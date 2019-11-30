@@ -325,13 +325,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   curve:
     points:
-    - {x: 0, y: 0, z: 0}
-    - {x: 2.49, y: 0, z: 0}
+    - {x: -0.6, y: 0, z: 0}
+    - {x: -0.96, y: 2.9, z: 0}
     - {x: 0.78, y: 3.15, z: 0}
-    - {x: 5.17, y: -3.73, z: -0.88}
-    - {x: -0.62, y: -5.49, z: 0}
+    - {x: 4.4, y: 0.19, z: 5.49}
+    - {x: -19.31, y: -4.92, z: 0}
     - {x: 0, y: -7.53, z: 0}
-    - {x: 12.03, y: -2.01, z: 2.6}
+    - {x: 12.03, y: -2.01, z: 2.66}
+    pointLocks: 000100
+  sampleRate: 1.56
 --- !u!4 &2110963971
 Transform:
   m_ObjectHideFlags: 0
@@ -340,7 +342,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2110963969}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.52, y: 0, z: -3.08}
+  m_LocalPosition: {x: 3.76, y: 0.62, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

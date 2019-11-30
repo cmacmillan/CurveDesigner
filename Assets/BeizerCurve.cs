@@ -22,11 +22,31 @@ public class BeizerCurve
     public List<Vector3> SampleCurve(float sampleDistance)
     {
         List<Vector3> retr = new List<Vector3>();
-        float curveLength = GetLength();
-        for (float f = 0; f < curveLength; f += sampleDistance)
+        float f = 0;
+        float lenSoFar = 0;
+        for (int i = 0; i < NumSegments; i++)
+        {
+            float segmentLength = _lengths[i];
+            f = lenSoFar;
+            lenSoFar += segmentLength;
+            int numSteps = Mathf.RoundToInt(segmentLength/ sampleDistance);
+            float jumpDist = segmentLength / numSteps;
+            for (int j = 0; j <= numSteps; j++)
+            {
+                retr.Add(GetPositionAtDistance(f));
+                f += jumpDist;
+            }
+        }
+        /*float curveLength = GetLength();
+        float numSteps = Mathf.Round(curveLength / sampleDistance);
+        float jumpDist = curveLength / numSteps;
+        float f = 0;
+        for (int i=0; i<numSteps; i++)
         {
             retr.Add(GetPositionAtDistance(f));
+            f += jumpDist;
         }
+        retr.Add(GetPositionAtDistance(curveLength));*/
         return retr;
     }
 
@@ -44,7 +64,7 @@ public class BeizerCurve
             }
         }
         int finalSegmentIndex = NumSegments - 1;
-        return GetSegmentPositionAtTime(finalSegmentIndex,distance/_lengths[finalSegmentIndex]);
+        return GetSegmentPositionAtTime(finalSegmentIndex,1.0f);
     }
     public Vector3 GetSegmentPositionAtTime(int segmentIndex,float time)
     {

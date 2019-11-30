@@ -6,7 +6,7 @@ public static class MyGUI
     private static readonly int _BeizerHint = "MyGUI.Beizer".GetHashCode();
 
     private const int _pointHitboxSize = 10;
-    public static void EditBezierCurve(BeizerCurve curve,Vector3 position)
+    public static void EditBezierCurve(Curve3D curve,Vector3 position)
     {
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
@@ -22,12 +22,12 @@ public static class MyGUI
                 Event.current.Use();
                 break;
             case EventType.Repaint:
-                for (int i=0;i<curve.NumSegments;i++)
+                /*for (int i=0;i<curve.NumSegments;i++)
                 {
                     Handles.DrawBezier(curve[i,0]+position, curve[i,3]+position, curve[i,1]+position, curve[i,2]+position,Color.white,Texture2D.whiteTexture,3);
-                }
-                curve.CacheLengths();
-                var samples = curve.SampleCurve(.01f).ToArray();
+                }*/
+                curve.curve.CacheLengths();
+                var samples = curve.curve.SampleCurve(curve.sampleRate).ToArray();
                 for(int i = 0; i < samples.Length; i++) {
                     samples[i] += position;
                 }

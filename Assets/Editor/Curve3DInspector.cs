@@ -9,6 +9,6 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve = target as Curve3D;
-        MyGUI.EditBezierCurve(curve.curve, curve.transform.position);
+        MyGUI.EditBezierCurve(curve, curve.transform.position);
     }
 }
