@@ -156,14 +156,11 @@ public class BeizerCurve
     {
         get
         {
-            int parentIndex = GetPhysicalIndex(virtualIndex);
-            return PointGroups[parentIndex].GetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex));
+            return GetPointGroupByIndex(virtualIndex).GetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex));
         }
         set
         {
-            int offsetIndex = virtualIndex-GetParentVirtualIndex(virtualIndex);
-            int parentIndex = GetPhysicalIndex(virtualIndex);
-            PointGroups[parentIndex].SetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex),value);
+            GetPointGroupByIndex(virtualIndex).SetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex),value);
         }
     }
     public Vector3 this[int segmentVirtualIndex,int pointVirtualIndex]
@@ -184,6 +181,10 @@ public class BeizerCurve
     {
         int offsetIndex = virtualIndex-GetParentVirtualIndex(virtualIndex);
         return (PGIndex)offsetIndex;
+    }
+    public PointGroup GetPointGroupByIndex(int virtualIndex)
+    {
+        return PointGroups[GetPhysicalIndex(virtualIndex)];
     }
 
     private static int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }

@@ -55,12 +55,14 @@ public static class MyGUI
     {
         public float screenDepth;
         public Color color;
+        public Texture2D texture;
         public Rect rect;
-        public PointRenderInfo(float screenDepth, Rect rect, Color color)
+        public PointRenderInfo(float screenDepth, Rect rect, Color color,Texture2D texture)
         {
             this.screenDepth = screenDepth;
             this.color = color;
             this.rect = rect;
+            this.texture = texture;
         }
     }
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
@@ -96,6 +98,10 @@ public static class MyGUI
                 }
                 Handles.BeginGUI();
 
+                Color DesaturateColor(Color color, float amount)
+                {
+                    return Color.Lerp(color,Color.white,amount);
+                }
                 List<PointRenderInfo> pointsToDraw = new List<PointRenderInfo>();
                 for (int i = 0; i < curve.curve.NumControlPoints; i++)
                 {
@@ -103,13 +109,17 @@ public static class MyGUI
                     float screenDepth;
                     if (WorldToGUISpace(curve.curve[i]+position, out guiPos, out screenDepth))
                     {
-                        pointsToDraw.Add(new PointRenderInfo(screenDepth,GetRectCenteredAtPosition(guiPos,6,6),curve.curve.GetPointTypeByIndex(i)==PGIndex.Position?Color.red:Color.green));
+                        bool isPrimaryPoint = curve.curve.GetPointTypeByIndex(i) == PGIndex.Position;
+                        var color = curve.curve.GetPointGroupByIndex(i).GetIsPointLocked() ? Color.red : Color.green;
+                        float colorLerper = isPrimaryPoint?0.0f:.65f;
+                        var tex = isPrimaryPoint ?curve.circleIcon:curve.squareIcon;
+                        pointsToDraw.Add(new PointRenderInfo(screenDepth,GetRectCenteredAtPosition(guiPos,6,6),DesaturateColor(color,colorLerper),tex));
                     }
                 }
                 pointsToDraw.Sort((a,b)=>(int)Mathf.Sign(b.screenDepth-a.screenDepth));
                 foreach (var i in pointsToDraw)
                 {
-                    DrawPoint(i.rect,i.color,curve.icon);
+                    DrawPoint(i.rect,i.color,i.texture);
                 }
                 Handles.EndGUI();
                 /*curve.curve.CacheLengths();
