@@ -26,6 +26,17 @@ public class BeizerCurve
         PointGroups.Add(pointB);
     }
 
+    public void AddDefaultSegment()
+    {
+        var finalPointGroup = PointGroups[PointGroups.Count - 1];
+        var finalPointPos = finalPointGroup.GetWorldPositionByIndex(PGIndex.Position);
+        finalPointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,finalPointPos+new Vector3(1,0,0));
+        var pointB = new PointGroup();
+        pointB.SetWorldPositionByIndex(PGIndex.Position,finalPointPos+new Vector3(1,1,0));
+        pointB.SetWorldPositionByIndex(PGIndex.LeftTangent,finalPointPos+new Vector3(0,1,0));
+        PointGroups.Add(pointB);
+    }
+
     #region curve calculations
     public List<Vector3> SampleCurve(float sampleDistance)
     {

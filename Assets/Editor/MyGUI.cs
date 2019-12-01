@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 public static class MyGUI
@@ -49,6 +51,18 @@ public static class MyGUI
     }
     #endregion
 
+    private struct PointRenderInfo
+    {
+        public float screenDepth;
+        public Color color;
+        public Rect rect;
+        public PointRenderInfo(float screenDepth, Rect rect, Color color)
+        {
+            this.screenDepth = screenDepth;
+            this.color = color;
+            this.rect = rect;
+        }
+    }
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
     {
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
@@ -71,7 +85,7 @@ public static class MyGUI
                     var point2 = curve.curve[i, 3] + position;
                     var tangent1 = curve.curve[i, 1] + position;
                     var tangent2 = curve.curve[i, 2] + position;
-                    Handles.DrawBezier(point1,point2,tangent1,tangent2,new Color(.7f,.7f,.7f),curve.lineTex,10);
+                    Handles.DrawBezier(point1,point2,tangent1,tangent2,new Color(.8f,.8f,.8f),curve.lineTex,10);
                 }
                 foreach (var i in curve.curve.PointGroups)
                 {
@@ -81,14 +95,21 @@ public static class MyGUI
                         Handles.DrawAAPolyLine(curve.lineTex,new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
                 }
                 Handles.BeginGUI();
+
+                List<PointRenderInfo> pointsToDraw = new List<PointRenderInfo>();
                 for (int i = 0; i < curve.curve.NumControlPoints; i++)
                 {
                     Vector2 guiPos;
                     float screenDepth;
                     if (WorldToGUISpace(curve.curve[i]+position, out guiPos, out screenDepth))
                     {
-                        DrawPoint(GetRectCenteredAtPosition(guiPos,6,6),curve.curve.GetPointTypeByIndex(i)==PGIndex.Position?Color.red:Color.green,curve.icon);
+                        pointsToDraw.Add(new PointRenderInfo(screenDepth,GetRectCenteredAtPosition(guiPos,6,6),curve.curve.GetPointTypeByIndex(i)==PGIndex.Position?Color.red:Color.green));
                     }
+                }
+                pointsToDraw.Sort((a,b)=>(int)Mathf.Sign(b.screenDepth-a.screenDepth));
+                foreach (var i in pointsToDraw)
+                {
+                    DrawPoint(i.rect,i.color,curve.icon);
                 }
                 Handles.EndGUI();
                 /*curve.curve.CacheLengths();

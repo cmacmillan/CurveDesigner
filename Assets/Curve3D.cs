@@ -17,9 +17,4 @@ public class Curve3D : MonoBehaviour
     {
         
     }
-    [ContextMenu("init")]
-    public void Init()
-    {
-        curve.Initialize();
-    }
 }
