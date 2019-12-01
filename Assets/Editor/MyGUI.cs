@@ -10,6 +10,10 @@ public static class MyGUI
     private const int _pointHitboxSize = 10;
 
     #region gui tools
+    private static Color DesaturateColor(Color color, float amount)
+    {
+        return Color.Lerp(color, Color.white, amount);
+    }
     static void DrawPoint(Rect position, Color color, Texture2D tex)
     {
         Color oldColor = GUI.color;
@@ -51,24 +55,61 @@ public static class MyGUI
     }
     #endregion
 
-    private struct PointRenderInfo
+    private class PointInfo
     {
-        public float screenDepth;
         public Color color;
         public Texture2D texture;
-        public Rect rect;
-        public PointRenderInfo(float screenDepth, Rect rect, Color color,Texture2D texture)
+        public Vector3 worldPosition;
+        public Vector2 guiPos;
+        public float screenDepth;
+        public PointInfo(Vector3 worldPosition, Color color,Texture2D texture)
         {
-            this.screenDepth = screenDepth;
             this.color = color;
-            this.rect = rect;
+            this.worldPosition = worldPosition;
             this.texture = texture;
+        }
+        public bool IsPointOnScreen()
+        {
+            return WorldToGUISpace(worldPosition, out guiPos, out screenDepth);
         }
     }
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
     {
+        if (curve.positionCurve == null)
+            curve.positionCurve.Initialize();
+
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
+
+        List<PointInfo> pointsToDraw = new List<PointInfo>();
+        #region populate pointsToDraw
+        {
+            switch (curve.editMode)
+            {
+                case SelectedPointType.PositionCurve:
+                    #region PositionCurve
+                    for (int i = 0; i < curve.positionCurve.NumControlPoints; i++)
+                    {
+                        bool isPrimaryPoint = curve.positionCurve.GetPointTypeByIndex(i) == PGIndex.Position;
+                        var color = curve.positionCurve.GetPointGroupByIndex(i).GetIsPointLocked() ? Color.red : Color.green;
+                        float colorLerper = isPrimaryPoint ? 0.0f : .65f;
+                        color = DesaturateColor(color, colorLerper);
+                        var tex = isPrimaryPoint ? curve.circleIcon : curve.squareIcon;
+                        pointsToDraw.Add(new PointInfo(curve.positionCurve[i] + position, color, tex));
+                    }
+                    break;
+                #endregion
+                case SelectedPointType.Rotation:
+                    #region Rotation curve
+                    break;
+                #endregion
+                default:
+                    throw new System.InvalidOperationException();
+            }
+            pointsToDraw.RemoveAll(a => !a.IsPointOnScreen());
+        }
+        #endregion
+
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.MouseDown:
@@ -81,168 +122,162 @@ public static class MyGUI
                 Event.current.Use();
                 break;
             case EventType.Repaint:
-                for (int i=0;i<curve.curve.NumSegments;i++)
-                {
-                    var point1 = curve.curve[i, 0] + position;
-                    var point2 = curve.curve[i, 3] + position;
-                    var tangent1 = curve.curve[i, 1] + position;
-                    var tangent2 = curve.curve[i, 2] + position;
-                    Handles.DrawBezier(point1,point2,tangent1,tangent2,new Color(.8f,.8f,.8f),curve.lineTex,10);
-                }
-                foreach (var i in curve.curve.PointGroups)
-                {
-                    if (i.hasLeftTangent)
-                        Handles.DrawAAPolyLine(curve.lineTex,new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.LeftTangent) + position, i.GetWorldPositionByIndex(PGIndex.Position) + position });
-                    if (i.hasRightTangent)
-                        Handles.DrawAAPolyLine(curve.lineTex,new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
-                }
-                Handles.BeginGUI();
+                #region repaint
 
-                Color DesaturateColor(Color color, float amount)
+                for (int i = 0; i < curve.positionCurve.NumSegments; i++)
                 {
-                    return Color.Lerp(color,Color.white,amount);
+                    var point1 = curve.positionCurve[i, 0] + position;
+                    var point2 = curve.positionCurve[i, 3] + position;
+                    var tangent1 = curve.positionCurve[i, 1] + position;
+                    var tangent2 = curve.positionCurve[i, 2] + position;
+                    Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.8f, .8f, .8f), curve.lineTex, 10);
                 }
-                List<PointRenderInfo> pointsToDraw = new List<PointRenderInfo>();
-                for (int i = 0; i < curve.curve.NumControlPoints; i++)
+
+                if (curve.editMode == SelectedPointType.PositionCurve)
                 {
-                    Vector2 guiPos;
-                    float screenDepth;
-                    if (WorldToGUISpace(curve.curve[i]+position, out guiPos, out screenDepth))
+                    foreach (var i in curve.positionCurve.PointGroups)
                     {
-                        bool isPrimaryPoint = curve.curve.GetPointTypeByIndex(i) == PGIndex.Position;
-                        var color = curve.curve.GetPointGroupByIndex(i).GetIsPointLocked() ? Color.red : Color.green;
-                        float colorLerper = isPrimaryPoint?0.0f:.65f;
-                        var tex = isPrimaryPoint ?curve.circleIcon:curve.squareIcon;
-                        pointsToDraw.Add(new PointRenderInfo(screenDepth,GetRectCenteredAtPosition(guiPos,6,6),DesaturateColor(color,colorLerper),tex));
+                        if (i.hasLeftTangent)
+                            Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.LeftTangent) + position, i.GetWorldPositionByIndex(PGIndex.Position) + position });
+                        if (i.hasRightTangent)
+                            Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
                     }
                 }
+
+                Handles.BeginGUI();
+
                 pointsToDraw.Sort((a,b)=>(int)Mathf.Sign(b.screenDepth-a.screenDepth));
                 foreach (var i in pointsToDraw)
                 {
-                    DrawPoint(i.rect,i.color,i.texture);
+                    DrawPoint(GetRectCenteredAtPosition(i.guiPos,6,6),i.color,i.texture);
                 }
+
                 Handles.EndGUI();
-                /*curve.curve.CacheLengths();
-                var samples = curve.curve.SampleCurve(curve.sampleRate).ToArray();
-                for(int i = 0; i < samples.Length; i++) {
-                    samples[i] += position;//+new Vector3(0,Random.value,0);
-                }
-                if (samples.Length >= 2)
-                {
-                    var pos = HandleUtility.ClosestPointToPolyLine(samples);
-                    Handles.DrawRectangle(controlID, pos, Quaternion.identity, .2f);
-                    Handles.DrawPolyLine(samples);
-                }*/
-                break; 
+
+                break;
+                #endregion
         }
     }
 
 
+    #region old code
+    /*curve.curve.CacheLengths();
+    var samples = curve.curve.SampleCurve(curve.sampleRate).ToArray();
+    for(int i = 0; i < samples.Length; i++) {
+        samples[i] += position;//+new Vector3(0,Random.value,0);
+    }
+    if (samples.Length >= 2)
+    {
+        var pos = HandleUtility.ClosestPointToPolyLine(samples);
+        Handles.DrawRectangle(controlID, pos, Quaternion.identity, .2f);
+        Handles.DrawPolyLine(samples);
+    }*/
     /*private static readonly GUIContent s_TempContent = new GUIContent();
 
-    private static GUIContent TempContent(string text)
-    {
-        s_TempContent.text = text;
-        s_TempContent.image = null;
-        s_TempContent.tooltip = null;
-        return s_TempContent;
-    }
+     private static GUIContent TempContent(string text)
+     {
+         s_TempContent.text = text;
+         s_TempContent.image = null;
+         s_TempContent.tooltip = null;
+         return s_TempContent;
+     }
 
 
-    private static readonly int s_ButtonHint = "MyGUI.Button".GetHashCode();
+     private static readonly int s_ButtonHint = "MyGUI.Button".GetHashCode();
 
-    public static bool Button(Rect position, GUIContent label, GUIStyle style)
-    {
-        int controlID = GUIUtility.GetControlID(s_ButtonHint, FocusType.Passive, position);
-        bool result = false;
+     public static bool Button(Rect position, GUIContent label, GUIStyle style)
+     {
+         int controlID = GUIUtility.GetControlID(s_ButtonHint, FocusType.Passive, position);
+         bool result = false;
 
-        switch (Event.current.GetTypeForControl(controlID))
-        {
-            case EventType.MouseDown:
-                if (GUI.enabled && position.Contains(Event.current.mousePosition))
-                {
-                    GUIUtility.hotControl = controlID;
-                    Event.current.Use();
-                }
-                break;
+         switch (Event.current.GetTypeForControl(controlID))
+         {
+             case EventType.MouseDown:
+                 if (GUI.enabled && position.Contains(Event.current.mousePosition))
+                 {
+                     GUIUtility.hotControl = controlID;
+                     Event.current.Use();
+                 }
+                 break;
 
-            case EventType.MouseDrag:
-                if (GUIUtility.hotControl == controlID)
-                {
-                    Event.current.Use();
-                }
-                break;
+             case EventType.MouseDrag:
+                 if (GUIUtility.hotControl == controlID)
+                 {
+                     Event.current.Use();
+                 }
+                 break;
 
-            case EventType.MouseUp:
-                if (GUIUtility.hotControl == controlID)
-                {
-                    GUIUtility.hotControl = 0;
+             case EventType.MouseUp:
+                 if (GUIUtility.hotControl == controlID)
+                 {
+                     GUIUtility.hotControl = 0;
 
-                    if (position.Contains(Event.current.mousePosition))
-                    {
-                        result = true;
-                        Event.current.Use();
-                    }
-                }
-                break;
+                     if (position.Contains(Event.current.mousePosition))
+                     {
+                         result = true;
+                         Event.current.Use();
+                     }
+                 }
+                 break;
 
-            case EventType.KeyDown:
-                if (GUIUtility.hotControl == controlID)
-                {
-                    if (Event.current.keyCode == KeyCode.Escape)
-                    {
-                        GUIUtility.hotControl = 0;
-                        Event.current.Use();
-                    }
-                }
-                break;
+             case EventType.KeyDown:
+                 if (GUIUtility.hotControl == controlID)
+                 {
+                     if (Event.current.keyCode == KeyCode.Escape)
+                     {
+                         GUIUtility.hotControl = 0;
+                         Event.current.Use();
+                     }
+                 }
+                 break;
 
-            case EventType.Repaint:
-                //Draw says you GUIStyle, you draw this GUIContent
-                style.Draw(position, label, controlID);
-                break;
-        }
+             case EventType.Repaint:
+                 //Draw says you GUIStyle, you draw this GUIContent
+                 style.Draw(position, label, controlID);
+                 break;
+         }
 
-        return result;
-    }
+         return result;
+     }
 
-    public static bool Button(Rect position, GUIContent label)
-    {
-        return Button(position, label, GUI.skin.button);
-    }
+     public static bool Button(Rect position, GUIContent label)
+     {
+         return Button(position, label, GUI.skin.button);
+     }
 
-    public static bool Button(Rect position, string label, GUIStyle style)
-    {
-        return Button(position, TempContent(label), style);
-    }
+     public static bool Button(Rect position, string label, GUIStyle style)
+     {
+         return Button(position, TempContent(label), style);
+     }
 
-    public static bool Button(Rect position, string label)
-    {
-        return Button(position, label, GUI.skin.button);
-    }
+     public static bool Button(Rect position, string label)
+     {
+         return Button(position, label, GUI.skin.button);
+     }
 
 
-    // Button Control - Layout Version
+     // Button Control - Layout Version
 
-    public static bool Button(GUIContent label, GUIStyle style, params GUILayoutOption[] options)
-    {
-        Rect position = GUILayoutUtility.GetRect(label, style, options);
-        return Button(position, label, style);
-    }
+     public static bool Button(GUIContent label, GUIStyle style, params GUILayoutOption[] options)
+     {
+         Rect position = GUILayoutUtility.GetRect(label, style, options);
+         return Button(position, label, style);
+     }
 
-    public static bool Button(GUIContent label, params GUILayoutOption[] options)
-    {
-        return Button(label, GUI.skin.button, options);
-    }
+     public static bool Button(GUIContent label, params GUILayoutOption[] options)
+     {
+         return Button(label, GUI.skin.button, options);
+     }
 
-    public static bool Button(string label, GUIStyle style, params GUILayoutOption[] options)
-    {
-        return Button(TempContent(label), style, options);
-    }
+     public static bool Button(string label, GUIStyle style, params GUILayoutOption[] options)
+     {
+         return Button(TempContent(label), style, options);
+     }
 
-    public static bool Button(string label, params GUILayoutOption[] options)
-    {
-        return Button(label, GUI.skin.button, options);
-    }*/
+     public static bool Button(string label, params GUILayoutOption[] options)
+     {
+         return Button(label, GUI.skin.button, options);
+     }*/
+    #endregion
 }
 

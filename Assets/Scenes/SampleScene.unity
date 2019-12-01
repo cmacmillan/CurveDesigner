@@ -323,7 +323,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85850b8b95539404a8db8795f4a6083e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  curve:
+  type: 0
+  editMode: 1
+  positionCurve:
     PointGroups:
     - hasLeftTangent: 0
       hasRightTangent: 1
@@ -344,21 +346,20 @@ MonoBehaviour:
       rightTangent: {x: 1, y: 0, z: 0}
       position: {x: 2, y: 2, z: 0}
     - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -1, y: 0, z: 0}
-      rightTangent: {x: 1, y: 0, z: 0}
-      position: {x: 3, y: 3, z: 0}
-    - hasLeftTangent: 1
       hasRightTangent: 0
       isPointLocked: 0
       leftTangent: {x: -1, y: 0, z: 0}
       rightTangent: {x: 0, y: 0, z: 0}
-      position: {x: 4, y: 4, z: 0}
-  sampleRate: 1.82
+      position: {x: 3, y: 3, z: 0}
+  sampleRate: 0.01
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
   circleIcon: {fileID: 2800000, guid: 971f68b2bfc7a704181c2904de1fe15d, type: 3}
   squareIcon: {fileID: 2800000, guid: e33d07ce577ea5f45bc068384c03d5b0, type: 3}
+  diamondIcon: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
+  selectedPoint:
+    isPointHot: 0
+    type: 0
+    positionCurveIndex: 0
 --- !u!4 &2110963971
 Transform:
   m_ObjectHideFlags: 0
@@ -367,7 +368,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2110963969}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.2, z: 0}
+  m_LocalPosition: {x: -0.29, y: 0.31, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

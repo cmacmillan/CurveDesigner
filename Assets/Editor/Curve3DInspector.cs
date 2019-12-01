@@ -6,6 +6,10 @@ using UnityEngine;
 [CustomEditor(typeof(Curve3D))]
 public class Curve3DInspector : Editor
 {
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+    }
     private void OnSceneGUI()
     {
         var curve = target as Curve3D;
@@ -26,14 +30,14 @@ public class Curve3DInspector : Editor
         GUI.color = Color.red;
         if (GUILayout.Button("Add"))
         {
-            curve.curve.AddDefaultSegment();
+            curve.positionCurve.AddDefaultSegment();
         }
         if (GUILayout.Button("Lock"))
         {
         }
         if (GUILayout.Button("Clear"))
         {
-            curve.curve.Initialize();
+            curve.positionCurve.Initialize();
         }
         GUILayout.EndHorizontal();
         GUILayout.EndArea();
