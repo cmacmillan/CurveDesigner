@@ -6,17 +6,25 @@ using UnityEngine;
 [System.Serializable]
 public class BeizerCurve
 {
-    [HideInInspector]
-    [SerializeField]
-    private List<Vector3> points;
 
-    [HideInInspector]
     [SerializeField]
-    private List<bool> pointLocks;
+    [HideInInspector]
+    public List<PointGroup> PointGroups;
+    public int NumControlPoints { get { return PointGroups.Count*3-2; } }
+    public int NumSegments { get { return PointGroups.Count-1; } }
 
-    public int NumPoints { get { return points.Count; } }
-    public int NumSegments { get { return points.Count / 3; } }
-    public const int PointsPerSegment=4;
+    public void Initialize()
+    {
+        PointGroups = new List<PointGroup>();
+        var pointA = new PointGroup();
+        pointA.SetWorldPositionByIndex(PGIndex.Position, Vector3.zero);
+        pointA.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(1,0,0));
+        PointGroups.Add(pointA);
+        var pointB = new PointGroup();
+        pointB.SetWorldPositionByIndex(PGIndex.Position, new Vector3(1,1,0));
+        pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0));
+        PointGroups.Add(pointB);
+    }
 
     #region curve calculations
     public List<Vector3> SampleCurve(float sampleDistance)
@@ -60,7 +68,7 @@ public class BeizerCurve
     }
     public Vector3 GetSegmentPositionAtTime(int segmentIndex,float time)
     {
-        return SolvePositionAtTime(GetPointIndex(segmentIndex,0),4,time);
+        return SolvePositionAtTime(GetVirtualIndex(segmentIndex,0),4,time);
     }
 
     private Vector3 SolvePositionAtTime(int startIndex, int length, float time)
@@ -76,27 +84,19 @@ public class BeizerCurve
     #region point locking
     public void SetPointLockState(int segmentIndex, int pointIndex,bool state)
     {
-        SetPointLockState(GetPointIndex(segmentIndex,pointIndex),state);
+        SetPointLockState(GetVirtualIndex(segmentIndex,pointIndex),state);
     }
     public bool GetPointLockState(int segmentIndex, int pointIndex)
     {
-        return GetPointLockState(GetPointIndex(segmentIndex,pointIndex));
+        return GetPointLockState(GetVirtualIndex(segmentIndex,pointIndex));
     }
     public void SetPointLockState(int index,bool state)
     {
-        pointLocks[GetPointParentBaseIndex(index)] = state;
-        if (state == true)
-        {
-            if (index > 0 && index < NumPoints - 1)
-            {
-                int parentIndex = GetPointParentPositionIndex(index);
-                this[parentIndex - 1] = this[parentIndex - 1];//Calls the setter to ensure the mirroring
-            }
-        }
+        PointGroups[GetPhysicalIndex(index)].SetPointLocked(state);
     }
     public bool GetPointLockState(int index)
     {
-        return pointLocks[GetPointParentBaseIndex(index)];
+        return PointGroups[GetPhysicalIndex(index)].GetIsPointLocked();
     }
     #endregion
 
@@ -141,55 +141,41 @@ public class BeizerCurve
     #endregion
 
     #region point manipulation
-    public Vector3 this[int index]
+    public Vector3 this[int virtualIndex]
     {
         get
         {
-            int parentIndex = GetPointParentPositionIndex(index);
-            if (parentIndex == index)
-            {
-                return points[index];
-            }
-            else
-            {
-                return points[index] + points[parentIndex];
-            }
+            int parentIndex = GetPhysicalIndex(virtualIndex);
+            return PointGroups[parentIndex].GetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex));
         }
         set
         {
-            int parentIndex = GetPointParentPositionIndex(index);
-            if (parentIndex == index)
-            {
-                points[index] = value;
-            }
-            else
-            {
-                points[index] = value - points[parentIndex];
-                if (pointLocks[GetPointParentBaseIndex(index)] == true && index > 0 && index < NumPoints - 1)
-                {
-                    int oppositePointIndex = -(index-parentIndex);
-                    Vector3 vectorFromMiddlePointToPointA = points[index] - points[parentIndex];
-                    points[oppositePointIndex] = points[parentIndex] - vectorFromMiddlePointToPointA;
-                }
-            }
+            int offsetIndex = virtualIndex-GetParentVirtualIndex(virtualIndex);
+            int parentIndex = GetPhysicalIndex(virtualIndex);
+            PointGroups[parentIndex].SetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex),value);
         }
     }
-    public Vector3 this[int segmentIndex,int pointIndex]
+    public Vector3 this[int segmentVirtualIndex,int pointVirtualIndex]
     {
         get
         {
-            int index = GetPointIndex(segmentIndex, pointIndex);
+            int index = GetVirtualIndex(segmentVirtualIndex, pointVirtualIndex);
             return this[index];
         }
         set
         {
-            int index = GetPointIndex(segmentIndex,pointIndex);
+            int index = GetVirtualIndex(segmentVirtualIndex,pointVirtualIndex);
             this[index] = value;
         }
     }
     #endregion
+    public PGIndex GetPointTypeByIndex(int virtualIndex)
+    {
+        int offsetIndex = virtualIndex-GetParentVirtualIndex(virtualIndex);
+        return (PGIndex)offsetIndex;
+    }
 
-    private static int GetPointIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
-    private static int GetPointParentPositionIndex(int childIndex) { return GetPointParentBaseIndex(childIndex) * 3; }
-    private static int GetPointParentBaseIndex(int childIndex) { return ((childIndex + 1) / 3); }
+    private static int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
+    private static int GetParentVirtualIndex(int childVirtualIndex) { return GetPhysicalIndex(childVirtualIndex) * 3; }
+    private static int GetPhysicalIndex(int childIndex) { return ((childIndex + 1) / 3); }
 }

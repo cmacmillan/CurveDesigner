@@ -8,11 +8,10 @@ public static class MyGUI
     private const int _pointHitboxSize = 10;
 
     #region gui tools
-    static void DrawBox(Rect position, Color color, Texture2D tex)
+    static void DrawPoint(Rect position, Color color, Texture2D tex)
     {
         Color oldColor = GUI.color;
         GUI.color = color;
-        //GUI.Box(position, "");
         GUI.DrawTexture(position,tex);
         GUI.color = oldColor;
     }
@@ -68,20 +67,30 @@ public static class MyGUI
             case EventType.Repaint:
                 for (int i=0;i<curve.curve.NumSegments;i++)
                 {
-                    Handles.DrawBezier(curve.curve[i,0]+position, curve.curve[i,3]+position, curve.curve[i,1]+position, curve.curve[i,2]+position,Color.white,Texture2D.whiteTexture,3);
+                    var point1 = curve.curve[i, 0] + position;
+                    var point2 = curve.curve[i, 3] + position;
+                    var tangent1 = curve.curve[i, 1] + position;
+                    var tangent2 = curve.curve[i, 2] + position;
+                    Handles.DrawBezier(point1,point2,tangent1,tangent2,new Color(.7f,.7f,.7f),curve.lineTex,10);
+                }
+                foreach (var i in curve.curve.PointGroups)
+                {
+                    if (i.hasLeftTangent)
+                        Handles.DrawAAPolyLine(curve.lineTex,new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.LeftTangent) + position, i.GetWorldPositionByIndex(PGIndex.Position) + position });
+                    if (i.hasRightTangent)
+                        Handles.DrawAAPolyLine(curve.lineTex,new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
                 }
                 Handles.BeginGUI();
-                for (int i = 0; i < curve.curve.NumPoints; i++)
+                for (int i = 0; i < curve.curve.NumControlPoints; i++)
                 {
                     Vector2 guiPos;
                     float screenDepth;
                     if (WorldToGUISpace(curve.curve[i]+position, out guiPos, out screenDepth))
                     {
-                        DrawBox(GetRectCenteredAtPosition(guiPos,6,6),Color.white,curve.icon);
+                        DrawPoint(GetRectCenteredAtPosition(guiPos,6,6),curve.curve.GetPointTypeByIndex(i)==PGIndex.Position?Color.red:Color.green,curve.icon);
                     }
                 }
                 Handles.EndGUI();
-
                 /*curve.curve.CacheLengths();
                 var samples = curve.curve.SampleCurve(curve.sampleRate).ToArray();
                 for(int i = 0; i < samples.Length; i++) {
