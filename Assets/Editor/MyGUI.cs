@@ -6,6 +6,50 @@ public static class MyGUI
     private static readonly int _BeizerHint = "MyGUI.Beizer".GetHashCode();
 
     private const int _pointHitboxSize = 10;
+
+    #region gui tools
+    static void DrawBox(Rect position, Color color, Texture2D tex)
+    {
+        Color oldColor = GUI.color;
+        GUI.color = color;
+        //GUI.Box(position, "");
+        GUI.DrawTexture(position,tex);
+        GUI.color = oldColor;
+    }
+    private static Rect GetRectCenteredAtPosition(Vector2 position, int halfWidth, int halfHeight)
+    {
+        return new Rect(position.x - halfWidth, position.y - halfHeight, 2 * halfWidth, 2 * halfHeight);
+    }
+    private static bool WorldToGUISpace(Vector3 worldPos, out Vector2 guiPosition, out float screenDepth)
+    {
+        var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
+        Vector3 screen_pos = sceneCam.WorldToScreenPoint(worldPos);
+        screenDepth = screen_pos.z;
+        if (screen_pos.z < 0)
+        {
+            guiPosition = Vector2.zero;
+            return false;
+        }
+        guiPosition = ScreenSpaceToGuiSpace(screen_pos);
+        return true;
+    }
+    private static Vector3 GUIToWorldSpace(Vector2 guiPos, float screenDepth)
+    {
+        var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
+        Vector3 screen_pos = GuiSpaceToScreenSpace(guiPos);
+        screen_pos.z = screenDepth;
+        return sceneCam.ScreenToWorldPoint(screen_pos);
+    }
+    private static Vector2 ScreenSpaceToGuiSpace(Vector2 screenPos)
+    {
+        return new Vector2(screenPos.x, Camera.current.pixelHeight - screenPos.y);
+    }
+    private static Vector2 GuiSpaceToScreenSpace(Vector2 guiPos)
+    {
+        return new Vector2(guiPos.x, Camera.current.pixelHeight - guiPos.y);
+    }
+    #endregion
+
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
     {
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
@@ -22,21 +66,33 @@ public static class MyGUI
                 Event.current.Use();
                 break;
             case EventType.Repaint:
-                /*for (int i=0;i<curve.NumSegments;i++)
+                for (int i=0;i<curve.curve.NumSegments;i++)
                 {
-                    Handles.DrawBezier(curve[i,0]+position, curve[i,3]+position, curve[i,1]+position, curve[i,2]+position,Color.white,Texture2D.whiteTexture,3);
-                }*/
-                curve.curve.CacheLengths();
+                    Handles.DrawBezier(curve.curve[i,0]+position, curve.curve[i,3]+position, curve.curve[i,1]+position, curve.curve[i,2]+position,Color.white,Texture2D.whiteTexture,3);
+                }
+                Handles.BeginGUI();
+                for (int i = 0; i < curve.curve.NumPoints; i++)
+                {
+                    Vector2 guiPos;
+                    float screenDepth;
+                    if (WorldToGUISpace(curve.curve[i]+position, out guiPos, out screenDepth))
+                    {
+                        DrawBox(GetRectCenteredAtPosition(guiPos,6,6),Color.white,curve.icon);
+                    }
+                }
+                Handles.EndGUI();
+
+                /*curve.curve.CacheLengths();
                 var samples = curve.curve.SampleCurve(curve.sampleRate).ToArray();
                 for(int i = 0; i < samples.Length; i++) {
-                    samples[i] += position;
+                    samples[i] += position;//+new Vector3(0,Random.value,0);
                 }
                 if (samples.Length >= 2)
                 {
                     var pos = HandleUtility.ClosestPointToPolyLine(samples);
                     Handles.DrawRectangle(controlID, pos, Quaternion.identity, .2f);
                     Handles.DrawPolyLine(samples);
-                }
+                }*/
                 break; 
         }
     }
