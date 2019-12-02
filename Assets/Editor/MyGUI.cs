@@ -2,7 +2,6 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-
 public static class MyGUI
 {
     private static readonly int _BeizerHint = "MyGUI.Beizer".GetHashCode();
@@ -54,7 +53,6 @@ public static class MyGUI
         return new Vector2(guiPos.x, Camera.current.pixelHeight - guiPos.y);
     }
     #endregion
-
     private class PointInfo
     {
         public Color color;
@@ -64,12 +62,14 @@ public static class MyGUI
         public float screenDepth;
         public bool isPointOnScreen;
         public float distanceToMouse;
-        public PointInfo(Vector3 worldPosition, Color color,Texture2D texture)
+        public int index;
+        public PointInfo(Vector3 worldPosition, Color color,Texture2D texture,int index)
         {
             var MousePos = Event.current.mousePosition;
             this.color = color;
             this.worldPosition = worldPosition; 
             this.texture = texture;
+            this.index = index;
             this.isPointOnScreen = WorldToGUISpace(worldPosition, out this.guiPos, out this.screenDepth);
             distanceToMouse = Vector2.Distance(this.guiPos,MousePos);
         }
@@ -84,13 +84,12 @@ public static class MyGUI
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
 
-
         List<PointInfo> points = new List<PointInfo>();
-        PointInfo closestPointToMouse=null;
+        PointInfo hotPoint=null;
         Texture2D linePlaceTexture=null;
         PointInfo GetClosestPointToMouse()
         {
-            float minDistanceToMouse = float.PositiveInfinity;
+            float minDistanceToMouse = buttonClickDistance;
             PointInfo closestPoint = null;
             foreach (var i in points)
             {
@@ -107,21 +106,22 @@ public static class MyGUI
         {
             switch (curve.editMode)
             {
-                case SelectedPointType.PositionCurve:
+                case EditMode.PositionCurve:
                     #region PositionCurve
                     linePlaceTexture = curve.circleIcon;
                     for (int i = 0; i < curve.positionCurve.NumControlPoints; i++)
                     {
-                        bool isPrimaryPoint = curve.positionCurve.GetPointTypeByIndex(i) == PGIndex.Position;
+                        var pointIndexType = curve.positionCurve.GetPointTypeByIndex(i);
+                        bool isPositionPoint = pointIndexType == PGIndex.Position;
                         var color = curve.positionCurve.GetPointGroupByIndex(i).GetIsPointLocked() ? Color.red : Color.green;
-                        float colorLerper = isPrimaryPoint ? 0.0f : .65f;
+                        float colorLerper = isPositionPoint ? 0.0f : .65f;
                         color = DesaturateColor(color, colorLerper);
-                        var tex = isPrimaryPoint ? curve.circleIcon : curve.squareIcon;
-                        points.Add(new PointInfo(curve.positionCurve[i] + position, color, tex));
+                        var tex = isPositionPoint ? curve.circleIcon : curve.squareIcon;
+                        points.Add(new PointInfo(curve.positionCurve[i] + position, color, tex, i));
                     }
                     break;
                 #endregion
-                case SelectedPointType.Rotation:
+                case EditMode.Rotation:
                     #region Rotation curve
                     linePlaceTexture = curve.diamondIcon;
                     break;
@@ -129,30 +129,37 @@ public static class MyGUI
                 default:
                     throw new System.InvalidOperationException();
             }
-            points.RemoveAll(a => !a.isPointOnScreen);
-            closestPointToMouse = GetClosestPointToMouse();
-            var yellow = new Color(.95f, .8f, 0);
-            if (closestPointToMouse != null && closestPointToMouse.distanceToMouse < buttonClickDistance)
+            if (curve.IsAPointSelected)
             {
-                closestPointToMouse.color = yellow;
+                hotPoint = points[curve.hotPointIndex];
             }
             else
             {
-                curve.positionCurve.CacheLengths();
-                var samples = curve.positionCurve.SampleCurve(curve.sampleRate);
-                foreach (var i in samples)
+                points.RemoveAll(a => !a.isPointOnScreen);
+                hotPoint = GetClosestPointToMouse();
+                var cyan = new Color(0, .7f, 1.0f);
+                if (hotPoint != null)
                 {
-                    i.position += position;
+                    hotPoint.color = cyan;
                 }
-                int segmentIndex;
-                float time;
-                UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
-                Vector3 pointPosition = curve.positionCurve.GetSegmentPositionAtTime(segmentIndex,time)+position;
-                var pointInfo = new PointInfo(pointPosition, yellow, linePlaceTexture);
-                if (pointInfo.isPointOnScreen && pointInfo.distanceToMouse < lineClickDistance)
+                else
                 {
-                    points.Add(pointInfo);
-                    closestPointToMouse = pointInfo;
+                    curve.positionCurve.CacheLengths();
+                    var samples = curve.positionCurve.SampleCurve(curve.sampleRate);
+                    foreach (var i in samples)
+                    {
+                        i.position += position;
+                    }
+                    int segmentIndex;
+                    float time;
+                    UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
+                    Vector3 pointPosition = curve.positionCurve.GetSegmentPositionAtTime(segmentIndex, time) + position;
+                    var pointInfo = new PointInfo(pointPosition, Color.green, linePlaceTexture, -1);
+                    if (pointInfo.isPointOnScreen && pointInfo.distanceToMouse < lineClickDistance)
+                    {
+                        points.Add(pointInfo);
+                        hotPoint = pointInfo;
+                    }
                 }
             }
         }
@@ -161,13 +168,41 @@ public static class MyGUI
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.MouseDown:
+                if (hotPoint != null)
+                {
+                    Debug.Log("down");
+                    GUIUtility.hotControl = controlID;
+                    curve.hotPointIndex = hotPoint.index;
+                    Event.current.Use();
+                }
                 break;
             case EventType.MouseDrag:
+                if (hotPoint != null && GUIUtility.hotControl == controlID)
+                {
+                    Debug.Log("drag");
+                    switch (curve.editMode)
+                    {
+                        case EditMode.PositionCurve:
+                            curve.positionCurve[hotPoint.index] = GUIToWorldSpace(MousePos, hotPoint.screenDepth)-position;
+                            break;
+                        default:
+                            throw new System.InvalidOperationException();
+                    }
+                    Event.current.Use();
+                    break;
+                }
                 break;
             case EventType.MouseUp:
+                if (hotPoint != null || GUIUtility.hotControl == controlID)
+                {
+                    Debug.Log("up");
+                    GUIUtility.hotControl = 0;
+                    curve.hotPointIndex = -1;
+                    Event.current.Use();
+                }
                 break;
             case EventType.MouseMove:
-                Event.current.Use();
+                HandleUtility.Repaint();
                 break;
             case EventType.Repaint:
                 #region repaint
@@ -181,15 +216,21 @@ public static class MyGUI
                     Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.8f, .8f, .8f), curve.lineTex, 10);
                 }
 
-                if (curve.editMode == SelectedPointType.PositionCurve)
+                switch (curve.editMode)
                 {
-                    foreach (var i in curve.positionCurve.PointGroups)
-                    {
-                        if (i.hasLeftTangent)
-                            Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.LeftTangent) + position, i.GetWorldPositionByIndex(PGIndex.Position) + position });
-                        if (i.hasRightTangent)
-                            Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
-                    }
+                    case EditMode.PositionCurve:
+                        #region PositionCurve
+                        foreach (var i in curve.positionCurve.PointGroups)
+                        {
+                            if (i.hasLeftTangent)
+                                Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.LeftTangent) + position, i.GetWorldPositionByIndex(PGIndex.Position) + position });
+                            if (i.hasRightTangent)
+                                Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
+                        }
+                        break;
+                    #endregion
+                    default:
+                        throw new System.InvalidOperationException();
                 }
 
                 Handles.BeginGUI();

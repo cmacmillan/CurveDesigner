@@ -5,7 +5,7 @@ using UnityEngine;
 public class Curve3D : MonoBehaviour
 {
     public CurveType type;
-    public SelectedPointType editMode=SelectedPointType.PositionCurve;
+    public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
     [Range(.01f,3)]
     public float sampleRate = 1.0f;
@@ -14,7 +14,15 @@ public class Curve3D : MonoBehaviour
     public Texture2D squareIcon;
     public Texture2D diamondIcon;
 
-    public SelectedPointInfo selectedPoint=null;
+    public bool IsAPointSelected
+    {
+        get
+        {
+            return hotPointIndex != -1;
+        }
+    }
+    //public int selectedItemIndex;
+    public int hotPointIndex=-1;
 
     void Start()
     {
@@ -24,18 +32,10 @@ public class Curve3D : MonoBehaviour
     {
     }
 }
-[System.Serializable]
-public class SelectedPointInfo
+public enum EditMode
 {
-    public bool isPointHot;
-    public SelectedPointType type;
-    public int positionCurveIndex;
-}
-public enum SelectedPointType
-{
-    Unknown = 0,
-    PositionCurve = 1,
-    Rotation = 2,
+    PositionCurve = 0,
+    Rotation = 1,
 }
 public enum CurveType
 {

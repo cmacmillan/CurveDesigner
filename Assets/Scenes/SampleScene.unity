@@ -324,36 +324,39 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  editMode: 1
+  editMode: 0
   positionCurve:
     PointGroups:
-    - hasLeftTangent: 0
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: 0, y: 0, z: 0}
-      rightTangent: {x: 1, y: 0, z: 0}
-      position: {x: 0, y: 0, z: 0}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 0
-      leftTangent: {x: -1, y: 0, z: 0}
-      rightTangent: {x: 1, y: 0, z: 0}
-      position: {x: 1, y: 1, z: 0}
+      leftTangent: {x: 2.0822358, y: 4.6053705, z: -0.60832787}
+      rightTangent: {x: 4.336485, y: -0.41065407, z: -0.45928097}
+      position: {x: -0.8553764, y: -1.3570088, z: -0.032936096}
+    - hasLeftTangent: 1
+      hasRightTangent: 1
+      isPointLocked: 0
+      leftTangent: {x: -2.1608744, y: 0.76599157, z: 0.055505276}
+      rightTangent: {x: 3.3900905, y: 0.28561985, z: -0.18082285}
+      position: {x: 2.5289388, y: -0.30343175, z: -0.19417715}
+    - hasLeftTangent: 1
+      hasRightTangent: 1
+      isPointLocked: 0
+      leftTangent: {x: -0.7472453, y: -0.16012406, z: 0.22265625}
+      rightTangent: {x: 3.0677066, y: 0.88897693, z: -1.105134}
+      position: {x: 2.1116369, y: 1.3699294, z: -0.140625}
     - hasLeftTangent: 1
       hasRightTangent: 0
       isPointLocked: 0
-      leftTangent: {x: -1, y: 0, z: 0}
+      leftTangent: {x: 0.6938704, y: 2.2239447, z: -0.05078125}
       rightTangent: {x: 0, y: 0, z: 0}
-      position: {x: 2, y: 2, z: 0}
+      position: {x: -0.09451598, y: 2.52638, z: -0.46484375}
   sampleRate: 0.1
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
   circleIcon: {fileID: 2800000, guid: 971f68b2bfc7a704181c2904de1fe15d, type: 3}
   squareIcon: {fileID: 2800000, guid: e33d07ce577ea5f45bc068384c03d5b0, type: 3}
   diamondIcon: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
-  selectedPoint:
-    isPointHot: 0
-    type: 0
-    positionCurveIndex: 0
+  hotPointIndex: -1
 --- !u!4 &2110963971
 Transform:
   m_ObjectHideFlags: 0
@@ -362,7 +365,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2110963969}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.54, y: 0, z: 0}
+  m_LocalPosition: {x: -0.54, y: 1.57, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

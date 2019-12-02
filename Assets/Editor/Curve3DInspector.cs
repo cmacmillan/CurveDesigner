@@ -37,6 +37,7 @@ public class Curve3DInspector : Editor
         }
         if (GUILayout.Button("Clear"))
         {
+            Debug.Log("cleared");
             curve.positionCurve.Initialize();
         }
         GUILayout.EndHorizontal();
