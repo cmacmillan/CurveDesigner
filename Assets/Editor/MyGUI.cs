@@ -165,37 +165,39 @@ public static class MyGUI
         }
         #endregion
 
+        void OnDrag()
+        {
+            if (hotPoint != null && GUIUtility.hotControl == controlID)
+            {
+                switch (curve.editMode)
+                {
+                    case EditMode.PositionCurve:
+                        curve.positionCurve[hotPoint.index] = GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth) - position;
+                        break;
+                    default:
+                        throw new System.InvalidOperationException();
+                }
+                Event.current.Use();
+            }
+        }
+
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.MouseDown:
                 if (hotPoint != null)
                 {
-                    Debug.Log("down");
                     GUIUtility.hotControl = controlID;
                     curve.hotPointIndex = hotPoint.index;
-                    Event.current.Use();
+                    curve.pointDragOffset = hotPoint.guiPos-MousePos;
+                    OnDrag();
                 }
                 break;
             case EventType.MouseDrag:
-                if (hotPoint != null && GUIUtility.hotControl == controlID)
-                {
-                    Debug.Log("drag");
-                    switch (curve.editMode)
-                    {
-                        case EditMode.PositionCurve:
-                            curve.positionCurve[hotPoint.index] = GUIToWorldSpace(MousePos, hotPoint.screenDepth)-position;
-                            break;
-                        default:
-                            throw new System.InvalidOperationException();
-                    }
-                    Event.current.Use();
-                    break;
-                }
+                OnDrag();
                 break;
             case EventType.MouseUp:
                 if (hotPoint != null || GUIUtility.hotControl == controlID)
                 {
-                    Debug.Log("up");
                     GUIUtility.hotControl = 0;
                     curve.hotPointIndex = -1;
                     Event.current.Use();

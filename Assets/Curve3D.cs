@@ -23,6 +23,7 @@ public class Curve3D : MonoBehaviour
     }
     //public int selectedItemIndex;
     public int hotPointIndex=-1;
+    public Vector2 pointDragOffset;
 
     void Start()
     {
