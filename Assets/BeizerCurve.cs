@@ -6,7 +6,6 @@ using UnityEngine;
 [System.Serializable]
 public class BeizerCurve
 {
-
     [SerializeField]
     [HideInInspector]
     public List<PointGroup> PointGroups;
@@ -206,7 +205,7 @@ public class BeizerCurve
         return PointGroups[GetPhysicalIndex(virtualIndex)];
     }
 
-    private static int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
-    private static int GetParentVirtualIndex(int childVirtualIndex) { return GetPhysicalIndex(childVirtualIndex) * 3; }
-    private static int GetPhysicalIndex(int childIndex) { return ((childIndex + 1) / 3); }
+    public int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
+    public int GetParentVirtualIndex(int childVirtualIndex) { return GetPhysicalIndex(childVirtualIndex) * 3; }
+    public int GetPhysicalIndex(int childIndex) { return ((childIndex + 1) / 3); }
 }

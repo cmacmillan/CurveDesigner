@@ -86,6 +86,7 @@ public static class MyGUI
 
         List<PointInfo> points = new List<PointInfo>();
         PointInfo hotPoint=null;
+        PointInfo recentlySelectedPoint = null;
         Texture2D linePlaceTexture=null;
         PointInfo GetClosestPointToMouse()
         {
@@ -114,8 +115,6 @@ public static class MyGUI
                         var pointIndexType = curve.positionCurve.GetPointTypeByIndex(i);
                         bool isPositionPoint = pointIndexType == PGIndex.Position;
                         var color = curve.positionCurve.GetPointGroupByIndex(i).GetIsPointLocked() ? Color.red : Color.green;
-                        float colorLerper = isPositionPoint ? 0.0f : .65f;
-                        color = DesaturateColor(color, colorLerper);
                         var tex = isPositionPoint ? curve.circleIcon : curve.squareIcon;
                         points.Add(new PointInfo(curve.positionCurve[i] + position, color, tex, i));
                     }
@@ -132,17 +131,13 @@ public static class MyGUI
             if (curve.IsAPointSelected)
             {
                 hotPoint = points[curve.hotPointIndex];
+                hotPoint.color = Color.yellow;
             }
             else
             {
                 points.RemoveAll(a => !a.isPointOnScreen);
                 hotPoint = GetClosestPointToMouse();
-                var cyan = new Color(0, .7f, 1.0f);
-                if (hotPoint != null)
-                {
-                    hotPoint.color = cyan;
-                }
-                else
+                if (hotPoint == null)
                 {
                     curve.positionCurve.CacheLengths();
                     var samples = curve.positionCurve.SampleCurve(curve.sampleRate);
@@ -189,7 +184,19 @@ public static class MyGUI
                     GUIUtility.hotControl = controlID;
                     curve.hotPointIndex = hotPoint.index;
                     curve.pointDragOffset = hotPoint.guiPos-MousePos;
+                    switch (curve.editMode)
+                    {
+                        case EditMode.PositionCurve:
+                            curve.recentlySelectedPointIndex = curve.positionCurve.GetParentVirtualIndex(hotPoint.index);
+                            break;
+                        default:
+                            throw new System.InvalidOperationException();
+                    }
                     OnDrag();
+                }
+                else
+                {
+                    curve.recentlySelectedPointIndex = -1;
                 }
                 break;
             case EventType.MouseDrag:
@@ -229,12 +236,27 @@ public static class MyGUI
                             if (i.hasRightTangent)
                                 Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
                         }
+                        if (!curve.IsAPointSelected && curve.recentlySelectedPointIndex!=-1)
+                        {
+                            var renderPoint = points[curve.recentlySelectedPointIndex];
+                            var pointGroup = curve.positionCurve.GetPointGroupByIndex(renderPoint.index);
+                            renderPoint.color = Color.yellow;
+                            if (pointGroup.hasLeftTangent)
+                                points[curve.recentlySelectedPointIndex - 1].color = Color.yellow;
+                            if (pointGroup.hasRightTangent)
+                                points[curve.recentlySelectedPointIndex + 1].color = Color.yellow;
+                        }
                         break;
                     #endregion
                     default:
                         throw new System.InvalidOperationException();
                 }
 
+                if (hotPoint != null && !curve.IsAPointSelected)
+                {
+                    hotPoint.color *= .7f;
+                    hotPoint.color.a = 1;
+                }
                 Handles.BeginGUI();
 
                 points.Sort((a, b) => (int)Mathf.Sign(b.screenDepth - a.screenDepth));
