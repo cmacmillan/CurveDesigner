@@ -62,17 +62,20 @@ public static class MyGUI
         public Vector3 worldPosition;
         public Vector2 guiPos;
         public float screenDepth;
+        public bool isPointOnScreen;
+        public float distanceToMouse;
         public PointInfo(Vector3 worldPosition, Color color,Texture2D texture)
         {
+            var MousePos = Event.current.mousePosition;
             this.color = color;
-            this.worldPosition = worldPosition;
+            this.worldPosition = worldPosition; 
             this.texture = texture;
-        }
-        public bool IsPointOnScreen()
-        {
-            return WorldToGUISpace(worldPosition, out guiPos, out screenDepth);
+            this.isPointOnScreen = WorldToGUISpace(worldPosition, out this.guiPos, out this.screenDepth);
+            distanceToMouse = Vector2.Distance(this.guiPos,MousePos);
         }
     }
+    private const float buttonClickDistance=20.0f;
+    private const float lineClickDistance=15.0f;
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
     {
         if (curve.positionCurve == null)
@@ -81,13 +84,32 @@ public static class MyGUI
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
 
-        List<PointInfo> pointsToDraw = new List<PointInfo>();
-        #region populate pointsToDraw
+
+        List<PointInfo> points = new List<PointInfo>();
+        PointInfo closestPointToMouse=null;
+        Texture2D linePlaceTexture=null;
+        PointInfo GetClosestPointToMouse()
+        {
+            float minDistanceToMouse = float.PositiveInfinity;
+            PointInfo closestPoint = null;
+            foreach (var i in points)
+            {
+                if (i.distanceToMouse<minDistanceToMouse)
+                {
+                    closestPoint = i;
+                    minDistanceToMouse = i.distanceToMouse;
+                }
+            }
+            return closestPoint;
+        }
+
+        #region populate points
         {
             switch (curve.editMode)
             {
                 case SelectedPointType.PositionCurve:
                     #region PositionCurve
+                    linePlaceTexture = curve.circleIcon;
                     for (int i = 0; i < curve.positionCurve.NumControlPoints; i++)
                     {
                         bool isPrimaryPoint = curve.positionCurve.GetPointTypeByIndex(i) == PGIndex.Position;
@@ -95,18 +117,44 @@ public static class MyGUI
                         float colorLerper = isPrimaryPoint ? 0.0f : .65f;
                         color = DesaturateColor(color, colorLerper);
                         var tex = isPrimaryPoint ? curve.circleIcon : curve.squareIcon;
-                        pointsToDraw.Add(new PointInfo(curve.positionCurve[i] + position, color, tex));
+                        points.Add(new PointInfo(curve.positionCurve[i] + position, color, tex));
                     }
                     break;
                 #endregion
                 case SelectedPointType.Rotation:
                     #region Rotation curve
+                    linePlaceTexture = curve.diamondIcon;
                     break;
                 #endregion
                 default:
                     throw new System.InvalidOperationException();
             }
-            pointsToDraw.RemoveAll(a => !a.IsPointOnScreen());
+            points.RemoveAll(a => !a.isPointOnScreen);
+            closestPointToMouse = GetClosestPointToMouse();
+            var yellow = new Color(.95f, .8f, 0);
+            if (closestPointToMouse != null && closestPointToMouse.distanceToMouse < buttonClickDistance)
+            {
+                closestPointToMouse.color = yellow;
+            }
+            else
+            {
+                curve.positionCurve.CacheLengths();
+                var samples = curve.positionCurve.SampleCurve(curve.sampleRate);
+                foreach (var i in samples)
+                {
+                    i.position += position;
+                }
+                int segmentIndex;
+                float time;
+                UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
+                Vector3 pointPosition = curve.positionCurve.GetSegmentPositionAtTime(segmentIndex,time)+position;
+                var pointInfo = new PointInfo(pointPosition, yellow, linePlaceTexture);
+                if (pointInfo.isPointOnScreen && pointInfo.distanceToMouse < lineClickDistance)
+                {
+                    points.Add(pointInfo);
+                    closestPointToMouse = pointInfo;
+                }
+            }
         }
         #endregion
 
@@ -146,8 +194,8 @@ public static class MyGUI
 
                 Handles.BeginGUI();
 
-                pointsToDraw.Sort((a,b)=>(int)Mathf.Sign(b.screenDepth-a.screenDepth));
-                foreach (var i in pointsToDraw)
+                points.Sort((a, b) => (int)Mathf.Sign(b.screenDepth - a.screenDepth));
+                foreach (var i in points)
                 {
                     DrawPoint(GetRectCenteredAtPosition(i.guiPos,6,6),i.color,i.texture);
                 }
@@ -158,7 +206,6 @@ public static class MyGUI
                 #endregion
         }
     }
-
 
     #region old code
     /*curve.curve.CacheLengths();

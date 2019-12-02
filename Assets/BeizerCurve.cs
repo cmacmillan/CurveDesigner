@@ -37,10 +37,25 @@ public class BeizerCurve
         PointGroups.Add(pointB);
     }
 
-    #region curve calculations
-    public List<Vector3> SampleCurve(float sampleDistance)
+    public class SampleFragment
     {
-        List<Vector3> retr = new List<Vector3>();
+        public Vector3 position;
+        public int segmentIndex;
+        public float time;
+        public SampleFragment(Vector3 position, int segmentIndex,float time)
+        {
+            this.position = position;
+            this.segmentIndex = segmentIndex;
+            this.time = time;
+        }
+    }
+
+    #region curve calculations
+    public List<SampleFragment> SampleCurve(float sampleDistance)
+    {
+        List<SampleFragment> retr = new List<SampleFragment>();
+        float time;
+        Vector3 position;
         float lenSoFar = 0;
         for (int i = 0; i < NumSegments; i++)
         {
@@ -51,23 +66,26 @@ public class BeizerCurve
             float jumpDist = segmentLength / numSteps;
             for (int j = 0; j < numSteps; j++)
             {
-                retr.Add(GetPositionAtDistance(f));
+                position = GetPositionAtDistance(f,out time);
+                retr.Add(new SampleFragment(position,i,time));
                 f += jumpDist;
             }
         }
-        retr.Add(GetPositionAtDistance(lenSoFar));//add last point
+        position = GetPositionAtDistance(lenSoFar,out time);
+        retr.Add(new SampleFragment(position,NumSegments,time));//add last point
         return retr;
     }
 
     //Doesn't actually sample at distance along the beizer, but rather the position at distance/length, which isn't quite uniform
 
-    public Vector3 GetPositionAtDistance(float distance)
+    public Vector3 GetPositionAtDistance(float distance, out float time)
     {
         for (int i=0;i<NumSegments;i++)
         {
             if (distance-_lengths[i]<0)
             {
-                return GetSegmentPositionAtTime(i,distance/_lengths[i]);
+                time = distance / _lengths[i];
+                return GetSegmentPositionAtTime(i,time);
             }
             else
             {
@@ -75,7 +93,8 @@ public class BeizerCurve
             }
         }
         int finalSegmentIndex = NumSegments - 1;
-        return GetSegmentPositionAtTime(finalSegmentIndex,1.0f);
+        time = 1.0f;
+        return GetSegmentPositionAtTime(finalSegmentIndex,time);
     }
     public Vector3 GetSegmentPositionAtTime(int segmentIndex,float time)
     {
