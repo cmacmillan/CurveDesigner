@@ -114,7 +114,7 @@ public static class MyGUI
                     {
                         var pointIndexType = curve.positionCurve.GetPointTypeByIndex(i);
                         bool isPositionPoint = pointIndexType == PGIndex.Position;
-                        var color = curve.positionCurve.GetPointGroupByIndex(i).GetIsPointLocked() ? Color.red : Color.green;
+                        var color = Color.green;
                         var tex = isPositionPoint ? curve.circleIcon : curve.squareIcon;
                         points.Add(new PointInfo(curve.positionCurve[i] + position, color, tex, i));
                     }
@@ -131,7 +131,6 @@ public static class MyGUI
             if (curve.IsAPointSelected)
             {
                 hotPoint = points[curve.hotPointIndex];
-                hotPoint.color = Color.yellow;
             }
             else
             {
@@ -236,7 +235,33 @@ public static class MyGUI
                             if (i.hasRightTangent)
                                 Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
                         }
-                        if (!curve.IsAPointSelected && curve.recentlySelectedPointIndex!=-1)
+                        if (curve.IsAPointSelected)
+                        {
+                            hotPoint.color = Color.yellow;
+                            var renderPoint = points[curve.hotPointIndex];
+                            var pointGroup = curve.positionCurve.GetPointGroupByIndex(renderPoint.index);
+                            if (pointGroup.GetIsPointLocked())
+                            {
+                                switch (curve.positionCurve.GetPointTypeByIndex(hotPoint.index))
+                                {
+                                    case PGIndex.Position:
+                                        break;
+                                    case PGIndex.LeftTangent:
+                                        if (pointGroup.hasRightTangent)
+                                            points[curve.hotPointIndex + 2].color = Color.yellow;
+                                        break;
+                                    case PGIndex.RightTangent:
+                                        if (pointGroup.hasLeftTangent)
+                                            points[curve.hotPointIndex - 2].color = Color.yellow;
+                                        break;
+                                    default:
+                                        throw new System.InvalidOperationException();
+                                }
+                            }
+                            
+                            //var otherPoint = (int)curve.positionCurve.GetOtherTangentIndex(curve.positionCurve.GetPointTypeByIndex(hotPoint.index));
+                        }
+                        else if (curve.recentlySelectedPointIndex!=-1)
                         {
                             var renderPoint = points[curve.recentlySelectedPointIndex];
                             var pointGroup = curve.positionCurve.GetPointGroupByIndex(renderPoint.index);

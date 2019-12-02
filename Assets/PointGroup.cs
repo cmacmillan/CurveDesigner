@@ -47,7 +47,7 @@ public class PointGroup
     }
     private Vector3 reflectAcrossPosition(Vector3 vect)
     {
-        return position - (vect - position);
+        return -vect;
     }
     public void SetPointLocked(bool state)
     {

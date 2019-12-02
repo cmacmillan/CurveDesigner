@@ -200,6 +200,20 @@ public class BeizerCurve
         int offsetIndex = virtualIndex-GetParentVirtualIndex(virtualIndex);
         return (PGIndex)offsetIndex;
     }
+    public PGIndex GetOtherTangentIndex(PGIndex index)
+    {
+        switch (index)
+        {
+            case PGIndex.LeftTangent:
+                return PGIndex.RightTangent;
+            case PGIndex.RightTangent:
+                return PGIndex.LeftTangent;
+            case PGIndex.Position:
+                return PGIndex.Position;
+            default:
+                throw new System.InvalidOperationException();
+        }
+    }
     public PointGroup GetPointGroupByIndex(int virtualIndex)
     {
         return PointGroups[GetPhysicalIndex(virtualIndex)];
