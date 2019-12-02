@@ -13,6 +13,7 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve = target as Curve3D;
+        Undo.RecordObject(curve, "curve");
         MyGUI.EditBezierCurve(curve, curve.transform.position);
         Handles.BeginGUI();
         GUILayout.BeginArea(new Rect(20, 20, 150, 60));
