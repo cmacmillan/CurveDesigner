@@ -2,6 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class CurveSplitPointInfo
+{
+    public int segmentIndex;
+    public float time;
+    public CurveSplitPointInfo(int segmentIndex, float time)
+    {
+        this.segmentIndex = segmentIndex;
+        this.time = time;
+    }
+}
 public enum PGIndex
 {
     LeftTangent = -1,

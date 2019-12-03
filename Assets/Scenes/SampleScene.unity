@@ -327,38 +327,63 @@ MonoBehaviour:
   editMode: 0
   positionCurve:
     PointGroups:
+    - hasLeftTangent: 0
+      hasRightTangent: 1
+      isPointLocked: 1
+      leftTangent: {x: 0, y: 0, z: 0}
+      rightTangent: {x: 1, y: 0, z: 0}
+      position: {x: 0, y: 0, z: 0}
     - hasLeftTangent: 1
       hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: 0.20817351, y: -8.669102, z: -0.71837807}
-      rightTangent: {x: -4.1892877, y: -1.4518466, z: 1.1964722}
-      position: {x: -0.72542995, y: 5.8752074, z: 0.94828606}
+      isPointLocked: 1
+      leftTangent: {x: -1, y: 0, z: 0}
+      rightTangent: {x: 1, y: -0, z: -0}
+      position: {x: 1, y: 1, z: 0}
     - hasLeftTangent: 1
       hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -1.6441467, y: 2.116088, z: 0.13464737}
-      rightTangent: {x: 1.819324, y: -2.1692286, z: -0.19133759}
-      position: {x: -2.7145164, y: -1.8051304, z: 0.70406723}
+      isPointLocked: 1
+      leftTangent: {x: -1, y: 0, z: 0}
+      rightTangent: {x: 1, y: -0, z: -0}
+      position: {x: 1.5605135, y: 1.569931, z: 0.024471283}
     - hasLeftTangent: 1
       hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -1.745583, y: -2.3130713, z: 0.13327885}
-      rightTangent: {x: 1.375174, y: 2.409142, z: -0.5355892}
-      position: {x: 6.2953215, y: -1.0703777, z: -1.3647318}
+      isPointLocked: 1
+      leftTangent: {x: -1, y: 0, z: 0}
+      rightTangent: {x: 1, y: -0, z: -0}
+      position: {x: 1.9190822, y: 2.215269, z: 1.7174177}
+    - hasLeftTangent: 1
+      hasRightTangent: 1
+      isPointLocked: 1
+      leftTangent: {x: 0.07491231, y: 0.8436127, z: -0.08630514}
+      rightTangent: {x: -0.07491231, y: -0.8436127, z: 0.08630514}
+      position: {x: 2.0920541, y: 2.7257729, z: 3.0822487}
+    - hasLeftTangent: 1
+      hasRightTangent: 1
+      isPointLocked: 1
+      leftTangent: {x: -1, y: 0, z: 0}
+      rightTangent: {x: 1, y: -0, z: -0}
+      position: {x: 2.2021523, y: 2.8564568, z: 5.1160593}
+    - hasLeftTangent: 1
+      hasRightTangent: 1
+      isPointLocked: 1
+      leftTangent: {x: 1.5080309, y: -1.4419956, z: -0.116549015}
+      rightTangent: {x: -1.5080309, y: 1.4419956, z: 0.116549015}
+      position: {x: 2.4910746, y: 3.3986835, z: 4.9018054}
     - hasLeftTangent: 1
       hasRightTangent: 0
-      isPointLocked: 0
-      leftTangent: {x: 4.7866015, y: 0.26308727, z: -1.1887865}
+      isPointLocked: 1
+      leftTangent: {x: 0.2010889, y: 0.51950645, z: -0.64990807}
       rightTangent: {x: 0, y: 0, z: 0}
-      position: {x: 0.9804515, y: 6.0277243, z: -0.20362282}
+      position: {x: 2.9897451, y: 3.8138065, z: 4.698682}
   sampleRate: 0.1
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
   circleIcon: {fileID: 2800000, guid: 971f68b2bfc7a704181c2904de1fe15d, type: 3}
   squareIcon: {fileID: 2800000, guid: e33d07ce577ea5f45bc068384c03d5b0, type: 3}
   diamondIcon: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
-  recentlySelectedPointIndex: -1
+  recentlySelectedPointIndex: 12
   hotPointIndex: -1
-  pointDragOffset: {x: 6.6000366, y: -3.684433}
+  pointDragOffset: {x: 5.1510925, y: 0.51605225}
+  arePointsLocked: 1
 --- !u!4 &2110963971
 Transform:
   m_ObjectHideFlags: 0
@@ -367,7 +392,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2110963969}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.54, y: 1.57, z: 0}
+  m_LocalPosition: {x: -0.54, y: 16.23, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

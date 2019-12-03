@@ -84,10 +84,11 @@ public static class MyGUI
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
 
-        List<PointInfo> points = new List<PointInfo>();
-        PointInfo hotPoint=null;
-        PointInfo recentlySelectedPoint = null;
-        Texture2D linePlaceTexture=null;
+        List<PointInfo> points = null;
+        PointInfo hotPoint;
+        PointInfo recentlySelectedPoint;
+        Texture2D linePlaceTexture;
+        CurveSplitPointInfo curveSplitPoint=null;
         PointInfo GetClosestPointToMouse()
         {
             float minDistanceToMouse = buttonClickDistance;
@@ -103,8 +104,12 @@ public static class MyGUI
             return closestPoint;
         }
 
-        #region populate points
-        {
+        void PopulatePoints(){
+            points = new List<PointInfo>();
+            hotPoint = null;
+            recentlySelectedPoint = null;
+            linePlaceTexture = null;
+            curveSplitPoint = null;
             switch (curve.editMode)
             {
                 case EditMode.PositionCurve:
@@ -134,7 +139,6 @@ public static class MyGUI
             }
             else
             {
-                points.RemoveAll(a => !a.isPointOnScreen);
                 hotPoint = GetClosestPointToMouse();
                 if (hotPoint == null)
                 {
@@ -148,6 +152,7 @@ public static class MyGUI
                     float time;
                     UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
                     Vector3 pointPosition = curve.positionCurve.GetSegmentPositionAtTime(segmentIndex, time) + position;
+                    curveSplitPoint = new CurveSplitPointInfo(segmentIndex,time);
                     var pointInfo = new PointInfo(pointPosition, Color.green, linePlaceTexture, -1);
                     if (pointInfo.isPointOnScreen && pointInfo.distanceToMouse < lineClickDistance)
                     {
@@ -157,11 +162,12 @@ public static class MyGUI
                 }
             }
         }
-        #endregion
+        PopulatePoints();
 
+        bool isMainMouseButton = Event.current.button == 0;
         void OnDrag()
         {
-            if (hotPoint != null && GUIUtility.hotControl == controlID)
+            if (hotPoint != null && GUIUtility.hotControl == controlID && isMainMouseButton)
             {
                 switch (curve.editMode)
                 {
@@ -178,35 +184,43 @@ public static class MyGUI
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.MouseDown:
-                if (hotPoint != null)
+                if (isMainMouseButton)
                 {
-                    GUIUtility.hotControl = controlID;
-                    curve.hotPointIndex = hotPoint.index;
-                    curve.pointDragOffset = hotPoint.guiPos-MousePos;
-                    switch (curve.editMode)
+                    if (hotPoint != null)
                     {
-                        case EditMode.PositionCurve:
-                            curve.recentlySelectedPointIndex = curve.positionCurve.GetParentVirtualIndex(hotPoint.index);
-                            break;
-                        default:
-                            throw new System.InvalidOperationException();
+                        GUIUtility.hotControl = controlID;
+                        curve.hotPointIndex = hotPoint.index;
+                        switch (curve.editMode)
+                        {
+                            case EditMode.PositionCurve:
+                                if (curveSplitPoint!=null)
+                                {
+                                    hotPoint.index = curve.positionCurve.InsertSegmentAfterIndex(curveSplitPoint);
+                                    curve.hotPointIndex = hotPoint.index;
+                                    PopulatePoints();
+                                }
+                                curve.recentlySelectedPointIndex = curve.positionCurve.GetParentVirtualIndex(hotPoint.index);
+                                break;
+                            default:
+                                throw new System.InvalidOperationException();
+                        }
+                        curve.pointDragOffset = hotPoint.guiPos - MousePos;
+                        OnDrag();
                     }
-                    OnDrag();
-                }
-                else
-                {
-                    curve.recentlySelectedPointIndex = -1;
                 }
                 break;
             case EventType.MouseDrag:
                 OnDrag();
                 break;
             case EventType.MouseUp:
-                if (hotPoint != null || GUIUtility.hotControl == controlID)
+                if (isMainMouseButton)
                 {
-                    GUIUtility.hotControl = 0;
-                    curve.hotPointIndex = -1;
-                    Event.current.Use();
+                    if (hotPoint != null || GUIUtility.hotControl == controlID)
+                    {
+                        GUIUtility.hotControl = 0;
+                        curve.hotPointIndex = -1;
+                        Event.current.Use();
+                    }
                 }
                 break;
             case EventType.MouseMove:
@@ -284,6 +298,7 @@ public static class MyGUI
                 }
                 Handles.BeginGUI();
 
+                points.RemoveAll(a => !a.isPointOnScreen);
                 points.Sort((a, b) => (int)Mathf.Sign(b.screenDepth - a.screenDepth));
                 foreach (var i in points)
                 {

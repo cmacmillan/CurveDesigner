@@ -25,6 +25,17 @@ public class BeizerCurve
         PointGroups.Add(pointB);
     }
 
+    public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint)
+    {
+        var point = new PointGroup();
+        var basePosition = this.GetSegmentPositionAtTime(splitPoint.segmentIndex, splitPoint.time);
+        point.SetWorldPositionByIndex(PGIndex.Position,basePosition);
+        point.SetWorldPositionByIndex(PGIndex.LeftTangent, basePosition + new Vector3(-1,0,0));
+        point.SetWorldPositionByIndex(PGIndex.RightTangent, basePosition + new Vector3(1,0,0));
+        PointGroups.Insert(splitPoint.segmentIndex+1,point);
+        return (splitPoint.segmentIndex+1)*3;
+    }
+
     public void AddDefaultSegment()
     {
         var finalPointGroup = PointGroups[PointGroups.Count - 1];
@@ -195,6 +206,7 @@ public class BeizerCurve
         }
     }
     #endregion
+
     public PGIndex GetPointTypeByIndex(int virtualIndex)
     {
         int offsetIndex = virtualIndex-GetParentVirtualIndex(virtualIndex);
