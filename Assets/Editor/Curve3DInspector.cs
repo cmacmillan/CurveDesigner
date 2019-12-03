@@ -44,6 +44,8 @@ public class Curve3DInspector : Editor
         if (GUILayout.Button("Clear"))
         {
             Debug.Log("cleared");
+            curve.recentlySelectedPointIndex = -1;
+            curve.hotPointIndex = -1;
             curve.positionCurve.Initialize();
         }
         GUILayout.EndHorizontal();

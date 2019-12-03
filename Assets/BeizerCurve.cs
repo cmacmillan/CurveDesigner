@@ -30,8 +30,11 @@ public class BeizerCurve
         var point = new PointGroup();
         var basePosition = this.GetSegmentPositionAtTime(splitPoint.segmentIndex, splitPoint.time);
         point.SetWorldPositionByIndex(PGIndex.Position,basePosition);
-        point.SetWorldPositionByIndex(PGIndex.LeftTangent, basePosition + new Vector3(-1,0,0));
-        point.SetWorldPositionByIndex(PGIndex.RightTangent, basePosition + new Vector3(1,0,0));
+        Vector3 leftTangent;
+        Vector3 rightTangent;
+        GetSegmentTangentsAtTime(splitPoint.segmentIndex,splitPoint.time,out leftTangent,out rightTangent);
+        point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
+        point.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent);
         PointGroups.Insert(splitPoint.segmentIndex+1,point);
         return (splitPoint.segmentIndex+1)*3;
     }
@@ -106,6 +109,17 @@ public class BeizerCurve
         time = 1.0f;
         return GetSegmentPositionAtTime(finalSegmentIndex,time);
     }
+
+    public void GetSegmentTangentsAtTime(int segmentIndex, float time, out Vector3 leftTangent, out Vector3 rightTangent)
+    {
+        SolvePositionAtTimeTangents(GetVirtualIndex(segmentIndex,0), 4, time, out leftTangent, out rightTangent);
+    }
+    private void SolvePositionAtTimeTangents(int startIndex, int length, float time, out Vector3 leftTangent, out Vector3 rightTangent)
+    {
+        leftTangent = SolvePositionAtTime(startIndex,length-1,time);
+        rightTangent = SolvePositionAtTime(startIndex+1,length-1,time);
+    }
+
     public Vector3 GetSegmentPositionAtTime(int segmentIndex,float time)
     {
         return SolvePositionAtTime(GetVirtualIndex(segmentIndex,0),4,time);

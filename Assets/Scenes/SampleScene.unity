@@ -329,60 +329,24 @@ MonoBehaviour:
     PointGroups:
     - hasLeftTangent: 0
       hasRightTangent: 1
-      isPointLocked: 1
+      isPointLocked: 0
       leftTangent: {x: 0, y: 0, z: 0}
       rightTangent: {x: 1, y: 0, z: 0}
       position: {x: 0, y: 0, z: 0}
     - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -1, y: 0, z: 0}
-      rightTangent: {x: 1, y: -0, z: -0}
-      position: {x: 1, y: 1, z: 0}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -1, y: 0, z: 0}
-      rightTangent: {x: 1, y: -0, z: -0}
-      position: {x: 1.5605135, y: 1.569931, z: 0.024471283}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -1, y: 0, z: 0}
-      rightTangent: {x: 1, y: -0, z: -0}
-      position: {x: 1.9190822, y: 2.215269, z: 1.7174177}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: 0.07491231, y: 0.8436127, z: -0.08630514}
-      rightTangent: {x: -0.07491231, y: -0.8436127, z: 0.08630514}
-      position: {x: 2.0920541, y: 2.7257729, z: 3.0822487}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -1, y: 0, z: 0}
-      rightTangent: {x: 1, y: -0, z: -0}
-      position: {x: 2.2021523, y: 2.8564568, z: 5.1160593}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: 1.5080309, y: -1.4419956, z: -0.116549015}
-      rightTangent: {x: -1.5080309, y: 1.4419956, z: 0.116549015}
-      position: {x: 2.4910746, y: 3.3986835, z: 4.9018054}
-    - hasLeftTangent: 1
       hasRightTangent: 0
-      isPointLocked: 1
-      leftTangent: {x: 0.2010889, y: 0.51950645, z: -0.64990807}
+      isPointLocked: 0
+      leftTangent: {x: -1, y: 0, z: 0}
       rightTangent: {x: 0, y: 0, z: 0}
-      position: {x: 2.9897451, y: 3.8138065, z: 4.698682}
+      position: {x: 1, y: 1, z: 0}
   sampleRate: 0.1
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
   circleIcon: {fileID: 2800000, guid: 971f68b2bfc7a704181c2904de1fe15d, type: 3}
   squareIcon: {fileID: 2800000, guid: e33d07ce577ea5f45bc068384c03d5b0, type: 3}
   diamondIcon: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
-  recentlySelectedPointIndex: 12
+  recentlySelectedPointIndex: -1
   hotPointIndex: -1
-  pointDragOffset: {x: 5.1510925, y: 0.51605225}
+  pointDragOffset: {x: -6.890381, y: -4.827774}
   arePointsLocked: 1
 --- !u!4 &2110963971
 Transform:
