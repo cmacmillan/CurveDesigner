@@ -32,9 +32,15 @@ public class BeizerCurve
         point.SetWorldPositionByIndex(PGIndex.Position,basePosition);
         Vector3 leftTangent;
         Vector3 rightTangent;
-        GetSegmentTangentsAtTime(splitPoint.segmentIndex,splitPoint.time,out leftTangent,out rightTangent);
+        Vector3 preLeftTangent;
+        Vector3 postRightTangent;
+        SolvePositionAtTimeTangents(GetVirtualIndex(splitPoint.segmentIndex, 0), 4, splitPoint.time, out leftTangent, out rightTangent, out preLeftTangent, out postRightTangent);
         point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
         point.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent);
+        var prePointGroup = PointGroups[splitPoint.segmentIndex];
+        var postPointGroup = PointGroups[splitPoint.segmentIndex + 1];
+        prePointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,preLeftTangent);
+        postPointGroup.SetWorldPositionByIndex(PGIndex.LeftTangent,postRightTangent);
         PointGroups.Insert(splitPoint.segmentIndex+1,point);
         return (splitPoint.segmentIndex+1)*3;
     }
@@ -110,14 +116,13 @@ public class BeizerCurve
         return GetSegmentPositionAtTime(finalSegmentIndex,time);
     }
 
-    public void GetSegmentTangentsAtTime(int segmentIndex, float time, out Vector3 leftTangent, out Vector3 rightTangent)
-    {
-        SolvePositionAtTimeTangents(GetVirtualIndex(segmentIndex,0), 4, time, out leftTangent, out rightTangent);
-    }
-    private void SolvePositionAtTimeTangents(int startIndex, int length, float time, out Vector3 leftTangent, out Vector3 rightTangent)
+    private void SolvePositionAtTimeTangents(int startIndex, int length, float time, out Vector3 leftTangent, out Vector3 rightTangent, out Vector3 preLeftTangent, out Vector3 postRightTangent)
     {
         leftTangent = SolvePositionAtTime(startIndex,length-1,time);
         rightTangent = SolvePositionAtTime(startIndex+1,length-1,time);
+
+        preLeftTangent = SolvePositionAtTime(startIndex,length-2,time);
+        postRightTangent = SolvePositionAtTime(startIndex+2,length-2,time);
     }
 
     public Vector3 GetSegmentPositionAtTime(int segmentIndex,float time)
