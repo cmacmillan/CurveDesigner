@@ -347,16 +347,28 @@ MonoBehaviour:
       position: {x: 0.91114396, y: 1.2166195, z: 0.0320518}
     - hasLeftTangent: 1
       hasRightTangent: 1
-      isPointLocked: 1
+      isPointLocked: 0
       leftTangent: {x: -0.16207385, y: -1.0668049, z: -0.16977835}
-      rightTangent: {x: 0.16207385, y: 1.0668049, z: 0.16977835}
-      position: {x: 1.118293, y: 2.4117393, z: 0.19895506}
+      rightTangent: {x: 0.03564775, y: 0.23464108, z: 0.03734234}
+      position: {x: 1.0279562, y: 2.5669289, z: 0.220263}
+    - hasLeftTangent: 1
+      hasRightTangent: 1
+      isPointLocked: 0
+      leftTangent: {x: -0.13698137, y: -0.11318755, z: -0.0257712}
+      rightTangent: {x: 0.48580933, y: 0.40142393, z: 0.09139854}
+      position: {x: 1.3077374, y: 3.086132, z: 0.31614828}
+    - hasLeftTangent: 1
+      hasRightTangent: 1
+      isPointLocked: 0
+      leftTangent: {x: 0.6228006, y: 0.83712864, z: 0.19334784}
+      rightTangent: {x: -0.6603124, y: -0.94973373, z: -0.21423864}
+      position: {x: 2.0317514, y: 2.3198376, z: 0.21752024}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 1
-      leftTangent: {x: 0.8104954, y: 0.984478, z: 0.24110055}
-      rightTangent: {x: -0.8104954, y: -0.984478, z: -0.24110055}
-      position: {x: 1.8041859, y: 2.381134, z: 0.20640683}
+      leftTangent: {x: 0.047715425, y: 0.10512924, z: 0.033802986}
+      rightTangent: {x: -0.047715425, y: -0.10512924, z: -0.033802986}
+      position: {x: 1.7606831, y: 1.9376755, z: 0.1250391}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 1
@@ -522,7 +534,7 @@ MonoBehaviour:
   diamondIcon: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
   recentlySelectedPointIndex: 12
   hotPointIndex: -1
-  pointDragOffset: {x: 0.9381714, y: -4.139038}
+  pointDragOffset: {x: -3.7125854, y: -7.368561}
 --- !u!4 &2110963971
 Transform:
   m_ObjectHideFlags: 0

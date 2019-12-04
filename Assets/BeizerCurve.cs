@@ -29,8 +29,9 @@ public class BeizerCurve
 
     public enum SplitInsertionNeighborModification
     {
-        RetainCurveShape=0,
-        RetainPointLocks=1,
+        DoNotModifyNeighbors=0,
+        RetainCurveShape=1,
+        RetainTangentLocks=2,
     }
 
     public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint)
@@ -57,26 +58,37 @@ public class BeizerCurve
         switch (splitInsertionNeighborModification)
         {
             case SplitInsertionNeighborModification.RetainCurveShape:
-                point.SetPointLocked(false);
                 prePointGroup.SetPointLocked(false);
                 postPointGroup.SetPointLocked(false);
                 prePointModify();
                 postPointModify();
                 break;
-            case SplitInsertionNeighborModification.RetainPointLocks:
-                if (!point.GetIsPointLocked())
-                    break;
+            case SplitInsertionNeighborModification.RetainTangentLocks:
                 if (!prePointGroup.GetIsPointLocked())
+                {
                     prePointModify();
+                }
                 if (!postPointGroup.GetIsPointLocked())
+                {
                     postPointModify();
+                }
                 break;
             default:
                 break;
         }
 
-        point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
-        point.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent);
+        //use the bigger tangent, this only matter if the point is locked
+        if ((leftTangent-point.GetWorldPositionByIndex(PGIndex.Position)).magnitude<(rightTangent-point.GetWorldPositionByIndex(PGIndex.Position)).magnitude)
+        {
+            point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
+            point.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent);
+        }
+        else
+        {
+            point.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent);
+            point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
+        }
+
         PointGroups.Insert(splitPoint.segmentIndex+1,point);
         return (splitPoint.segmentIndex+1)*3;
     }
