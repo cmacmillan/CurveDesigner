@@ -31,7 +31,6 @@ public class BeizerCurve
     {
         DoNotModifyNeighbors=0,
         RetainCurveShape=1,
-        RetainTangentLocks=2,
     }
 
     public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint)
@@ -63,21 +62,11 @@ public class BeizerCurve
                 prePointModify();
                 postPointModify();
                 break;
-            case SplitInsertionNeighborModification.RetainTangentLocks:
-                if (!prePointGroup.GetIsPointLocked())
-                {
-                    prePointModify();
-                }
-                if (!postPointGroup.GetIsPointLocked())
-                {
-                    postPointModify();
-                }
-                break;
             default:
                 break;
         }
 
-        //use the bigger tangent, this only matter if the point is locked
+        //use the bigger tangent, this only matters if the point is locked
         if ((leftTangent-point.GetWorldPositionByIndex(PGIndex.Position)).magnitude<(rightTangent-point.GetWorldPositionByIndex(PGIndex.Position)).magnitude)
         {
             point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);

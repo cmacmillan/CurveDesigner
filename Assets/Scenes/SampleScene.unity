@@ -347,20 +347,20 @@ MonoBehaviour:
       position: {x: 0.91114396, y: 1.2166195, z: 0.0320518}
     - hasLeftTangent: 1
       hasRightTangent: 1
-      isPointLocked: 0
+      isPointLocked: 1
       leftTangent: {x: -0.16207385, y: -1.0668049, z: -0.16977835}
-      rightTangent: {x: 0.03564775, y: 0.23464108, z: 0.03734234}
+      rightTangent: {x: 0.16207385, y: 1.0668049, z: 0.16977835}
       position: {x: 1.0279562, y: 2.5669289, z: 0.220263}
     - hasLeftTangent: 1
       hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -0.13698137, y: -0.11318755, z: -0.0257712}
-      rightTangent: {x: 0.48580933, y: 0.40142393, z: 0.09139854}
-      position: {x: 1.3077374, y: 3.086132, z: 0.31614828}
+      isPointLocked: 1
+      leftTangent: {x: -0.33302402, y: 0.08843517, z: -0.004566729}
+      rightTangent: {x: 0.33302402, y: -0.08843517, z: 0.004566729}
+      position: {x: 1.9334002, y: 3.236168, z: 0.37641}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 0
-      leftTangent: {x: 0.6228006, y: 0.83712864, z: 0.19334784}
+      leftTangent: {x: 0.79840875, y: 1.0731697, z: 0.2478652}
       rightTangent: {x: -0.6603124, y: -0.94973373, z: -0.21423864}
       position: {x: 2.0317514, y: 2.3198376, z: 0.21752024}
     - hasLeftTangent: 1
@@ -525,8 +525,8 @@ MonoBehaviour:
       leftTangent: {x: -0.19549656, y: -0.2223692, z: -0.033400446}
       rightTangent: {x: 0, y: 0, z: 0}
       position: {x: 5.0932035, y: 1.3135433, z: -0.096466064}
-    placeLockedPoints: 0
-    splitInsertionNeighborModification: 1
+    placeLockedPoints: 1
+    splitInsertionNeighborModification: 0
   sampleRate: 0.1
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
   circleIcon: {fileID: 2800000, guid: 971f68b2bfc7a704181c2904de1fe15d, type: 3}
@@ -534,7 +534,7 @@ MonoBehaviour:
   diamondIcon: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
   recentlySelectedPointIndex: 12
   hotPointIndex: -1
-  pointDragOffset: {x: -3.7125854, y: -7.368561}
+  pointDragOffset: {x: 2.5140076, y: -1.7844849}
 --- !u!4 &2110963971
 Transform:
   m_ObjectHideFlags: 0
