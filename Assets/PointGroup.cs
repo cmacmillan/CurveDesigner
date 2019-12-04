@@ -114,9 +114,10 @@ public class PointGroup
     }
     #endregion
 
-    public PointGroup()
+    public PointGroup(bool lockState)
     {
         hasLeftTangent = false;
         hasRightTangent = false;
+        SetPointLocked(lockState);
     }
 }

@@ -24,7 +24,6 @@ public class Curve3D : MonoBehaviour
     public int recentlySelectedPointIndex=-1;
     public int hotPointIndex=-1;
     public Vector2 pointDragOffset;
-    public bool arePointsLocked = false;
 
     void Start()
     {

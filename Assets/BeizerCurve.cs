@@ -11,23 +11,33 @@ public class BeizerCurve
     public List<PointGroup> PointGroups;
     public int NumControlPoints { get { return PointGroups.Count*3-2; } }
     public int NumSegments { get { return PointGroups.Count-1; } }
+    public bool placeLockedPoints = true;
+    public SplitInsertionNeighborModification splitInsertionNeighborModification;
 
     public void Initialize()
     {
         PointGroups = new List<PointGroup>();
-        var pointA = new PointGroup();
+        var pointA = new PointGroup(placeLockedPoints);
         pointA.SetWorldPositionByIndex(PGIndex.Position, Vector3.zero);
         pointA.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(1,0,0));
         PointGroups.Add(pointA);
-        var pointB = new PointGroup();
+        var pointB = new PointGroup(placeLockedPoints);
         pointB.SetWorldPositionByIndex(PGIndex.Position, new Vector3(1,1,0));
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0));
         PointGroups.Add(pointB);
     }
 
+    public enum SplitInsertionNeighborModification
+    {
+        RetainCurveShape=0,
+        RetainPointLocks=1,
+    }
+
     public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint)
     {
-        var point = new PointGroup();
+        var prePointGroup = PointGroups[splitPoint.segmentIndex];
+        var postPointGroup = PointGroups[splitPoint.segmentIndex + 1];
+        PointGroup point = new PointGroup(placeLockedPoints);
         var basePosition = this.GetSegmentPositionAtTime(splitPoint.segmentIndex, splitPoint.time);
         point.SetWorldPositionByIndex(PGIndex.Position,basePosition);
         Vector3 leftTangent;
@@ -35,12 +45,38 @@ public class BeizerCurve
         Vector3 preLeftTangent;
         Vector3 postRightTangent;
         SolvePositionAtTimeTangents(GetVirtualIndex(splitPoint.segmentIndex, 0), 4, splitPoint.time, out leftTangent, out rightTangent, out preLeftTangent, out postRightTangent);
+
+        void prePointModify()
+        {
+            prePointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,preLeftTangent);
+        }
+        void postPointModify()
+        {
+            postPointGroup.SetWorldPositionByIndex(PGIndex.LeftTangent,postRightTangent);
+        }
+        switch (splitInsertionNeighborModification)
+        {
+            case SplitInsertionNeighborModification.RetainCurveShape:
+                point.SetPointLocked(false);
+                prePointGroup.SetPointLocked(false);
+                postPointGroup.SetPointLocked(false);
+                prePointModify();
+                postPointModify();
+                break;
+            case SplitInsertionNeighborModification.RetainPointLocks:
+                if (!point.GetIsPointLocked())
+                    break;
+                if (!prePointGroup.GetIsPointLocked())
+                    prePointModify();
+                if (!postPointGroup.GetIsPointLocked())
+                    postPointModify();
+                break;
+            default:
+                break;
+        }
+
         point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
         point.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent);
-        var prePointGroup = PointGroups[splitPoint.segmentIndex];
-        var postPointGroup = PointGroups[splitPoint.segmentIndex + 1];
-        prePointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,preLeftTangent);
-        postPointGroup.SetWorldPositionByIndex(PGIndex.LeftTangent,postRightTangent);
         PointGroups.Insert(splitPoint.segmentIndex+1,point);
         return (splitPoint.segmentIndex+1)*3;
     }
@@ -50,7 +86,7 @@ public class BeizerCurve
         var finalPointGroup = PointGroups[PointGroups.Count - 1];
         var finalPointPos = finalPointGroup.GetWorldPositionByIndex(PGIndex.Position);
         finalPointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,finalPointPos+new Vector3(1,0,0));
-        var pointB = new PointGroup();
+        var pointB = new PointGroup(placeLockedPoints);
         pointB.SetWorldPositionByIndex(PGIndex.Position,finalPointPos+new Vector3(1,1,0));
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent,finalPointPos+new Vector3(0,1,0));
         PointGroups.Add(pointB);

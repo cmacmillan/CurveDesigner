@@ -35,11 +35,7 @@ public class Curve3DInspector : Editor
         }
         if (GUILayout.Button("Lock"))
         {
-            curve.arePointsLocked = !curve.arePointsLocked;
-            foreach (var i in curve.positionCurve.PointGroups)
-            {
-                i.SetPointLocked(curve.arePointsLocked);
-            }
+            curve.positionCurve.placeLockedPoints = !curve.positionCurve.placeLockedPoints;
         }
         if (GUILayout.Button("Clear"))
         {
