@@ -12,7 +12,7 @@ public class BeizerCurve
     public int NumControlPoints { get { return PointGroups.Count*3-2; } }
     public int NumSegments { get { return PointGroups.Count-1; } }
     public bool placeLockedPoints = true;
-    public SplitInsertionNeighborModification splitInsertionNeighborModification;
+    public SplitInsertionNeighborModification splitInsertionBehaviour;
 
     public void Initialize()
     {
@@ -54,7 +54,7 @@ public class BeizerCurve
         {
             postPointGroup.SetWorldPositionByIndex(PGIndex.LeftTangent,postRightTangent);
         }
-        switch (splitInsertionNeighborModification)
+        switch (splitInsertionBehaviour)
         {
             case SplitInsertionNeighborModification.RetainCurveShape:
                 prePointGroup.SetPointLocked(false);

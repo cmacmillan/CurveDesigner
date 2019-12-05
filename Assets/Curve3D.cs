@@ -8,7 +8,6 @@ public class Curve3D : MonoBehaviour
     public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
     [Range(.01f,3)]
-    public float sampleRate = 1.0f;
     public Texture2D lineTex;
     public Texture2D circleIcon;
     public Texture2D squareIcon;

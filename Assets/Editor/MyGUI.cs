@@ -76,6 +76,7 @@ public static class MyGUI
     }
     private const float buttonClickDistance=20.0f;
     private const float lineClickDistance=15.0f;
+    private const float lineSampleDistance = .2f;
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
     {
         if (curve.positionCurve == null)
@@ -142,8 +143,7 @@ public static class MyGUI
                 hotPoint = GetClosestPointToMouse();
                 if (hotPoint == null)
                 {
-                    curve.positionCurve.CacheLengths();
-                    var samples = curve.positionCurve.SampleCurve(curve.sampleRate);
+                    var samples = curve.positionCurve.SampleCurve(lineSampleDistance);
                     foreach (var i in samples)
                     {
                         i.position += position;
@@ -173,6 +173,7 @@ public static class MyGUI
                 {
                     case EditMode.PositionCurve:
                         curve.positionCurve[hotPoint.index] = GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth) - position;
+                        curve.positionCurve.CacheLengths();
                         break;
                     default:
                         throw new System.InvalidOperationException();

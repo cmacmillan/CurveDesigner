@@ -46,4 +46,48 @@ public static class UnitySourceScripts
 
         return Vector3.Lerp(lineStart, lineEnd, dot);
     }
+
+    /*
+    // Project /point/ onto a line.
+    public static Vector3 ProjectPointLine(Vector3 point, Vector3 lineStart, Vector3 lineEnd)
+    {
+        Vector3 relativePoint = point - lineStart;
+        Vector3 lineDirection = lineEnd - lineStart;
+        float length = lineDirection.magnitude;
+        Vector3 normalizedLineDirection = lineDirection;
+        if (length > .000001f)
+            normalizedLineDirection /= length;
+
+        float dot = Vector3.Dot(normalizedLineDirection, relativePoint);
+        dot = Mathf.Clamp(dot, 0.0F, length);
+
+        return lineStart + normalizedLineDirection * dot;
+    }
+    // Calculate distance between a point and a line.
+    public static float DistancePointLine(Vector3 point, Vector3 lineStart, Vector3 lineEnd)
+    {
+        return Vector3.Magnitude(ProjectPointLine(point, lineStart, lineEnd) - point);
+    }
+
+    internal static float DistanceToLineInternal(Vector3 point, Vector3 p1, Vector3 p2)
+    {
+        float retval = DistancePointLine(point, p1, p2);
+        if (retval < 0)
+            retval = 0.0f;
+        return retval;
+    }
+
+    // Pixel distance from mouse pointer to line.
+    public static float DistanceToLine(Vector3 p1, Vector3 p2)
+    {
+        p1 = HandleUtility.WorldToGUIPoint(p1);
+        p2 = HandleUtility.WorldToGUIPoint(p2);
+        if (p1.z < 0 || p2.z < 0)
+            return float.PositiveInfinity;
+
+        Vector2 point = Event.current.mousePosition;
+
+        return DistanceToLineInternal(point, p1, p2);
+    }
+    */
 }
