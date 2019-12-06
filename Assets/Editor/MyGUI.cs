@@ -76,14 +76,21 @@ public static class MyGUI
     }
     private const float buttonClickDistance=20.0f;
     private const float lineClickDistance=15.0f;
-    private const float lineSampleDistance = .2f;
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
+
     {
         if (curve.positionCurve == null)
             curve.positionCurve.Initialize();
 
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
+
+        if (curve.positionCurve.isCurveOutOfDate && GUIUtility.hotControl!=controlID)
+        {
+            curve.positionCurve.isCurveOutOfDate = false;
+            Debug.Log("cached!");
+            curve.positionCurve.CacheSampleCurve();
+        }
 
         List<PointInfo> points = null;
         PointInfo hotPoint;
@@ -143,7 +150,7 @@ public static class MyGUI
                 hotPoint = GetClosestPointToMouse();
                 if (hotPoint == null)
                 {
-                    var samples = curve.positionCurve.SampleCurve(lineSampleDistance);
+                    var samples = curve.positionCurve.GetCachedSampled();
                     foreach (var i in samples)
                     {
                         i.position += position;
@@ -151,6 +158,10 @@ public static class MyGUI
                     int segmentIndex;
                     float time;
                     UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
+                    foreach (var i in samples)
+                    {
+                        i.position -= position;
+                    }
                     Vector3 pointPosition = curve.positionCurve.GetSegmentPositionAtTime(segmentIndex, time) + position;
                     curveSplitPoint = new CurveSplitPointInfo(segmentIndex,time);
                     var pointInfo = new PointInfo(pointPosition, Color.green, linePlaceTexture, -1);
@@ -173,7 +184,7 @@ public static class MyGUI
                 {
                     case EditMode.PositionCurve:
                         curve.positionCurve[hotPoint.index] = GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth) - position;
-                        curve.positionCurve.CacheLengths();
+                        curve.positionCurve.isCurveOutOfDate = true;
                         break;
                     default:
                         throw new System.InvalidOperationException();

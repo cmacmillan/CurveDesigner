@@ -43,6 +43,7 @@ public class Curve3DInspector : Editor
             curve.recentlySelectedPointIndex = -1;
             curve.hotPointIndex = -1;
             curve.positionCurve.Initialize();
+            curve.positionCurve.isCurveOutOfDate = true;
         }
         GUILayout.EndHorizontal();
         GUILayout.EndArea();

@@ -12,6 +12,7 @@ public class BeizerCurve
     public int NumControlPoints { get { return PointGroups.Count*3-2; } }
     public int NumSegments { get { return PointGroups.Count-1; } }
     public bool placeLockedPoints = true;
+    public bool isCurveOutOfDate = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour;
 
     public void Initialize()
@@ -107,8 +108,20 @@ public class BeizerCurve
     }
 
     #region curve calculations
-    public List<SampleFragment> SampleCurve(float sampleDistance)
+    public const float lineSampleDistance=.1f;
+    private List<SampleFragment> cachedFragments = null;
+    public List<SampleFragment> GetCachedSampled()
     {
+        if (cachedFragments==null)
+        {
+            CacheSampleCurve();
+        }
+        return cachedFragments;
+    }
+    public void CacheSampleCurve()
+    {
+        CacheLengths();
+        float sampleDistance = lineSampleDistance;
         List<SampleFragment> retr = new List<SampleFragment>();
         float time;
         Vector3 position;
@@ -129,7 +142,7 @@ public class BeizerCurve
         }
         position = GetPositionAtDistance(lenSoFar,out time);
         retr.Add(new SampleFragment(position,NumSegments,time));//add last point
-        return retr;
+        cachedFragments = retr;
     }
 
     //Doesn't actually sample at distance along the beizer, but rather the position at distance/length, which isn't quite uniform
@@ -197,7 +210,7 @@ public class BeizerCurve
     #endregion
 
     #region length calculation
-    private List<float> _lengths;
+    private List<float> _lengths = null;
     public float GetLength()
     {
         float len = 0;
