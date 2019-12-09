@@ -109,7 +109,7 @@ public class BeizerCurve
 
     #region curve calculations
     public const float lineSampleDistance=.1f;
-    private List<SampleFragment> cachedFragments = null;
+    public List<SampleFragment> cachedFragments = null;
     public List<SampleFragment> GetCachedSampled()
     {
         if (cachedFragments==null)

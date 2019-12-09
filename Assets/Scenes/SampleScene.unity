@@ -331,210 +331,48 @@ MonoBehaviour:
       hasRightTangent: 1
       isPointLocked: 1
       leftTangent: {x: 0, y: 0, z: 0}
-      rightTangent: {x: 0.6779195, y: 0, z: 0}
-      position: {x: 0, y: 0, z: 0}
+      rightTangent: {x: -1.211009, y: 1.1611996, z: 0.18943834}
+      position: {x: 3.183384, y: 0.8184185, z: -0.009221554}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 1
-      leftTangent: {x: -0.08583912, y: -0.2960402, z: 0}
-      rightTangent: {x: 0.08583912, y: 0.2960402, z: -0}
-      position: {x: 0.5225285, y: 0.7556038, z: -0.00000166893}
+      leftTangent: {x: -1.59758, y: -0.58465767, z: -0.11094761}
+      rightTangent: {x: 1.59758, y: 0.58465767, z: 0.11094761}
+      position: {x: 3.3963575, y: 2.1275597, z: 1.7983532}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 1
-      leftTangent: {x: -0.3220805, y: 0, z: 0}
-      rightTangent: {x: 0.3220805, y: -0, z: -0}
-      position: {x: 0.91114396, y: 1.2166195, z: 0.0320518}
+      leftTangent: {x: 1.2424355, y: -0.5607033, z: -0.10089266}
+      rightTangent: {x: -1.2424355, y: 0.5607033, z: 0.10089266}
+      position: {x: 3.2923088, y: 3.3054981, z: 0.11539459}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 1
-      leftTangent: {x: -0.16207385, y: -1.0668049, z: -0.16977835}
-      rightTangent: {x: 0.16207385, y: 1.0668049, z: 0.16977835}
-      position: {x: 1.0279562, y: 2.5669289, z: 0.220263}
+      leftTangent: {x: -1.5219452, y: -0.80304146, z: -0.044070125}
+      rightTangent: {x: 1.5219452, y: 0.80304146, z: 0.044070125}
+      position: {x: 3.4992115, y: 4.834934, z: 1.9083549}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 1
-      leftTangent: {x: -0.33302402, y: 0.08843517, z: -0.004566729}
-      rightTangent: {x: 0.33302402, y: -0.08843517, z: 0.004566729}
-      position: {x: 1.9334002, y: 3.236168, z: 0.37641}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: 0.79840875, y: 1.0731697, z: 0.2478652}
-      rightTangent: {x: -0.6603124, y: -0.94973373, z: -0.21423864}
-      position: {x: 2.0317514, y: 2.3198376, z: 0.21752024}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: 0.047715425, y: 0.10512924, z: 0.033802986}
-      rightTangent: {x: -0.047715425, y: -0.10512924, z: -0.033802986}
-      position: {x: 1.7606831, y: 1.9376755, z: 0.1250391}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.18172479, y: 0.19443703, z: 0.028887033}
-      rightTangent: {x: 0.18172479, y: -0.19443703, z: -0.028887033}
-      position: {x: 1.1978183, y: 0.111436844, z: -0.13770914}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.13774252, y: -0.1528244, z: -0.017224789}
-      rightTangent: {x: 0.13774252, y: 0.1528244, z: 0.017224789}
-      position: {x: 1.635153, y: 0.9811611, z: -0.032044172}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.06300938, y: -0.1345272, z: -0.00967738}
-      rightTangent: {x: 0.06300938, y: 0.1345272, z: 0.00967738}
-      position: {x: 1.9560518, y: 0.41041374, z: -0.14554644}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.14988947, y: -0.14168167, z: -0.010108471}
-      rightTangent: {x: 0.14988947, y: 0.14168167, z: 0.010108471}
-      position: {x: 1.9138772, y: -0.17038345, z: -0.35129356}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.20493674, y: -0.007461548, z: 0.006178856}
-      rightTangent: {x: 0.20493674, y: 0.007461548, z: -0.006178856}
-      position: {x: 2.4095342, y: 0.21692657, z: -0.24816346}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.12867641, y: -0.10296059, z: -0.02111864}
-      rightTangent: {x: 0.12867641, y: 0.10296059, z: 0.02111864}
-      position: {x: 2.651125, y: 1.0448608, z: -0.13095665}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -0.0049750805, y: -0.11850166, z: -0.017051458}
-      rightTangent: {x: -0.25933754, y: -0.016762853, z: -0.021980345}
-      position: {x: 2.197285, y: 1.3008709, z: -0.11507392}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.072057724, y: -0.081661224, z: -0.017898351}
-      rightTangent: {x: 0.072057724, y: 0.081661224, z: 0.017898351}
-      position: {x: 1.9719656, y: 1.4177723, z: -0.113586664}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.10028601, y: 0.00603199, z: -0.003989756}
-      rightTangent: {x: 0.10028601, y: -0.00603199, z: 0.003989756}
-      position: {x: 2.3372357, y: 1.5858345, z: -0.063705206}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.03338933, y: 0.15064824, z: 0.029638052}
-      rightTangent: {x: 0.03338933, y: -0.15064824, z: -0.029638052}
-      position: {x: 2.6291628, y: 1.5547295, z: -0.0616405}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: 0.0010368824, y: -0.23328018, z: -0.039025784}
-      rightTangent: {x: -0.0010368824, y: 0.23328018, z: 0.039025784}
-      position: {x: 2.8927844, y: 1.7419014, z: -0.031491995}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.19682503, y: 0.16974556, z: 0.025627222}
-      rightTangent: {x: 0.19682503, y: -0.16974556, z: -0.025627222}
-      position: {x: 3.5903554, y: 1.4804707, z: -0.07176566}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: 0.09496617, y: 0.1405648, z: 0.02120027}
-      rightTangent: {x: -0.09496617, y: -0.1405648, z: -0.02120027}
-      position: {x: 3.1615613, y: 1.0538483, z: -0.13676453}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -0.0011401176, y: 0.19098711, z: 0.02849777}
-      rightTangent: {x: 0.0010182858, y: -0.17058957, z: -0.025454178}
-      position: {x: 2.9227798, y: 0.65859795, z: -0.19998646}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.016403198, y: 0.072358355, z: 0.010762751}
-      rightTangent: {x: 0.016403198, y: -0.072358355, z: -0.010762751}
-      position: {x: 3.081701, y: 0.113601685, z: -0.27726674}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -0.107884645, y: -0.10275624, z: -0.0154137015}
-      rightTangent: {x: 0.15104055, y: 0.14386052, z: 0.021579415}
-      position: {x: 3.3209286, y: 0.08551979, z: -0.28120518}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.05680394, y: -0.19592667, z: -0.029160157}
-      rightTangent: {x: 0.05680394, y: 0.19592667, z: 0.029160157}
-      position: {x: 3.7019808, y: 0.7264252, z: -0.18545532}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.069244385, y: -0.046068907, z: -0.006925732}
-      rightTangent: {x: 0.069244385, y: 0.046068907, z: 0.006925732}
-      position: {x: 3.8833387, y: 1.4016399, z: -0.08499932}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.108840466, y: -0.10303116, z: -0.018940687}
-      rightTangent: {x: 0.108840466, y: 0.10303116, z: 0.018940687}
-      position: {x: 4.0089326, y: 1.7797718, z: -0.031327963}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -0.07720137, y: -0.0023868084, z: -0.0012094639}
-      rightTangent: {x: 0.053883553, y: 0.0016658306, z: 0.0008441601}
-      position: {x: 4.18504, y: 2.0508976, z: 0.0108760595}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -0.10425472, y: 0.23430324, z: 0.0347091}
-      rightTangent: {x: 0.2502632, y: 0.6161823, z: 0.0919857}
-      position: {x: 4.4139743, y: 1.7403584, z: -0.034034014}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: -0.14832115, y: 0.15585136, z: 0.018096447}
-      rightTangent: {x: 0.14832115, y: -0.15585136, z: -0.018096447}
-      position: {x: 4.8929825, y: 1.9507465, z: 0.012755156}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 1
-      leftTangent: {x: 0.12024498, y: 0.012507439, z: 0.010890786}
-      rightTangent: {x: -0.12024498, y: -0.012507439, z: -0.010890786}
-      position: {x: 4.7999716, y: 1.6392155, z: -0.04745269}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: 0.053463936, y: 0.02197051, z: 0.007489726}
-      rightTangent: {x: -0.15783262, y: -0.06485939, z: -0.022110581}
-      position: {x: 4.4909263, y: 1.569912, z: -0.08134794}
-    - hasLeftTangent: 1
-      hasRightTangent: 1
-      isPointLocked: 0
-      leftTangent: {x: -0.16224098, y: 0.12523413, z: 0.011655934}
-      rightTangent: {x: 0.11094475, y: -0.085879445, z: -0.008234277}
-      position: {x: 4.6476464, y: 1.2937851, z: -0.11822915}
+      leftTangent: {x: 1.4246299, y: -0.68955994, z: -1.1011119}
+      rightTangent: {x: -1.4246299, y: 0.68955994, z: 1.1011119}
+      position: {x: 3.7399337, y: 6.185608, z: 0.38850403}
     - hasLeftTangent: 1
       hasRightTangent: 0
       isPointLocked: 1
-      leftTangent: {x: -0.19549656, y: -0.2223692, z: -0.033400446}
+      leftTangent: {x: -1.2779408, y: -0.37176132, z: 0.047636032}
       rightTangent: {x: 0, y: 0, z: 0}
-      position: {x: 5.0932035, y: 1.3135433, z: -0.096466064}
+      position: {x: 3.6021912, y: 7.362236, z: 2.5183487}
     placeLockedPoints: 1
-    splitInsertionNeighborModification: 0
-  sampleRate: 0.1
+    isCurveOutOfDate: 0
+    splitInsertionBehaviour: 0
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
   circleIcon: {fileID: 2800000, guid: 971f68b2bfc7a704181c2904de1fe15d, type: 3}
   squareIcon: {fileID: 2800000, guid: e33d07ce577ea5f45bc068384c03d5b0, type: 3}
   diamondIcon: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
-  recentlySelectedPointIndex: 12
+  recentlySelectedPointIndex: 15
   hotPointIndex: -1
-  pointDragOffset: {x: 2.5140076, y: -1.7844849}
+  pointDragOffset: {x: -0.9725342, y: -4.705368}
 --- !u!4 &2110963971
 Transform:
   m_ObjectHideFlags: 0

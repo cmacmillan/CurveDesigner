@@ -40,7 +40,7 @@ public class Curve3DInspector : Editor
         if (GUILayout.Button("Clear"))
         {
             Debug.Log("cleared");
-            curve.recentlySelectedPointIndex = -1;
+            curve.selectedPointsIndex.Clear();
             curve.hotPointIndex = -1;
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;

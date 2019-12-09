@@ -176,6 +176,8 @@ public static class MyGUI
         PopulatePoints();
 
         bool isMainMouseButton = Event.current.button == 0;
+        bool isCtrlPressed = Event.current.control;
+
         void OnDrag()
         {
             if (hotPoint != null && GUIUtility.hotControl == controlID && isMainMouseButton)
@@ -195,7 +197,14 @@ public static class MyGUI
 
         switch (Event.current.GetTypeForControl(controlID))
         {
+            case EventType.KeyDown:
+                //Event.current.Use();
+                break;
+            case EventType.KeyUp:
+                //Event.current.Use();
+                break;
             case EventType.MouseDown:
+                #region Mouse Down
                 if (isMainMouseButton)
                 {
                     if (hotPoint != null)
@@ -211,7 +220,12 @@ public static class MyGUI
                                     curve.hotPointIndex = hotPoint.index;
                                     PopulatePoints();
                                 }
-                                curve.recentlySelectedPointIndex = curve.positionCurve.GetParentVirtualIndex(hotPoint.index);
+                                if (!isCtrlPressed)
+                                {
+                                    curve.selectedPointsIndex.Clear();
+                                }
+                                var currentIndexToSelect= curve.positionCurve.GetParentVirtualIndex(hotPoint.index);
+                                curve.selectedPointsIndex.Add(currentIndexToSelect);
                                 break;
                             default:
                                 throw new System.InvalidOperationException();
@@ -221,10 +235,12 @@ public static class MyGUI
                     }
                 }
                 break;
+            #endregion
             case EventType.MouseDrag:
                 OnDrag();
                 break;
             case EventType.MouseUp:
+                #region Mouse Up
                 if (isMainMouseButton)
                 {
                     if (hotPoint != null || GUIUtility.hotControl == controlID)
@@ -235,6 +251,7 @@ public static class MyGUI
                     }
                 }
                 break;
+                #endregion
             case EventType.MouseMove:
                 HandleUtility.Repaint();
                 break;
@@ -287,15 +304,18 @@ public static class MyGUI
                             
                             //var otherPoint = (int)curve.positionCurve.GetOtherTangentIndex(curve.positionCurve.GetPointTypeByIndex(hotPoint.index));
                         }
-                        else if (curve.recentlySelectedPointIndex!=-1)
+                        else
                         {
-                            var renderPoint = points[curve.recentlySelectedPointIndex];
-                            var pointGroup = curve.positionCurve.GetPointGroupByIndex(renderPoint.index);
-                            renderPoint.color = Color.yellow;
-                            if (pointGroup.hasLeftTangent)
-                                points[curve.recentlySelectedPointIndex - 1].color = Color.yellow;
-                            if (pointGroup.hasRightTangent)
-                                points[curve.recentlySelectedPointIndex + 1].color = Color.yellow;
+                            foreach (var recentlySelectedPointIndex in curve.selectedPointsIndex)
+                            {
+                                var renderPoint = points[recentlySelectedPointIndex];
+                                var pointGroup = curve.positionCurve.GetPointGroupByIndex(renderPoint.index);
+                                renderPoint.color = Color.yellow;
+                                if (pointGroup.hasLeftTangent)
+                                    points[recentlySelectedPointIndex - 1].color = Color.yellow;
+                                if (pointGroup.hasRightTangent)
+                                    points[recentlySelectedPointIndex + 1].color = Color.yellow;
+                            }
                         }
                         break;
                     #endregion

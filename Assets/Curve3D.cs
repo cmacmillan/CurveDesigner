@@ -7,7 +7,6 @@ public class Curve3D : MonoBehaviour
     public CurveType type;
     public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
-    [Range(.01f,3)]
     public Texture2D lineTex;
     public Texture2D circleIcon;
     public Texture2D squareIcon;
@@ -20,7 +19,7 @@ public class Curve3D : MonoBehaviour
             return hotPointIndex != -1;
         }
     }
-    public int recentlySelectedPointIndex=-1;
+    public List<int> selectedPointsIndex = new List<int>();
     public int hotPointIndex=-1;
     public Vector2 pointDragOffset;
 
