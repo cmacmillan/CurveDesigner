@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +12,10 @@ public class Curve3D : MonoBehaviour
     public Texture2D circleIcon;
     public Texture2D squareIcon;
     public Texture2D diamondIcon;
+    public MeshFilter filter;
+    public DateTime lastMeshUpdateStartTime;
+    public DateTime lastMeshUpdateEndTime;
+    public Mesh mesh;
 
     public bool IsAPointSelected
     {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -76,6 +77,7 @@ public static class MyGUI
     }
     private const float buttonClickDistance=20.0f;
     private const float lineClickDistance=15.0f;
+    public const float lineSampleDistance=.1f;
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
 
     {
@@ -85,11 +87,10 @@ public static class MyGUI
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
 
-        if (curve.positionCurve.isCurveOutOfDate && GUIUtility.hotControl!=controlID)
+        if (curve.positionCurve.isCurveOutOfDate && GUIUtility.hotControl!=controlID)//we only cache when NOT moving the point
         {
             curve.positionCurve.isCurveOutOfDate = false;
-            Debug.Log("cached!");
-            curve.positionCurve.CacheSampleCurve();
+            curve.positionCurve.CacheSampleCurve(lineSampleDistance);
         }
 
         List<PointInfo> points = null;
@@ -150,7 +151,7 @@ public static class MyGUI
                 hotPoint = GetClosestPointToMouse();
                 if (hotPoint == null)
                 {
-                    var samples = curve.positionCurve.GetCachedSampled();
+                    var samples = curve.positionCurve.GetCachedSampled(lineSampleDistance);
                     foreach (var i in samples)
                     {
                         i.position += position;
@@ -178,6 +179,36 @@ public static class MyGUI
         bool isMainMouseButton = Event.current.button == 0;
         bool isCtrlPressed = Event.current.control;
 
+        if (!MeshGenerator.IsBuzy)
+        {
+            if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
+            {
+                MeshGenerator.StartGenerating(curve.positionCurve, curve.lastMeshUpdateStartTime);
+            } else if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime)
+            {
+                if (curve.mesh == null)
+                {
+                    curve.mesh = new Mesh();
+                    curve.filter.mesh = curve.mesh;
+                } else
+                {
+                    curve.mesh.Clear();
+                }
+                curve.mesh.vertices = MeshGenerator.vertices;
+                curve.mesh.triangles = MeshGenerator.triangles;
+                curve.mesh.RecalculateNormals();
+                curve.filter.mesh = curve.mesh;
+                curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
+            }
+        }
+        void OnUndo()
+        {
+            curve.lastMeshUpdateStartTime = DateTime.Now;
+        }
+        Undo.undoRedoPerformed -= OnUndo;
+        Undo.undoRedoPerformed += OnUndo;
+        
+
         void OnDrag()
         {
             if (hotPoint != null && GUIUtility.hotControl == controlID && isMainMouseButton)
@@ -191,6 +222,7 @@ public static class MyGUI
                     default:
                         throw new System.InvalidOperationException();
                 }
+                curve.lastMeshUpdateStartTime= DateTime.Now;
                 Event.current.Use();
             }
         }

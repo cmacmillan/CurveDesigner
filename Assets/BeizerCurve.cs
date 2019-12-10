@@ -14,7 +14,30 @@ public class BeizerCurve
     public bool placeLockedPoints = true;
     public bool isCurveOutOfDate = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour;
+    public List<SampleFragment> cachedFragments = null;
+    private List<float> _lengths = null;
+    
+    public BeizerCurve() { }
+    public BeizerCurve(BeizerCurve curveToClone)
+    {
+        PointGroups = new List<PointGroup>();
+        foreach (var i in curveToClone.PointGroups)
+        {
+            PointGroups.Add(new PointGroup(i));
+        }
+        this._lengths = new List<float>(curveToClone._lengths);
+        this.placeLockedPoints = curveToClone.placeLockedPoints;
+        this.isCurveOutOfDate = curveToClone.isCurveOutOfDate;
+        this.splitInsertionBehaviour = curveToClone.splitInsertionBehaviour;
+    }
 
+    public enum SplitInsertionNeighborModification
+    {
+        DoNotModifyNeighbors=0,
+        RetainCurveShape=1,
+    }
+
+    #region curve manipulation
     public void Initialize()
     {
         PointGroups = new List<PointGroup>();
@@ -26,12 +49,6 @@ public class BeizerCurve
         pointB.SetWorldPositionByIndex(PGIndex.Position, new Vector3(1,1,0));
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0));
         PointGroups.Add(pointB);
-    }
-
-    public enum SplitInsertionNeighborModification
-    {
-        DoNotModifyNeighbors=0,
-        RetainCurveShape=1,
     }
 
     public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint)
@@ -93,6 +110,7 @@ public class BeizerCurve
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent,finalPointPos+new Vector3(0,1,0));
         PointGroups.Add(pointB);
     }
+    #endregion
 
     public class SampleFragment
     {
@@ -108,20 +126,17 @@ public class BeizerCurve
     }
 
     #region curve calculations
-    public const float lineSampleDistance=.1f;
-    public List<SampleFragment> cachedFragments = null;
-    public List<SampleFragment> GetCachedSampled()
+    public List<SampleFragment> GetCachedSampled(float sampleDistance)
     {
         if (cachedFragments==null)
         {
-            CacheSampleCurve();
+            CacheSampleCurve(sampleDistance);
         }
         return cachedFragments;
     }
-    public void CacheSampleCurve()
+    public void CacheSampleCurve(float sampleDistance)
     {
         CacheLengths();
-        float sampleDistance = lineSampleDistance;
         List<SampleFragment> retr = new List<SampleFragment>();
         float time;
         Vector3 position;
@@ -210,7 +225,6 @@ public class BeizerCurve
     #endregion
 
     #region length calculation
-    private List<float> _lengths = null;
     public float GetLength()
     {
         float len = 0;

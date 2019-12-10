@@ -50,6 +50,18 @@ public class PointGroup
     [SerializeField]
     private Vector3 position;
     #endregion
+
+    public PointGroup() { }
+    public PointGroup(PointGroup clone)
+    {
+        this.hasLeftTangent = clone.hasLeftTangent;
+        this.hasRightTangent = clone.hasRightTangent;
+        this.isPointLocked = clone.isPointLocked;
+        this.leftTangent = clone.leftTangent;
+        this.rightTangent = clone.rightTangent;
+        this.position = clone.position;
+    }
+
     #region Get/Set methods
     public bool GetIsPointLocked()
     {
