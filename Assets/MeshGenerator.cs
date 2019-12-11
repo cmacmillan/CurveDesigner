@@ -7,8 +7,9 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-    public static Vector3[] vertices;
-    public static int[] triangles;
+    public static List<Vector3> vertices;
+    public static List<int> triangles;
+    private static List<Vector3> points;
 
     public static bool IsBuzy = false;
 
@@ -36,14 +37,39 @@ public static class MeshGenerator
     {
         return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
     }
+    private static void InitOrClear<T>(ref List<T> list,int capacity=-1)
+    {
+        if (list == null)
+        {
+            if (capacity<=0)
+                list = new List<T>();
+            else 
+                list = new List<T>(capacity);
+        }
+        else
+        {
+            list.Clear();
+            if (capacity > list.Capacity)
+                list.Capacity = capacity;
+        }
+    }
     private static void GenerateMesh()
     {
         Debug.Log("started thread");
-        curve.CacheSampleCurve(vertexDensity);//yuck, rewrite
-        Vector3[] points = curve.GetCachedSampled(vertexDensity).Select(a => a.position).ToArray();//yuck, rewrite
+        curve.CacheSampleCurve(vertexDensity);
+
+        InitOrClear(ref points);
+        int numVerts = RingPointCount * points.Count;
+        InitOrClear(ref vertices, numVerts);
+        int numRings = points.Count - 1;
+        int numTris = RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
+        InitOrClear(ref triangles,numTris);
+        var sampled = curve.GetCachedSampled(vertexDensity);
+        foreach (var i in sampled)
+        {
+            points.Add(i.position);
+        }
         {//generate verts
-            int numVerts = RingPointCount * points.Length;
-            Vector3[] verts = new Vector3[numVerts];
             void GenerateRing(int i, Vector3 startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
                 int ringIndex = i * RingPointCount;
@@ -53,35 +79,32 @@ public static class MeshGenerator
                 {
                     float theta = 360.0f * j / (float)RingPointCount;
                     Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
-                    verts[ringIndex + j] = startPoint + rotatedVect * radius;
+                    vertices.Add(startPoint + rotatedVect * radius);
                 }
             }
             Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (points[1] - points[0]).normalized) * Vector3.right;
-            for (int i = 0; i < points.Length - 1; i++)
+            for (int i = 0; i < points.Count - 1; i++)
             {
                 GenerateRing(i, points[i], (points[i + 1] - points[i]).normalized, ref lastTangent);
             }
-            int finalIndex = points.Length - 1;
+            int finalIndex = points.Count- 1;
             GenerateRing(finalIndex, points[finalIndex], (points[finalIndex] - points[finalIndex - 1]).normalized, ref lastTangent);
-            vertices = verts;
         }
         {//generate tris
-            int numRings = points.Length - 1;
-            int numTris = RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
-            int[] tris = new int[numTris];
+
             int triIndex = 0;
             void DrawQuad(int ring1Point1, int ring1Point2, int ring2Point1, int ring2Point2)
             {
                 //Tri1
-                tris[triIndex++] = ring1Point1;
-                tris[triIndex++] = ring2Point2;
-                tris[triIndex++] = ring2Point1;
+                triangles.Add(ring1Point1);
+                triangles.Add(ring2Point2);
+                triangles.Add(ring2Point1);
                 //Tri2
-                tris[triIndex++] = ring1Point1;
-                tris[triIndex++] = ring1Point2;
-                tris[triIndex++] = ring2Point2;
+                triangles.Add(ring1Point1);
+                triangles.Add(ring1Point2);
+                triangles.Add(ring2Point2);
             }
-            for (int i = 0; i < points.Length - 1; i++)
+            for (int i = 0; i < points.Count- 1; i++)
             {
                 int ringIndex = i * RingPointCount;
                 int nextRingIndex = ringIndex + RingPointCount;
@@ -94,7 +117,6 @@ public static class MeshGenerator
                          nextRingIndex + ((j + 1) % RingPointCount));
                 }
             }
-            triangles = tris;
         }
         Debug.Log("finished thread");
         IsBuzy = false;

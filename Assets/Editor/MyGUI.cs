@@ -194,8 +194,8 @@ public static class MyGUI
                 {
                     curve.mesh.Clear();
                 }
-                curve.mesh.vertices = MeshGenerator.vertices;
-                curve.mesh.triangles = MeshGenerator.triangles;
+                curve.mesh.SetVertices(MeshGenerator.vertices);
+                curve.mesh.SetTriangles(MeshGenerator.triangles,0);
                 curve.mesh.RecalculateNormals();
                 curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
             }
