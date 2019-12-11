@@ -197,7 +197,6 @@ public static class MyGUI
                 curve.mesh.vertices = MeshGenerator.vertices;
                 curve.mesh.triangles = MeshGenerator.triangles;
                 curve.mesh.RecalculateNormals();
-                curve.filter.mesh = curve.mesh;
                 curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
             }
         }
