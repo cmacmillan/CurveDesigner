@@ -54,8 +54,15 @@ public static class MyGUI
         return new Vector2(guiPos.x, Camera.current.pixelHeight - guiPos.y);
     }
     #endregion
+    public enum PointType
+    {
+        Position = 0,
+        PlusButton = 1,
+        SplitPoint = 2,
+    }
     private class PointInfo
     {
+        public PointType type;
         public Color color;
         public Texture2D texture;
         public Vector3 worldPosition;
@@ -64,33 +71,33 @@ public static class MyGUI
         public bool isPointOnScreen;
         public float distanceToMouse;
         public int index;
-        public PointInfo(Vector3 worldPosition, Color color,Texture2D texture,int index)
+        public PointInfo(Vector3 worldPosition, Color color,Texture2D texture,int index,PointType type)
         {
             var MousePos = Event.current.mousePosition;
             this.color = color;
             this.worldPosition = worldPosition; 
             this.texture = texture;
             this.index = index;
+            this.type = type;
             this.isPointOnScreen = WorldToGUISpace(worldPosition, out this.guiPos, out this.screenDepth);
             distanceToMouse = Vector2.Distance(this.guiPos,MousePos);
         }
     }
     private const float buttonClickDistance=20.0f;
     private const float lineClickDistance=15.0f;
+    private const int plusButtonDistance = 30;
     public const float lineSampleDistance=.1f;
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
-
     {
-        if (curve.positionCurve == null)
-            curve.positionCurve.Initialize();
+        var positionCurve = curve.positionCurve;
 
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
 
-        if (curve.positionCurve.isCurveOutOfDate && GUIUtility.hotControl!=controlID)//we only cache when NOT moving the point
+        if (positionCurve.isCurveOutOfDate && GUIUtility.hotControl!=controlID)//we only cache when NOT moving the point
         {
-            curve.positionCurve.isCurveOutOfDate = false;
-            curve.positionCurve.CacheSampleCurve(lineSampleDistance);
+            positionCurve.isCurveOutOfDate = false;
+            positionCurve.CacheSampleCurve(lineSampleDistance);
         }
 
         List<PointInfo> points = null;
@@ -124,14 +131,28 @@ public static class MyGUI
                 case EditMode.PositionCurve:
                     #region PositionCurve
                     linePlaceTexture = curve.circleIcon;
-                    for (int i = 0; i < curve.positionCurve.NumControlPoints; i++)
+                    for (int i = 0; i < positionCurve.NumControlPoints; i++)
                     {
-                        var pointIndexType = curve.positionCurve.GetPointTypeByIndex(i);
+                        var pointIndexType = positionCurve.GetPointTypeByIndex(i);
                         bool isPositionPoint = pointIndexType == PGIndex.Position;
                         var color = Color.green;
                         var tex = isPositionPoint ? curve.circleIcon : curve.squareIcon;
-                        points.Add(new PointInfo(curve.positionCurve[i] + position, color, tex, i));
+                        points.Add(new PointInfo(positionCurve[i] + position, color, tex, i,PointType.Position));
                     }
+                    PointInfo pointInfo;
+                    if (positionCurve.NumControlPoints == 0)
+                    {
+                        pointInfo = new PointInfo(position, Color.blue, curve.plusButton, -1,PointType.PlusButton);
+                    }
+                    else
+                    {
+                        int count = positionCurve.NumControlPoints;
+                        var lastPoint = positionCurve[count - 1];
+                        var secondToLastPoint = positionCurve[count - 2];
+                        var plusButtonVector = plusButtonDistance*(lastPoint - secondToLastPoint).normalized;
+                        pointInfo = new PointInfo(position+plusButtonVector+lastPoint, Color.blue, curve.plusButton, -1,PointType.PlusButton);
+                    }
+                    points.Add(pointInfo);
                     break;
                 #endregion
                 case EditMode.Rotation:
@@ -151,7 +172,7 @@ public static class MyGUI
                 hotPoint = GetClosestPointToMouse();
                 if (hotPoint == null)
                 {
-                    var samples = curve.positionCurve.GetCachedSampled(lineSampleDistance);
+                    var samples = positionCurve.GetCachedSampled(lineSampleDistance);
                     foreach (var i in samples)
                     {
                         i.position += position;
@@ -163,9 +184,9 @@ public static class MyGUI
                     {
                         i.position -= position;
                     }
-                    Vector3 pointPosition = curve.positionCurve.GetSegmentPositionAtTime(segmentIndex, time) + position;
+                    Vector3 pointPosition = positionCurve.GetSegmentPositionAtTime(segmentIndex, time) + position;
                     curveSplitPoint = new CurveSplitPointInfo(segmentIndex,time);
-                    var pointInfo = new PointInfo(pointPosition, Color.green, linePlaceTexture, -1);
+                    var pointInfo = new PointInfo(pointPosition, Color.green, linePlaceTexture, -1,PointType.SplitPoint);
                     if (pointInfo.isPointOnScreen && pointInfo.distanceToMouse < lineClickDistance)
                     {
                         points.Add(pointInfo);
@@ -198,7 +219,7 @@ public static class MyGUI
             }
             if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
             {
-                MeshGenerator.StartGenerating(curve.positionCurve, curve.lastMeshUpdateStartTime);
+                MeshGenerator.StartGenerating(positionCurve, curve.lastMeshUpdateStartTime);
             }
         }
 
@@ -217,8 +238,8 @@ public static class MyGUI
                 switch (curve.editMode)
                 {
                     case EditMode.PositionCurve:
-                        curve.positionCurve[hotPoint.index] = GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth) - position;
-                        curve.positionCurve.isCurveOutOfDate = true;
+                        positionCurve[hotPoint.index] = GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth) - position;
+                        positionCurve.isCurveOutOfDate = true;
                         break;
                     default:
                         throw new System.InvalidOperationException();
@@ -247,9 +268,9 @@ public static class MyGUI
                         switch (curve.editMode)
                         {
                             case EditMode.PositionCurve:
-                                if (curveSplitPoint!=null)
+                                if (hotPoint.type== PointType.SplitPoint)
                                 {
-                                    hotPoint.index = curve.positionCurve.InsertSegmentAfterIndex(curveSplitPoint);
+                                    hotPoint.index = positionCurve.InsertSegmentAfterIndex(curveSplitPoint);
                                     curve.hotPointIndex = hotPoint.index;
                                     PopulatePoints();
                                 }
@@ -257,7 +278,7 @@ public static class MyGUI
                                 {
                                     curve.selectedPointsIndex.Clear();
                                 }
-                                var currentIndexToSelect= curve.positionCurve.GetParentVirtualIndex(hotPoint.index);
+                                var currentIndexToSelect= positionCurve.GetParentVirtualIndex(hotPoint.index);
                                 curve.selectedPointsIndex.Add(currentIndexToSelect);
                                 break;
                             default:
@@ -291,12 +312,12 @@ public static class MyGUI
             case EventType.Repaint:
                 #region repaint
 
-                for (int i = 0; i < curve.positionCurve.NumSegments; i++)
+                for (int i = 0; i < positionCurve.NumSegments; i++)
                 {
-                    var point1 = curve.positionCurve[i, 0] + position;
-                    var point2 = curve.positionCurve[i, 3] + position;
-                    var tangent1 = curve.positionCurve[i, 1] + position;
-                    var tangent2 = curve.positionCurve[i, 2] + position;
+                    var point1 = positionCurve[i, 0] + position;
+                    var point2 = positionCurve[i, 3] + position;
+                    var tangent1 = positionCurve[i, 1] + position;
+                    var tangent2 = positionCurve[i, 2] + position;
                     Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.8f, .8f, .8f), curve.lineTex, 10);
                 }
 
@@ -304,7 +325,7 @@ public static class MyGUI
                 {
                     case EditMode.PositionCurve:
                         #region PositionCurve
-                        foreach (var i in curve.positionCurve.PointGroups)
+                        foreach (var i in positionCurve.PointGroups)
                         {
                             if (i.hasLeftTangent)
                                 Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.LeftTangent) + position, i.GetWorldPositionByIndex(PGIndex.Position) + position });
@@ -315,10 +336,10 @@ public static class MyGUI
                         {
                             hotPoint.color = Color.yellow;
                             var renderPoint = points[curve.hotPointIndex];
-                            var pointGroup = curve.positionCurve.GetPointGroupByIndex(renderPoint.index);
+                            var pointGroup = positionCurve.GetPointGroupByIndex(renderPoint.index);
                             if (pointGroup.GetIsPointLocked())
                             {
-                                switch (curve.positionCurve.GetPointTypeByIndex(hotPoint.index))
+                                switch (positionCurve.GetPointTypeByIndex(hotPoint.index))
                                 {
                                     case PGIndex.Position:
                                         break;
@@ -335,14 +356,14 @@ public static class MyGUI
                                 }
                             }
                             
-                            //var otherPoint = (int)curve.positionCurve.GetOtherTangentIndex(curve.positionCurve.GetPointTypeByIndex(hotPoint.index));
+                            //var otherPoint = (int)positionCurve.GetOtherTangentIndex(positionCurve.GetPointTypeByIndex(hotPoint.index));
                         }
                         else
                         {
                             foreach (var recentlySelectedPointIndex in curve.selectedPointsIndex)
                             {
                                 var renderPoint = points[recentlySelectedPointIndex];
-                                var pointGroup = curve.positionCurve.GetPointGroupByIndex(renderPoint.index);
+                                var pointGroup = positionCurve.GetPointGroupByIndex(renderPoint.index);
                                 renderPoint.color = Color.yellow;
                                 if (pointGroup.hasLeftTangent)
                                     points[recentlySelectedPointIndex - 1].color = Color.yellow;

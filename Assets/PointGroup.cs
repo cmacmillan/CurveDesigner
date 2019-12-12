@@ -27,13 +27,13 @@ public class PointGroup
     #region fields
     [HideInInspector]
     [SerializeField]
-    public bool hasLeftTangent;
+    public bool hasLeftTangent=false;
     [SerializeField]
     [HideInInspector]
-    public bool hasRightTangent;
+    public bool hasRightTangent=false;
     [HideInInspector]
     [SerializeField]
-    private bool isPointLocked;
+    private bool isPointLocked=false;
     /// <summary>
     /// The right tangent in space relative to central point
     /// </summary>

@@ -13,6 +13,7 @@ public class Curve3D : MonoBehaviour
     public Texture2D circleIcon;
     public Texture2D squareIcon;
     public Texture2D diamondIcon;
+    public Texture2D plusButton;
     public MeshFilter filter;
     public DateTime lastMeshUpdateStartTime;
     public DateTime lastMeshUpdateEndTime;
