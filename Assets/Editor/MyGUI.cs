@@ -181,10 +181,7 @@ public static class MyGUI
 
         if (!MeshGenerator.IsBuzy)
         {
-            if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
-            {
-                MeshGenerator.StartGenerating(curve.positionCurve, curve.lastMeshUpdateStartTime);
-            } else if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime)
+            if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime)
             {
                 if (curve.mesh == null)
                 {
@@ -199,7 +196,12 @@ public static class MyGUI
                 curve.mesh.RecalculateNormals();
                 curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
             }
+            if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
+            {
+                MeshGenerator.StartGenerating(curve.positionCurve, curve.lastMeshUpdateStartTime);
+            }
         }
+
         void OnUndo()
         {
             curve.lastMeshUpdateStartTime = DateTime.Now;
