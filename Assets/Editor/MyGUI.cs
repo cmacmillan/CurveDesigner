@@ -226,6 +226,7 @@ public static class MyGUI
         void OnUndo()
         {
             curve.lastMeshUpdateStartTime = DateTime.Now;
+            curve.positionCurve.CacheLengths();
         }
         Undo.undoRedoPerformed -= OnUndo;
         Undo.undoRedoPerformed += OnUndo;
