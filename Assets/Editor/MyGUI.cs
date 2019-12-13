@@ -86,7 +86,7 @@ public static class MyGUI
     private const float buttonClickDistance=20.0f;
     private const float lineClickDistance=15.0f;
     private const int plusButtonDistance = 30;
-    public const float lineSampleDistance=.1f;
+    public const float lineSampleDistance=2f;
     public static void EditBezierCurve(Curve3D curve,Vector3 position)
     {
         var positionCurve = curve.positionCurve;
@@ -226,9 +226,12 @@ public static class MyGUI
         void OnUndo()
         {
             curve.lastMeshUpdateStartTime = DateTime.Now;
-            curve.positionCurve.CacheLengths();
+            positionCurve.CacheSampleCurve(lineSampleDistance);
+            Debug.Log("undo!");
+            //curve.positionCurve.CacheLengths();
         }
-        Undo.undoRedoPerformed -= OnUndo;
+
+        Undo.undoRedoPerformed = null;
         Undo.undoRedoPerformed += OnUndo;
         
 
