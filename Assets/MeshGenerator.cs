@@ -19,7 +19,7 @@ public static class MeshGenerator
 
     private const int RingPointCount = 8;//temporary, replace with something customizable
     private const float radius=3.0f;//temporary
-    private const float vertexDensity=.1f;
+    private const float vertexDensity=1.0f;
 
     public static void StartGenerating(BeizerCurve curve,DateTime now)
     {
