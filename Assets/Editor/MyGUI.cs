@@ -179,7 +179,7 @@ public static class MyGUI
                     }
                     int segmentIndex;
                     float time;
-                    Debug.Log(samples.Count);
+                    Debug.Log($"samples:{samples.Count}");
                     UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
                     foreach (var i in samples)
                     {
