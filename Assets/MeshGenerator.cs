@@ -21,6 +21,7 @@ public static class MeshGenerator
     public static float Radius=3.0f;//temporary
     public static float VertexDensity=1.0f;
     public static float TubeAngle = 360.0f;
+    public static float Rotation = 0.0f;
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -35,6 +36,7 @@ public static class MeshGenerator
             MeshGenerator.Radius = curve.curveRadius;
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
             MeshGenerator.TubeAngle = curve.angleOfTube;
+            MeshGenerator.Rotation = curve.curveRotation;
 
             Thread thread = new Thread(GenerateMesh);
             thread.Start();
@@ -77,6 +79,7 @@ public static class MeshGenerator
             points.Add(i.position);
         }
         {//generate verts
+            float distanceFromFull = 360.0f - TubeAngle;
             void GenerateRing(int i, Vector3 startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
                 int ringIndex = i * RingPointCount;
@@ -85,7 +88,7 @@ public static class MeshGenerator
                 previousTangent = tangentVect;
                 for (int j = 0; j < RingPointCount; j++)
                 {
-                    float theta = TubeAngle * j / (float)RingPointCount;
+                    float theta = (TubeAngle * j / (float)RingPointCount) + distanceFromFull / 2 + Rotation;
                     Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
                     vertices.Add(startPoint + rotatedVect * Radius);
                 }

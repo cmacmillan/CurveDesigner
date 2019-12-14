@@ -43,6 +43,12 @@ public class Curve3D : MonoBehaviour
     [HideInInspector]
     private int oldAngleOfTube= -1;
 
+    [Range(0, 360)]
+    public int curveRotation = 360;
+    [SerializeField]
+    [HideInInspector]
+    private int oldCurveRotation= -1;
+
     public bool HaveCurveSettingsChanged()
     {
         bool CheckField<T>(ref T field, ref T oldField)
@@ -59,6 +65,7 @@ public class Curve3D : MonoBehaviour
         retr|=CheckField(ref curveVertexDensity, ref oldCurveVertexDensity);
         retr|=CheckField(ref curveRadius, ref oldCurveRadius);
         retr|=CheckField(ref angleOfTube, ref oldAngleOfTube);
+        retr|=CheckField(ref curveRotation, ref oldCurveRotation);
         return retr;
     }
 
