@@ -20,6 +20,7 @@ public static class MeshGenerator
     public static int RingPointCount = 8;//temporary, replace with something customizable
     public static float Radius=3.0f;//temporary
     public static float VertexDensity=1.0f;
+    public static float TubeAngle = 360.0f;
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -28,10 +29,13 @@ public static class MeshGenerator
             IsBuzy = true;
             BeizerCurve clonedCurve = new BeizerCurve(curve.positionCurve);
             lastUpdateTime = curve.lastMeshUpdateStartTime;
+
             MeshGenerator.curve = clonedCurve;
             MeshGenerator.RingPointCount = curve.ringPointCount;
             MeshGenerator.Radius = curve.curveRadius;
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
+            MeshGenerator.TubeAngle = curve.angleOfTube;
+
             Thread thread = new Thread(GenerateMesh);
             thread.Start();
         }
@@ -76,11 +80,12 @@ public static class MeshGenerator
             void GenerateRing(int i, Vector3 startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
                 int ringIndex = i * RingPointCount;
-                Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
+                //Old Method: Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
+                Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
                 previousTangent = tangentVect;
                 for (int j = 0; j < RingPointCount; j++)
                 {
-                    float theta = 360.0f * j / (float)RingPointCount;
+                    float theta = TubeAngle * j / (float)RingPointCount;
                     Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
                     vertices.Add(startPoint + rotatedVect * Radius);
                 }
