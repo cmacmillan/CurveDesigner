@@ -126,16 +126,38 @@ public class BeizerCurve
     }
 
     #region curve calculations
-    public List<SampleFragment> GetCachedSampled(float sampleDistance)
+    private const float screenDensityMultiplier=1f;
+    private float GetDensityForCurveBasedOnScreenSpaceSize()
+    {
+        if (NumControlPoints < 2)
+            return 1.0f;
+        var camera = Camera.current;
+        float totalLength = 0;
+        for (int i = 0; i<NumControlPoints-1;i++)
+        {
+            var point1 = this[i];
+            var point2 = this[i+1];
+            var screenPoint1 = camera.WorldToViewportPoint(point1);
+            var screenPoint2 = camera.WorldToViewportPoint(point2);
+            totalLength += Vector2.Distance(screenPoint1, screenPoint2);//Vector2 because we only want x and y
+        }
+        return screenDensityMultiplier/totalLength;
+    }
+    public List<SampleFragment> GetCachedSampled(float? density=null)
     {
         if (cachedFragments==null)
         {
-            CacheSampleCurve(sampleDistance);
+            CacheSampleCurve(density);
         }
         return cachedFragments;
     }
-    public void CacheSampleCurve(float sampleDistance)
+    public void CacheSampleCurve(float? density=null)
     {
+        float sampleDistance;
+        if (density.HasValue)
+            sampleDistance = density.Value;
+        else
+            sampleDistance = GetDensityForCurveBasedOnScreenSpaceSize();
         CacheLengths();
         List<SampleFragment> retr = new List<SampleFragment>();
         float time;

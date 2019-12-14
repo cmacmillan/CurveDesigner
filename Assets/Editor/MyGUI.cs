@@ -97,7 +97,7 @@ public static class MyGUI
         if (positionCurve.isCurveOutOfDate && GUIUtility.hotControl!=controlID)//we only cache when NOT moving the point
         {
             positionCurve.isCurveOutOfDate = false;
-            positionCurve.CacheSampleCurve(lineSampleDistance);
+            positionCurve.CacheSampleCurve();
         }
 
         List<PointInfo> points = null;
@@ -172,13 +172,14 @@ public static class MyGUI
                 hotPoint = GetClosestPointToMouse();
                 if (hotPoint == null)
                 {
-                    var samples = positionCurve.GetCachedSampled(lineSampleDistance);
+                    var samples = positionCurve.GetCachedSampled();
                     foreach (var i in samples)
                     {
                         i.position += position;
                     }
                     int segmentIndex;
                     float time;
+                    Debug.Log(samples.Count);
                     UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
                     foreach (var i in samples)
                     {
@@ -226,7 +227,7 @@ public static class MyGUI
         void OnUndo()
         {
             curve.lastMeshUpdateStartTime = DateTime.Now;
-            positionCurve.CacheSampleCurve(lineSampleDistance);
+            positionCurve.CacheSampleCurve();
             Debug.Log("undo!");
             //curve.positionCurve.CacheLengths();
         }

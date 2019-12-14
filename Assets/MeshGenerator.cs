@@ -64,7 +64,7 @@ public static class MeshGenerator
         int numRings = points.Count - 1;
         int numTris = RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
         InitOrClear(ref triangles,numTris);
-        var sampled = curve.GetCachedSampled(vertexDensity);
+        var sampled = curve.GetCachedSampled();
         foreach (var i in sampled)
         {
             points.Add(i.position);
