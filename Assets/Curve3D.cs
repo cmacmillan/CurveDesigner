@@ -19,6 +19,42 @@ public class Curve3D : MonoBehaviour
     public DateTime lastMeshUpdateEndTime;
     public Mesh mesh;
 
+    [Min(.001f)]
+    public float curveVertexDensity=1.0f;
+    [SerializeField]
+    [HideInInspector]
+    private float oldCurveVertexDensity=-1;
+
+    [Min(0)]
+    public float curveRadius =3.0f;
+    [SerializeField]
+    [HideInInspector]
+    private float oldCurveRadius=-1;
+
+    [Min(3)]
+    public int ringPointCount = 8;
+    [SerializeField]
+    [HideInInspector]
+    private int oldRingPointCount=-1;
+
+    public bool HaveCurveSettingsChanged()
+    {
+        bool CheckField<T>(ref T field, ref T oldField)
+        {
+            if (!field.Equals(oldField))
+            {
+                oldField = field;
+                return true;
+            }
+            return false;
+        }
+        bool retr = false;
+        retr|=CheckField(ref ringPointCount, ref oldRingPointCount);
+        retr|=CheckField(ref curveVertexDensity, ref oldCurveVertexDensity);
+        retr|=CheckField(ref curveRadius, ref oldCurveRadius);
+        return retr;
+    }
+
     public bool IsAPointSelected
     {
         get

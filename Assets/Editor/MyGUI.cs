@@ -219,9 +219,12 @@ public static class MyGUI
             }
             if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
             {
-                MeshGenerator.StartGenerating(positionCurve, curve.lastMeshUpdateStartTime);
+                MeshGenerator.StartGenerating(curve);
             }
         }
+
+        if (curve.HaveCurveSettingsChanged())
+            curve.lastMeshUpdateStartTime = DateTime.Now;
 
         void OnUndo()
         {

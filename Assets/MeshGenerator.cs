@@ -17,18 +17,21 @@ public static class MeshGenerator
 
     public static BeizerCurve curve;
 
-    private const int RingPointCount = 8;//temporary, replace with something customizable
-    private const float radius=3.0f;//temporary
-    private const float vertexDensity=1.0f;
+    public static int RingPointCount = 8;//temporary, replace with something customizable
+    public static float Radius=3.0f;//temporary
+    public static float VertexDensity=1.0f;
 
-    public static void StartGenerating(BeizerCurve curve,DateTime now)
+    public static void StartGenerating(Curve3D curve)
     {
         if (!IsBuzy)
         {
             IsBuzy = true;
-            BeizerCurve clonedCurve = new BeizerCurve(curve);
-            lastUpdateTime = now;
+            BeizerCurve clonedCurve = new BeizerCurve(curve.positionCurve);
+            lastUpdateTime = curve.lastMeshUpdateStartTime;
             MeshGenerator.curve = clonedCurve;
+            MeshGenerator.RingPointCount = curve.ringPointCount;
+            MeshGenerator.Radius = curve.curveRadius;
+            MeshGenerator.VertexDensity = curve.curveVertexDensity;
             Thread thread = new Thread(GenerateMesh);
             thread.Start();
         }
@@ -56,7 +59,7 @@ public static class MeshGenerator
     private static void GenerateMesh()
     {
         Debug.Log("started thread");
-        curve.CacheSampleCurve(vertexDensity);
+        curve.CacheSampleCurve(VertexDensity);
 
         InitOrClear(ref points);
         int numVerts = RingPointCount * points.Count;
@@ -79,7 +82,7 @@ public static class MeshGenerator
                 {
                     float theta = 360.0f * j / (float)RingPointCount;
                     Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
-                    vertices.Add(startPoint + rotatedVect * radius);
+                    vertices.Add(startPoint + rotatedVect * Radius);
                 }
             }
             Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (points[1] - points[0]).normalized) * Vector3.right;
