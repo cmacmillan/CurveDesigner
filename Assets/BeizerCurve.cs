@@ -16,6 +16,8 @@ public class BeizerCurve
     public SplitInsertionNeighborModification splitInsertionBehaviour;
     public List<SampleFragment> cachedFragments = null;
     private List<float> _lengths = null;
+    //Cummulative lengths, where index 0 is the length of the 0th item, index 1  is the length of the 0th+1st etc.
+    private List<float> _cummulativeLengths = null;
     
     public BeizerCurve() { }
     public BeizerCurve(BeizerCurve curveToClone)
@@ -112,19 +114,6 @@ public class BeizerCurve
     }
     #endregion
 
-    public class SampleFragment
-    {
-        public Vector3 position;
-        public int segmentIndex;
-        public float time;
-        public SampleFragment(Vector3 position, int segmentIndex,float time)
-        {
-            this.position = position;
-            this.segmentIndex = segmentIndex;
-            this.time = time;
-        }
-    }
-
     #region curve calculations
     //.private const float samplesPerUnit = 100.0f;
     private const int MaxSamples = 500;
@@ -151,7 +140,9 @@ public class BeizerCurve
             sampleDistance = GetAutoCurveDensity(GetLength());
         List<SampleFragment> retr = new List<SampleFragment>();
         float time;
+        Vector3 previousPosition=GetPositionAtDistance(0,out time);//get start of curve point
         Vector3 position;
+        float actualDistanceAlongCurve = 0.0f;
         float lenSoFar = 0;
         for (int i = 0; i < NumSegments; i++)
         {
@@ -163,16 +154,19 @@ public class BeizerCurve
             for (int j = 0; j < numSteps; j++)
             {
                 position = GetPositionAtDistance(f,out time);
-                retr.Add(new SampleFragment(position,i,time));
+                actualDistanceAlongCurve += Vector3.Distance(position,previousPosition);
+                previousPosition = position;
+                retr.Add(new SampleFragment(position,i,time,actualDistanceAlongCurve));
                 f += jumpDist;
             }
         }
         position = GetPositionAtDistance(lenSoFar,out time);
-        retr.Add(new SampleFragment(position,NumSegments,time));//add last point
+        actualDistanceAlongCurve += Vector3.Distance(position, previousPosition);
+        retr.Add(new SampleFragment(position,NumSegments,time,actualDistanceAlongCurve));//add last point
         cachedFragments = retr;
     }
 
-    //Doesn't actually sample at distance along the beizer, but rather the position at distance/length, which isn't quite uniform
+    //Doesn't actually sample at distance along the beizer, but rather the position at time=distance/length, which isn't quite uniform
 
     public Vector3 GetPositionAtDistance(float distance, out float time)
     {
@@ -237,27 +231,37 @@ public class BeizerCurve
     #endregion
 
     #region length calculation
+    public float GetSegmentLength(int segmentIndex)
+    {
+        return _lengths[segmentIndex];
+    }
+    public float GetCummulativeSegmentLength(int segmentIndex)
+    {
+        return _cummulativeLengths[segmentIndex];
+    }
     public float GetLength()
     {
-        float len = 0;
-        foreach (var i in _lengths)
-        {
-            len += i;
-        }
-        return len;
+        return _cummulativeLengths[NumSegments - 1];
     }
     public void CacheLengths()
     {
         if (_lengths==null)
-        {
             _lengths = new List<float>();
-        } else
-        {
+        else
             _lengths.Clear();
-        }
+        if (_cummulativeLengths == null)
+            _cummulativeLengths = new List<float>();
+        else
+            _cummulativeLengths.Clear();
         for (int i = 0; i < NumSegments; i++)
         {
             _lengths.Add(CalculateSegmentLength(i));
+        }
+        float len = 0;
+        for (int i = 0; i < NumSegments; i++)
+        {
+            len += _lengths[i];
+            _cummulativeLengths.Add(len);
         }
     }
     private const int _numSegmentLengthSamples = 100;

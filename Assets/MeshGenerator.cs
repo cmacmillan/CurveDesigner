@@ -9,7 +9,6 @@ public static class MeshGenerator
 {
     public static List<Vector3> vertices;
     public static List<int> triangles;
-    private static List<Vector3> points;
 
     public static bool IsBuzy = false;
 
@@ -17,11 +16,49 @@ public static class MeshGenerator
 
     public static BeizerCurve curve;
 
-    public static int RingPointCount = 8;//temporary, replace with something customizable
-    public static float Radius=3.0f;//temporary
+    public static List<IFieldKeyframe<float>> SizeKeyframes;
+
+    public static int RingPointCount = 8;
+    public static float Radius=3.0f;
     public static float VertexDensity=1.0f;
     public static float TubeAngle = 360.0f;
     public static float Rotation = 0.0f;
+
+    private static void CopyOverKeyframeList<T,U>(List<U> sourceList, ref List<IFieldKeyframe<T>> destinationList) where U : IFieldKeyframe<T>
+    {
+        if (destinationList == null)
+        {
+            destinationList = new List<IFieldKeyframe<T>>();
+        } else
+        {
+            destinationList.Clear();
+        }
+        if (destinationList.Capacity < sourceList.Count)
+            destinationList.Capacity = sourceList.Count;
+        foreach (var i in sourceList)
+        {
+            destinationList.Add(i.Clone());
+        }
+    }
+
+    private static T GetKeyframeValueAtTime<T>(List<IFieldKeyframe<T>> keyframes, ref int currentIndex,float distanceSinceIndex, out float currentKeyframeDistance)
+    {
+        float KeyframeLength(int index)
+        {
+            if (index == keyframes.Count - 1)
+                return curve.GetLength() - keyframes[index].Distance;
+            return keyframes[index + 1].Distance - keyframes[index].Distance;
+        }
+        while (currentIndex<keyframes.Count-1 && distanceSinceIndex > KeyframeLength(currentIndex))
+        {
+            distanceSinceIndex -= KeyframeLength(currentIndex);
+            currentIndex++;
+        }
+        currentKeyframeDistance = keyframes[currentIndex].Distance;
+        if (currentIndex == keyframes.Count - 1)
+            return keyframes[currentIndex].Value;
+        return keyframes[currentIndex].Lerp(keyframes[currentIndex+1],distanceSinceIndex/KeyframeLength(currentIndex));
+    }
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -37,6 +74,7 @@ public static class MeshGenerator
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
             MeshGenerator.TubeAngle = curve.angleOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
+            CopyOverKeyframeList(curve.curveSize,ref MeshGenerator.SizeKeyframes);
 
             Thread thread = new Thread(GenerateMesh);
             thread.Start();
@@ -65,41 +103,41 @@ public static class MeshGenerator
     private static void GenerateMesh()
     {
         Debug.Log("started thread");
-        curve.CacheSampleCurve(VertexDensity);
 
-        InitOrClear(ref points);
-        int numVerts = RingPointCount * points.Count;
+        curve.CacheSampleCurve(VertexDensity);
+        var sampled = curve.GetCachedSampled();
+
+        int numVerts = RingPointCount * sampled.Count;
         InitOrClear(ref vertices, numVerts);
-        int numRings = points.Count - 1;
+        int numRings = sampled.Count - 1;
         int numTris = RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
         InitOrClear(ref triangles,numTris);
-        var sampled = curve.GetCachedSampled();
-        foreach (var i in sampled)
-        {
-            points.Add(i.position);
-        }
+
         {//generate verts
             float distanceFromFull = 360.0f - TubeAngle;
-            void GenerateRing(int i, Vector3 startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
+            int sizeIndexCache = 0;
+            float previousSizeKeyframeDistance=0.0f;
+            void GenerateRing(int i, SampleFragment startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
                 int ringIndex = i * RingPointCount;
                 //Old Method: Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
                 Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
                 previousTangent = tangentVect;
+                var size = GetKeyframeValueAtTime(SizeKeyframes,ref sizeIndexCache,startPoint.distanceAlongCurve-previousSizeKeyframeDistance,out previousSizeKeyframeDistance);
                 for (int j = 0; j < RingPointCount; j++)
                 {
                     float theta = (TubeAngle * j / (float)RingPointCount) + distanceFromFull / 2 + Rotation;
                     Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
-                    vertices.Add(startPoint + rotatedVect * Radius);
+                    vertices.Add(startPoint.position + rotatedVect * size);
                 }
             }
-            Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (points[1] - points[0]).normalized) * Vector3.right;
-            for (int i = 0; i < points.Count - 1; i++)
+            Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (sampled[1].position - sampled[0].position).normalized) * Vector3.right;
+            for (int i = 0; i < sampled.Count - 1; i++)
             {
-                GenerateRing(i, points[i], (points[i + 1] - points[i]).normalized, ref lastTangent);
+                GenerateRing(i, sampled[i], (sampled[i + 1].position - sampled[i].position).normalized, ref lastTangent);
             }
-            int finalIndex = points.Count- 1;
-            GenerateRing(finalIndex, points[finalIndex], (points[finalIndex] - points[finalIndex - 1]).normalized, ref lastTangent);
+            int finalIndex = sampled.Count- 1;
+            GenerateRing(finalIndex, sampled[finalIndex], (sampled[finalIndex].position - sampled[finalIndex - 1].position).normalized, ref lastTangent);
         }
         {//generate tris
 
@@ -115,7 +153,7 @@ public static class MeshGenerator
                 triangles.Add(ring1Point2);
                 triangles.Add(ring2Point2);
             }
-            for (int i = 0; i < points.Count- 1; i++)
+            for (int i = 0; i < sampled.Count- 1; i++)
             {
                 int ringIndex = i * RingPointCount;
                 int nextRingIndex = ringIndex + RingPointCount;

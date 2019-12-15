@@ -19,6 +19,8 @@ public class Curve3D : MonoBehaviour
     public DateTime lastMeshUpdateEndTime;
     public Mesh mesh;
 
+    public List<FloatFieldKeyframe> curveSize;
+
     [Min(.001f)]
     public float curveVertexDensity=1.0f;
     [SerializeField]
@@ -92,6 +94,7 @@ public enum EditMode
 {
     PositionCurve = 0,
     Rotation = 1,
+    Size = 2,
 }
 public enum CurveType
 {
