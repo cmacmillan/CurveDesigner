@@ -14,7 +14,7 @@ public class Curve3DInspector : Editor
     {
         var curve = target as Curve3D;
         Undo.RecordObject(curve, "curve");
-        MyGUI.EditBezierCurve(curve, curve.transform.position);
+        MyGUI.EditBezierCurve(curve);
         Handles.BeginGUI();
         GUILayout.BeginArea(new Rect(20, 20, 150, 60));
         var rect = EditorGUILayout.BeginVertical();

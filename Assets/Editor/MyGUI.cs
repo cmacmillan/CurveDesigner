@@ -86,7 +86,7 @@ public static class MyGUI
     private const float buttonClickDistance=20.0f;
     private const float lineClickDistance=15.0f;
     private const int plusButtonDistance = 30;
-    public static void EditBezierCurve(Curve3D curve,Vector3 position)
+    public static void EditBezierCurve(Curve3D curve)
     {
         var positionCurve = curve.positionCurve;
 
@@ -136,12 +136,12 @@ public static class MyGUI
                         bool isPositionPoint = pointIndexType == PGIndex.Position;
                         var color = Color.green;
                         var tex = isPositionPoint ? curve.circleIcon : curve.squareIcon;
-                        points.Add(new PointInfo(positionCurve[i] + position, color, tex, i,PointType.Position));
+                        points.Add(new PointInfo(curve.transform.TransformPoint(positionCurve[i]), color, tex, i,PointType.Position));
                     }
                     PointInfo pointInfo;
                     if (positionCurve.NumControlPoints == 0)
                     {
-                        pointInfo = new PointInfo(position, Color.blue, curve.plusButton, -1,PointType.PlusButton);
+                        pointInfo = new PointInfo(curve.transform.position, Color.blue, curve.plusButton, -1,PointType.PlusButton);
                     }
                     else
                     {
@@ -149,7 +149,7 @@ public static class MyGUI
                         var lastPoint = positionCurve[count - 1];
                         var secondToLastPoint = positionCurve[count - 2];
                         var plusButtonVector = plusButtonDistance*(lastPoint - secondToLastPoint).normalized;
-                        pointInfo = new PointInfo(position+plusButtonVector+lastPoint, Color.blue, curve.plusButton, -1,PointType.PlusButton);
+                        pointInfo = new PointInfo(curve.transform.TransformPoint(plusButtonVector+lastPoint), Color.blue, curve.plusButton, -1,PointType.PlusButton);
                     }
                     points.Add(pointInfo);
                     break;
@@ -174,7 +174,7 @@ public static class MyGUI
                     var samples = positionCurve.GetCachedSampled();
                     foreach (var i in samples)
                     {
-                        i.position += position;
+                        i.position = curve.transform.TransformPoint(i.position);
                     }
                     int segmentIndex;
                     float time;
@@ -182,9 +182,9 @@ public static class MyGUI
                     UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
                     foreach (var i in samples)
                     {
-                        i.position -= position;
+                        i.position = curve.transform.InverseTransformPoint(i.position);
                     }
-                    Vector3 pointPosition = positionCurve.GetSegmentPositionAtTime(segmentIndex, time) + position;
+                    Vector3 pointPosition = curve.transform.TransformPoint(positionCurve.GetSegmentPositionAtTime(segmentIndex, time));
                     curveSplitPoint = new CurveSplitPointInfo(segmentIndex,time);
                     var pointInfo = new PointInfo(pointPosition, Color.green, linePlaceTexture, -1,PointType.SplitPoint);
                     if (pointInfo.isPointOnScreen && pointInfo.distanceToMouse < lineClickDistance)
@@ -245,7 +245,7 @@ public static class MyGUI
                 switch (curve.editMode)
                 {
                     case EditMode.PositionCurve:
-                        positionCurve[hotPoint.index] = GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth) - position;
+                        positionCurve[hotPoint.index] = curve.transform.InverseTransformPoint(GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth));
                         positionCurve.isCurveOutOfDate = true;
                         break;
                     default:
@@ -321,10 +321,10 @@ public static class MyGUI
 
                 for (int i = 0; i < positionCurve.NumSegments; i++)
                 {
-                    var point1 = positionCurve[i, 0] + position;
-                    var point2 = positionCurve[i, 3] + position;
-                    var tangent1 = positionCurve[i, 1] + position;
-                    var tangent2 = positionCurve[i, 2] + position;
+                    var point1 = curve.transform.TransformPoint(positionCurve[i, 0]);
+                    var point2 = curve.transform.TransformPoint(positionCurve[i, 3]);
+                    var tangent1 = curve.transform.TransformPoint(positionCurve[i, 1]);
+                    var tangent2 = curve.transform.TransformPoint(positionCurve[i, 2]);
                     Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.8f, .8f, .8f), curve.lineTex, 10);
                 }
 
@@ -335,9 +335,9 @@ public static class MyGUI
                         foreach (var i in positionCurve.PointGroups)
                         {
                             if (i.hasLeftTangent)
-                                Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.LeftTangent) + position, i.GetWorldPositionByIndex(PGIndex.Position) + position });
+                                Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { curve.transform.TransformPoint(i.GetWorldPositionByIndex(PGIndex.LeftTangent)), curve.transform.TransformPoint(i.GetWorldPositionByIndex(PGIndex.Position))});
                             if (i.hasRightTangent)
-                                Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { i.GetWorldPositionByIndex(PGIndex.Position) + position, i.GetWorldPositionByIndex(PGIndex.RightTangent) + position });
+                                Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { curve.transform.TransformPoint(i.GetWorldPositionByIndex(PGIndex.Position)), curve.transform.TransformPoint(i.GetWorldPositionByIndex(PGIndex.RightTangent)) });
                         }
                         if (curve.IsAPointSelected)
                         {
