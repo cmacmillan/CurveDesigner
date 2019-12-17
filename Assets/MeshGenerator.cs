@@ -16,7 +16,6 @@ public static class MeshGenerator
 
     public static BeizerCurve curve;
 
-    //public static List<IFieldKeyframe<float>> SizeKeyframes;
     public static AnimationCurve sizeCurve;
 
     public static int RingPointCount = 8;
@@ -24,42 +23,6 @@ public static class MeshGenerator
     public static float VertexDensity=1.0f;
     public static float TubeAngle = 360.0f;
     public static float Rotation = 0.0f;
-
-    private static void CopyOverKeyframeList<T,U>(List<U> sourceList, ref List<IFieldKeyframe<T>> destinationList) where U : IFieldKeyframe<T>
-    {
-        if (destinationList == null)
-        {
-            destinationList = new List<IFieldKeyframe<T>>();
-        } else
-        {
-            destinationList.Clear();
-        }
-        if (destinationList.Capacity < sourceList.Count)
-            destinationList.Capacity = sourceList.Count;
-        foreach (var i in sourceList)
-        {
-            destinationList.Add(i.Clone());
-        }
-    }
-
-    /*private static T GetKeyframeValueAtTime<T>(AnimationCurve keyframeCurve, ref int currentIndex,float distanceSinceIndex, out float currentKeyframeDistance)
-    {
-        float KeyframeLength(int index)
-        {
-            if (index == keyframes.Count - 1)
-                return curve.GetLength() - keyframes[index].Distance;
-            return keyframes[index + 1].Distance - keyframes[index].Distance;
-        }
-        while (currentIndex<keyframes.Count-1 && distanceSinceIndex > KeyframeLength(currentIndex))
-        {
-            distanceSinceIndex -= KeyframeLength(currentIndex);
-            currentIndex++;
-        }
-        currentKeyframeDistance = keyframes[currentIndex].Distance;
-        if (currentIndex == keyframes.Count - 1)
-            return keyframes[currentIndex].Value;
-        return keyframes[currentIndex].Lerp(keyframes[currentIndex+1],distanceSinceIndex/KeyframeLength(currentIndex));
-    }*/
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -75,7 +38,6 @@ public static class MeshGenerator
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
             MeshGenerator.TubeAngle = curve.angleOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
-            //CopyOverKeyframeList(curve.curveSize,ref MeshGenerator.SizeKeyframes);
             MeshGenerator.sizeCurve = Curve3D.CopyAnimationCurve(curve.curveSizeAnimationCurve);
 
             Thread thread = new Thread(GenerateMesh);
@@ -117,15 +79,12 @@ public static class MeshGenerator
 
         {//generate verts
             float distanceFromFull = 360.0f - TubeAngle;
-            int sizeIndexCache = 0;
-            float previousSizeKeyframeDistance=0.0f;
             void GenerateRing(int i, SampleFragment startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
                 int ringIndex = i * RingPointCount;
                 //Old Method: Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
                 Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
                 previousTangent = tangentVect;
-                //var size = GetKeyframeValueAtTime(sizeCurve,ref sizeIndexCache,startPoint.distanceAlongCurve-previousSizeKeyframeDistance,out previousSizeKeyframeDistance);
                 var size = sizeCurve.Evaluate(startPoint.distanceAlongCurve);
                 for (int j = 0; j < RingPointCount; j++)
                 {
@@ -143,8 +102,6 @@ public static class MeshGenerator
             GenerateRing(finalIndex, sampled[finalIndex], (sampled[finalIndex].position - sampled[finalIndex - 1].position).normalized, ref lastTangent);
         }
         {//generate tris
-
-            int triIndex = 0;
             void DrawQuad(int ring1Point1, int ring1Point2, int ring2Point1, int ring2Point2)
             {
                 //Tri1

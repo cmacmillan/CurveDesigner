@@ -47,8 +47,6 @@ public class Curve3DInspector : Editor
             curve.hotPointIndex = -1;
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;
-            //curve.curveSize = new List<FloatFieldKeyframe>();
-            //curve.curveSize.Add(new FloatFieldKeyframe(0, 1.0f));
         }
         GUILayout.EndHorizontal();
         GUILayout.EndArea();

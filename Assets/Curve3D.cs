@@ -67,7 +67,6 @@ public class Curve3D : MonoBehaviour
         }
         return true;
     }
-    //public List<FloatFieldKeyframe> curveSize;
 
 
     [Min(.001f)]
