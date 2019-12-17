@@ -16,7 +16,8 @@ public static class MeshGenerator
 
     public static BeizerCurve curve;
 
-    public static List<IFieldKeyframe<float>> SizeKeyframes;
+    //public static List<IFieldKeyframe<float>> SizeKeyframes;
+    public static AnimationCurve sizeCurve;
 
     public static int RingPointCount = 8;
     public static float Radius=3.0f;
@@ -41,7 +42,7 @@ public static class MeshGenerator
         }
     }
 
-    private static T GetKeyframeValueAtTime<T>(List<IFieldKeyframe<T>> keyframes, ref int currentIndex,float distanceSinceIndex, out float currentKeyframeDistance)
+    /*private static T GetKeyframeValueAtTime<T>(AnimationCurve keyframeCurve, ref int currentIndex,float distanceSinceIndex, out float currentKeyframeDistance)
     {
         float KeyframeLength(int index)
         {
@@ -58,7 +59,7 @@ public static class MeshGenerator
         if (currentIndex == keyframes.Count - 1)
             return keyframes[currentIndex].Value;
         return keyframes[currentIndex].Lerp(keyframes[currentIndex+1],distanceSinceIndex/KeyframeLength(currentIndex));
-    }
+    }*/
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -74,7 +75,8 @@ public static class MeshGenerator
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
             MeshGenerator.TubeAngle = curve.angleOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
-            CopyOverKeyframeList(curve.curveSize,ref MeshGenerator.SizeKeyframes);
+            //CopyOverKeyframeList(curve.curveSize,ref MeshGenerator.SizeKeyframes);
+            MeshGenerator.sizeCurve = Curve3D.CopyAnimationCurve(curve.curveSizeAnimationCurve);
 
             Thread thread = new Thread(GenerateMesh);
             thread.Start();
@@ -123,7 +125,8 @@ public static class MeshGenerator
                 //Old Method: Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
                 Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
                 previousTangent = tangentVect;
-                var size = GetKeyframeValueAtTime(SizeKeyframes,ref sizeIndexCache,startPoint.distanceAlongCurve-previousSizeKeyframeDistance,out previousSizeKeyframeDistance);
+                //var size = GetKeyframeValueAtTime(sizeCurve,ref sizeIndexCache,startPoint.distanceAlongCurve-previousSizeKeyframeDistance,out previousSizeKeyframeDistance);
+                var size = sizeCurve.Evaluate(startPoint.distanceAlongCurve);
                 for (int j = 0; j < RingPointCount; j++)
                 {
                     float theta = (TubeAngle * j / (float)RingPointCount) + distanceFromFull / 2 + Rotation;

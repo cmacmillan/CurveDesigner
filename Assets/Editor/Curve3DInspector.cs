@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+using UnityObject = UnityEngine.Object;
+
 
 [CustomEditor(typeof(Curve3D))]
 public class Curve3DInspector : Editor
@@ -44,13 +47,12 @@ public class Curve3DInspector : Editor
             curve.hotPointIndex = -1;
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;
-            curve.curveSize = new List<FloatFieldKeyframe>();
-            curve.curveSize.Add(new FloatFieldKeyframe(0,1.0f));
+            //curve.curveSize = new List<FloatFieldKeyframe>();
+            //curve.curveSize.Add(new FloatFieldKeyframe(0, 1.0f));
         }
         GUILayout.EndHorizontal();
         GUILayout.EndArea();
 
         Handles.EndGUI();
-
     }
 }

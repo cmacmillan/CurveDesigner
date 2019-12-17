@@ -19,7 +19,56 @@ public class Curve3D : MonoBehaviour
     public DateTime lastMeshUpdateEndTime;
     public Mesh mesh;
 
-    public List<FloatFieldKeyframe> curveSize;
+    [Header("Lock axis to position 0")]
+    public bool lockXAxis;
+    public bool lockYAxis;
+    public bool lockZAxis;
+
+
+    public AnimationCurve curveSizeAnimationCurve;
+    [SerializeField]
+    [HideInInspector]
+    private AnimationCurve _oldCurveSizeAnimationCurve = new AnimationCurve();
+
+    public static AnimationCurve CopyAnimationCurve(AnimationCurve curve)
+    {
+        return new AnimationCurve(curve.keys);
+    }
+    public static bool DoKeyframesMatch(Keyframe k1, Keyframe k2)
+    {
+        if (k1.inTangent != k2.inTangent)
+            return false;
+        if (k1.inWeight != k2.inWeight)
+            return false;
+        if (k1.outTangent != k2.outTangent)
+            return false;
+        if (k1.outWeight != k2.outWeight)
+            return false;
+        if (k1.time != k2.time)
+            return false;
+        if (k1.value != k2.value)
+            return false;
+        if (k1.weightedMode != k2.weightedMode)
+            return false;
+        return true;
+    }
+    public static bool DoAnimationCurvesMatch(AnimationCurve curve1,AnimationCurve curve2)
+    {
+        if (curve1.length != curve2.length)
+            return false;
+        if (curve1.postWrapMode != curve2.postWrapMode)
+            return false;
+        if (curve1.preWrapMode != curve2.preWrapMode)
+            return false;
+        for (int i = 0; i < curve1.keys.Length; i++)
+        {
+            if (!DoKeyframesMatch(curve1.keys[i], curve2.keys[i]))
+                return false;
+        }
+        return true;
+    }
+    //public List<FloatFieldKeyframe> curveSize;
+
 
     [Min(.001f)]
     public float curveVertexDensity=1.0f;
@@ -53,7 +102,7 @@ public class Curve3D : MonoBehaviour
 
     public bool HaveCurveSettingsChanged()
     {
-        bool CheckField<T>(ref T field, ref T oldField)
+        bool CheckField<T>(T field, ref T oldField)
         {
             if (!field.Equals(oldField))
             {
@@ -62,12 +111,22 @@ public class Curve3D : MonoBehaviour
             }
             return false;
         }
+        bool CheckAnimationCurve(AnimationCurve newCurve, ref AnimationCurve oldCurve)
+        {
+            if (!DoAnimationCurvesMatch(newCurve,oldCurve))
+            {
+                oldCurve = CopyAnimationCurve(newCurve);
+                return true;  
+            }
+            return false;
+        }
         bool retr = false;
-        retr|=CheckField(ref ringPointCount, ref oldRingPointCount);
-        retr|=CheckField(ref curveVertexDensity, ref oldCurveVertexDensity);
-        retr|=CheckField(ref curveRadius, ref oldCurveRadius);
-        retr|=CheckField(ref angleOfTube, ref oldAngleOfTube);
-        retr|=CheckField(ref curveRotation, ref oldCurveRotation);
+        retr|=CheckField(ringPointCount, ref oldRingPointCount);
+        retr|=CheckField(curveVertexDensity, ref oldCurveVertexDensity);
+        retr|=CheckField(curveRadius, ref oldCurveRadius);
+        retr|=CheckField(angleOfTube, ref oldAngleOfTube);
+        retr|=CheckField(curveRotation, ref oldCurveRotation);
+        retr |= CheckAnimationCurve(curveSizeAnimationCurve,ref _oldCurveSizeAnimationCurve);
         return retr;
     }
 
