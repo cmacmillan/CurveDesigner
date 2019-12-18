@@ -138,7 +138,7 @@ public class BeizerCurve
                 {
                     distance = (distance - _cummulativeLengths[i - 1]);
                 }
-                time = distance/_lengths[0];
+                time = distance/_lengths[i];
                 return i;
             }
         }

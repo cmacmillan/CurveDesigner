@@ -237,15 +237,6 @@ public static class MyGUI
         Undo.undoRedoPerformed = null;
         Undo.undoRedoPerformed += OnUndo;
         
-        //These methods are pointless, remove them
-        int GetPositionSegmentIndexKeyframeIsIn(Keyframe frame, out float progressAlongSegment)
-        {
-            return positionCurve.GetSegmentIndexAndTimeByDistance(frame.time,out progressAlongSegment);
-        }
-        float GetNewDistanceForKeyframe(KeyframeInfo frame)
-        {
-            return positionCurve.GetDistanceBySegmentIndexAndTime(frame.segmentIndex,frame.progressAlongSegment);
-        }
         void OnDrag()
         {
             if (hotPoint != null && GUIUtility.hotControl == controlID && isMainMouseButton)
@@ -267,7 +258,7 @@ public static class MyGUI
                         {
                             var key = sizeCurve.keys[i];
                             float progressAlongSegment;
-                            int segmentIndex = GetPositionSegmentIndexKeyframeIsIn(key,out progressAlongSegment);
+                            int segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(key.time,out progressAlongSegment);
                             keyframes.Add(new KeyframeInfo(key,segmentIndex,progressAlongSegment));
                         }
 
@@ -292,7 +283,8 @@ public static class MyGUI
                         for (int i = 0; i < keyframes.Count; i++)
                         {
                             var key = sizeCurve.keys[i];
-                            key.time = GetNewDistanceForKeyframe(keyframes[i]);
+                            var data = keyframes[i];
+                            key.time = positionCurve.GetDistanceBySegmentIndexAndTime(data.segmentIndex,data.progressAlongSegment);
                             keys[i] = key;
                         }
                         sizeCurve.keys = keys;
