@@ -122,6 +122,29 @@ public class BeizerCurve
     {
         return Mathf.Max(curveLength/MaxSamples,curveLength/(samplesPerSegment*NumSegments));
     }
+    public float GetDistanceBySegmentIndexAndTime(int segmentIndex,float time)
+    {
+        if (segmentIndex == 0)
+            return time * _lengths[0];
+        return _cummulativeLengths[segmentIndex - 1] + time * _lengths[segmentIndex];//this is linearly interpolating along by time which as we know isn't correct because beizers aren't linear like this...
+    }
+    public int GetSegmentIndexAndTimeByDistance(float distance, out float time)
+    {
+        for (int i = 0; i < _cummulativeLengths.Count; i++)
+        {
+            if (_cummulativeLengths[i] > distance)
+            {
+                if (i > 0)
+                {
+                    distance = (distance - _cummulativeLengths[i - 1]);
+                }
+                time = distance/_lengths[0];
+                return i;
+            }
+        }
+        time = distance/_lengths[_lengths.Count - 1];
+        return _lengths.Count - 1;
+    }
     public List<SampleFragment> GetCachedSampled(float? density=null)
     {
         if (cachedFragments==null)
@@ -222,11 +245,11 @@ public class BeizerCurve
     }
     public void SetPointLockState(int index,bool state)
     {
-        PointGroups[GetPhysicalIndex(index)].SetPointLocked(state);
+        PointGroups[GetPointGroupIndex(index)].SetPointLocked(state);
     }
     public bool GetPointLockState(int index)
     {
-        return PointGroups[GetPhysicalIndex(index)].GetIsPointLocked();
+        return PointGroups[GetPointGroupIndex(index)].GetIsPointLocked();
     }
     #endregion
 
@@ -249,14 +272,31 @@ public class BeizerCurve
             _lengths = new List<float>();
         else
             _lengths.Clear();
-        if (_cummulativeLengths == null)
-            _cummulativeLengths = new List<float>();
-        else
-            _cummulativeLengths.Clear();
         for (int i = 0; i < NumSegments; i++)
         {
             _lengths.Add(CalculateSegmentLength(i));
         }
+        CalculateCummulativeLengths();
+    }
+    public void CacheSegmentLength(int index)
+    {
+        if (index < 0 || index >= NumSegments)
+            throw new System.ArgumentOutOfRangeException();
+        if (index >= _lengths.Count)
+        {
+            CacheLengths();
+        } else
+        {
+            _lengths[index] = CalculateSegmentLength(index);
+            CalculateCummulativeLengths();
+        }
+    }
+    private void CalculateCummulativeLengths()
+    {
+        if (_cummulativeLengths == null)
+            _cummulativeLengths = new List<float>();
+        else
+            _cummulativeLengths.Clear();
         float len = 0;
         for (int i = 0; i < NumSegments; i++)
         {
@@ -327,10 +367,10 @@ public class BeizerCurve
     }
     public PointGroup GetPointGroupByIndex(int virtualIndex)
     {
-        return PointGroups[GetPhysicalIndex(virtualIndex)];
+        return PointGroups[GetPointGroupIndex(virtualIndex)];
     }
 
     public int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
-    public int GetParentVirtualIndex(int childVirtualIndex) { return GetPhysicalIndex(childVirtualIndex) * 3; }
-    public int GetPhysicalIndex(int childIndex) { return ((childIndex + 1) / 3); }
+    public int GetParentVirtualIndex(int childVirtualIndex) { return GetPointGroupIndex(childVirtualIndex) * 3; }
+    public int GetPointGroupIndex(int childIndex) { return ((childIndex + 1) / 3); }
 }

@@ -62,6 +62,20 @@ public class PointGroup
         this.position = clone.position;
     }
 
+    public bool DoesEditAffectBothSegments(PGIndex index)
+    {
+        switch (index)
+        {
+            case PGIndex.LeftTangent:
+                return this.hasRightTangent;
+            case PGIndex.RightTangent:
+                return this.hasRightTangent;
+            case PGIndex.Position:
+            default:
+                return true;
+        }
+    }
+
     #region Get/Set methods
     public bool GetIsPointLocked()
     {

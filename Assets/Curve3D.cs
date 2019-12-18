@@ -148,6 +148,18 @@ public class Curve3D : MonoBehaviour
     {
     }
 }
+public class KeyframeInfo
+{
+    public Keyframe frame;
+    public int segmentIndex;
+    public float progressAlongSegment;
+    public KeyframeInfo(Keyframe frame, int segmentIndex, float progressAlongSegment)
+    {
+        this.frame = frame;
+        this.segmentIndex = segmentIndex;
+        this.progressAlongSegment = progressAlongSegment;
+    }
+}
 public enum EditMode
 {
     PositionCurve = 0,

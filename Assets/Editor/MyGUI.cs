@@ -237,7 +237,15 @@ public static class MyGUI
         Undo.undoRedoPerformed = null;
         Undo.undoRedoPerformed += OnUndo;
         
-
+        //These methods are pointless, remove them
+        int GetPositionSegmentIndexKeyframeIsIn(Keyframe frame, out float progressAlongSegment)
+        {
+            return positionCurve.GetSegmentIndexAndTimeByDistance(frame.time,out progressAlongSegment);
+        }
+        float GetNewDistanceForKeyframe(KeyframeInfo frame)
+        {
+            return positionCurve.GetDistanceBySegmentIndexAndTime(frame.segmentIndex,frame.progressAlongSegment);
+        }
         void OnDrag()
         {
             if (hotPoint != null && GUIUtility.hotControl == controlID && isMainMouseButton)
@@ -245,8 +253,50 @@ public static class MyGUI
                 switch (curve.editMode)
                 {
                     case EditMode.PositionCurve:
-                        positionCurve[hotPoint.index] = curve.transform.InverseTransformPoint(GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth));
+                        var oldPointPosition = positionCurve[hotPoint.index];
+                        var newPointPosition = curve.transform.InverseTransformPoint(GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth));
                         positionCurve.isCurveOutOfDate = true;
+
+                        //Build keyframe info 
+                        var sizeCurve = curve.curveSizeAnimationCurve;
+                        List<KeyframeInfo> keyframes = new List<KeyframeInfo>(sizeCurve.keys.Length);
+                        var modifiedPointType = positionCurve.GetPointTypeByIndex(hotPoint.index);
+                        var pointGroup = positionCurve.GetPointGroupByIndex(hotPoint.index);
+                        var pointGroupIndex = positionCurve.GetPointGroupIndex(hotPoint.index);
+                        for (int i=0;i<sizeCurve.keys.Length;i++)
+                        {
+                            var key = sizeCurve.keys[i];
+                            float progressAlongSegment;
+                            int segmentIndex = GetPositionSegmentIndexKeyframeIsIn(key,out progressAlongSegment);
+                            keyframes.Add(new KeyframeInfo(key,segmentIndex,progressAlongSegment));
+                        }
+
+                        //////Actually update the point's position///////
+                        positionCurve[hotPoint.index] = newPointPosition;
+                        /////////////////////////////////////////////////
+
+                        {//Update curve length
+                            bool lowerShouldRecalculateLength = pointGroup.DoesEditAffectBothSegments(modifiedPointType);
+                            bool upperShouldRecalculateLength = pointGroup.DoesEditAffectBothSegments(modifiedPointType);
+                            if (pointGroupIndex == 0)
+                                lowerShouldRecalculateLength = false;
+                            else if (pointGroupIndex == positionCurve.NumSegments)
+                                upperShouldRecalculateLength = false;
+                            if (lowerShouldRecalculateLength)
+                                positionCurve.CacheSegmentLength(pointGroupIndex - 1);
+                            if (upperShouldRecalculateLength)
+                                positionCurve.CacheSegmentLength(pointGroupIndex);
+                        }
+
+                        Keyframe[] keys = sizeCurve.keys;
+                        for (int i = 0; i < keyframes.Count; i++)
+                        {
+                            var key = sizeCurve.keys[i];
+                            key.time = GetNewDistanceForKeyframe(keyframes[i]);
+                            keys[i] = key;
+                        }
+                        sizeCurve.keys = keys;
+
                         break;
                     default:
                         throw new System.InvalidOperationException();
