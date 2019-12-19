@@ -259,7 +259,28 @@ public static class MyGUI
                             var key = sizeCurve.keys[i];
                             float progressAlongSegment;
                             int segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(key.time,out progressAlongSegment);
-                            keyframes.Add(new KeyframeInfo(key,segmentIndex,progressAlongSegment));
+                            var keyframeInfo = new KeyframeInfo(key, segmentIndex, progressAlongSegment);
+                            if (i > 0)
+                            {
+                                var segmentDistance = key.time-sizeCurve.keys[i - 1].time;
+                                var leftXDistance = (key.inWeight * segmentDistance);
+                                var leftTime = key.time-leftXDistance;
+                                segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(leftTime,out progressAlongSegment);
+                                keyframeInfo.leftTangentProgressAlongSegment = progressAlongSegment;
+                                keyframeInfo.leftTangentIndex = segmentIndex;
+                                keyframeInfo.leftTangentValue = key.value - leftXDistance * key.inTangent;
+                            }
+                            if (i < sizeCurve.keys.Length - 1)
+                            {
+                                /*var segmentDistance = sizeCurve.keys[i + 1].time-key.time;
+                                var rightXDistance = (key.outWeight * segmentDistance);
+                                var rightTime = key.time+rightXDistance;
+                                segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(rightTime,out progressAlongSegment);
+                                keyframeInfo.rightTangentProgressAlongSegment = progressAlongSegment;
+                                keyframeInfo.rightTangentIndex= segmentIndex;
+                                keyframeInfo.rightTangentValue = key.value - rightXDistance * key.outTangent;*/
+                            }
+                            keyframes.Add(keyframeInfo);
                         }
 
                         //////Actually update the point's position///////
@@ -284,7 +305,21 @@ public static class MyGUI
                         {
                             var key = sizeCurve.keys[i];
                             var data = keyframes[i];
+                            key.weightedMode = WeightedMode.Both;
                             key.time = positionCurve.GetDistanceBySegmentIndexAndTime(data.segmentIndex,data.progressAlongSegment);
+                            if (i > 0)
+                            {
+                                var leftX = positionCurve.GetDistanceBySegmentIndexAndTime(data.leftTangentIndex,data.leftTangentProgressAlongSegment);
+                                var leftY = data.leftTangentValue;
+                                var segmentDistance = key.time-sizeCurve.keys[i - 1].time;
+                                var leftWeight = -(leftX - key.time) / segmentDistance;
+                                key.inWeight = leftWeight;
+                                var leftXDist = key.inWeight * segmentDistance;
+                                key.inTangent = (leftY - key.value) / -leftXDist;
+                            }
+                            //var rightX = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex,data.rightTangentProgressAlongSegment);
+                            //var rightY = data.rightTangentValue;
+                            
                             keys[i] = key;
                         }
                         sizeCurve.keys = keys;

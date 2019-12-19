@@ -116,7 +116,7 @@ public class Curve3D : MonoBehaviour
             {
                 oldCurve = CopyAnimationCurve(newCurve);
                 return true;  
-            }
+            } 
             return false;
         }
         bool retr = false;
@@ -153,6 +153,15 @@ public class KeyframeInfo
     public Keyframe frame;
     public int segmentIndex;
     public float progressAlongSegment;
+
+    public int leftTangentIndex;
+    public float leftTangentProgressAlongSegment;
+    public float leftTangentValue;
+
+    public int rightTangentIndex;
+    public float rightTangentProgressAlongSegment;
+    public float rightTangentValue;
+
     public KeyframeInfo(Keyframe frame, int segmentIndex, float progressAlongSegment)
     {
         this.frame = frame;
