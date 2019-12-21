@@ -272,13 +272,13 @@ public static class MyGUI
                             }
                             if (i < sizeCurve.keys.Length - 1)
                             {
-                                /*var segmentDistance = sizeCurve.keys[i + 1].time-key.time;
+                                var segmentDistance = sizeCurve.keys[i + 1].time-key.time;
                                 var rightXDistance = (key.outWeight * segmentDistance);
                                 var rightTime = key.time+rightXDistance;
                                 segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(rightTime,out progressAlongSegment);
                                 keyframeInfo.rightTangentProgressAlongSegment = progressAlongSegment;
                                 keyframeInfo.rightTangentIndex= segmentIndex;
-                                keyframeInfo.rightTangentValue = key.value - rightXDistance * key.outTangent;*/
+                                keyframeInfo.rightTangentValue = key.value + rightXDistance * key.outTangent;
                             }
                             keyframes.Add(keyframeInfo);
                         }
@@ -307,6 +307,13 @@ public static class MyGUI
                             var data = keyframes[i];
                             key.weightedMode = WeightedMode.Both;
                             key.time = positionCurve.GetDistanceBySegmentIndexAndTime(data.segmentIndex,data.progressAlongSegment);
+                            keys[i] = key;
+                        }
+                        sizeCurve.keys = keys;
+                        for (int i = 0; i < keyframes.Count; i++)
+                        {
+                            var key = sizeCurve.keys[i];
+                            var data = keyframes[i];
                             if (i > 0)
                             {
                                 var leftX = positionCurve.GetDistanceBySegmentIndexAndTime(data.leftTangentIndex,data.leftTangentProgressAlongSegment);
@@ -317,8 +324,16 @@ public static class MyGUI
                                 var leftXDist = key.inWeight * segmentDistance;
                                 key.inTangent = (leftY - key.value) / -leftXDist;
                             }
-                            //var rightX = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex,data.rightTangentProgressAlongSegment);
-                            //var rightY = data.rightTangentValue;
+                            if (i < sizeCurve.keys.Length - 1)
+                            {
+                                var rightTime = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex,data.rightTangentProgressAlongSegment);
+                                var rightValue = data.rightTangentValue;
+                                var segmentDistance = sizeCurve.keys[i + 1].time - key.time;
+                                var rightXDist = rightTime - key.time;
+                                var rightWeight = rightXDist / segmentDistance;
+                                key.outWeight = rightWeight;
+                                key.outTangent = (rightValue - key.value) / rightXDist;
+                            }
                             
                             keys[i] = key;
                         }
