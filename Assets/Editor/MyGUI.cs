@@ -59,6 +59,7 @@ public static class MyGUI
         Position = 0,
         PlusButton = 1,
         SplitPoint = 2,
+        ValuePoint = 3,
     }
     private class PointInfo
     {
@@ -89,6 +90,8 @@ public static class MyGUI
     public static void EditBezierCurve(Curve3D curve)
     {
         var positionCurve = curve.positionCurve;
+
+        var sizeCurve = curve.curveSizeAnimationCurve;
 
         int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
@@ -152,6 +155,37 @@ public static class MyGUI
                         pointInfo = new PointInfo(curve.transform.TransformPoint(plusButtonVector+lastPoint), Color.blue, curve.plusButton, -1,PointType.PlusButton);
                     }
                     points.Add(pointInfo);
+                    break;
+                #endregion
+                case EditMode.Size:
+                    #region size
+                    if (positionCurve.NumControlPoints < 4)
+                        break;
+                    linePlaceTexture = curve.diamondIcon;
+                    var sizeKeys = sizeCurve.keys;
+                    int c = 0;
+                    var leftWorldVector = (positionCurve[1]-positionCurve[0]).normalized;
+                    var rightWorldVector= (positionCurve[positionCurve.NumControlPoints-1]-positionCurve[positionCurve.NumControlPoints-2]).normalized;
+                    var curveStartPoint = positionCurve[0];
+                    var curveEndPoint = positionCurve[positionCurve.NumControlPoints-1];
+                    foreach (var i in sizeKeys)
+                    {
+                        float time;
+                        if (i.time<0)
+                        {
+                            pointInfo = new PointInfo(curve.transform.TransformPoint(curveStartPoint+leftWorldVector*i.time),Color.magenta,linePlaceTexture,c,PointType.ValuePoint);
+                        }
+                        else if (i.time > positionCurve.GetLength())
+                        {
+                            pointInfo = new PointInfo(curve.transform.TransformPoint(curveEndPoint+rightWorldVector*(i.time-positionCurve.GetLength())),Color.magenta,linePlaceTexture,c,PointType.ValuePoint);
+                        }
+                        else
+                        {
+                            pointInfo = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(i.time,out time)),Color.magenta,linePlaceTexture,c,PointType.ValuePoint);
+                        }
+                        points.Add(pointInfo);
+                        c++;
+                    }
                     break;
                 #endregion
                 case EditMode.Rotation:
@@ -248,8 +282,8 @@ public static class MyGUI
                         var newPointPosition = curve.transform.InverseTransformPoint(GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth));
                         positionCurve.isCurveOutOfDate = true;
 
+                        #region update size curve
                         //Build keyframe info 
-                        var sizeCurve = curve.curveSizeAnimationCurve;
                         List<KeyframeInfo> keyframes = new List<KeyframeInfo>(sizeCurve.keys.Length);
                         var modifiedPointType = positionCurve.GetPointTypeByIndex(hotPoint.index);
                         var pointGroup = positionCurve.GetPointGroupByIndex(hotPoint.index);
@@ -340,6 +374,8 @@ public static class MyGUI
                         sizeCurve.keys = keys;
 
                         break;
+                    #endregion
+
                     default:
                         throw new System.InvalidOperationException();
                 }
@@ -372,6 +408,7 @@ public static class MyGUI
                                     hotPoint.index = positionCurve.InsertSegmentAfterIndex(curveSplitPoint);
                                     curve.hotPointIndex = hotPoint.index;
                                     PopulatePoints();
+                                    positionCurve.CacheLengths();
                                 }
                                 if (!isCtrlPressed)
                                 {
@@ -472,6 +509,8 @@ public static class MyGUI
                         }
                         break;
                     #endregion
+                    case EditMode.Size:
+                        break;
                     default:
                         throw new System.InvalidOperationException();
                 }
