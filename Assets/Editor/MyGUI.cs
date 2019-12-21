@@ -376,6 +376,8 @@ public static class MyGUI
                         break;
                     #endregion
 
+                    case EditMode.Size:
+                        break;
                     default:
                         throw new System.InvalidOperationException();
                 }
@@ -416,6 +418,55 @@ public static class MyGUI
                                 }
                                 var currentIndexToSelect= positionCurve.GetParentVirtualIndex(hotPoint.index);
                                 curve.selectedPointsIndex.Add(currentIndexToSelect);
+                                break;
+                            case EditMode.Size:
+                                var keys = sizeCurve.keys;
+                                float splitDistanceAlongCurve = positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex,curveSplitPoint.time);
+
+                                int insertionIndex = 0;
+                                #region calculate insertion index
+                                {
+                                    if (splitDistanceAlongCurve > keys[keys.Length - 1].time)
+                                    {
+                                        insertionIndex = keys.Length;
+                                    }
+                                    else if (splitDistanceAlongCurve < keys[0].time)
+                                    {
+                                        insertionIndex = 0;
+                                    }
+                                    else
+                                    {
+                                        for (int i = 0; i < keys.Length - 1; i++)
+                                        {
+                                            if (splitDistanceAlongCurve < keys[i].time)
+                                            {
+                                                insertionIndex = i;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                #endregion
+
+                                #region insert keyframe
+                                Keyframe[] newKeys = new Keyframe[keys.Length+1];
+                                for (int i = 0; i < newKeys.Length; i++)
+                                {
+                                    if (i < insertionIndex)
+                                    {
+                                        newKeys[i] = keys[i];
+                                    } else if (i > insertionIndex)
+                                    {
+                                        newKeys[i] = keys[i - 1];
+                                    } else
+                                    {
+                                        Keyframe insertedKeyframe = new Keyframe(splitDistanceAlongCurve,sizeCurve.Evaluate(splitDistanceAlongCurve));
+                                        newKeys[i] = insertedKeyframe;
+                                    }
+                                }
+                                curve.curveSizeAnimationCurve.keys = newKeys;
+                                #endregion
+
                                 break;
                             default:
                                 throw new System.InvalidOperationException();
