@@ -66,7 +66,7 @@ public static class MeshGenerator
     }
     private static void GenerateMesh()
     {
-        Debug.Log("started thread");
+        //Debug.Log("started thread");
 
         curve.CacheSampleCurve(VertexDensity);
         var sampled = curve.GetCachedSampled();
@@ -127,7 +127,7 @@ public static class MeshGenerator
                 }
             }
         }
-        Debug.Log("finished thread");
+        //Debug.Log("finished thread");
         IsBuzy = false;
     }
 }

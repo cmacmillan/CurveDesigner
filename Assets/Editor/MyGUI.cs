@@ -128,6 +128,7 @@ public static class MyGUI
             recentlySelectedPoint = null;
             linePlaceTexture = null;
             curveSplitPoint = null;
+            float time;
             switch (curve.editMode)
             {
                 case EditMode.PositionCurve:
@@ -170,7 +171,6 @@ public static class MyGUI
                     var curveEndPoint = positionCurve[positionCurve.NumControlPoints-1];
                     foreach (var i in sizeKeys)
                     {
-                        float time;
                         if (i.time<0)
                         {
                             pointInfo = new PointInfo(curve.transform.TransformPoint(curveStartPoint+leftWorldVector*i.time),Color.magenta,linePlaceTexture,c,PointType.ValuePoint);
@@ -196,6 +196,22 @@ public static class MyGUI
                 default:
                     throw new System.InvalidOperationException();
             }
+
+            #region find split point
+            var samples = positionCurve.GetCachedSampled();
+            foreach (var i in samples)
+            {
+                i.position = curve.transform.TransformPoint(i.position);
+            }
+            int segmentIndex;
+            UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
+            foreach (var i in samples)
+            {
+                i.position = curve.transform.InverseTransformPoint(i.position);
+            }
+            curveSplitPoint = new CurveSplitPointInfo(segmentIndex, time);
+            #endregion
+
             if (curve.IsAPointSelected)
             {
                 hotPoint = points[curve.hotPointIndex];
@@ -205,21 +221,7 @@ public static class MyGUI
                 hotPoint = GetClosestPointToMouse();
                 if (hotPoint == null)
                 {
-                    var samples = positionCurve.GetCachedSampled();
-                    foreach (var i in samples)
-                    {
-                        i.position = curve.transform.TransformPoint(i.position);
-                    }
-                    int segmentIndex;
-                    float time;
-                    Debug.Log($"samples:{samples.Count}");
-                    UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
-                    foreach (var i in samples)
-                    {
-                        i.position = curve.transform.InverseTransformPoint(i.position);
-                    }
                     Vector3 pointPosition = curve.transform.TransformPoint(positionCurve.GetSegmentPositionAtTime(segmentIndex, time));
-                    curveSplitPoint = new CurveSplitPointInfo(segmentIndex,time);
                     var pointInfo = new PointInfo(pointPosition, Color.green, linePlaceTexture, -1,PointType.SplitPoint);
                     if (pointInfo.isPointOnScreen && pointInfo.distanceToMouse < lineClickDistance)
                     {
@@ -264,12 +266,16 @@ public static class MyGUI
         {
             curve.lastMeshUpdateStartTime = DateTime.Now;
             positionCurve.CacheSampleCurve();
-            Debug.Log("undo!");
+            //Debug.Log("undo!");
             //curve.positionCurve.CacheLengths();
         }
 
         Undo.undoRedoPerformed = null;
         Undo.undoRedoPerformed += OnUndo;
+        int InsertKeyframe()
+        {
+
+        }
         
         void OnDrag()
         {
@@ -334,49 +340,58 @@ public static class MyGUI
                                 positionCurve.CacheSegmentLength(pointGroupIndex);
                         }
 
-                        Keyframe[] keys = sizeCurve.keys;
-                        for (int i = 0; i < keyframes.Count; i++)
                         {
-                            var key = sizeCurve.keys[i];
-                            var data = keyframes[i];
-                            key.weightedMode = WeightedMode.Both;
-                            key.time = positionCurve.GetDistanceBySegmentIndexAndTime(data.segmentIndex,data.progressAlongSegment);
-                            keys[i] = key;
-                        }
-                        sizeCurve.keys = keys;
-                        for (int i = 0; i < keyframes.Count; i++)
-                        {
-                            var key = sizeCurve.keys[i];
-                            var data = keyframes[i];
-                            if (i > 0)
+                            Keyframe[] keys = sizeCurve.keys;
+                            for (int i = 0; i < keyframes.Count; i++)
                             {
-                                var leftX = positionCurve.GetDistanceBySegmentIndexAndTime(data.leftTangentIndex,data.leftTangentProgressAlongSegment);
-                                var leftY = data.leftTangentValue;
-                                var segmentDistance = key.time-sizeCurve.keys[i - 1].time;
-                                var leftWeight = -(leftX - key.time) / segmentDistance;
-                                key.inWeight = leftWeight;
-                                var leftXDist = key.inWeight * segmentDistance;
-                                key.inTangent = (leftY - key.value) / -leftXDist;
+                                var key = sizeCurve.keys[i];
+                                var data = keyframes[i];
+                                key.weightedMode = WeightedMode.Both;
+                                key.time = positionCurve.GetDistanceBySegmentIndexAndTime(data.segmentIndex, data.progressAlongSegment);
+                                keys[i] = key;
                             }
-                            if (i < sizeCurve.keys.Length - 1)
+                            sizeCurve.keys = keys;
+
+                            for (int i = 0; i < keyframes.Count; i++)
                             {
-                                var rightTime = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex,data.rightTangentProgressAlongSegment);
-                                var rightValue = data.rightTangentValue;
-                                var segmentDistance = sizeCurve.keys[i + 1].time - key.time;
-                                var rightXDist = rightTime - key.time;
-                                var rightWeight = rightXDist / segmentDistance;
-                                key.outWeight = rightWeight;
-                                key.outTangent = (rightValue - key.value) / rightXDist;
+                                var key = sizeCurve.keys[i];
+                                var data = keyframes[i];
+                                if (i > 0)
+                                {
+                                    var leftX = positionCurve.GetDistanceBySegmentIndexAndTime(data.leftTangentIndex, data.leftTangentProgressAlongSegment);
+                                    var leftY = data.leftTangentValue;
+                                    var segmentDistance = key.time - sizeCurve.keys[i - 1].time;
+                                    var leftWeight = -(leftX - key.time) / segmentDistance;
+                                    key.inWeight = leftWeight;
+                                    var leftXDist = key.inWeight * segmentDistance;
+                                    key.inTangent = (leftY - key.value) / -leftXDist;
+                                }
+                                if (i < sizeCurve.keys.Length - 1)
+                                {
+                                    var rightTime = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex, data.rightTangentProgressAlongSegment);
+                                    var rightValue = data.rightTangentValue;
+                                    var segmentDistance = sizeCurve.keys[i + 1].time - key.time;
+                                    var rightXDist = rightTime - key.time;
+                                    var rightWeight = rightXDist / segmentDistance;
+                                    key.outWeight = rightWeight;
+                                    key.outTangent = (rightValue - key.value) / rightXDist;
+                                }
+
+                                keys[i] = key;
                             }
-                            
-                            keys[i] = key;
+                            sizeCurve.keys = keys;
                         }
-                        sizeCurve.keys = keys;
 
                         break;
                     #endregion
 
                     case EditMode.Size:
+                        {
+                            var keys = sizeCurve.keys;
+                            var newtime = curve.positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex,curveSplitPoint.time);
+                            keys[hotPoint.index].time = newtime;
+                            sizeCurve.keys = keys;
+                        }
                         break;
                     default:
                         throw new System.InvalidOperationException();
@@ -421,52 +436,58 @@ public static class MyGUI
                                 break;
                             case EditMode.Size:
                                 var keys = sizeCurve.keys;
-                                float splitDistanceAlongCurve = positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex,curveSplitPoint.time);
-
-                                int insertionIndex = 0;
-                                #region calculate insertion index
+                                if (hotPoint.type  == PointType.SplitPoint)
                                 {
-                                    if (splitDistanceAlongCurve > keys[keys.Length - 1].time)
+                                    float splitDistanceAlongCurve = positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
+
+                                    int insertionIndex = 0;
+                                    #region calculate insertion index
                                     {
-                                        insertionIndex = keys.Length;
-                                    }
-                                    else if (splitDistanceAlongCurve < keys[0].time)
-                                    {
-                                        insertionIndex = 0;
-                                    }
-                                    else
-                                    {
-                                        for (int i = 0; i < keys.Length - 1; i++)
+                                        if (splitDistanceAlongCurve > keys[keys.Length - 1].time)
                                         {
-                                            if (splitDistanceAlongCurve < keys[i].time)
+                                            insertionIndex = keys.Length;
+                                        }
+                                        else if (splitDistanceAlongCurve < keys[0].time)
+                                        {
+                                            insertionIndex = 0;
+                                        }
+                                        else
+                                        {
+                                            for (int i = 0; i < keys.Length; i++)
                                             {
-                                                insertionIndex = i;
-                                                break;
+                                                if (splitDistanceAlongCurve < keys[i].time)
+                                                {
+                                                    insertionIndex = i;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                #endregion
+                                    #endregion
 
-                                #region insert keyframe
-                                Keyframe[] newKeys = new Keyframe[keys.Length+1];
-                                for (int i = 0; i < newKeys.Length; i++)
-                                {
-                                    if (i < insertionIndex)
+                                    #region insert keyframe
+                                    Keyframe[] newKeys = new Keyframe[keys.Length + 1];
+                                    for (int i = 0; i < newKeys.Length; i++)
                                     {
-                                        newKeys[i] = keys[i];
-                                    } else if (i > insertionIndex)
-                                    {
-                                        newKeys[i] = keys[i - 1];
-                                    } else
-                                    {
-                                        Keyframe insertedKeyframe = new Keyframe(splitDistanceAlongCurve,sizeCurve.Evaluate(splitDistanceAlongCurve));
-                                        newKeys[i] = insertedKeyframe;
+                                        if (i < insertionIndex)
+                                        {
+                                            newKeys[i] = keys[i];
+                                        }
+                                        else if (i > insertionIndex)
+                                        {
+                                            newKeys[i] = keys[i - 1];
+                                        }
+                                        else
+                                        {
+                                            Keyframe insertedKeyframe = new Keyframe(splitDistanceAlongCurve, sizeCurve.Evaluate(splitDistanceAlongCurve));
+                                            newKeys[i] = insertedKeyframe;
+                                        }
                                     }
-                                }
-                                curve.curveSizeAnimationCurve.keys = newKeys;
-                                #endregion
+                                    curve.curveSizeAnimationCurve.keys = newKeys;
+                                    #endregion
 
+                                    curve.hotPointIndex = insertionIndex;
+                                }
                                 break;
                             default:
                                 throw new System.InvalidOperationException();
