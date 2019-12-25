@@ -89,6 +89,7 @@ public static class MyGUI
     private const int plusButtonDistance = 30;
     public static void EditBezierCurve(Curve3D curve)
     {
+        curve.TryInitialize();
         var positionCurve = curve.positionCurve;
 
         var sizeCurve = curve.curveSizeAnimationCurve;
@@ -319,6 +320,7 @@ public static class MyGUI
                         insertedKeyframe.time = splitDistanceAlongCurve;
                     } else
                     {
+                        //Need to recalculate tangents here
                         insertedKeyframe= new Keyframe(splitDistanceAlongCurve, targetCurve.Evaluate(splitDistanceAlongCurve));
                     }
                     newKeys[i] = insertedKeyframe;
@@ -515,6 +517,7 @@ public static class MyGUI
                                 if (hotPoint.type == PointType.SplitPoint)
                                 {
                                     curve.hotPointIndex = InsertKeyframe(sizeCurve);
+                                    hotPoint.index = curve.hotPointIndex;
                                 }
                                 break;
                             default:
@@ -568,6 +571,17 @@ public static class MyGUI
                             if (i.hasRightTangent)
                                 Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { curve.transform.TransformPoint(i.GetWorldPositionByIndex(PGIndex.Position)), curve.transform.TransformPoint(i.GetWorldPositionByIndex(PGIndex.RightTangent)) });
                         }
+                        /*draw curve debug line
+                        var curveLen = positionCurve.GetLength();
+                        float time;
+                        var prevPoint = positionCurve.GetPositionAtDistance(0,out time);
+                        for (int i = 0; i < 100; i++)
+                        {
+                            var currPoint = positionCurve.GetPositionAtDistance((i/100.0f)*curveLen,out time);
+                            Debug.DrawLine(prevPoint, currPoint);
+                            prevPoint = currPoint;    
+                        }
+                        */
                         if (curve.IsAPointSelected)
                         {
                             hotPoint.color = Color.yellow;

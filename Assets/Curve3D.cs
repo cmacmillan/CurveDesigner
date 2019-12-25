@@ -18,6 +18,16 @@ public class Curve3D : MonoBehaviour
     public DateTime lastMeshUpdateStartTime;
     public DateTime lastMeshUpdateEndTime;
     public Mesh mesh;
+    private bool isInitialized = false;
+
+    public void TryInitialize()
+    {
+        if (!isInitialized)
+        {
+            isInitialized = true;
+            positionCurve.Initialize();
+        }
+    }
 
     [Header("Lock axis to position 0")]
     public bool lockXAxis;
@@ -94,6 +104,7 @@ public class Curve3D : MonoBehaviour
     private int oldAngleOfTube= -1;
 
     [Range(0, 360)]
+
     public int curveRotation = 360;
     [SerializeField]
     [HideInInspector]

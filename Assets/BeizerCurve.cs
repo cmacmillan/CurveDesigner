@@ -142,7 +142,10 @@ public class BeizerCurve
                 return i;
             }
         }
-        time = distance/_lengths[_lengths.Count - 1];
+        //at the end of the curve
+        if (_lengths.Count>1)
+            distance = distance - _cummulativeLengths[_lengths.Count - 2];
+        time = distance / _lengths[_lengths.Count - 1];
         return _lengths.Count - 1;
     }
     public List<SampleFragment> GetCachedSampled(float? density=null)
