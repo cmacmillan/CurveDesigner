@@ -15,8 +15,12 @@ public class BeizerCurve
     public bool isCurveOutOfDate = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour;
     public List<SampleFragment> cachedFragments = null;
+    [SerializeField]
+    [HideInInspector]
     private List<float> _lengths = null;
     //Cummulative lengths, where index 0 is the length of the 0th item, index 1  is the length of the 0th+1st etc.
+    [SerializeField]
+    [HideInInspector]
     private List<float> _cummulativeLengths = null;
     
     public BeizerCurve() { }

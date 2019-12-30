@@ -144,6 +144,7 @@ public static class MyGUI
                         points.Add(new PointInfo(curve.transform.TransformPoint(positionCurve[i]), color, tex, i,PointType.Position));
                     }
                     {//Debug size tangent stuff
+                        positionCurve.CacheLengths();
                         for (int i = 0; i < sizeCurve.keys.Length; i++)
                         {
                             var key = sizeCurve.keys[i];
@@ -478,7 +479,10 @@ public static class MyGUI
                                     var leftWeight = -(leftX - key.time) / segmentDistance;
                                     key.inWeight = leftWeight;
                                     var leftXDist = key.inWeight * segmentDistance;//Becomes 0 = NaN
-                                    key.inTangent = (leftY - key.value) / -leftXDist;
+                                    if (leftXDist == 0)
+                                        key.inTangent = 0;
+                                    else
+                                        key.inTangent = (leftY - key.value) / -leftXDist;
                                 }
                                 if (i < sizeCurve.keys.Length - 1)
                                 {
@@ -488,7 +492,10 @@ public static class MyGUI
                                     var rightXDist = rightTime - key.time;//Becomes 0 = NaN
                                     var rightWeight = rightXDist / segmentDistance;
                                     key.outWeight = rightWeight;
-                                    key.outTangent = (rightValue - key.value) / rightXDist;
+                                    if (rightXDist == 0)
+                                        key.outTangent = 0;
+                                    else
+                                        key.outTangent = (rightValue - key.value) / rightXDist;
                                 }
 
                                 keys[i] = key;
