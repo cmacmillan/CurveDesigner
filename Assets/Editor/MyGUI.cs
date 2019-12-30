@@ -143,7 +143,10 @@ public static class MyGUI
                         var tex = isPositionPoint ? curve.circleIcon : curve.squareIcon;
                         points.Add(new PointInfo(curve.transform.TransformPoint(positionCurve[i]), color, tex, i,PointType.Position));
                     }
-                    {//Debug size tangent stuff
+
+                    #region Debug size tangent stuff
+                    {
+                        /*
                         positionCurve.CacheLengths();
                         for (int i = 0; i < sizeCurve.keys.Length; i++)
                         {
@@ -176,7 +179,10 @@ public static class MyGUI
                                 points.Add(pointInfo2);
                             }
                         }
+                        */
                     }
+                    #endregion
+
                     PointInfo pointInfo;
                     if (positionCurve.NumControlPoints == 0)
                     {

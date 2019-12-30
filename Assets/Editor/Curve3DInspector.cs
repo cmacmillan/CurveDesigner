@@ -48,9 +48,12 @@ public class Curve3DInspector : Editor
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;
         }
+        //GUI.color = Color.white;
+        //EditorGUI.CurveField(new Rect(0, 0, 20, 20),curve.curveSizeAnimationCurve);
         GUILayout.EndHorizontal();
         GUILayout.EndArea();
 
         Handles.EndGUI();
+
     }
 }
