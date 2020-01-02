@@ -353,7 +353,7 @@ public class BeizerCurve
     }
     #endregion
 
-    public PGIndex GetPointTypeByIndex(int virtualIndex)
+    public static PGIndex GetPointTypeByIndex(int virtualIndex)
     {
         int offsetIndex = virtualIndex-GetParentVirtualIndex(virtualIndex);
         return (PGIndex)offsetIndex;
@@ -377,7 +377,20 @@ public class BeizerCurve
         return PointGroups[GetPointGroupIndex(virtualIndex)];
     }
 
-    public int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
-    public int GetParentVirtualIndex(int childVirtualIndex) { return GetPointGroupIndex(childVirtualIndex) * 3; }
-    public int GetPointGroupIndex(int childIndex) { return ((childIndex + 1) / 3); }
+    public static int GetVirtualIndexByType(int parentPointGroupIndex,PGIndex type)
+    {
+        int retrVal = parentPointGroupIndex * 3;
+        if (type== PGIndex.LeftTangent)
+        {
+            return retrVal - 1;
+        } else if (type == PGIndex.RightTangent)
+        {
+            return retrVal+ 1;
+        }
+        return retrVal;
+    }
+
+    public static int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
+    public static int GetParentVirtualIndex(int childVirtualIndex) { return GetPointGroupIndex(childVirtualIndex) * 3; }
+    public static int GetPointGroupIndex(int childIndex) { return ((childIndex + 1) / 3); }
 }
