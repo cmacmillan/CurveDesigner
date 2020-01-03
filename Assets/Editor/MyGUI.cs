@@ -73,7 +73,7 @@ public static class MyGUI
             case PointType.ValuePointRightTangent:
                 return PGIndex.RightTangent;
             default:
-                throw new NotImplementedException();
+                throw new ArgumentException();
         }
     }
     private class PointInfo
@@ -86,17 +86,17 @@ public static class MyGUI
         public float screenDepth;
         public bool isPointOnScreen;
         public float distanceToMouse;
-        public int index;
-        public int extraIndex;
-        public PointInfo(Vector3 worldPosition, Color color,Texture2D texture,int index,PointType type,int extraIndex=-1)
+        public int indexInList;
+        public int dataIndex;
+        public PointInfo(Vector3 worldPosition, Color color,Texture2D texture,int indexInList,PointType type,int dataIndex=-1)
         {
             var MousePos = Event.current.mousePosition;
             this.color = color;
             this.worldPosition = worldPosition; 
             this.texture = texture;
-            this.index = index;
+            this.indexInList = indexInList;
             this.type = type;
-            this.extraIndex = extraIndex;
+            this.dataIndex = dataIndex;
             this.isPointOnScreen = WorldToGUISpace(worldPosition, out this.guiPos, out this.screenDepth);
             distanceToMouse = Vector2.Distance(this.guiPos,MousePos);
         }
@@ -325,17 +325,17 @@ public static class MyGUI
         Undo.undoRedoPerformed = null;
         Undo.undoRedoPerformed += OnUndo;
 
-        int InsertKeyframe(AnimationCurve targetCurve,Keyframe? frame=null)
+        int InsertKeyframeAtSplitPoint(AnimationCurve targetCurve,Keyframe? frame=null)
         {
             Keyframe[] keys = targetCurve.keys;
-            float splitDistanceAlongCurve= positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
+            float pointDistanceAlongCurve= positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
             int insertionIndex = 0;
             {
-                if (splitDistanceAlongCurve >= keys[keys.Length - 1].time)
+                if (pointDistanceAlongCurve >= keys[keys.Length - 1].time)
                 {
                     insertionIndex = keys.Length;
                 }
-                else if (splitDistanceAlongCurve < keys[0].time)
+                else if (pointDistanceAlongCurve < keys[0].time)
                 {
                     insertionIndex = 0;
                 }
@@ -343,7 +343,7 @@ public static class MyGUI
                 {
                     for (int i = 0; i < keys.Length; i++)
                     {
-                        if (splitDistanceAlongCurve < keys[i].time)
+                        if (pointDistanceAlongCurve < keys[i].time)
                         {
                             insertionIndex = i;
                             break;
@@ -368,11 +368,11 @@ public static class MyGUI
                     if (frame.HasValue)
                     {
                         insertedKeyframe = frame.Value;
-                        insertedKeyframe.time = splitDistanceAlongCurve;
+                        insertedKeyframe.time = pointDistanceAlongCurve;
                     } else
                     {
                         //Need to recalculate tangents here
-                        insertedKeyframe= new Keyframe(splitDistanceAlongCurve, targetCurve.Evaluate(splitDistanceAlongCurve));
+                        insertedKeyframe= new Keyframe(pointDistanceAlongCurve, targetCurve.Evaluate(pointDistanceAlongCurve));
                     }
                     newKeys[i] = insertedKeyframe;
                 }
@@ -398,14 +398,16 @@ public static class MyGUI
             targetCurve.keys = newKeys;
             return retr;
         }
-        string PrintKeyframeTime(AnimationCurve targetCurve)
+
+        void MoveLeftTangent(AnimationCurve targetCurve,int index)
         {
-            string str = "";
-            foreach (var i in targetCurve.keys)
-            {
-                str += i.value + "|";
-            }
-            return str;
+            Keyframe[] keys = targetCurve.keys;
+            float pointDistanceAlongCurve= positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
+            var prevPointDistance = keys[index - 1];
+            var currPointDistance = keys[index];
+            var previousWeight = keys[index].inWeight;
+            var weight = (currPointDistance.time - pointDistanceAlongCurve) / (currPointDistance.time-prevPointDistance.time);
+            targetCurve.keys = keys;
         }
 
         void OnDrag()
@@ -415,15 +417,15 @@ public static class MyGUI
                 switch (curve.editMode)
                 {
                     case EditMode.PositionCurve:
-                        var oldPointPosition = positionCurve[hotPoint.index];
+                        var oldPointPosition = positionCurve[hotPoint.indexInList];
                         var newPointPosition = curve.transform.InverseTransformPoint(GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth));
 
                         #region update size curve
                         //Build keyframe info 
                         List<KeyframeInfo> keyframes = new List<KeyframeInfo>(sizeCurve.keys.Length);
-                        var modifiedPointType = BeizerCurve.GetPointTypeByIndex(hotPoint.index);
-                        var pointGroup = positionCurve.GetPointGroupByIndex(hotPoint.index);
-                        var pointGroupIndex = BeizerCurve.GetPointGroupIndex(hotPoint.index);
+                        var modifiedPointType = BeizerCurve.GetPointTypeByIndex(hotPoint.indexInList);
+                        var pointGroup = positionCurve.GetPointGroupByIndex(hotPoint.indexInList);
+                        var pointGroupIndex = BeizerCurve.GetPointGroupIndex(hotPoint.indexInList);
                         for (int i = 0; i < sizeCurve.keys.Length; i++)
                         {
                             var key = sizeCurve.keys[i];
@@ -454,7 +456,7 @@ public static class MyGUI
                         }
 
                         //////Actually update the point's position///////
-                        positionCurve[hotPoint.index] = newPointPosition;
+                        positionCurve[hotPoint.indexInList] = newPointPosition;
                         /////////////////////////////////////////////////
 
                         {//Update curve length
@@ -525,17 +527,20 @@ public static class MyGUI
                         {
                             if (hotPoint.type == PointType.ValuePoint)
                             {
-                                var key = RemoveKeyframe(sizeCurve,hotPoint.extraIndex);
-                                var extrIndex = InsertKeyframe(sizeCurve, key);
+                                var key = RemoveKeyframe(sizeCurve,hotPoint.dataIndex);
+                                var extrIndex = InsertKeyframeAtSplitPoint(sizeCurve, key);
                                 var index = BeizerCurve.GetVirtualIndexByType(extrIndex, PointTypeToPGIndex(PointType.ValuePoint));
                                 curve.hotPointIndex = index;
-                                hotPoint.index = index;
+                                hotPoint.indexInList = index;
                             }
-                            else if (hotPoint.type == PointType.ValuePointLeftTangent || hotPoint.type == PointType.ValuePointRightTangent)
+                            else if (hotPoint.type == PointType.ValuePointLeftTangent)
+                            {
+                                MoveLeftTangent(sizeCurve,hotPoint.dataIndex);
+                            }
+                            else if (hotPoint.type == PointType.ValuePointRightTangent)
                             {
                                 throw new NotImplementedException();
                             }
-                            //Currently not selecting the point, probably need to remove the old hot point and use the current one
                         }
                         break;
                     default:
@@ -568,14 +573,14 @@ public static class MyGUI
                     if (hotPoint != null)
                     {
                         GUIUtility.hotControl = controlID;
-                        curve.hotPointIndex = hotPoint.index;
+                        curve.hotPointIndex = hotPoint.indexInList;
                         switch (curve.editMode)
                         {
                             case EditMode.PositionCurve:
                                 if (hotPoint.type== PointType.SplitPoint)
                                 {
-                                    hotPoint.index = positionCurve.InsertSegmentAfterIndex(curveSplitPoint);
-                                    curve.hotPointIndex = hotPoint.index;
+                                    hotPoint.indexInList = positionCurve.InsertSegmentAfterIndex(curveSplitPoint);
+                                    curve.hotPointIndex = hotPoint.indexInList;
                                     PopulatePoints();
                                     positionCurve.CacheLengths();
                                 }
@@ -583,19 +588,19 @@ public static class MyGUI
                                 {
                                     curve.selectedPointsIndex.Clear();
                                 }
-                                var currentIndexToSelect= BeizerCurve.GetParentVirtualIndex(hotPoint.index);
+                                var currentIndexToSelect= BeizerCurve.GetParentVirtualIndex(hotPoint.indexInList);
                                 curve.selectedPointsIndex.Add(currentIndexToSelect);
                                 break;
                             case EditMode.Size:
                                 if (hotPoint.type == PointType.SplitPoint)
                                 {
-                                    var extraIndex = InsertKeyframe(sizeCurve);
-                                    hotPoint.extraIndex = extraIndex;
+                                    var extraIndex = InsertKeyframeAtSplitPoint(sizeCurve);
+                                    hotPoint.dataIndex = extraIndex;
                                     hotPoint.type = PointType.ValuePoint;//We've inserted a point, so now we are editing a value point
 
                                     var index = BeizerCurve.GetVirtualIndexByType(extraIndex,PointTypeToPGIndex(PointType.ValuePoint));
                                     curve.hotPointIndex = index;
-                                    hotPoint.index = index;
+                                    hotPoint.indexInList = index;
                                 }
                                 break;
                             default:
@@ -664,10 +669,10 @@ public static class MyGUI
                         {
                             hotPoint.color = Color.yellow;
                             var renderPoint = points[curve.hotPointIndex];
-                            var pointGroup = positionCurve.GetPointGroupByIndex(renderPoint.index);
+                            var pointGroup = positionCurve.GetPointGroupByIndex(renderPoint.indexInList);
                             if (pointGroup.GetIsPointLocked())
                             {
-                                switch (BeizerCurve.GetPointTypeByIndex(hotPoint.index))
+                                switch (BeizerCurve.GetPointTypeByIndex(hotPoint.indexInList))
                                 {
                                     case PGIndex.Position:
                                         break;
@@ -691,7 +696,7 @@ public static class MyGUI
                             foreach (var recentlySelectedPointIndex in curve.selectedPointsIndex)
                             {
                                 var renderPoint = points[recentlySelectedPointIndex];
-                                var pointGroup = positionCurve.GetPointGroupByIndex(renderPoint.index);
+                                var pointGroup = positionCurve.GetPointGroupByIndex(renderPoint.indexInList);
                                 renderPoint.color = Color.yellow;
                                 if (pointGroup.hasLeftTangent)
                                     points[recentlySelectedPointIndex - 1].color = Color.yellow;
