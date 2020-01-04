@@ -4,7 +4,19 @@ using UnityEngine;
 
 public static class KeyframeExtensionMethods
 {
-    public static float GetKeyFrameX(this AnimationCurve curve, int index,PGIndex type,bool GetRelativePosition=false)
+    public static float SegmentLength(this AnimationCurve curve,int index, PGIndex type)
+    {
+        switch (type)
+        {
+            case PGIndex.LeftTangent:
+                return curve[index].time - curve[index - 1].time;
+            case PGIndex.RightTangent:
+                return curve[index + 1].time - curve[index].time;
+            default:
+                throw new System.ArgumentException();
+        }
+    }
+    public static float GetKeyframeX(this AnimationCurve curve, int index,PGIndex type,bool GetRelativePosition=false)
     {
         float segmentLength;
         switch (type)
@@ -14,52 +26,79 @@ public static class KeyframeExtensionMethods
             case PGIndex.LeftTangent:
                 if (index <= 0)
                     throw new System.ArgumentException();
-                segmentLength = curve[index].time - curve[index - 1].time;
+                segmentLength = SegmentLength(curve, index, PGIndex.LeftTangent);
                 return (GetRelativePosition?0:curve[index].time) - segmentLength * curve[index].inWeight;
             case PGIndex.RightTangent:
                 if (index >= curve.length - 1)
                     throw new System.ArgumentException();
-                segmentLength = curve[index+1].time - curve[index].time;
-                return (GetRelativePosition?0:curve[index].time) + segmentLength * curve[index].inWeight;
+                segmentLength = SegmentLength(curve,index,PGIndex.RightTangent);
+                return (GetRelativePosition?0:curve[index].time) + segmentLength * curve[index].outWeight;
             default:
                 throw new System.ArgumentException();
         }
     }
-    public static float GetKeyframeY(this AnimationCurve curve,int index, PGIndex type)
+    public static float GetKeyframeY(this AnimationCurve curve,int index, PGIndex type,bool GetRelativePosition=false)
     {
-        var relativeKeyframeX = GetKeyFrameX(curve, index, type,true);
+        var relativeKeyframeX = GetKeyframeX(curve, index, type,true);
         switch (type)
         {
             case PGIndex.Position:
                 return curve[index].value;
             case PGIndex.LeftTangent:
+                return (GetRelativePosition?0:curve[index].value) + relativeKeyframeX * curve[index].inTangent;
             case PGIndex.RightTangent:
-                return curve[index].value + relativeKeyframeX * curve[index].inTangent;
+                return (GetRelativePosition?0:curve[index].value) + relativeKeyframeX * curve[index].outTangent;
             default:
                 throw new System.ArgumentException();
         }
     }
 
-    public static void SetKeyframeY(this AnimationCurve curve, int index, PGIndex type, float value)
+    public static void SetKeyframeX(this AnimationCurve curve, int index, PGIndex type, float value, bool setRelativeValue = false)
     {
         var keys = curve.keys;
         var key = curve[index];
+        if (setRelativeValue)
+            value = value + key.time;
+        var yBefore = GetKeyframeY(curve, index, type);
+        float segmentLength;
+        switch (type)
+        {
+            case PGIndex.Position:
+                key.time = value;
+                break;
+            case PGIndex.LeftTangent:
+                segmentLength = SegmentLength(curve, index, PGIndex.LeftTangent);
+                key.inWeight = (key.time - value) / segmentLength;
+                break;
+            case PGIndex.RightTangent:
+                segmentLength = SegmentLength(curve, index, PGIndex.RightTangent);
+                key.outWeight = (value - key.time) / segmentLength;
+                break;
+        }
+        SetKeyframeY(curve,index,type,yBefore);
+        keys[index] = key;
+        curve.keys = keys;
+    }
+
+    public static void SetKeyframeY(this AnimationCurve curve, int index, PGIndex type, float value,bool setRelativeValue=false)
+    {
+        var keys = curve.keys;
+        var key = curve[index];
+        if (setRelativeValue)
+            value = value + key.value;
         switch (type)
         {
             case PGIndex.Position:
                 key.value = value;
                 break;
+            case PGIndex.LeftTangent:
+                key.inTangent = (key.value-value) / (SegmentLength(curve,index,PGIndex.LeftTangent)*key.inWeight);
+                break;
+            case PGIndex.RightTangent:
+                key.outTangent= (value-key.value) / (SegmentLength(curve,index,PGIndex.RightTangent)*key.outWeight);
+                break;
         }
         keys[index] = key;
         curve.keys = keys;
     }
-    /*public static float GetY(this Keyframe frame)
-    {
-    }
-    public static float SetX(this Keyframe frame)
-    {
-    }
-    public static float SetY(this Keyframe frame)
-    {
-    }*/
 }
