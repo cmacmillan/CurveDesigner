@@ -167,12 +167,31 @@ public static class MeshGenerator
                     );
             }
             //Then we gotta connect the ends as well
-        }
+            int lastRingIndex = numRings * RingPointCount;
+            int firstRingIndex = 0;
+            for (int j = 0; j < RingPointCount; j++)
+            {
+                if (!shouldDrawConnectingFace && (j + 1) >= RingPointCount)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
+                    continue;
+                DrawQuad(
+                        firstRingIndex + ((j + 1) % RingPointCount),
+                        firstRingIndex+ j,
+                        firstRingIndex + ((j + 1) % RingPointCount) + interiorBase,
+                        firstRingIndex + j + interiorBase
+                    );
+                DrawQuad(
+                        lastRingIndex+ j,
+                        lastRingIndex + ((j + 1) % RingPointCount),
+                        lastRingIndex + j + interiorBase,
+                        lastRingIndex + ((j + 1) % RingPointCount) + interiorBase
+                    );
+    }
+}
         switch (TubeType)
         {
             case TubeType.Solid:
-                numVerts= RingPointCount * sampled.Count;
-                numTris=RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
+                numVerts = RingPointCount * sampled.Count;
+                numTris = RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                 shouldDrawConnectingFace = true;
                 InitLists();
                 GenerateVertexLayer(true);
