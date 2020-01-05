@@ -16,6 +16,8 @@ public static class MeshGenerator
 
     public static BeizerCurve curve;
 
+    public static TubeType TubeType;
+
     public static AnimationCurve sizeCurve;
 
     public static int RingPointCount = 8;
@@ -23,6 +25,7 @@ public static class MeshGenerator
     public static float VertexDensity=1.0f;
     public static float TubeAngle = 360.0f;
     public static float Rotation = 0.0f;
+    public static float TubeThickness = 0.0f;
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -38,7 +41,9 @@ public static class MeshGenerator
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
             MeshGenerator.TubeAngle = curve.angleOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
+            MeshGenerator.TubeType = curve.tubeType;
             MeshGenerator.sizeCurve = Curve3D.CopyAnimationCurve(curve.curveSizeAnimationCurve);
+            MeshGenerator.TubeThickness = curve.tubeThickness;
 
             Thread thread = new Thread(GenerateMesh);
             thread.Start();
@@ -71,21 +76,34 @@ public static class MeshGenerator
         curve.CacheSampleCurve(VertexDensity);
         var sampled = curve.GetCachedSampled();
 
-        int numVerts = RingPointCount * sampled.Count;
-        InitOrClear(ref vertices, numVerts);
+        int numVerts;
+        int numTris;
         int numRings = sampled.Count - 1;
-        int numTris = RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
+        switch (TubeType)
+        {
+            case TubeType.Hollow:
+                numVerts = RingPointCount * sampled.Count * 2;
+                numTris = RingPointCount * numRings * 6 * 2;
+                break;
+            case TubeType.Solid:
+                numVerts= RingPointCount * sampled.Count;
+                numTris=RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
+                break;
+            default:
+                throw new System.ArgumentException();
+        }
+        InitOrClear(ref vertices, numVerts);
         InitOrClear(ref triangles,numTris);
-
-        {//generate verts
+        void GenerateLayer(bool isExterior){//generate verts
             float distanceFromFull = 360.0f - TubeAngle;
-            void GenerateRing(int i, SampleFragment startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
+            void GenerateRing(SampleFragment startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
-                int ringIndex = i * RingPointCount;
-                //Old Method: Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
+                //Old Method: 
+                //Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
                 Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
                 previousTangent = tangentVect;
-                var size = sizeCurve.Evaluate(startPoint.distanceAlongCurve);
+                float offset = (isExterior ? .5f :-.5f)*(TubeThickness);
+                var size = sizeCurve.Evaluate(startPoint.distanceAlongCurve)+offset;
                 for (int j = 0; j < RingPointCount; j++)
                 {
                     float theta = (TubeAngle * j / (float)RingPointCount) + distanceFromFull / 2 + Rotation;
@@ -96,10 +114,20 @@ public static class MeshGenerator
             Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (sampled[1].position - sampled[0].position).normalized) * Vector3.right;
             for (int i = 0; i < sampled.Count - 1; i++)
             {
-                GenerateRing(i, sampled[i], (sampled[i + 1].position - sampled[i].position).normalized, ref lastTangent);
+                GenerateRing(sampled[i], (sampled[i + 1].position - sampled[i].position).normalized, ref lastTangent);
             }
             int finalIndex = sampled.Count- 1;
-            GenerateRing(finalIndex, sampled[finalIndex], (sampled[finalIndex].position - sampled[finalIndex - 1].position).normalized, ref lastTangent);
+            GenerateRing(sampled[finalIndex], (sampled[finalIndex].position - sampled[finalIndex - 1].position).normalized, ref lastTangent);
+        }
+        switch (TubeType)
+        {
+            case TubeType.Solid:
+                GenerateLayer(true);
+                break;
+            case TubeType.Hollow:
+                GenerateLayer(true);
+                GenerateLayer(false);
+                break;
         }
         {//generate tris
             void DrawQuad(int ring1Point1, int ring1Point2, int ring2Point1, int ring2Point2)

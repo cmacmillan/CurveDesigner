@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class Curve3D : MonoBehaviour
 {
-    public CurveType type;
     public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
     public Texture2D lineTex;
@@ -110,6 +109,22 @@ public class Curve3D : MonoBehaviour
     [HideInInspector]
     private int oldCurveRotation= -1;
 
+    [Min(0)]
+    public float tubeThickness = .1f;
+    [HideInInspector]
+    [SerializeField]
+    private float oldTubeThickness = -1;
+
+    public CurveType type = CurveType.Tube;
+    [HideInInspector]
+    [SerializeField]
+    private CurveType oldType;
+
+    public TubeType tubeType = TubeType.Hollow;
+    [SerializeField]
+    [HideInInspector]
+    private TubeType oldTubeType;
+
     public bool HaveCurveSettingsChanged()
     {
         bool CheckField<T>(T field, ref T oldField)
@@ -131,12 +146,18 @@ public class Curve3D : MonoBehaviour
             return false;
         }
         bool retr = false;
+
         retr|=CheckField(ringPointCount, ref oldRingPointCount);
         retr|=CheckField(curveVertexDensity, ref oldCurveVertexDensity);
         retr|=CheckField(curveRadius, ref oldCurveRadius);
         retr|=CheckField(angleOfTube, ref oldAngleOfTube);
         retr|=CheckField(curveRotation, ref oldCurveRotation);
+        retr|=CheckField(tubeThickness, ref oldTubeThickness);
+        retr|=CheckField(type, ref oldType);
+        retr|=CheckField(tubeType, ref oldTubeType);
+
         retr |= CheckAnimationCurve(curveSizeAnimationCurve,ref _oldCurveSizeAnimationCurve);
+
         return retr;
     }
 
@@ -191,4 +212,9 @@ public enum CurveType
     Tube = 0,
     Flat = 1,
     DoubleBeizer = 2,
+}
+public enum TubeType
+{
+    Hollow = 0,
+    Solid = 1,
 }
