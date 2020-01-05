@@ -88,7 +88,7 @@ public static class MeshGenerator
                 Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
                 previousTangent = tangentVect;
                 float offset = (isExterior ? .5f :-.5f)*(TubeThickness);
-                var size = sizeCurve.Evaluate(startPoint.distanceAlongCurve)+offset;
+                var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceAlongCurve) + offset);
                 for (int j = 0; j < RingPointCount; j++)
                 {
                     float theta = (TubeAngle * j / (float)RingPointCount) + distanceFromFull / 2 + Rotation;
@@ -118,7 +118,7 @@ public static class MeshGenerator
         void TrianglifyLayer(bool isExterior)
         {//generate tris
             int basePoint = isExterior ? 0 :numVerts/2;
-            for (int i = basePoint; i < sampled.Count- + basePoint; i++)
+            for (int i = 0; i < numRings; i++)
             {
                 int ringIndex = i * RingPointCount;
                 int nextRingIndex = ringIndex + RingPointCount;
@@ -128,16 +128,16 @@ public static class MeshGenerator
                         continue;
                     if (isExterior)
                         DrawQuad(
-                            ringIndex + j,
-                            ringIndex + ((j + 1) % RingPointCount),
-                            nextRingIndex + j,
-                            nextRingIndex + ((j + 1) % RingPointCount));
+                            ringIndex + j+basePoint,
+                            ringIndex + ((j + 1) % RingPointCount)+basePoint,
+                            nextRingIndex + j+basePoint,
+                            nextRingIndex + ((j + 1) % RingPointCount)+basePoint);
                     else //flipped
                         DrawQuad(
-                            ringIndex + ((j + 1) % RingPointCount),
-                            ringIndex + j,
-                            nextRingIndex + ((j + 1) % RingPointCount),
-                            nextRingIndex + j);
+                            ringIndex + ((j + 1) % RingPointCount)+basePoint,
+                            ringIndex + j+basePoint,
+                            nextRingIndex + ((j + 1) % RingPointCount)+basePoint,
+                            nextRingIndex + j+basePoint);
                 }
             }
         }
@@ -159,6 +159,12 @@ public static class MeshGenerator
                         interiorBase+ringIndex,
                         interiorBase+nextRingIndex
                     );
+                DrawQuad(
+                        nextRingIndex+RingPointCount-1,
+                        ringIndex+RingPointCount-1,
+                        interiorBase+nextRingIndex+RingPointCount-1,
+                        interiorBase+ringIndex+RingPointCount-1
+                    );
             }
             //Then we gotta connect the ends as well
         }
@@ -167,7 +173,7 @@ public static class MeshGenerator
             case TubeType.Solid:
                 numVerts= RingPointCount * sampled.Count;
                 numTris=RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
-                shouldDrawConnectingFace = false;
+                shouldDrawConnectingFace = true;
                 InitLists();
                 GenerateVertexLayer(true);
                 TrianglifyLayer(true);
@@ -175,7 +181,7 @@ public static class MeshGenerator
             case TubeType.Hollow:
                 numVerts = RingPointCount * sampled.Count * 2;
                 numTris = RingPointCount * numRings * 6 * 2;
-                shouldDrawConnectingFace = true;
+                shouldDrawConnectingFace = false;
                 InitLists();
                 GenerateVertexLayer(true);
                 GenerateVertexLayer(false);
