@@ -467,7 +467,7 @@ public static class MyGUI
                                 var key = sizeCurve.keys[i];
                                 var data = keyframes[i];
                                 key.weightedMode = WeightedMode.Both;
-                                key.time = GetSplitPointDistance();
+                                key.time = positionCurve.GetDistanceBySegmentIndexAndTime(data.segmentIndex, data.progressAlongSegment);
                                 keys[i] = key;
                             }
                             sizeCurve.keys = keys;
@@ -478,14 +478,14 @@ public static class MyGUI
                                 var data = keyframes[i];
                                 if (i > 0)
                                 {
-                                    var leftX = GetSplitPointDistance();
+                                    var leftX = positionCurve.GetDistanceBySegmentIndexAndTime(data.leftTangentIndex, data.leftTangentProgressAlongSegment);
                                     var leftY = data.leftTangentValue;
                                     sizeCurve.SetKeyframeX(i,PGIndex.LeftTangent,leftX);
                                     sizeCurve.SetKeyframeY(i,PGIndex.LeftTangent,leftY);
                                 }
                                 if (i < sizeCurve.keys.Length - 1)
                                 {
-                                    var rightX = GetSplitPointDistance();
+                                    var rightX = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex, data.rightTangentProgressAlongSegment);
                                     var rightY = data.rightTangentValue;
                                     sizeCurve.SetKeyframeX(i, PGIndex.RightTangent, rightX);
                                     sizeCurve.SetKeyframeY(i, PGIndex.RightTangent,rightY);
