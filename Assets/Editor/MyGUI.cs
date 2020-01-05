@@ -488,18 +488,14 @@ public static class MyGUI
                                 {
                                     var leftX = positionCurve.GetDistanceBySegmentIndexAndTime(data.leftTangentIndex, data.leftTangentProgressAlongSegment);
                                     var leftY = data.leftTangentValue;
-                                    var segmentDistance = key.time - sizeCurve.keys[i - 1].time;
-                                    var leftWeight = -(leftX - key.time) / segmentDistance;
-                                    key.inWeight = leftWeight;
+                                    sizeCurve.SetKeyframeX(i,PGIndex.LeftTangent,leftX);
                                     sizeCurve.SetKeyframeY(i,PGIndex.LeftTangent,leftY);
                                 }
                                 if (i < sizeCurve.keys.Length - 1)
                                 {
                                     var rightX = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex, data.rightTangentProgressAlongSegment);
                                     var rightY = data.rightTangentValue;
-                                    var segmentDistance = sizeCurve.keys[i + 1].time - key.time;
-                                    var rightWeight = rightX - key.time / segmentDistance;
-                                    key.outWeight = rightWeight;
+                                    sizeCurve.SetKeyframeX(i, PGIndex.RightTangent, rightX);
                                     sizeCurve.SetKeyframeY(i, PGIndex.RightTangent,rightY);
                                 }
 
