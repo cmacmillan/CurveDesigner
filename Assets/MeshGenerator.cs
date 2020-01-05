@@ -115,6 +115,12 @@ public static class MeshGenerator
             triangles.Add(side1Point2);
             triangles.Add(side2Point2);
         }
+        void DrawTri(int point1, int point2, int point3)
+        {
+            triangles.Add(point1);
+            triangles.Add(point2);
+            triangles.Add(point3);
+        }
         void TrianglifyLayer(bool isExterior)
         {//generate tris
             int basePoint = isExterior ? 0 :numVerts/2;
@@ -187,6 +193,41 @@ public static class MeshGenerator
                     );
     }
 }
+        void CreateTubeEndPlates()
+        {
+            //center point is average of ring
+            int AddRingCenterVertexFromAverage(int baseIndex)
+            {
+                Vector3 average= Vector3.zero;
+                for (int i = 0; i < RingPointCount; i++)
+                    average += vertices[i+baseIndex];
+                average = average/ RingPointCount;
+                vertices.Add(average);
+                return vertices.Count - 1;
+            }
+            int startRingBaseIndex = 0;
+            int endRingBaseIndex = numRings* RingPointCount;
+            void TrianglifyRingToCenter(int baseIndex,int centerIndex,bool invert)
+            {
+                for (int i = 0; i < RingPointCount; i++)
+                {
+                    if (invert)
+                        DrawTri(
+                            baseIndex + i,
+                            centerIndex,
+                            baseIndex + ((i + 1) % RingPointCount)
+                            );
+                    else
+                        DrawTri(
+                            baseIndex + i,
+                            baseIndex + ((i + 1) % RingPointCount),
+                            centerIndex
+                            );
+                }
+            }
+            TrianglifyRingToCenter(startRingBaseIndex, AddRingCenterVertexFromAverage(startRingBaseIndex),true);
+            TrianglifyRingToCenter(endRingBaseIndex, AddRingCenterVertexFromAverage(endRingBaseIndex),false);
+        }
         switch (TubeType)
         {
             case TubeType.Solid:
@@ -196,6 +237,7 @@ public static class MeshGenerator
                 InitLists();
                 GenerateVertexLayer(true);
                 TrianglifyLayer(true);
+                CreateTubeEndPlates();  
                 break;
             case TubeType.Hollow:
                 numVerts = RingPointCount * sampled.Count * 2;
