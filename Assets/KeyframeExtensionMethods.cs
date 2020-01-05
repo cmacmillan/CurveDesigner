@@ -68,11 +68,11 @@ public static class KeyframeExtensionMethods
                 break;
             case PGIndex.LeftTangent:
                 segmentLength = SegmentLength(curve, index, PGIndex.LeftTangent);
-                key.inWeight = (key.time - value) / segmentLength;
+                key.inWeight = Mathf.Clamp01((key.time - value) / segmentLength);
                 break;
             case PGIndex.RightTangent:
                 segmentLength = SegmentLength(curve, index, PGIndex.RightTangent);
-                key.outWeight = (value - key.time) / segmentLength;
+                key.outWeight = Mathf.Clamp01((value - key.time) / segmentLength);
                 break;
         }
         SetKeyframeY(curve,index,type,yBefore);
@@ -92,10 +92,16 @@ public static class KeyframeExtensionMethods
                 key.value = value;
                 break;
             case PGIndex.LeftTangent:
-                key.inTangent = (key.value-value) / (SegmentLength(curve,index,PGIndex.LeftTangent)*key.inWeight);
+                if (key.inWeight == 0)
+                    key.inTangent = 0;//avoid divide by zero, we lose the tangent value if you set the weight to 0
+                else
+                    key.inTangent = (key.value - value) / (SegmentLength(curve, index, PGIndex.LeftTangent) * key.inWeight);
                 break;
             case PGIndex.RightTangent:
-                key.outTangent= (value-key.value) / (SegmentLength(curve,index,PGIndex.RightTangent)*key.outWeight);
+                if (key.outWeight == 0)
+                    key.outTangent = 0;//avoid divide by zero, we lose the tangent value if you set the weight to 0
+                else
+                    key.outTangent = (value-key.value) / (SegmentLength(curve,index,PGIndex.RightTangent)*key.outWeight);
                 break;
         }
         keys[index] = key;

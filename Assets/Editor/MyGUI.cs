@@ -403,11 +403,13 @@ public static class MyGUI
         {
             Keyframe[] keys = targetCurve.keys;
             float pointDistanceAlongCurve= positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
-            var prevPointDistance = keys[index - 1];
-            var currPointDistance = keys[index];
-            var previousWeight = keys[index].inWeight;
-            var weight = (currPointDistance.time - pointDistanceAlongCurve) / (currPointDistance.time-prevPointDistance.time);
-            targetCurve.keys = keys;
+            targetCurve.SetKeyframeX(index, PGIndex.LeftTangent, pointDistanceAlongCurve);
+        }
+        void MoveRightTangent(AnimationCurve targetCurve,int index)
+        {
+            Keyframe[] keys = targetCurve.keys;
+            float pointDistanceAlongCurve= positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
+            targetCurve.SetKeyframeX(index, PGIndex.RightTangent, pointDistanceAlongCurve);
         }
 
         void OnDrag()
@@ -434,23 +436,17 @@ public static class MyGUI
                             var keyframeInfo = new KeyframeInfo(key, segmentIndex, progressAlongSegment);
                             if (i > 0)
                             {
-                                var segmentDistance = key.time - sizeCurve.keys[i - 1].time;
-                                var leftXDistance = (key.inWeight * segmentDistance);
-                                var leftTime = key.time - leftXDistance;
-                                segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(leftTime, out progressAlongSegment);
+                                segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(sizeCurve.GetKeyframeX(i,PGIndex.LeftTangent), out progressAlongSegment);
                                 keyframeInfo.leftTangentProgressAlongSegment = progressAlongSegment;
                                 keyframeInfo.leftTangentIndex = segmentIndex;
-                                keyframeInfo.leftTangentValue = key.value - leftXDistance * key.inTangent;
+                                keyframeInfo.leftTangentValue = sizeCurve.GetKeyframeY(i, PGIndex.LeftTangent);
                             }
                             if (i < sizeCurve.keys.Length - 1)
                             {
-                                var segmentDistance = sizeCurve.keys[i + 1].time - key.time;
-                                var rightXDistance = (key.outWeight * segmentDistance);
-                                var rightTime = key.time + rightXDistance;
-                                segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(rightTime, out progressAlongSegment);
+                                segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(sizeCurve.GetKeyframeX(i,PGIndex.RightTangent), out progressAlongSegment);
                                 keyframeInfo.rightTangentProgressAlongSegment = progressAlongSegment;
                                 keyframeInfo.rightTangentIndex = segmentIndex;
-                                keyframeInfo.rightTangentValue = key.value + rightXDistance * key.outTangent;
+                                keyframeInfo.rightTangentValue = sizeCurve.GetKeyframeY(i, PGIndex.RightTangent);
                             }
                             keyframes.Add(keyframeInfo);
                         }
@@ -495,24 +491,16 @@ public static class MyGUI
                                     var segmentDistance = key.time - sizeCurve.keys[i - 1].time;
                                     var leftWeight = -(leftX - key.time) / segmentDistance;
                                     key.inWeight = leftWeight;
-                                    var leftXDist = key.inWeight * segmentDistance;//Becomes 0 = NaN
-                                    if (leftXDist == 0)
-                                        key.inTangent = 0;
-                                    else
-                                        key.inTangent = (leftY - key.value) / -leftXDist;
+                                    sizeCurve.SetKeyframeY(i,PGIndex.LeftTangent,leftY);
                                 }
                                 if (i < sizeCurve.keys.Length - 1)
                                 {
-                                    var rightTime = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex, data.rightTangentProgressAlongSegment);
-                                    var rightValue = data.rightTangentValue;
+                                    var rightX = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex, data.rightTangentProgressAlongSegment);
+                                    var rightY = data.rightTangentValue;
                                     var segmentDistance = sizeCurve.keys[i + 1].time - key.time;
-                                    var rightXDist = rightTime - key.time;//Becomes 0 = NaN
-                                    var rightWeight = rightXDist / segmentDistance;
+                                    var rightWeight = rightX - key.time / segmentDistance;
                                     key.outWeight = rightWeight;
-                                    if (rightXDist == 0)
-                                        key.outTangent = 0;
-                                    else
-                                        key.outTangent = (rightValue - key.value) / rightXDist;
+                                    sizeCurve.SetKeyframeY(i, PGIndex.RightTangent,rightY);
                                 }
 
                                 keys[i] = key;
@@ -539,7 +527,7 @@ public static class MyGUI
                             }
                             else if (hotPoint.type == PointType.ValuePointRightTangent)
                             {
-                                throw new NotImplementedException();
+                                MoveRightTangent(sizeCurve, hotPoint.dataIndex);
                             }
                         }
                         break;
@@ -550,13 +538,6 @@ public static class MyGUI
                 curve.lastMeshUpdateStartTime= DateTime.Now;
                 Event.current.Use();
             }
-        }
-
-        void DBG()
-        {
-            float asdf;
-            int sIndex = positionCurve.GetSegmentIndexAndTimeByDistance(sizeCurve.keys[2].time, out asdf);
-            Debug.Log($"{Event.current.GetTypeForControl(controlID)},{sIndex},{asdf}");
         }
         switch (Event.current.GetTypeForControl(controlID))
         {
@@ -688,7 +669,6 @@ public static class MyGUI
                                         throw new System.InvalidOperationException();
                                 }
                             }
-                            
                             //var otherPoint = (int)positionCurve.GetOtherTangentIndex(positionCurve.GetPointTypeByIndex(hotPoint.index));
                         }
                         else
