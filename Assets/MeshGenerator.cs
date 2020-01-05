@@ -76,6 +76,7 @@ public static class MeshGenerator
         var sampled = curve.GetCachedSampled();
         int numVerts;
         int numTris;
+        bool shouldDrawConnectingFace;
         int numRings = sampled.Count - 1;
 
         void GenerateVertexLayer(bool isExterior){//generate verts
@@ -103,18 +104,19 @@ public static class MeshGenerator
             int finalIndex = sampled.Count- 1;
             GenerateRing(sampled[finalIndex], (sampled[finalIndex].position - sampled[finalIndex - 1].position).normalized, ref lastTangent);
         }
-        void TrianglifyLayer(bool isExterior){//generate tris
-            void DrawQuad(int ring1Point1, int ring1Point2, int ring2Point1, int ring2Point2)
-            {
-                //Tri1
-                triangles.Add(ring1Point1);
-                triangles.Add(ring2Point2);
-                triangles.Add(ring2Point1);
-                //Tri2
-                triangles.Add(ring1Point1);
-                triangles.Add(ring1Point2);
-                triangles.Add(ring2Point2);
-            }
+        void DrawQuad(int side1Point1, int side1Point2, int side2Point1, int side2Point2)
+        {
+            //Tri1
+            triangles.Add(side1Point1);
+            triangles.Add(side2Point2);
+            triangles.Add(side2Point1);
+            //Tri2
+            triangles.Add(side1Point1);
+            triangles.Add(side1Point2);
+            triangles.Add(side2Point2);
+        }
+        void TrianglifyLayer(bool isExterior)
+        {//generate tris
             int basePoint = isExterior ? 0 :numVerts/2;
             for (int i = basePoint; i < sampled.Count- + basePoint; i++)
             {
@@ -122,6 +124,8 @@ public static class MeshGenerator
                 int nextRingIndex = ringIndex + RingPointCount;
                 for (int j = 0; j < RingPointCount; j++)
                 {
+                    if (!shouldDrawConnectingFace && (j + 1) >= RingPointCount)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
+                        continue;
                     if (isExterior)
                         DrawQuad(
                             ringIndex + j,
@@ -142,11 +146,28 @@ public static class MeshGenerator
             InitOrClear(ref vertices, numVerts);
             InitOrClear(ref triangles,numTris);
         }
+        void ConnectTubeInteriorAndExterior()
+        {
+            int interiorBase = numVerts / 2;
+            for (int i = 0; i < numRings; i++)
+            {
+                int ringIndex = i * RingPointCount;
+                int nextRingIndex = ringIndex + RingPointCount;
+                DrawQuad(
+                        ringIndex,
+                        nextRingIndex,
+                        interiorBase+ringIndex,
+                        interiorBase+nextRingIndex
+                    );
+            }
+            //Then we gotta connect the ends as well
+        }
         switch (TubeType)
         {
             case TubeType.Solid:
                 numVerts= RingPointCount * sampled.Count;
                 numTris=RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
+                shouldDrawConnectingFace = false;
                 InitLists();
                 GenerateVertexLayer(true);
                 TrianglifyLayer(true);
@@ -154,11 +175,13 @@ public static class MeshGenerator
             case TubeType.Hollow:
                 numVerts = RingPointCount * sampled.Count * 2;
                 numTris = RingPointCount * numRings * 6 * 2;
+                shouldDrawConnectingFace = true;
                 InitLists();
                 GenerateVertexLayer(true);
                 GenerateVertexLayer(false);
                 TrianglifyLayer(true);
                 TrianglifyLayer(false);
+                ConnectTubeInteriorAndExterior();
                 break;
         }
         IsBuzy = false;
