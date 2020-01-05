@@ -328,7 +328,7 @@ public static class MyGUI
         int InsertKeyframeAtSplitPoint(AnimationCurve targetCurve,Keyframe? frame=null)
         {
             Keyframe[] keys = targetCurve.keys;
-            float pointDistanceAlongCurve= positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
+            float pointDistanceAlongCurve = GetSplitPointDistance();
             int insertionIndex = 0;
             {
                 if (pointDistanceAlongCurve >= keys[keys.Length - 1].time)
@@ -399,17 +399,9 @@ public static class MyGUI
             return retr;
         }
 
-        void MoveLeftTangent(AnimationCurve targetCurve,int index)
+        float GetSplitPointDistance()
         {
-            Keyframe[] keys = targetCurve.keys;
-            float pointDistanceAlongCurve= positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
-            targetCurve.SetKeyframeX(index, PGIndex.LeftTangent, pointDistanceAlongCurve);
-        }
-        void MoveRightTangent(AnimationCurve targetCurve,int index)
-        {
-            Keyframe[] keys = targetCurve.keys;
-            float pointDistanceAlongCurve= positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
-            targetCurve.SetKeyframeX(index, PGIndex.RightTangent, pointDistanceAlongCurve);
+            return positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
         }
 
         void OnDrag()
@@ -475,7 +467,7 @@ public static class MyGUI
                                 var key = sizeCurve.keys[i];
                                 var data = keyframes[i];
                                 key.weightedMode = WeightedMode.Both;
-                                key.time = positionCurve.GetDistanceBySegmentIndexAndTime(data.segmentIndex, data.progressAlongSegment);
+                                key.time = GetSplitPointDistance();
                                 keys[i] = key;
                             }
                             sizeCurve.keys = keys;
@@ -486,14 +478,14 @@ public static class MyGUI
                                 var data = keyframes[i];
                                 if (i > 0)
                                 {
-                                    var leftX = positionCurve.GetDistanceBySegmentIndexAndTime(data.leftTangentIndex, data.leftTangentProgressAlongSegment);
+                                    var leftX = GetSplitPointDistance();
                                     var leftY = data.leftTangentValue;
                                     sizeCurve.SetKeyframeX(i,PGIndex.LeftTangent,leftX);
                                     sizeCurve.SetKeyframeY(i,PGIndex.LeftTangent,leftY);
                                 }
                                 if (i < sizeCurve.keys.Length - 1)
                                 {
-                                    var rightX = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex, data.rightTangentProgressAlongSegment);
+                                    var rightX = GetSplitPointDistance();
                                     var rightY = data.rightTangentValue;
                                     sizeCurve.SetKeyframeX(i, PGIndex.RightTangent, rightX);
                                     sizeCurve.SetKeyframeY(i, PGIndex.RightTangent,rightY);
@@ -519,11 +511,11 @@ public static class MyGUI
                             }
                             else if (hotPoint.type == PointType.ValuePointLeftTangent)
                             {
-                                MoveLeftTangent(sizeCurve,hotPoint.dataIndex);
+                                sizeCurve.SetKeyframeX(hotPoint.dataIndex, PGIndex.LeftTangent, GetSplitPointDistance());
                             }
                             else if (hotPoint.type == PointType.ValuePointRightTangent)
                             {
-                                MoveRightTangent(sizeCurve, hotPoint.dataIndex);
+                                sizeCurve.SetKeyframeX(hotPoint.dataIndex, PGIndex.RightTangent, GetSplitPointDistance());
                             }
                         }
                         break;
