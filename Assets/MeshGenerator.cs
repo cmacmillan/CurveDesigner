@@ -72,29 +72,13 @@ public static class MeshGenerator
     private static void GenerateMesh()
     {
         //Debug.Log("started thread");
-
         curve.CacheSampleCurve(VertexDensity);
         var sampled = curve.GetCachedSampled();
-
         int numVerts;
         int numTris;
         int numRings = sampled.Count - 1;
-        switch (TubeType)
-        {
-            case TubeType.Hollow:
-                numVerts = RingPointCount * sampled.Count * 2;
-                numTris = RingPointCount * numRings * 6 * 2;
-                break;
-            case TubeType.Solid:
-                numVerts= RingPointCount * sampled.Count;
-                numTris=RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
-                break;
-            default:
-                throw new System.ArgumentException();
-        }
-        InitOrClear(ref vertices, numVerts);
-        InitOrClear(ref triangles,numTris);
-        void GenerateLayer(bool isExterior){//generate verts
+
+        void GenerateVertexLayer(bool isExterior){//generate verts
             float distanceFromFull = 360.0f - TubeAngle;
             void GenerateRing(SampleFragment startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
@@ -119,17 +103,7 @@ public static class MeshGenerator
             int finalIndex = sampled.Count- 1;
             GenerateRing(sampled[finalIndex], (sampled[finalIndex].position - sampled[finalIndex - 1].position).normalized, ref lastTangent);
         }
-        switch (TubeType)
-        {
-            case TubeType.Solid:
-                GenerateLayer(true);
-                break;
-            case TubeType.Hollow:
-                GenerateLayer(true);
-                GenerateLayer(false);
-                break;
-        }
-        {//generate tris
+        void TrianglifyLayer(bool isExterior){//generate tris
             void DrawQuad(int ring1Point1, int ring1Point2, int ring2Point1, int ring2Point2)
             {
                 //Tri1
@@ -141,21 +115,52 @@ public static class MeshGenerator
                 triangles.Add(ring1Point2);
                 triangles.Add(ring2Point2);
             }
-            for (int i = 0; i < sampled.Count- 1; i++)
+            int basePoint = isExterior ? 0 :numVerts/2;
+            for (int i = basePoint; i < sampled.Count- + basePoint; i++)
             {
                 int ringIndex = i * RingPointCount;
                 int nextRingIndex = ringIndex + RingPointCount;
                 for (int j = 0; j < RingPointCount; j++)
                 {
-                    DrawQuad(
-                         ringIndex + j,
-                         ringIndex + ((j + 1) % RingPointCount),
-                         nextRingIndex + j,
-                         nextRingIndex + ((j + 1) % RingPointCount));
+                    if (isExterior)
+                        DrawQuad(
+                            ringIndex + j,
+                            ringIndex + ((j + 1) % RingPointCount),
+                            nextRingIndex + j,
+                            nextRingIndex + ((j + 1) % RingPointCount));
+                    else //flipped
+                        DrawQuad(
+                            ringIndex + ((j + 1) % RingPointCount),
+                            ringIndex + j,
+                            nextRingIndex + ((j + 1) % RingPointCount),
+                            nextRingIndex + j);
                 }
             }
         }
-        //Debug.Log("finished thread");
+        void InitLists()
+        {
+            InitOrClear(ref vertices, numVerts);
+            InitOrClear(ref triangles,numTris);
+        }
+        switch (TubeType)
+        {
+            case TubeType.Solid:
+                numVerts= RingPointCount * sampled.Count;
+                numTris=RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
+                InitLists();
+                GenerateVertexLayer(true);
+                TrianglifyLayer(true);
+                break;
+            case TubeType.Hollow:
+                numVerts = RingPointCount * sampled.Count * 2;
+                numTris = RingPointCount * numRings * 6 * 2;
+                InitLists();
+                GenerateVertexLayer(true);
+                GenerateVertexLayer(false);
+                TrianglifyLayer(true);
+                TrianglifyLayer(false);
+                break;
+        }
         IsBuzy = false;
     }
 }
