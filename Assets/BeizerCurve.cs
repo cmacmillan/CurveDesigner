@@ -196,8 +196,12 @@ public class BeizerCurve
         cachedFragments = retr;
     }
 
+    public Vector3 GetPositionAtDistance(float distance)
+    {
+        float time;
+        return GetPositionAtDistance(distance, out time);
+    }
     //Doesn't actually sample at distance along the beizer, but rather the position at time=distance/length, which isn't quite uniform
-
     public Vector3 GetPositionAtDistance(float distance, out float time)
     {
         for (int i=0;i<NumSegments;i++)
@@ -217,7 +221,7 @@ public class BeizerCurve
         return GetSegmentPositionAtTime(finalSegmentIndex,time);
     }
 
-    private void SolvePositionAtTimeTangents(int startIndex, int length, float time, out Vector3 leftTangent, out Vector3 rightTangent, out Vector3 preLeftTangent, out Vector3 postRightTangent)
+    public void SolvePositionAtTimeTangents(int startIndex, int length, float time, out Vector3 leftTangent, out Vector3 rightTangent, out Vector3 preLeftTangent, out Vector3 postRightTangent)
     {
         leftTangent = SolvePositionAtTime(startIndex,length-1,time);
         rightTangent = SolvePositionAtTime(startIndex+1,length-1,time);

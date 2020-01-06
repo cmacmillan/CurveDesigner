@@ -23,7 +23,8 @@ public static class MeshGenerator
     public static int RingPointCount = 8;
     public static float Radius=3.0f;
     public static float VertexDensity=1.0f;
-    public static float TubeAngle = 360.0f;
+    public static float TubeArc = 360.0f;
+    public static bool IsTubeArcConstant { get { return true; } }
     public static float Rotation = 0.0f;
     public static float TubeThickness = 0.0f;
 
@@ -39,7 +40,7 @@ public static class MeshGenerator
             MeshGenerator.RingPointCount = curve.ringPointCount;
             MeshGenerator.Radius = curve.curveRadius;
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
-            MeshGenerator.TubeAngle = curve.angleOfTube;
+            MeshGenerator.TubeArc = curve.arcOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
             MeshGenerator.TubeType = curve.tubeType;
             MeshGenerator.sizeCurve = Curve3D.CopyAnimationCurve(curve.curveSizeAnimationCurve);
@@ -80,7 +81,7 @@ public static class MeshGenerator
         int numRings = sampled.Count - 1;
 
         void GenerateVertexLayer(bool isExterior){//generate verts
-            float distanceFromFull = 360.0f - TubeAngle;
+            float distanceFromFull = 360.0f - TubeArc;
             void GenerateRing(SampleFragment startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
                 //Old Method: 
@@ -91,7 +92,7 @@ public static class MeshGenerator
                 var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceAlongCurve) + offset);
                 for (int j = 0; j < RingPointCount; j++)
                 {
-                    float theta = (TubeAngle * j / (float)RingPointCount) + distanceFromFull / 2 + Rotation;
+                    float theta = (TubeArc * j / (RingPointCount-(TubeArc==360.0?0:1))) + distanceFromFull / 2 + Rotation;
                     Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
                     vertices.Add(startPoint.position + rotatedVect * size);
                 }
@@ -172,6 +173,10 @@ public static class MeshGenerator
                         interiorBase+ringIndex+RingPointCount-1
                     );
             }
+        }
+        void ConnectTubeInteriorExteriorEnds()
+        {
+            int interiorBase = numVerts / 2;
             //Then we gotta connect the ends as well
             int lastRingIndex = numRings * RingPointCount;
             int firstRingIndex = 0;
@@ -191,8 +196,8 @@ public static class MeshGenerator
                         lastRingIndex + j + interiorBase,
                         lastRingIndex + ((j + 1) % RingPointCount) + interiorBase
                     );
-    }
-}
+            }
+        }
         void CreateTubeEndPlates()
         {
             //center point is average of ring
@@ -242,13 +247,19 @@ public static class MeshGenerator
             case TubeType.Hollow:
                 numVerts = RingPointCount * sampled.Count * 2;
                 numTris = RingPointCount * numRings * 6 * 2;
-                shouldDrawConnectingFace = false;
+                bool is360degree = TubeArc == 360.0f && MeshGenerator.IsTubeArcConstant;
+                if (is360degree)
+                    shouldDrawConnectingFace = true;
+                else
+                    shouldDrawConnectingFace = false;
                 InitLists();
                 GenerateVertexLayer(true);
                 GenerateVertexLayer(false);
                 TrianglifyLayer(true);
                 TrianglifyLayer(false);
-                ConnectTubeInteriorAndExterior();
+                if (!is360degree)
+                    ConnectTubeInteriorAndExterior();
+                ConnectTubeInteriorExteriorEnds();
                 break;
         }
         IsBuzy = false;

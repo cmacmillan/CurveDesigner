@@ -611,6 +611,27 @@ public static class MyGUI
                     var tangent2 = curve.transform.TransformPoint(positionCurve[i, 2]);
                     Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.8f, .8f, .8f), curve.lineTex, 10);
                 }
+                if (curve.editMode == EditMode.Size)
+                {
+                    for (int c = 0; c < sizeCurve.keys.Length; c++)
+                    {
+                        float centerPointTime;
+                        float centerPointDistance = sizeCurve.GetKeyframeX(c, PGIndex.Position);
+                        int centerPointSegment = positionCurve.GetSegmentIndexAndTimeByDistance(centerPointDistance, out centerPointTime);
+                        var centerPointPosition = curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(centerPointDistance));
+                        Vector3 centerPointLeftTangent;
+                        Vector3 centerPointLeftTangent;
+                        positionCurve.SolvePositionAtTimeTangents(centerPointSegment,4,centerPointTime,out centerPointLeftTangent,)
+                        if (c > 0)
+                        {
+                            float leftTangentTime;
+                            float leftTangentDistance = sizeCurve.GetKeyframeX(c, PGIndex.LeftTangent);
+                            int leftTangentSegment = positionCurve.GetSegmentIndexAndTimeByDistance(leftTangentDistance, out leftTangentTime);
+                            var leftTangentPosition = curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(leftTangentDistance));
+                            Handles.DrawBezier(leftTangentPosition, centerPointPosition, tangent1, tangent2, new Color(.8f, .8f, .8f), curve.leftTangentLineTex, 10);
+                        }
+                    }
+                }
 
                 switch (curve.editMode)
                 {

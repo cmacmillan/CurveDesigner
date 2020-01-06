@@ -9,6 +9,7 @@ public class Curve3D : MonoBehaviour
     public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
     public Texture2D lineTex;
+    public Texture2D leftTangentLineTex;
     public Texture2D circleIcon;
     public Texture2D squareIcon;
     public Texture2D diamondIcon;
@@ -97,10 +98,10 @@ public class Curve3D : MonoBehaviour
     private int oldRingPointCount=-1;
 
     [Range(0, 360)]
-    public int angleOfTube = 360;
+    public int arcOfTube = 360;
     [SerializeField]
     [HideInInspector]
-    private int oldAngleOfTube= -1;
+    private int oldArcOfTube = -1;
 
     [Range(0, 360)]
 
@@ -150,7 +151,7 @@ public class Curve3D : MonoBehaviour
         retr|=CheckField(ringPointCount, ref oldRingPointCount);
         retr|=CheckField(curveVertexDensity, ref oldCurveVertexDensity);
         retr|=CheckField(curveRadius, ref oldCurveRadius);
-        retr|=CheckField(angleOfTube, ref oldAngleOfTube);
+        retr|=CheckField(arcOfTube, ref oldArcOfTube);
         retr|=CheckField(curveRotation, ref oldCurveRotation);
         retr|=CheckField(tubeThickness, ref oldTubeThickness);
         retr|=CheckField(type, ref oldType);
@@ -212,6 +213,7 @@ public enum CurveType
     Tube = 0,
     Flat = 1,
     DoubleBeizer = 2,
+    NoMesh = 3,
 }
 public enum TubeType
 {
