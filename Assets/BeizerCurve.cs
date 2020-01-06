@@ -35,6 +35,7 @@ public class BeizerCurve
         this.placeLockedPoints = curveToClone.placeLockedPoints;
         this.isCurveOutOfDate = curveToClone.isCurveOutOfDate;
         this.splitInsertionBehaviour = curveToClone.splitInsertionBehaviour;
+        this._cummulativeLengths = new List<float>(curveToClone._cummulativeLengths);
     }
 
     public enum SplitInsertionNeighborModification
@@ -57,11 +58,11 @@ public class BeizerCurve
         PointGroups.Add(pointB);
     }
 
-    public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint)
+    public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
     {
         var prePointGroup = PointGroups[splitPoint.segmentIndex];
         var postPointGroup = PointGroups[splitPoint.segmentIndex + 1];
-        PointGroup point = new PointGroup(placeLockedPoints);
+        PointGroup point = new PointGroup(lockPlacedPoint);
         var basePosition = this.GetSegmentPositionAtTime(splitPoint.segmentIndex, splitPoint.time);
         point.SetWorldPositionByIndex(PGIndex.Position,basePosition);
         Vector3 leftTangent;
@@ -78,7 +79,7 @@ public class BeizerCurve
         {
             postPointGroup.SetWorldPositionByIndex(PGIndex.LeftTangent,postRightTangent);
         }
-        switch (splitInsertionBehaviour)
+        switch (shouldModifyNeighbors)
         {
             case SplitInsertionNeighborModification.RetainCurveShape:
                 prePointGroup.SetPointLocked(false);
@@ -103,7 +104,7 @@ public class BeizerCurve
         }
 
         PointGroups.Insert(splitPoint.segmentIndex+1,point);
-        return (splitPoint.segmentIndex+1)*3;
+        return (splitPoint.segmentIndex+1);
     }
 
     public void AddDefaultSegment()
@@ -289,7 +290,7 @@ public class BeizerCurve
         }
         CalculateCummulativeLengths();
     }
-    public void CacheSegmentLength(int index)
+    public void CacheSegmentLength(int index,bool isInsert=false)
     {
         if (index < 0 || index >= NumSegments)
             throw new System.ArgumentOutOfRangeException();
@@ -298,7 +299,10 @@ public class BeizerCurve
             CacheLengths();
         } else
         {
-            _lengths[index] = CalculateSegmentLength(index);
+            if (isInsert)
+                _lengths.Insert(index+1, CalculateSegmentLength(index));
+            else
+                _lengths[index] = CalculateSegmentLength(index);
             CalculateCummulativeLengths();
         }
     }
