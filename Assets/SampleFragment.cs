@@ -12,11 +12,11 @@ public class SampleFragment
     /// The distance along the curve in real units
     /// </summary>
     public float distanceAlongCurve;
-    public SampleFragment(Vector3 position, int segmentIndex, float time, float distanceAlongSegment)
+    public SampleFragment(Vector3 position, int segmentIndex, float time, float distanceAlongCurve)
     {
         this.position = position;
         this.segmentIndex = segmentIndex;
         this.time = time;
-        this.distanceAlongCurve = distanceAlongSegment;
+        this.distanceAlongCurve = distanceAlongCurve;
     }
 }

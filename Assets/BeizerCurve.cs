@@ -57,6 +57,21 @@ public class BeizerCurve
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0));
         PointGroups.Add(pointB);
     }
+    public List<Vector3> GetPointsBetweenDistances(float startDistance,float endDistance)
+    {
+        List<Vector3> points = new List<Vector3>();
+        points.Add(GetPositionAtDistance(startDistance));
+        for (int i = 0; i < cachedFragments.Count; i++)
+        {
+            var actualDistance = GetDistanceBySegmentIndexAndTime(cachedFragments[i].segmentIndex,cachedFragments[i].time);
+            if (actualDistance >= endDistance)
+                break;
+            if (actualDistance > startDistance)
+                points.Add(cachedFragments[i].position);
+        }
+        points.Add(GetPositionAtDistance(endDistance));
+        return points;
+    }
 
     public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
     {
@@ -127,6 +142,7 @@ public class BeizerCurve
     {
         return Mathf.Max(curveLength/MaxSamples,curveLength/(samplesPerSegment*NumSegments));
     }
+    //We need to interpolate between cached points rather than just doing it linearly
     public float GetDistanceBySegmentIndexAndTime(int segmentIndex,float time)
     {
         if (segmentIndex == 0)
@@ -136,6 +152,7 @@ public class BeizerCurve
     public int GetSegmentIndexAndTimeByDistance(float distance, out float time)
     {
         for (int i = 0; i < _cummulativeLengths.Count; i++)
+
         {
             if (_cummulativeLengths[i] > distance)
             {
@@ -173,7 +190,6 @@ public class BeizerCurve
         float time;
         Vector3 previousPosition=GetPositionAtDistance(0,out time);//get start of curve point
         Vector3 position;
-        float actualDistanceAlongCurve = 0.0f;
         float lenSoFar = 0;
         for (int i = 0; i < NumSegments; i++)
         {
@@ -185,15 +201,13 @@ public class BeizerCurve
             for (int j = 0; j < numSteps; j++)
             {
                 position = GetPositionAtDistance(f,out time);
-                actualDistanceAlongCurve += Vector3.Distance(position,previousPosition);
                 previousPosition = position;
-                retr.Add(new SampleFragment(position,i,time,actualDistanceAlongCurve));
+                retr.Add(new SampleFragment(position, i, time,GetDistanceBySegmentIndexAndTime(i,time)));//actualDistanceAlongCurve));
                 f += jumpDist;
             }
         }
         position = GetPositionAtDistance(lenSoFar,out time);
-        actualDistanceAlongCurve += Vector3.Distance(position, previousPosition);
-        retr.Add(new SampleFragment(position,NumSegments,time,actualDistanceAlongCurve));//add last point
+        retr.Add(new SampleFragment(position,NumSegments-1,1,GetDistanceBySegmentIndexAndTime(NumSegments-1,1)));//add last point
         cachedFragments = retr;
     }
 
