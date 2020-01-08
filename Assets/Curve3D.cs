@@ -9,8 +9,14 @@ public class Curve3D : MonoBehaviour
     public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
     public Texture2D lineTex;
-    public Texture2D leftTangentLineTex;
-    public Texture2D rightTangentLineTex;
+
+    public Texture2D blueLineTopTex;
+    public Texture2D blueLineBottomTex;
+    public Texture2D redLineTopTex;
+    public Texture2D redLineBottomTex;
+    public Color lineGray1;
+    public Color lineGray2;
+
     public Texture2D circleIcon;
     public Texture2D squareIcon;
     public Texture2D diamondIcon;

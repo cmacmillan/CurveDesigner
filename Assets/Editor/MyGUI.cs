@@ -194,6 +194,7 @@ public static class MyGUI
                         float progressAlongSegment;
                         int segmentIndex2 = positionCurve.GetSegmentIndexAndTimeByDistance(key.time, out progressAlongSegment);
                         var keyframeInfo = new KeyframeInfo(key, segmentIndex2, progressAlongSegment);
+                        Color dotColor = c % 2 == 0 ? curve.lineGray1 : curve.lineGray2;
                         if (c > 0)
                         {
                             var segmentDistance = key.time - sizeCurve.keys[c - 1].time;
@@ -203,21 +204,21 @@ public static class MyGUI
                             keyframeInfo.leftTangentProgressAlongSegment = progressAlongSegment;
                             keyframeInfo.leftTangentIndex = segmentIndex2;
                             keyframeInfo.leftTangentValue = key.value - leftXDistance * key.inTangent;
-                            var pointInfo2 = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(leftTime)), Color.magenta, curve.diamondIcon, pointIndex, PointType.ValuePointLeftTangent,c);
+                            var pointInfo2 = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(leftTime)), dotColor, curve.diamondIcon, pointIndex, PointType.ValuePointLeftTangent,c);
                             pointIndex++;
                             points.Add(pointInfo2);
                         }
                         if (key.time<0)
                         {
-                            pointInfo = new PointInfo(curve.transform.TransformPoint(curveStartPoint + leftWorldVector * key.time), Color.magenta, linePlaceTexture, pointIndex, PointType.ValuePoint, c);
+                            pointInfo = new PointInfo(curve.transform.TransformPoint(curveStartPoint + leftWorldVector * key.time), dotColor, linePlaceTexture, pointIndex, PointType.ValuePoint, c);
                         }
                         else if (key.time > positionCurve.GetLength())
                         {
-                            pointInfo = new PointInfo(curve.transform.TransformPoint(curveEndPoint + rightWorldVector * (key.time - positionCurve.GetLength())), Color.magenta, linePlaceTexture, pointIndex, PointType.ValuePoint, c);
+                            pointInfo = new PointInfo(curve.transform.TransformPoint(curveEndPoint + rightWorldVector * (key.time - positionCurve.GetLength())), dotColor, linePlaceTexture, pointIndex, PointType.ValuePoint, c);
                         }
                         else
                         {
-                            pointInfo = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(key.time)), Color.magenta, linePlaceTexture, pointIndex, PointType.ValuePoint, c);
+                            pointInfo = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(key.time)), dotColor, linePlaceTexture, pointIndex, PointType.ValuePoint, c);
                         }
                         pointIndex++;
                         points.Add(pointInfo);
@@ -230,7 +231,7 @@ public static class MyGUI
                             keyframeInfo.rightTangentProgressAlongSegment = progressAlongSegment;
                             keyframeInfo.rightTangentIndex = segmentIndex2;
                             keyframeInfo.rightTangentValue = key.value + rightXDistance * key.outTangent;
-                            var pointInfo2 = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(rightTime)), Color.magenta, curve.diamondIcon, pointIndex, PointType.ValuePointRightTangent,c);
+                            var pointInfo2 = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(rightTime)), dotColor, curve.diamondIcon, pointIndex, PointType.ValuePointRightTangent,c);
                             pointIndex++;
                             points.Add(pointInfo2);
                         }
@@ -611,7 +612,7 @@ public static class MyGUI
                     var point2 = curve.transform.TransformPoint(pointProvider[index, 3]);
                     var tangent1 = curve.transform.TransformPoint(pointProvider[index, 1]);
                     var tangent2 = curve.transform.TransformPoint(pointProvider[index, 2]);
-                    Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.8f, .8f, .8f), tex, lineThickness);
+                    Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.9f, .9f, .9f), tex, lineThickness);
                 }
                 for (int i = 0; i < positionCurve.NumSegments; i++)
                 {
@@ -625,17 +626,28 @@ public static class MyGUI
                         bool drawLeft = c > 0;
                         bool drawRight = c < keys.Length - 1;
                         float centerDistance = sizeCurve.GetKeyframeX(c, PGIndex.Position);
+                        Texture2D bottomTex;
+                        Texture2D topTex;
+                        if (c % 2 == 0)
+                        {
+                            bottomTex = curve.blueLineBottomTex;
+                            topTex = curve.blueLineTopTex;
+                        } else
+                        {
+                            bottomTex = curve.redLineBottomTex;
+                            topTex = curve.redLineTopTex;
+                        }
                         if (drawLeft)
                         {
                             float leftDistance = sizeCurve.GetKeyframeX(c, PGIndex.LeftTangent);
                             var samps = positionCurve.GetPointsBetweenDistances(leftDistance, centerDistance);
-                            Handles.DrawAAPolyLine(curve.leftTangentLineTex,lineThickness,samps.ToArray());
+                            Handles.DrawAAPolyLine(bottomTex,lineThickness,samps.ToArray());
                         }
                         if (drawRight)
                         {
                             float rightDistance = sizeCurve.GetKeyframeX(c, PGIndex.RightTangent);
                             var samps = positionCurve.GetPointsBetweenDistances(centerDistance, rightDistance);
-                            Handles.DrawAAPolyLine(curve.rightTangentLineTex,lineThickness,samps.ToArray());
+                            Handles.DrawAAPolyLine(topTex,lineThickness,samps.ToArray());
                         }
                     }
                 }
