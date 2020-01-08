@@ -104,6 +104,7 @@ public static class MyGUI
     private const float buttonClickDistance=20.0f;
     private const float lineClickDistance=15.0f;
     private const int plusButtonDistance = 30;
+    private const int lineThickness = 20;
     public static void EditBezierCurve(Curve3D curve)
     {
         curve.TryInitialize();
@@ -610,23 +611,31 @@ public static class MyGUI
                     var point2 = curve.transform.TransformPoint(pointProvider[index, 3]);
                     var tangent1 = curve.transform.TransformPoint(pointProvider[index, 1]);
                     var tangent2 = curve.transform.TransformPoint(pointProvider[index, 2]);
-                    Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.8f, .8f, .8f), tex, 10);
+                    Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.8f, .8f, .8f), tex, lineThickness);
                 }
                 for (int i = 0; i < positionCurve.NumSegments; i++)
                 {
-                    //DrawCurveFromIndex(i,curve.lineTex,positionCurve);
+                    DrawCurveFromIndex(i,curve.lineTex,positionCurve);
                 }
                 if (curve.editMode == EditMode.Size)
                 {
-                    for (int c = 0; c < sizeCurve.keys.Length; c++)
+                    var keys = sizeCurve.keys;
+                    for (int c = 0; c < keys.Length; c++)
                     {
                         bool drawLeft = c > 0;
+                        bool drawRight = c < keys.Length - 1;
                         float centerDistance = sizeCurve.GetKeyframeX(c, PGIndex.Position);
                         if (drawLeft)
                         {
                             float leftDistance = sizeCurve.GetKeyframeX(c, PGIndex.LeftTangent);
                             var samps = positionCurve.GetPointsBetweenDistances(leftDistance, centerDistance);
-                            Handles.DrawAAPolyLine(curve.leftTangentLineTex,10,samps.ToArray());
+                            Handles.DrawAAPolyLine(curve.leftTangentLineTex,lineThickness,samps.ToArray());
+                        }
+                        if (drawRight)
+                        {
+                            float rightDistance = sizeCurve.GetKeyframeX(c, PGIndex.RightTangent);
+                            var samps = positionCurve.GetPointsBetweenDistances(centerDistance, rightDistance);
+                            Handles.DrawAAPolyLine(curve.rightTangentLineTex,lineThickness,samps.ToArray());
                         }
                     }
                 }

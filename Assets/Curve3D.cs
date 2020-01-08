@@ -10,6 +10,7 @@ public class Curve3D : MonoBehaviour
     public BeizerCurve positionCurve;
     public Texture2D lineTex;
     public Texture2D leftTangentLineTex;
+    public Texture2D rightTangentLineTex;
     public Texture2D circleIcon;
     public Texture2D squareIcon;
     public Texture2D diamondIcon;
