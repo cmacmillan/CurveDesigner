@@ -27,6 +27,11 @@ public class Curve3D : MonoBehaviour
     public Mesh mesh;
     private bool isInitialized = false;
 
+    [ContextMenu("Reset curve")]
+    public void ResetCurve()
+    {
+        positionCurve.Initialize();
+    }
     public void TryInitialize()
     {
         if (!isInitialized)

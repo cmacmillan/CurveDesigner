@@ -26,8 +26,9 @@ public class BeizerCurve
         {
             PointGroups.Add(new PointGroup(i));
         }
-        this.segments = new List<Segment>(curveToClone.segments);
-        throw new System.NotImplementedException();//need to clone segments
+        this.segments = new List<Segment>(curveToClone.segments.Count);
+        foreach (var i in curveToClone.segments)
+            segments.Add(new Segment(i));
         this.placeLockedPoints = curveToClone.placeLockedPoints;
         this.isCurveOutOfDate = curveToClone.isCurveOutOfDate;
         this.splitInsertionBehaviour = curveToClone.splitInsertionBehaviour;
@@ -123,7 +124,12 @@ public class BeizerCurve
         return Mathf.Max(curveLength/MaxSamples,curveLength/(samplesPerSegment*NumSegments));
     }
 
-    public PointOnCurve GetPositionAtDistance(float distance)
+    public float GetPointAtSegmentIndexAndTime(int segmentIndex, float time)
+    {
+        return segments[segmentIndex].GetDistanceAtTime(time);
+    }
+
+    public PointOnCurve GetPointAtDistance(float distance)
     {
         float remainingDistance= distance;
         float time;
@@ -210,9 +216,20 @@ public class BeizerCurve
     public List<PointOnCurve> GetPoints()
     {
         List<PointOnCurve> retr = new List<PointOnCurve>();
+        bool isFirstSegment = true;//We only want to add the first point of the first segment, every other segment should omit the first point
         foreach (var i in segments)
+        {
+            int c = 0;
             foreach (var j in i.samples)
-                retr.Add(j);
+            {
+                if (c > 0 || isFirstSegment)
+                {
+                    retr.Add(j);
+                    isFirstSegment = false;
+                    c++;
+                }
+            }
+        }
         return retr;
     }
     private void CalculateCummulativeLengths()

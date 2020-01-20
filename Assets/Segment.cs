@@ -6,29 +6,37 @@ using UnityEngine;
 public class Segment
 {
     private const int _numSegmentLengthSamples = 10;
-    public Segment(BeizerCurve owner,int segmentIndex)
-    {
-        float len = 0;
-        Vector3 previousPosition = owner.GetSegmentPositionAtTime(segmentIndex,0.0f);
-        for (int i = 1; i < _numSegmentLengthSamples; i++)
-        {
-            var time = i / (float)_numSegmentLengthSamples;//We really need to ensure this includes the end points
-            Vector3 currentPosition = owner.GetSegmentPositionAtTime(segmentIndex, time);
-            len += Vector3.Distance(currentPosition, previousPosition);
-            AddLength(segmentIndex,time,len,currentPosition,owner.segments[segmentIndex-1].cummulativeLength+len);
-            previousPosition = currentPosition; 
-        }
-    }
-    public Segment(Segment objToClone)
-    {
-        throw new System.NotImplementedException();
-    }
     public List<PointOnCurve> samples = new List<PointOnCurve>();
     public float length = 0;
     /// <summary>
     /// Cummulative length including current segment
     /// </summary>
     public float cummulativeLength=-1;
+    public Segment(BeizerCurve owner,int segmentIndex)
+    {
+        float len = 0;
+        float cummulativeDist = 0;
+        if (segmentIndex > 0)
+            cummulativeDist = owner.segments[segmentIndex - 1].cummulativeLength;
+        Vector3 previousPosition = owner.GetSegmentPositionAtTime(segmentIndex, 0.0f);
+        AddLength(segmentIndex, 0.0f, 0, previousPosition,cummulativeDist);
+        for (int i = 1; i <= _numSegmentLengthSamples; i++)//we include the end point with <=
+        {
+            var time = i / (float)_numSegmentLengthSamples;
+            Vector3 currentPosition = owner.GetSegmentPositionAtTime(segmentIndex, time);
+            len += Vector3.Distance(currentPosition, previousPosition);
+            AddLength(segmentIndex,time,len,currentPosition,cummulativeDist+len);
+            previousPosition = currentPosition; 
+        }
+    }
+    public Segment(Segment objToClone)
+    {
+        this.cummulativeLength = objToClone.cummulativeLength;
+        this.length = objToClone.length;
+        this.samples = new List<PointOnCurve>(objToClone.samples.Count);
+        foreach (var i in objToClone.samples)
+            samples.Add(new PointOnCurve(i));
+    }
     public void AddLength(int segmentIndex,float time, float length, Vector3 position, float distanceAlongCurve)
     {
         samples.Add(new PointOnCurve(time, length, position, distanceAlongCurve,segmentIndex));
@@ -54,7 +62,7 @@ public class Segment
         }
         throw new System.Exception("Should always have a point at 1.0");
     }
-    public float GetLengthAtTime(float time)
+    public float GetDistanceAtTime(float time)
     {
         if (time < 0 || time > 1.0f)
             throw new System.ArgumentException("Length out of bounds");

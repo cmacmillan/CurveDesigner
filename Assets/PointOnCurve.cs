@@ -6,6 +6,14 @@ using UnityEngine;
 [System.Serializable]
 public class PointOnCurve
 {
+    public PointOnCurve(PointOnCurve pointToClone)
+    {
+        this.time = pointToClone.time;
+        this.distanceFromStartOfSegment = pointToClone.distanceFromStartOfSegment;
+        this.position = pointToClone.position;
+        this.distanceFromStartOfCurve = pointToClone.distanceFromStartOfCurve;
+        this.segmentIndex = pointToClone.segmentIndex;
+    }
     public PointOnCurve(float time, float distanceFromStartOfSegment, Vector3 position, float distanceFromStartOfCurve,int segmentIndex)
     {
         this.time = time;

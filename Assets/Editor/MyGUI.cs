@@ -192,19 +192,19 @@ public static class MyGUI
                     foreach (var key in sizeKeys)
                     {
                         float progressAlongSegment;
-                        int segmentIndex2 = positionCurve.GetSegmentIndexAndTimeAtDistance(key.time, out progressAlongSegment);
-                        var keyframeInfo = new KeyframeInfo(key, segmentIndex2, progressAlongSegment);
+                        var point = positionCurve.GetPointAtDistance(key.time);
+                        var keyframeInfo = new KeyframeInfo(key, point.segmentIndex, point.time);
                         Color dotColor = c % 2 == 0 ? curve.lineGray1 : curve.lineGray2;
                         if (c > 0)
                         {
                             var segmentDistance = key.time - sizeCurve.keys[c - 1].time;
                             var leftXDistance = (key.inWeight * segmentDistance);
                             var leftTime = key.time - leftXDistance;
-                            segmentIndex2 = positionCurve.GetSegmentIndexAndTimeAtDistance(leftTime, out progressAlongSegment);
-                            keyframeInfo.leftTangentProgressAlongSegment = progressAlongSegment;
-                            keyframeInfo.leftTangentIndex = segmentIndex2;
+                            point = positionCurve.GetPointAtDistance(leftTime);
+                            keyframeInfo.leftTangentProgressAlongSegment = point.time;
+                            keyframeInfo.leftTangentIndex = point.segmentIndex;
                             keyframeInfo.leftTangentValue = key.value - leftXDistance * key.inTangent;
-                            var pointInfo2 = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(leftTime)), dotColor, curve.diamondIcon, pointIndex, PointType.ValuePointLeftTangent,c);
+                            var pointInfo2 = new PointInfo(curve.transform.TransformPoint(point.position), dotColor, curve.diamondIcon, pointIndex, PointType.ValuePointLeftTangent,c);
                             pointIndex++;
                             points.Add(pointInfo2);
                         }
@@ -218,7 +218,7 @@ public static class MyGUI
                         }
                         else
                         {
-                            pointInfo = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(key.time)), dotColor, linePlaceTexture, pointIndex, PointType.ValuePoint, c);
+                            pointInfo = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPointAtDistance(key.time).position), dotColor, linePlaceTexture, pointIndex, PointType.ValuePoint, c);
                         }
                         pointIndex++;
                         points.Add(pointInfo);
@@ -227,11 +227,11 @@ public static class MyGUI
                             var segmentDistance = sizeCurve.keys[c + 1].time - key.time;
                             var rightXDistance = (key.outWeight * segmentDistance);
                             var rightTime = key.time + rightXDistance;
-                            segmentIndex2 = positionCurve.GetSegmentIndexAndTimeAtDistance(rightTime, out progressAlongSegment);
-                            keyframeInfo.rightTangentProgressAlongSegment = progressAlongSegment;
-                            keyframeInfo.rightTangentIndex = segmentIndex2;
+                            point = positionCurve.GetPointAtDistance(rightTime);
+                            keyframeInfo.rightTangentProgressAlongSegment = point.time;
+                            keyframeInfo.rightTangentIndex = point.segmentIndex;
                             keyframeInfo.rightTangentValue = key.value + rightXDistance * key.outTangent;
-                            var pointInfo2 = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPositionAtDistance(rightTime)), dotColor, curve.diamondIcon, pointIndex, PointType.ValuePointRightTangent,c);
+                            var pointInfo2 = new PointInfo(curve.transform.TransformPoint(positionCurve.GetPointAtDistance(rightTime).position), dotColor, curve.diamondIcon, pointIndex, PointType.ValuePointRightTangent,c);
                             pointIndex++;
                             points.Add(pointInfo2);
                         }
@@ -249,7 +249,7 @@ public static class MyGUI
             }
 
             #region find split point
-            var samples = positionCurve.GetCachedSampled();
+            var samples = positionCurve.GetPoints();
             foreach (var i in samples)
             {
                 i.position = curve.transform.TransformPoint(i.position);
@@ -317,7 +317,7 @@ public static class MyGUI
         void OnUndo()
         {
             curve.lastMeshUpdateStartTime = DateTime.Now;
-            positionCurve.CacheSampleCurve();
+            positionCurve.Recalculate();
             //Debug.Log("undo!");
             //curve.positionCurve.CacheLengths();
         }
@@ -403,7 +403,7 @@ public static class MyGUI
 
         float GetSplitPointDistance()
         {
-            return positionCurve.GetDistanceBySegmentIndexAndTime(curveSplitPoint.segmentIndex, curveSplitPoint.time);
+            return positionCurve.GetPointAtSegmentIndexAndTime(curveSplitPoint.segmentIndex,curveSplitPoint.time);
         }
 
         void OnDrag()
@@ -426,20 +426,20 @@ public static class MyGUI
                         {
                             var key = sizeCurve.keys[i];
                             float progressAlongSegment;
-                            int segmentIndex = positionCurve.GetSegmentIndexAndTimeAtDistance(key.time, out progressAlongSegment);
-                            var keyframeInfo = new KeyframeInfo(key, segmentIndex, progressAlongSegment);
+                            var point = positionCurve.GetPointAtDistance(key.time);
+                            var keyframeInfo = new KeyframeInfo(key, point.segmentIndex,point.time);
                             if (i > 0)
                             {
-                                segmentIndex = positionCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(i,PGIndex.LeftTangent), out progressAlongSegment);
-                                keyframeInfo.leftTangentProgressAlongSegment = progressAlongSegment;
-                                keyframeInfo.leftTangentIndex = segmentIndex;
+                                point = positionCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(i,PGIndex.LeftTangent));
+                                keyframeInfo.leftTangentProgressAlongSegment = point.time;
+                                keyframeInfo.leftTangentIndex = point.segmentIndex;
                                 keyframeInfo.leftTangentValue = sizeCurve.GetKeyframeY(i, PGIndex.LeftTangent);
                             }
                             if (i < sizeCurve.keys.Length - 1)
                             {
-                                segmentIndex = positionCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(i,PGIndex.RightTangent), out progressAlongSegment);
-                                keyframeInfo.rightTangentProgressAlongSegment = progressAlongSegment;
-                                keyframeInfo.rightTangentIndex = segmentIndex;
+                                point = positionCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(i, PGIndex.RightTangent));
+                                keyframeInfo.rightTangentProgressAlongSegment = point.time;
+                                keyframeInfo.rightTangentIndex = point.segmentIndex;
                                 keyframeInfo.rightTangentValue = sizeCurve.GetKeyframeY(i, PGIndex.RightTangent);
                             }
                             keyframes.Add(keyframeInfo);
@@ -456,7 +456,6 @@ public static class MyGUI
                                 lowerShouldRecalculateLength = false;
                             else if (pointGroupIndex == positionCurve.NumSegments)
                                 upperShouldRecalculateLength = false;
-                            throw new NotImplementedException();
                             positionCurve.Recalculate();//probably don't need to cache the whole curve
                         }
 
@@ -467,7 +466,7 @@ public static class MyGUI
                                 var key = sizeCurve.keys[i];
                                 var data = keyframes[i];
                                 key.weightedMode = WeightedMode.Both;
-                                key.time = positionCurve.GetDistanceBySegmentIndexAndTime(data.segmentIndex, data.progressAlongSegment);
+                                key.time = positionCurve.GetPointAtSegmentIndexAndTime(data.segmentIndex,data.progressAlongSegment);
                                 keys[i] = key;
                             }
                             sizeCurve.keys = keys;
@@ -478,14 +477,14 @@ public static class MyGUI
                                 var data = keyframes[i];
                                 if (i > 0)
                                 {
-                                    var leftX = positionCurve.GetDistanceBySegmentIndexAndTime(data.leftTangentIndex, data.leftTangentProgressAlongSegment);
+                                    var leftX = positionCurve.GetPointAtSegmentIndexAndTime(data.leftTangentIndex,data.leftTangentProgressAlongSegment);
                                     var leftY = data.leftTangentValue;
                                     sizeCurve.SetKeyframeX(i,PGIndex.LeftTangent,leftX);
                                     sizeCurve.SetKeyframeY(i,PGIndex.LeftTangent,leftY);
                                 }
                                 if (i < sizeCurve.keys.Length - 1)
                                 {
-                                    var rightX = positionCurve.GetDistanceBySegmentIndexAndTime(data.rightTangentIndex, data.rightTangentProgressAlongSegment);
+                                    var rightX = positionCurve.GetPointAtSegmentIndexAndTime(data.rightTangentIndex,data.rightTangentProgressAlongSegment);
                                     var rightY = data.rightTangentValue;
                                     sizeCurve.SetKeyframeX(i, PGIndex.RightTangent, rightX);
                                     sizeCurve.SetKeyframeY(i, PGIndex.RightTangent,rightY);
@@ -641,24 +640,21 @@ public static class MyGUI
                         int rightIndex=-1;
                         if (left)
                         {
-                            float time;
-                            int index = clonedCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent),out time);
-                            leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(index,time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                            var dataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent));
+                            leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(dataAtDistance.segmentIndex,dataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
                         }
                         {
-                            float time;
-                            int index = clonedCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.Position),out time);
-                            centerIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(index,time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                            var dataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.Position));
+                            centerIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(dataAtDistance.segmentIndex,dataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
                         }
                         if (left)
                             DrawCurveFromIndex(leftIndex,bottomTex,clonedCurve);
                         if (right)
                         {
-                            float time;
-                            int index = clonedCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.RightTangent),out time);
-                            rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(index,time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);       
+                            var dataAtDistance= clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent));
+                            rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(dataAtDistance.segmentIndex,dataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
                             DrawCurveFromIndex(centerIndex,topTex,clonedCurve);
                         }
