@@ -14,12 +14,11 @@ public class PointOnCurve
         this.distanceFromStartOfCurve = pointToClone.distanceFromStartOfCurve;
         this.segmentIndex = pointToClone.segmentIndex;
     }
-    public PointOnCurve(float time, float distanceFromStartOfSegment, Vector3 position, float distanceFromStartOfCurve,int segmentIndex)
+    public PointOnCurve(float time, float distanceFromStartOfSegment, Vector3 position,int segmentIndex)
     {
         this.time = time;
         this.distanceFromStartOfSegment = distanceFromStartOfSegment;
         this.position = position;
-        this.distanceFromStartOfCurve = distanceFromStartOfCurve;
         this.segmentIndex = segmentIndex;
     }
     public int segmentIndex;

@@ -112,6 +112,7 @@ public class BeizerCurve
         pointB.SetWorldPositionByIndex(PGIndex.Position,finalPointPos+new Vector3(1,1,0));
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent,finalPointPos+new Vector3(0,1,0));
         PointGroups.Add(pointB);
+        Recalculate();
     }
     #endregion
 
@@ -140,14 +141,14 @@ public class BeizerCurve
             {
                 time = segments[i].GetTimeAtLength(remainingDistance);
                 position = GetSegmentPositionAtTime(i, time);
-                return new PointOnCurve(time,remainingDistance,position,distance,i);
+                return new PointOnCurve(time,remainingDistance,position,i);
             }
             remainingDistance-= segments[i].length;
         }
         int finalSegmentIndex = NumSegments - 1;
         time = 1.0f;
         position = GetSegmentPositionAtTime(finalSegmentIndex,time);
-        return new PointOnCurve(time,segments[finalSegmentIndex].length,position,GetLength(),finalSegmentIndex);
+        return new PointOnCurve(time,segments[finalSegmentIndex].length,position,finalSegmentIndex);
     }
 
     public void SolvePositionAtTimeTangents(int startIndex, int length, float time, out Vector3 leftTangent, out Vector3 rightTangent, out Vector3 preLeftTangent, out Vector3 postRightTangent)
@@ -210,8 +211,8 @@ public class BeizerCurve
         for (int i = 0; i < NumSegments; i++)
         {
             segments.Add(new Segment(this, i));
-            CalculateCummulativeLengths();
         }
+        CalculateCummulativeLengths();
     }
     public List<PointOnCurve> GetPoints()
     {
@@ -237,6 +238,8 @@ public class BeizerCurve
         float cummulativeLength = 0;
         foreach (var i in segments)
         {
+            foreach (var j in i.samples)
+                j.distanceFromStartOfCurve = j.distanceFromStartOfSegment + cummulativeLength;//we add the cummulative length not including the current segment
             cummulativeLength += i.length;
             i.cummulativeLength = cummulativeLength;
         }

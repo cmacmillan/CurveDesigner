@@ -69,7 +69,7 @@ public class PointGroup
             case PGIndex.LeftTangent:
                 return this.hasRightTangent;
             case PGIndex.RightTangent:
-                return this.hasRightTangent;
+                return this.hasLeftTangent;
             case PGIndex.Position:
             default:
                 return true;

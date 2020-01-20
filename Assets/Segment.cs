@@ -20,19 +20,18 @@ public class Segment
     {
         samples.Clear();
         float len = 0;
-        float cummulativeDist = 0;
-        if (segmentIndex > 0)
-            cummulativeDist = owner.segments[segmentIndex - 1].cummulativeLength;
         Vector3 previousPosition = owner.GetSegmentPositionAtTime(segmentIndex, 0.0f);
-        AddLength(segmentIndex, 0.0f, 0, previousPosition,cummulativeDist);
+        AddLength(segmentIndex, 0.0f, 0, previousPosition);
         for (int i = 1; i <= _numSegmentLengthSamples; i++)//we include the end point with <=
         {
             var time = i / (float)_numSegmentLengthSamples;
             Vector3 currentPosition = owner.GetSegmentPositionAtTime(segmentIndex, time);
-            len += Vector3.Distance(currentPosition, previousPosition);
-            AddLength(segmentIndex,time,len,currentPosition,cummulativeDist+len);
+            var dist = Vector3.Distance(currentPosition, previousPosition);
+            len += dist;
+            AddLength(segmentIndex,time,len,currentPosition);
             previousPosition = currentPosition; 
         }
+        this.length = len;
     }
     public Segment(Segment objToClone)
     {
@@ -42,10 +41,9 @@ public class Segment
         foreach (var i in objToClone.samples)
             samples.Add(new PointOnCurve(i));
     }
-    public void AddLength(int segmentIndex,float time, float length, Vector3 position, float distanceAlongCurve)
+    public void AddLength(int segmentIndex,float time, float length, Vector3 position)
     {
-        samples.Add(new PointOnCurve(time, length, position, distanceAlongCurve,segmentIndex));
-        this.length += length;
+        samples.Add(new PointOnCurve(time, length, position, segmentIndex));
     }
     public float GetTimeAtLength(float length)
     {

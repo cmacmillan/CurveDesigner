@@ -450,16 +450,26 @@ public static class MyGUI
                         /////////////////////////////////////////////////
 
                         {//Update curve length
-                            bool lowerShouldRecalculateLength = pointGroup.DoesEditAffectBothSegments(modifiedPointType);
-                            bool upperShouldRecalculateLength = pointGroup.DoesEditAffectBothSegments(modifiedPointType);
-                            if (pointGroupIndex == 0)
-                                lowerShouldRecalculateLength = false;
-                            else if (pointGroupIndex == positionCurve.NumSegments)
-                                upperShouldRecalculateLength = false;
-                            if (lowerShouldRecalculateLength)
-                                positionCurve.segments[pointGroupIndex - 1].Recalculate(positionCurve,pointGroupIndex - 1);
-                            if (upperShouldRecalculateLength)
-                                positionCurve.segments[pointGroupIndex].Recalculate(positionCurve,pointGroupIndex);
+                            //Only recalculating the two segments this edit might affect
+                            switch (modifiedPointType)
+                            {
+                                case PGIndex.Position:
+                                    if (pointGroupIndex-1>=0)
+                                        positionCurve.segments[pointGroupIndex-1].Recalculate(positionCurve,pointGroupIndex-1);
+                                    if (pointGroupIndex<positionCurve.segments.Count)
+                                        positionCurve.segments[pointGroupIndex].Recalculate(positionCurve,pointGroupIndex);
+                                    break;
+                                case PGIndex.RightTangent:
+                                    positionCurve.segments[pointGroupIndex].Recalculate(positionCurve,pointGroupIndex);
+                                    if (pointGroupIndex-1>=0)
+                                        positionCurve.segments[pointGroupIndex-1].Recalculate(positionCurve,pointGroupIndex-1);
+                                    break;
+                                case PGIndex.LeftTangent:
+                                    positionCurve.segments[pointGroupIndex-1].Recalculate(positionCurve,pointGroupIndex-1);
+                                    if (pointGroupIndex+1<positionCurve.segments.Count)
+                                        positionCurve.segments[pointGroupIndex].Recalculate(positionCurve,pointGroupIndex);
+                                    break;
+                            }
                         }
 
                         {
