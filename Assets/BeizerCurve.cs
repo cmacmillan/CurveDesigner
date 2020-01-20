@@ -203,15 +203,15 @@ public class BeizerCurve
     /// </summary>
     public void Recalculate()
     {
-        if (segments==null)
+        if (segments == null)
             segments = new List<Segment>();
         else
             segments.Clear();
         for (int i = 0; i < NumSegments; i++)
         {
-            segments.Add(new Segment(this,i));
+            segments.Add(new Segment(this, i));
+            CalculateCummulativeLengths();
         }
-        CalculateCummulativeLengths();
     }
     public List<PointOnCurve> GetPoints()
     {

@@ -456,7 +456,10 @@ public static class MyGUI
                                 lowerShouldRecalculateLength = false;
                             else if (pointGroupIndex == positionCurve.NumSegments)
                                 upperShouldRecalculateLength = false;
-                            positionCurve.Recalculate();//probably don't need to cache the whole curve
+                            if (lowerShouldRecalculateLength)
+                                positionCurve.segments[pointGroupIndex - 1].Recalculate(positionCurve,pointGroupIndex - 1);
+                            if (upperShouldRecalculateLength)
+                                positionCurve.segments[pointGroupIndex].Recalculate(positionCurve,pointGroupIndex);
                         }
 
                         {

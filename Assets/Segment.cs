@@ -14,6 +14,11 @@ public class Segment
     public float cummulativeLength=-1;
     public Segment(BeizerCurve owner,int segmentIndex)
     {
+        Recalculate(owner,segmentIndex);
+    }
+    public void Recalculate(BeizerCurve owner,int segmentIndex)
+    {
+        samples.Clear();
         float len = 0;
         float cummulativeDist = 0;
         if (segmentIndex > 0)
@@ -60,7 +65,7 @@ public class Segment
             }
             previousPoint = currentPoint;
         }
-        throw new System.Exception("Should always have a point at 1.0");
+        return samples[samples.Count - 1].time;
     }
     public float GetDistanceAtTime(float time)
     {
@@ -80,7 +85,7 @@ public class Segment
             }
             previousPoint = currentPoint;
         }
-        throw new System.Exception("Should always have a point at 1.0");
+        return samples[samples.Count - 1].distanceFromStartOfSegment;
     }
 
 }
