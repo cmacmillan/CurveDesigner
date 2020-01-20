@@ -227,8 +227,8 @@ public class BeizerCurve
                 {
                     retr.Add(j);
                     isFirstSegment = false;
-                    c++;
                 }
+                c++;
             }
         }
         return retr;
