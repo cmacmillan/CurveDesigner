@@ -73,23 +73,21 @@ public static class MeshGenerator
     private static void GenerateMesh()
     {
         //Debug.Log("started thread");
-        curve.CacheSampleCurve(VertexDensity);
-        var sampled = curve.GetCachedSampled();
         int numVerts;
         int numTris;
         bool shouldDrawConnectingFace;
+        var sampled = curve.GetPoints();
         int numRings = sampled.Count - 1;
-
         void GenerateVertexLayer(bool isExterior){//generate verts
             float distanceFromFull = 360.0f - TubeArc;
-            void GenerateRing(SampleFragment startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
+            void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
             {
                 //Old Method: 
                 //Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
                 Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
                 previousTangent = tangentVect;
                 float offset = (isExterior ? .5f :-.5f)*(TubeThickness);
-                var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceAlongCurve) + offset);
+                var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceFromStartOfCurve) + offset);
                 for (int j = 0; j < RingPointCount; j++)
                 {
                     float theta = (TubeArc * j / (RingPointCount-(TubeArc==360.0?0:1))) + distanceFromFull / 2 + Rotation;

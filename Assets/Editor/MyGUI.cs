@@ -104,7 +104,7 @@ public static class MyGUI
     private const float buttonClickDistance=20.0f;
     private const float lineClickDistance=15.0f;
     private const int plusButtonDistance = 30;
-    private const int lineThickness = 20;
+    private const int lineThickness = 12;
     public static void EditBezierCurve(Curve3D curve)
     {
         curve.TryInitialize();
@@ -118,7 +118,7 @@ public static class MyGUI
         if (positionCurve.isCurveOutOfDate && GUIUtility.hotControl!=controlID)//we only cache when NOT moving the point
         {
             positionCurve.isCurveOutOfDate = false;
-            positionCurve.CacheSampleCurve();
+            positionCurve.Recalculate();
         }
 
         List<PointInfo> points = null;
@@ -188,11 +188,11 @@ public static class MyGUI
                     var rightWorldVector= (positionCurve[positionCurve.NumControlPoints-1]-positionCurve[positionCurve.NumControlPoints-2]).normalized;
                     var curveStartPoint = positionCurve[0];
                     var curveEndPoint = positionCurve[positionCurve.NumControlPoints-1];
-                    positionCurve.CacheLengths();//see if we can comment this out
+                    positionCurve.Recalculate();//see if we can comment this out
                     foreach (var key in sizeKeys)
                     {
                         float progressAlongSegment;
-                        int segmentIndex2 = positionCurve.GetSegmentIndexAndTimeByDistance(key.time, out progressAlongSegment);
+                        int segmentIndex2 = positionCurve.GetSegmentIndexAndTimeAtDistance(key.time, out progressAlongSegment);
                         var keyframeInfo = new KeyframeInfo(key, segmentIndex2, progressAlongSegment);
                         Color dotColor = c % 2 == 0 ? curve.lineGray1 : curve.lineGray2;
                         if (c > 0)
@@ -200,7 +200,7 @@ public static class MyGUI
                             var segmentDistance = key.time - sizeCurve.keys[c - 1].time;
                             var leftXDistance = (key.inWeight * segmentDistance);
                             var leftTime = key.time - leftXDistance;
-                            segmentIndex2 = positionCurve.GetSegmentIndexAndTimeByDistance(leftTime, out progressAlongSegment);
+                            segmentIndex2 = positionCurve.GetSegmentIndexAndTimeAtDistance(leftTime, out progressAlongSegment);
                             keyframeInfo.leftTangentProgressAlongSegment = progressAlongSegment;
                             keyframeInfo.leftTangentIndex = segmentIndex2;
                             keyframeInfo.leftTangentValue = key.value - leftXDistance * key.inTangent;
@@ -227,7 +227,7 @@ public static class MyGUI
                             var segmentDistance = sizeCurve.keys[c + 1].time - key.time;
                             var rightXDistance = (key.outWeight * segmentDistance);
                             var rightTime = key.time + rightXDistance;
-                            segmentIndex2 = positionCurve.GetSegmentIndexAndTimeByDistance(rightTime, out progressAlongSegment);
+                            segmentIndex2 = positionCurve.GetSegmentIndexAndTimeAtDistance(rightTime, out progressAlongSegment);
                             keyframeInfo.rightTangentProgressAlongSegment = progressAlongSegment;
                             keyframeInfo.rightTangentIndex = segmentIndex2;
                             keyframeInfo.rightTangentValue = key.value + rightXDistance * key.outTangent;
@@ -426,18 +426,18 @@ public static class MyGUI
                         {
                             var key = sizeCurve.keys[i];
                             float progressAlongSegment;
-                            int segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(key.time, out progressAlongSegment);
+                            int segmentIndex = positionCurve.GetSegmentIndexAndTimeAtDistance(key.time, out progressAlongSegment);
                             var keyframeInfo = new KeyframeInfo(key, segmentIndex, progressAlongSegment);
                             if (i > 0)
                             {
-                                segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(sizeCurve.GetKeyframeX(i,PGIndex.LeftTangent), out progressAlongSegment);
+                                segmentIndex = positionCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(i,PGIndex.LeftTangent), out progressAlongSegment);
                                 keyframeInfo.leftTangentProgressAlongSegment = progressAlongSegment;
                                 keyframeInfo.leftTangentIndex = segmentIndex;
                                 keyframeInfo.leftTangentValue = sizeCurve.GetKeyframeY(i, PGIndex.LeftTangent);
                             }
                             if (i < sizeCurve.keys.Length - 1)
                             {
-                                segmentIndex = positionCurve.GetSegmentIndexAndTimeByDistance(sizeCurve.GetKeyframeX(i,PGIndex.RightTangent), out progressAlongSegment);
+                                segmentIndex = positionCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(i,PGIndex.RightTangent), out progressAlongSegment);
                                 keyframeInfo.rightTangentProgressAlongSegment = progressAlongSegment;
                                 keyframeInfo.rightTangentIndex = segmentIndex;
                                 keyframeInfo.rightTangentValue = sizeCurve.GetKeyframeY(i, PGIndex.RightTangent);
@@ -456,10 +456,8 @@ public static class MyGUI
                                 lowerShouldRecalculateLength = false;
                             else if (pointGroupIndex == positionCurve.NumSegments)
                                 upperShouldRecalculateLength = false;
-                            if (lowerShouldRecalculateLength)
-                                positionCurve.CacheSegmentLength(pointGroupIndex - 1);
-                            if (upperShouldRecalculateLength)
-                                positionCurve.CacheSegmentLength(pointGroupIndex);
+                            throw new NotImplementedException();
+                            positionCurve.Recalculate();//probably don't need to cache the whole curve
                         }
 
                         {
@@ -554,7 +552,7 @@ public static class MyGUI
                                     hotPoint.indexInList = 3*positionCurve.InsertSegmentAfterIndex(curveSplitPoint,positionCurve.placeLockedPoints,positionCurve.splitInsertionBehaviour);
                                     curve.hotPointIndex = hotPoint.indexInList;
                                     PopulatePoints();
-                                    positionCurve.CacheLengths();
+                                    positionCurve.Recalculate();
                                 }
                                 if (!isCtrlPressed)
                                 {
@@ -621,11 +619,12 @@ public static class MyGUI
                 if (curve.editMode == EditMode.Size)
                 {
                     var keys = sizeCurve.keys;
+                    int i = 0;
                     for (int c = 0; c < keys.Length; c++)
                     {
-                        bool drawLeft = c > 0;
-                        bool drawRight = c < keys.Length - 1;
-                        float centerDistance = sizeCurve.GetKeyframeX(c, PGIndex.Position);
+                        var clonedCurve = new BeizerCurve(positionCurve);
+                        bool left = c > 0;
+                        bool right = c < keys.Length - 1;
                         Texture2D bottomTex;
                         Texture2D topTex;
                         if (c % 2 == 0)
@@ -637,17 +636,31 @@ public static class MyGUI
                             bottomTex = curve.redLineBottomTex;
                             topTex = curve.redLineTopTex;
                         }
-                        if (drawLeft)
+                        int leftIndex=-1;
+                        int centerIndex=-1;
+                        int rightIndex=-1;
+                        if (left)
                         {
-                            float leftDistance = sizeCurve.GetKeyframeX(c, PGIndex.LeftTangent);
-                            var samps = positionCurve.GetPointsBetweenDistances(leftDistance, centerDistance);
-                            Handles.DrawAAPolyLine(bottomTex,lineThickness,samps.ToArray());
+                            float time;
+                            int index = clonedCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent),out time);
+                            leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(index,time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                            clonedCurve.Recalculate();
                         }
-                        if (drawRight)
                         {
-                            float rightDistance = sizeCurve.GetKeyframeX(c, PGIndex.RightTangent);
-                            var samps = positionCurve.GetPointsBetweenDistances(centerDistance, rightDistance);
-                            Handles.DrawAAPolyLine(topTex,lineThickness,samps.ToArray());
+                            float time;
+                            int index = clonedCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.Position),out time);
+                            centerIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(index,time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                            clonedCurve.Recalculate();
+                        }
+                        if (left)
+                            DrawCurveFromIndex(leftIndex,bottomTex,clonedCurve);
+                        if (right)
+                        {
+                            float time;
+                            int index = clonedCurve.GetSegmentIndexAndTimeAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.RightTangent),out time);
+                            rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(index,time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);       
+                            clonedCurve.Recalculate();
+                            DrawCurveFromIndex(centerIndex,topTex,clonedCurve);
                         }
                     }
                 }

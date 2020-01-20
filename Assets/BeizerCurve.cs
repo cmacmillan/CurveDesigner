@@ -14,14 +14,9 @@ public class BeizerCurve
     public bool placeLockedPoints = true;
     public bool isCurveOutOfDate = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour;
-    public List<SampleFragment> cachedFragments = null;
     [SerializeField]
     [HideInInspector]
-    private List<float> _lengths = null;
-    //Cummulative lengths, where index 0 is the length of the 0th item, index 1  is the length of the 0th+1st etc.
-    [SerializeField]
-    [HideInInspector]
-    private List<float> _cummulativeLengths = null;
+    public List<Segment> segments = null;
     
     public BeizerCurve() { }
     public BeizerCurve(BeizerCurve curveToClone)
@@ -31,11 +26,11 @@ public class BeizerCurve
         {
             PointGroups.Add(new PointGroup(i));
         }
-        this._lengths = new List<float>(curveToClone._lengths);
+        this.segments = new List<Segment>(curveToClone.segments);
+        throw new System.NotImplementedException();//need to clone segments
         this.placeLockedPoints = curveToClone.placeLockedPoints;
         this.isCurveOutOfDate = curveToClone.isCurveOutOfDate;
         this.splitInsertionBehaviour = curveToClone.splitInsertionBehaviour;
-        this._cummulativeLengths = new List<float>(curveToClone._cummulativeLengths);
     }
 
     public enum SplitInsertionNeighborModification
@@ -56,21 +51,6 @@ public class BeizerCurve
         pointB.SetWorldPositionByIndex(PGIndex.Position, new Vector3(1,1,0));
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0));
         PointGroups.Add(pointB);
-    }
-    public List<Vector3> GetPointsBetweenDistances(float startDistance,float endDistance)
-    {
-        List<Vector3> points = new List<Vector3>();
-        points.Add(GetPositionAtDistance(startDistance));
-        for (int i = 0; i < cachedFragments.Count; i++)
-        {
-            var actualDistance = GetDistanceBySegmentIndexAndTime(cachedFragments[i].segmentIndex,cachedFragments[i].time);
-            if (actualDistance >= endDistance)
-                break;
-            if (actualDistance > startDistance)
-                points.Add(cachedFragments[i].position);
-        }
-        points.Add(GetPositionAtDistance(endDistance));
-        return points;
     }
 
     public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
@@ -142,98 +122,26 @@ public class BeizerCurve
     {
         return Mathf.Max(curveLength/MaxSamples,curveLength/(samplesPerSegment*NumSegments));
     }
-    //We need to interpolate between cached points rather than just doing it linearly
-    public float GetDistanceBySegmentIndexAndTime(int segmentIndex,float time)
-    {
-        if (segmentIndex == 0)
-            return time * _lengths[0];
-        return _cummulativeLengths[segmentIndex - 1] + time * _lengths[segmentIndex];//this is linearly interpolating along by time which as we know isn't correct because beizers aren't linear like this...
-    }
-    public int GetSegmentIndexAndTimeByDistance(float distance, out float time)
-    {
-        for (int i = 0; i < _cummulativeLengths.Count; i++)
 
-        {
-            if (_cummulativeLengths[i] > distance)
-            {
-                if (i > 0)
-                {
-                    distance = (distance - _cummulativeLengths[i - 1]);
-                }
-                time = distance/_lengths[i];
-                return i;
-            }
-        }
-        //at the end of the curve
-        if (_lengths.Count>1)
-            distance = distance - _cummulativeLengths[_lengths.Count - 2];
-        time = distance / _lengths[_lengths.Count - 1];
-        return _lengths.Count - 1;
-    }
-    public List<SampleFragment> GetCachedSampled(float? density=null)
+    public PointOnCurve GetPositionAtDistance(float distance)
     {
-        if (cachedFragments==null)
-        {
-            CacheSampleCurve(density);
-        }
-        return cachedFragments;
-    }
-    public void CacheSampleCurve(float? density=null)
-    {
-        CacheLengths();
-        float sampleDistance;
-        if (density.HasValue)
-            sampleDistance = density.Value;
-        else
-            sampleDistance = GetAutoCurveDensity(GetLength());
-        List<SampleFragment> retr = new List<SampleFragment>();
+        float remainingDistance= distance;
         float time;
-        Vector3 previousPosition=GetPositionAtDistance(0,out time);//get start of curve point
         Vector3 position;
-        float lenSoFar = 0;
-        for (int i = 0; i < NumSegments; i++)
-        {
-            float f = lenSoFar;
-            float segmentLength = _lengths[i];
-            lenSoFar += segmentLength;
-            int numSteps = Mathf.Max(1, Mathf.RoundToInt(segmentLength / sampleDistance));
-            float jumpDist = segmentLength / numSteps;
-            for (int j = 0; j < numSteps; j++)
-            {
-                position = GetPositionAtDistance(f,out time);
-                previousPosition = position;
-                retr.Add(new SampleFragment(position, i, time,GetDistanceBySegmentIndexAndTime(i,time)));//actualDistanceAlongCurve));
-                f += jumpDist;
-            }
-        }
-        position = GetPositionAtDistance(lenSoFar,out time);
-        retr.Add(new SampleFragment(position,NumSegments-1,1,GetDistanceBySegmentIndexAndTime(NumSegments-1,1)));//add last point
-        cachedFragments = retr;
-    }
-
-    public Vector3 GetPositionAtDistance(float distance)
-    {
-        float time;
-        return GetPositionAtDistance(distance, out time);
-    }
-    //Doesn't actually sample at distance along the beizer, but rather the position at time=distance/length, which isn't quite uniform
-    public Vector3 GetPositionAtDistance(float distance, out float time)
-    {
         for (int i=0;i<NumSegments;i++)
         {
-            if (distance-_lengths[i]<0)
+            if (remainingDistance < segments[i].length)
             {
-                time = distance / _lengths[i];
-                return GetSegmentPositionAtTime(i,time);
+                time = segments[i].GetTimeAtLength(remainingDistance);
+                position = GetSegmentPositionAtTime(i, time);
+                return new PointOnCurve(time,remainingDistance,position,distance,i);
             }
-            else
-            {
-                distance -= _lengths[i];
-            }
+            remainingDistance-= segments[i].length;
         }
         int finalSegmentIndex = NumSegments - 1;
         time = 1.0f;
-        return GetSegmentPositionAtTime(finalSegmentIndex,time);
+        position = GetSegmentPositionAtTime(finalSegmentIndex,time);
+        return new PointOnCurve(time,segments[finalSegmentIndex].length,position,GetLength(),finalSegmentIndex);
     }
 
     public void SolvePositionAtTimeTangents(int startIndex, int length, float time, out Vector3 leftTangent, out Vector3 rightTangent, out Vector3 preLeftTangent, out Vector3 postRightTangent)
@@ -280,71 +188,41 @@ public class BeizerCurve
     #endregion
 
     #region length calculation
-    public float GetSegmentLength(int segmentIndex)
-    {
-        return _lengths[segmentIndex];
-    }
-    public float GetCummulativeSegmentLength(int segmentIndex)
-    {
-        return _cummulativeLengths[segmentIndex];
-    }
     public float GetLength()
     {
-        return _cummulativeLengths[NumSegments - 1];
+        return segments[NumSegments - 1].cummulativeLength;
     }
-    public void CacheLengths()
+    /// <summary>
+    /// must call after modifying points
+    /// </summary>
+    public void Recalculate()
     {
-        if (_lengths==null)
-            _lengths = new List<float>();
+        if (segments==null)
+            segments = new List<Segment>();
         else
-            _lengths.Clear();
+            segments.Clear();
         for (int i = 0; i < NumSegments; i++)
         {
-            _lengths.Add(CalculateSegmentLength(i));
+            segments.Add(new Segment(this,i));
         }
         CalculateCummulativeLengths();
     }
-    public void CacheSegmentLength(int index,bool isInsert=false)
+    public List<PointOnCurve> GetPoints()
     {
-        if (index < 0 || index >= NumSegments)
-            throw new System.ArgumentOutOfRangeException();
-        if (index >= _lengths.Count)
-        {
-            CacheLengths();
-        } else
-        {
-            if (isInsert)
-                _lengths.Insert(index+1, CalculateSegmentLength(index));
-            else
-                _lengths[index] = CalculateSegmentLength(index);
-            CalculateCummulativeLengths();
-        }
+        List<PointOnCurve> retr = new List<PointOnCurve>();
+        foreach (var i in segments)
+            foreach (var j in i.samples)
+                retr.Add(j);
+        return retr;
     }
     private void CalculateCummulativeLengths()
     {
-        if (_cummulativeLengths == null)
-            _cummulativeLengths = new List<float>();
-        else
-            _cummulativeLengths.Clear();
-        float len = 0;
-        for (int i = 0; i < NumSegments; i++)
+        float cummulativeLength = 0;
+        foreach (var i in segments)
         {
-            len += _lengths[i];
-            _cummulativeLengths.Add(len);
+            cummulativeLength += i.length;
+            i.cummulativeLength = cummulativeLength;
         }
-    }
-    private const int _numSegmentLengthSamples = 100;
-    private float CalculateSegmentLength(int segmentIndex)
-    {
-        float len = 0;
-        Vector3 previousPosition = GetSegmentPositionAtTime(segmentIndex,0.0f);
-        for (int i = 1; i < _numSegmentLengthSamples; i++)
-        {
-            Vector3 currentPosition = GetSegmentPositionAtTime(segmentIndex, i / (float)_numSegmentLengthSamples);
-            len += Vector3.Distance(currentPosition, previousPosition);
-            previousPosition = currentPosition; 
-        }
-        return len;
     }
     #endregion
 
