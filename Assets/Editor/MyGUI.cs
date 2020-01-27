@@ -632,9 +632,9 @@ public static class MyGUI
                 {
                     var keys = sizeCurve.keys;
                     int i = 0;
+                    var clonedCurve = new BeizerCurve(positionCurve);//hmm
                     for (int c = 0; c < keys.Length; c++)
                     {
-                        var clonedCurve = new BeizerCurve(positionCurve);
                         bool left = c > 0;
                         bool right = c < keys.Length - 1;
                         Texture2D bottomTex;
@@ -663,13 +663,15 @@ public static class MyGUI
                             clonedCurve.Recalculate();
                         }
                         if (left)
-                            DrawCurveFromIndex(leftIndex,bottomTex,clonedCurve);
+                            for (int n=leftIndex;n<centerIndex;n++)
+                                DrawCurveFromIndex(n,bottomTex,clonedCurve);
                         if (right)
                         {
                             var dataAtDistance= clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent));
                             rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(dataAtDistance.segmentIndex,dataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
-                            DrawCurveFromIndex(centerIndex,topTex,clonedCurve);
+                            for (int n=centerIndex;n<rightIndex;n++)
+                                DrawCurveFromIndex(n,topTex,clonedCurve);
                         }
                     }
                 }

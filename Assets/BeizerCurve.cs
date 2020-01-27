@@ -127,7 +127,10 @@ public class BeizerCurve
 
     public float GetPointAtSegmentIndexAndTime(int segmentIndex, float time)
     {
-        return segments[segmentIndex].GetDistanceAtTime(time);
+        var segmentLen = segments[segmentIndex].GetDistanceAtTime(time);
+        if (segmentIndex > 0)
+            return segments[segmentIndex - 1].cummulativeLength + segmentLen;
+        return segmentLen;
     }
 
     public PointOnCurve GetPointAtDistance(float distance)
