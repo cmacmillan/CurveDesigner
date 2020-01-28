@@ -79,31 +79,6 @@ public static class MeshGenerator
         var sampled = curve.GetPoints();
         int numRings = sampled.Count - 1;
         int ActualRingPointCount = RingPointCount - (TubeArc == 360.0 ? 1 : 0);
-        void GenerateVertexLayer(bool isExterior){//generate verts
-            float distanceFromFull = 360.0f - TubeArc;
-            void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
-            {
-                //Old Method: 
-                //Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
-                Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
-                previousTangent = tangentVect;
-                float offset = (isExterior ? .5f :-.5f)*(TubeThickness);
-                var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceFromStartOfCurve) + offset);
-                for (int j = 0; j < ActualRingPointCount; j++)
-                {
-                    float theta = (TubeArc * j / (ActualRingPointCount- (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
-                    Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
-                    vertices.Add(startPoint.position + rotatedVect * size);
-                }
-            }
-            Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (sampled[1].position - sampled[0].position).normalized) * Vector3.right;
-            for (int i = 0; i < sampled.Count - 1; i++)
-            {
-                GenerateRing(sampled[i], (sampled[i + 1].position - sampled[i].position).normalized, ref lastTangent);
-            }
-            int finalIndex = sampled.Count- 1;
-            GenerateRing(sampled[finalIndex], (sampled[finalIndex].position - sampled[finalIndex - 1].position).normalized, ref lastTangent);
-        }
         void DrawQuad(int side1Point1, int side1Point2, int side2Point1, int side2Point2)
         {
             //Tri1
@@ -239,7 +214,7 @@ public static class MeshGenerator
                 numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                 shouldDrawConnectingFace = true;
                 InitLists();
-                GenerateVertexLayer(true);
+                curve.CreatePointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true);
                 TrianglifyLayer(true);
                 CreateTubeEndPlates();  
                 break;
@@ -252,8 +227,8 @@ public static class MeshGenerator
                 else
                     shouldDrawConnectingFace = false;
                 InitLists();
-                GenerateVertexLayer(true);
-                GenerateVertexLayer(false);
+                curve.CreatePointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true);
+                curve.CreatePointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, false);
                 TrianglifyLayer(true);
                 TrianglifyLayer(false);
                 if (!is360degree)

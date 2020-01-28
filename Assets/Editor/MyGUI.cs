@@ -22,7 +22,7 @@ public static class MyGUI
         Vector3 forward = (end - start).normalized;
         Handles.DrawWireDisc(start,forward,startRadius);
         Handles.DrawWireDisc(end,forward,endRadius);
-        Vector3 orthoVector = GetArbitraryOrthoVector(forward);
+        /*Vector3 orthoVector = GetArbitraryOrthoVector(forward);
         for (int i = 0; i < WireCylinderLineCount; i++)
         {
             float angle = 360.0f * i / WireCylinderLineCount;//degrees
@@ -30,7 +30,7 @@ public static class MyGUI
             Vector3 lineStartPoint = outVect*startRadius + start;
             Vector3 lineEndPoint = outVect*endRadius + end;
             Handles.DrawLine(lineStartPoint,lineEndPoint);
-        }
+        }*/
     }
     #endregion
 
@@ -641,17 +641,17 @@ public static class MyGUI
             case EventType.Repaint:
                 #region repaint
 
-                void DrawCurveFromIndex(int index,Texture2D tex,BeizerCurve pointProvider)
+                void DrawCurveFromIndex(int index,Texture2D tex,BeizerCurve pointProvider,Color color,float thickness)
                 {
                     var point1 = curve.transform.TransformPoint(pointProvider[index, 0]);
                     var point2 = curve.transform.TransformPoint(pointProvider[index, 3]);
                     var tangent1 = curve.transform.TransformPoint(pointProvider[index, 1]);
                     var tangent2 = curve.transform.TransformPoint(pointProvider[index, 2]);
-                    Handles.DrawBezier(point1, point2, tangent1, tangent2, new Color(.9f, .9f, .9f), tex, lineThickness);
+                    Handles.DrawBezier(point1, point2, tangent1, tangent2, color, tex, thickness);
                 }
                 for (int i = 0; i < positionCurve.NumSegments; i++)
                 {
-                    DrawCurveFromIndex(i,curve.lineTex,positionCurve);
+                    DrawCurveFromIndex(i,curve.lineTex,positionCurve,new Color(.6f,.6f,.6f),lineThickness);
                 }
                 if (curve.editMode == EditMode.Size)
                 {
@@ -693,7 +693,7 @@ public static class MyGUI
                         if (left)
                         {
                             for (int n=leftIndex;n<centerIndex;n++)
-                                DrawCurveFromIndex(n,bottomTex,clonedCurve);
+                                DrawCurveFromIndex(n,bottomTex,clonedCurve,Color.white,4);
                             //////
                             EditWireCylinder(leftDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.LeftTangent),centerDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.Position));
                         }
@@ -703,7 +703,7 @@ public static class MyGUI
                             rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(rightDataAtDistance.segmentIndex,rightDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
                             for (int n=centerIndex;n<rightIndex;n++)
-                                DrawCurveFromIndex(n,topTex,clonedCurve);
+                                DrawCurveFromIndex(n,topTex,clonedCurve,Color.white,4);
                             //////
                             EditWireCylinder(centerDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.Position),rightDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.RightTangent));
                         }

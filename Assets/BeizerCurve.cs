@@ -4,7 +4,7 @@ using UnityEngine;
 
 //A class which defines a chain of 3rd order beizer curves (4 control points per segment)
 [System.Serializable]
-public class BeizerCurve
+public partial class BeizerCurve
 {
     [SerializeField]
     [HideInInspector]
@@ -278,7 +278,7 @@ public class BeizerCurve
 
     public static PGIndex GetPointTypeByIndex(int virtualIndex)
     {
-        int offsetIndex = virtualIndex-GetParentVirtualIndex(virtualIndex);
+        int offsetIndex = virtualIndex - GetParentVirtualIndex(virtualIndex);
         return (PGIndex)offsetIndex;
     }
     public PGIndex GetOtherTangentIndex(PGIndex index)
