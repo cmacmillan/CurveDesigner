@@ -9,6 +9,31 @@ public static class MyGUI
 
     private const int _pointHitboxSize = 10;
 
+    #region 
+    private const int WireCylinderLineCount = 4;
+    private static Vector3 GetArbitraryOrthoVector(Vector3 vect)
+    {
+        if (vect != Vector3.right)
+            return Vector3.Cross(Vector3.right, vect).normalized;
+        return Vector3.Cross(Vector3.up, vect).normalized;
+    }
+    public static void EditWireCylinder(Vector3 start, float startRadius,Vector3 end, float endRadius)//we are gonna just pass in the curve or the relevant segment or something
+    {
+        Vector3 forward = (end - start).normalized;
+        Handles.DrawWireDisc(start,forward,startRadius);
+        Handles.DrawWireDisc(end,forward,endRadius);
+        Vector3 orthoVector = GetArbitraryOrthoVector(forward);
+        for (int i = 0; i < WireCylinderLineCount; i++)
+        {
+            float angle = 360.0f * i / WireCylinderLineCount;//degrees
+            var outVect = Quaternion.AngleAxis(angle,forward)*orthoVector;
+            Vector3 lineStartPoint = outVect*startRadius + start;
+            Vector3 lineEndPoint = outVect*endRadius + end;
+            Handles.DrawLine(lineStartPoint,lineEndPoint);
+        }
+    }
+    #endregion
+
     #region gui tools
     private static Color DesaturateColor(Color color, float amount)
     {
@@ -651,27 +676,36 @@ public static class MyGUI
                         int leftIndex=-1;
                         int centerIndex=-1;
                         int rightIndex=-1;
+                        PointOnCurve centerDataAtDistance=null;
+                        PointOnCurve leftDataAtDistance=null;
+                        PointOnCurve rightDataAtDistance=null;
                         if (left)
                         {
-                            var dataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent));
-                            leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(dataAtDistance.segmentIndex,dataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                            leftDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent));
+                            leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(leftDataAtDistance.segmentIndex,leftDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
                         }
-                        {
-                            var dataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.Position));
-                            centerIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(dataAtDistance.segmentIndex,dataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
-                            clonedCurve.Recalculate();
-                        }
+
+                        centerDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.Position));
+                        centerIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(centerDataAtDistance.segmentIndex, centerDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                        clonedCurve.Recalculate();
+
                         if (left)
+                        {
                             for (int n=leftIndex;n<centerIndex;n++)
                                 DrawCurveFromIndex(n,bottomTex,clonedCurve);
+                            //////
+                            EditWireCylinder(leftDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.LeftTangent),centerDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.Position));
+                        }
                         if (right)
                         {
-                            var dataAtDistance= clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent));
-                            rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(dataAtDistance.segmentIndex,dataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                            rightDataAtDistance= clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent));
+                            rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(rightDataAtDistance.segmentIndex,rightDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
                             for (int n=centerIndex;n<rightIndex;n++)
                                 DrawCurveFromIndex(n,topTex,clonedCurve);
+                            //////
+                            EditWireCylinder(centerDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.Position),rightDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.RightTangent));
                         }
                     }
                 }
