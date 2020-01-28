@@ -14,7 +14,7 @@ public static class MyGUI
     private const int NumCylinderSamples = 10;//TODO: rethink
     public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BeizerCurve positionCurve)
     {
-        var linearSizeCurve = new LinearEvaluatable(startKeyframeXY.y,endKeyframeXY.y);
+        var linearSizeCurve = new LinearEvaluatable(startKeyframeXY,endKeyframeXY);
         List<Vector3> outputPoints = new List<Vector3>();
         List<PointOnCurve> inputPoints = new List<PointOnCurve>();
         for (int i = 0; i < NumCylinderSamples+1; i++)//one extra sample

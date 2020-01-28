@@ -59,14 +59,18 @@ public class LinearEvaluatable : IEvaluatable
 {
     private float _startValue;
     private float _endValue;
-    public LinearEvaluatable(float startValue, float endValue)
+    private float _length;
+    private float _base;
+    public LinearEvaluatable(Vector2 start, Vector2 end)
     {
-        _startValue = startValue;
-        _endValue = endValue;
+        _startValue = start.y;
+        _endValue = end.y;
+        _length = end.x-start.x;
+        _base = start.x;
     }
     public float Evaluate(float time)
     {
-        return Mathf.Lerp(_startValue, _endValue, time);
+        return Mathf.Lerp(_startValue, _endValue, (time-_base)/_length);
     }
 }
 
