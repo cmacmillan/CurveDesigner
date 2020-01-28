@@ -11,26 +11,32 @@ public static class MyGUI
 
     #region 
     private const int WireCylinderLineCount = 4;
-    private static Vector3 GetArbitraryOrthoVector(Vector3 vect)
+    private const int NumCylinderSamples = 10;//TODO: rethink
+    public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BeizerCurve positionCurve)
     {
-        if (vect != Vector3.right)
-            return Vector3.Cross(Vector3.right, vect).normalized;
-        return Vector3.Cross(Vector3.up, vect).normalized;
-    }
-    public static void EditWireCylinder(Vector3 start, float startRadius,Vector3 end, float endRadius)//we are gonna just pass in the curve or the relevant segment or something
-    {
-        Vector3 forward = (end - start).normalized;
-        Handles.DrawWireDisc(start,forward,startRadius);
-        Handles.DrawWireDisc(end,forward,endRadius);
-        /*Vector3 orthoVector = GetArbitraryOrthoVector(forward);
-        for (int i = 0; i < WireCylinderLineCount; i++)
+        var linearSizeCurve = new LinearEvaluatable(startKeyframeXY.y,endKeyframeXY.y);
+        List<Vector3> outputPoints = new List<Vector3>();
+        List<PointOnCurve> inputPoints = new List<PointOnCurve>();
+        for (int i = 0; i < NumCylinderSamples+1; i++)//one extra sample
+            inputPoints.Add(positionCurve.GetPointAtDistance(Mathf.Lerp(startKeyframeXY.x, endKeyframeXY.x, i / (float)NumCylinderSamples)));
+
+        positionCurve.CreateRingPointsAlongCurve(inputPoints, outputPoints, linearSizeCurve, 360.0f, 0.0f, WireCylinderLineCount, 0, true);
+
+        var startForward = (inputPoints[1].position - inputPoints[0].position).normalized;
+        Handles.DrawWireDisc(startPoint.position,startForward,startKeyframeXY.y);
+        var endForward= (inputPoints[inputPoints.Count-1].position - inputPoints[inputPoints.Count-2].position).normalized;
+        Handles.DrawWireDisc(endPoint.position,endForward,endKeyframeXY.y);
+
+        List<Vector3> linePoints = new List<Vector3>(NumCylinderSamples+1);//one extra sample
+        for (int line=0;line<WireCylinderLineCount;line++)
         {
-            float angle = 360.0f * i / WireCylinderLineCount;//degrees
-            var outVect = Quaternion.AngleAxis(angle,forward)*orthoVector;
-            Vector3 lineStartPoint = outVect*startRadius + start;
-            Vector3 lineEndPoint = outVect*endRadius + end;
-            Handles.DrawLine(lineStartPoint,lineEndPoint);
-        }*/
+            linePoints.Clear();
+            for (int ring = 0; ring < NumCylinderSamples + 1; ring++)//one extra sample
+            {
+                linePoints.Add(outputPoints[ring * WireCylinderLineCount + line]);
+            }
+            Handles.DrawPolyLine(linePoints.ToArray());
+        }
     }
     #endregion
 
@@ -679,33 +685,40 @@ public static class MyGUI
                         PointOnCurve centerDataAtDistance=null;
                         PointOnCurve leftDataAtDistance=null;
                         PointOnCurve rightDataAtDistance=null;
+                        Vector2 leftXY = Vector2.zero;
+                        Vector2 centerXY = Vector2.zero;
+                        Vector2 rightXY = Vector2.zero;
                         if (left)
                         {
                             leftDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent));
                             leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(leftDataAtDistance.segmentIndex,leftDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
+                            leftXY = new Vector2(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent),sizeCurve.GetKeyframeY(c,PGIndex.LeftTangent));
                         }
 
                         centerDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.Position));
                         centerIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(centerDataAtDistance.segmentIndex, centerDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                         clonedCurve.Recalculate();
 
+                        centerXY = new Vector2(sizeCurve.GetKeyframeX(c,PGIndex.Position),sizeCurve.GetKeyframeY(c,PGIndex.Position));
+
                         if (left)
                         {
                             for (int n=leftIndex;n<centerIndex;n++)
                                 DrawCurveFromIndex(n,bottomTex,clonedCurve,Color.white,4);
                             //////
-                            EditWireCylinder(leftDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.LeftTangent),centerDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.Position));
+                            EditWireCylinder(leftDataAtDistance, centerDataAtDistance,leftXY,centerXY,positionCurve);
                         }
                         if (right)
                         {
+                            rightXY = new Vector2(sizeCurve.GetKeyframeX(c,PGIndex.RightTangent),sizeCurve.GetKeyframeY(c,PGIndex.RightTangent));
                             rightDataAtDistance= clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent));
                             rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(rightDataAtDistance.segmentIndex,rightDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
                             clonedCurve.Recalculate();
                             for (int n=centerIndex;n<rightIndex;n++)
                                 DrawCurveFromIndex(n,topTex,clonedCurve,Color.white,4);
                             //////
-                            EditWireCylinder(centerDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.Position),rightDataAtDistance.position,sizeCurve.GetKeyframeY(c,PGIndex.RightTangent));
+                            EditWireCylinder(centerDataAtDistance, rightDataAtDistance,centerXY,rightXY,positionCurve);
                         }
                     }
                 }
