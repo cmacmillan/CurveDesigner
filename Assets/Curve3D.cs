@@ -110,17 +110,17 @@ public class Curve3D : MonoBehaviour
     private int oldRingPointCount=-1;
 
     [Range(0, 360)]
-    public int arcOfTube = 360;
+    public float arcOfTube = 360;
     [SerializeField]
     [HideInInspector]
-    private int oldArcOfTube = -1;
+    private float oldArcOfTube = -1;
 
     [Range(0, 360)]
 
-    public int curveRotation = 360;
+    public float curveRotation = 360;
     [SerializeField]
     [HideInInspector]
-    private int oldCurveRotation= -1;
+    private float oldCurveRotation= -1;
 
     [Min(0)]
     public float tubeThickness = .1f;

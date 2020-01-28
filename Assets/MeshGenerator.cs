@@ -78,6 +78,7 @@ public static class MeshGenerator
         bool shouldDrawConnectingFace;
         var sampled = curve.GetPoints();
         int numRings = sampled.Count - 1;
+        int ActualRingPointCount = RingPointCount - (TubeArc == 360.0 ? 1 : 0);
         void GenerateVertexLayer(bool isExterior){//generate verts
             float distanceFromFull = 360.0f - TubeArc;
             void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
@@ -88,9 +89,9 @@ public static class MeshGenerator
                 previousTangent = tangentVect;
                 float offset = (isExterior ? .5f :-.5f)*(TubeThickness);
                 var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceFromStartOfCurve) + offset);
-                for (int j = 0; j < RingPointCount; j++)
+                for (int j = 0; j < ActualRingPointCount; j++)
                 {
-                    float theta = (TubeArc * j / (RingPointCount-(TubeArc==360.0?0:1))) + distanceFromFull / 2 + Rotation;
+                    float theta = (TubeArc * j / (ActualRingPointCount- (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
                     Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
                     vertices.Add(startPoint.position + rotatedVect * size);
                 }
@@ -125,23 +126,23 @@ public static class MeshGenerator
             int basePoint = isExterior ? 0 :numVerts/2;
             for (int i = 0; i < numRings; i++)
             {
-                int ringIndex = i * RingPointCount;
-                int nextRingIndex = ringIndex + RingPointCount;
-                for (int j = 0; j < RingPointCount; j++)
+                int ringIndex = i * ActualRingPointCount;
+                int nextRingIndex = ringIndex + ActualRingPointCount;
+                for (int j = 0; j < ActualRingPointCount; j++)
                 {
-                    if (!shouldDrawConnectingFace && (j + 1) >= RingPointCount)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
+                    if (!shouldDrawConnectingFace && (j + 1) >= ActualRingPointCount)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
                         continue;
                     if (isExterior)
                         DrawQuad(
                             ringIndex + j+basePoint,
-                            ringIndex + ((j + 1) % RingPointCount)+basePoint,
+                            ringIndex + ((j + 1) % ActualRingPointCount)+basePoint,
                             nextRingIndex + j+basePoint,
-                            nextRingIndex + ((j + 1) % RingPointCount)+basePoint);
+                            nextRingIndex + ((j + 1) % ActualRingPointCount)+basePoint);
                     else //flipped
                         DrawQuad(
-                            ringIndex + ((j + 1) % RingPointCount)+basePoint,
+                            ringIndex + ((j + 1) % ActualRingPointCount)+basePoint,
                             ringIndex + j+basePoint,
-                            nextRingIndex + ((j + 1) % RingPointCount)+basePoint,
+                            nextRingIndex + ((j + 1) % ActualRingPointCount)+basePoint,
                             nextRingIndex + j+basePoint);
                 }
             }
@@ -156,8 +157,8 @@ public static class MeshGenerator
             int interiorBase = numVerts / 2;
             for (int i = 0; i < numRings; i++)
             {
-                int ringIndex = i * RingPointCount;
-                int nextRingIndex = ringIndex + RingPointCount;
+                int ringIndex = i * ActualRingPointCount;
+                int nextRingIndex = ringIndex + ActualRingPointCount;
                 DrawQuad(
                         ringIndex,
                         nextRingIndex,
@@ -165,10 +166,10 @@ public static class MeshGenerator
                         interiorBase+nextRingIndex
                     );
                 DrawQuad(
-                        nextRingIndex+RingPointCount-1,
-                        ringIndex+RingPointCount-1,
-                        interiorBase+nextRingIndex+RingPointCount-1,
-                        interiorBase+ringIndex+RingPointCount-1
+                        nextRingIndex+ActualRingPointCount-1,
+                        ringIndex+ActualRingPointCount-1,
+                        interiorBase+nextRingIndex+ActualRingPointCount-1,
+                        interiorBase+ringIndex+ActualRingPointCount-1
                     );
             }
         }
@@ -176,23 +177,23 @@ public static class MeshGenerator
         {
             int interiorBase = numVerts / 2;
             //Then we gotta connect the ends as well
-            int lastRingIndex = numRings * RingPointCount;
+            int lastRingIndex = numRings * ActualRingPointCount;
             int firstRingIndex = 0;
-            for (int j = 0; j < RingPointCount; j++)
+            for (int j = 0; j < ActualRingPointCount; j++)
             {
-                if (!shouldDrawConnectingFace && (j + 1) >= RingPointCount)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
+                if (!shouldDrawConnectingFace && (j + 1) >= ActualRingPointCount)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
                     continue;
                 DrawQuad(
-                        firstRingIndex + ((j + 1) % RingPointCount),
+                        firstRingIndex + ((j + 1) % ActualRingPointCount),
                         firstRingIndex+ j,
-                        firstRingIndex + ((j + 1) % RingPointCount) + interiorBase,
+                        firstRingIndex + ((j + 1) % ActualRingPointCount) + interiorBase,
                         firstRingIndex + j + interiorBase
                     );
                 DrawQuad(
                         lastRingIndex+ j,
-                        lastRingIndex + ((j + 1) % RingPointCount),
+                        lastRingIndex + ((j + 1) % ActualRingPointCount),
                         lastRingIndex + j + interiorBase,
-                        lastRingIndex + ((j + 1) % RingPointCount) + interiorBase
+                        lastRingIndex + ((j + 1) % ActualRingPointCount) + interiorBase
                     );
             }
         }
@@ -202,28 +203,28 @@ public static class MeshGenerator
             int AddRingCenterVertexFromAverage(int baseIndex)
             {
                 Vector3 average= Vector3.zero;
-                for (int i = 0; i < RingPointCount; i++)
+                for (int i = 0; i < ActualRingPointCount; i++)
                     average += vertices[i+baseIndex];
-                average = average/ RingPointCount;
+                average = average/ ActualRingPointCount;
                 vertices.Add(average);
                 return vertices.Count - 1;
             }
             int startRingBaseIndex = 0;
-            int endRingBaseIndex = numRings* RingPointCount;
+            int endRingBaseIndex = numRings* ActualRingPointCount;
             void TrianglifyRingToCenter(int baseIndex,int centerIndex,bool invert)
             {
-                for (int i = 0; i < RingPointCount; i++)
+                for (int i = 0; i < ActualRingPointCount; i++)
                 {
                     if (invert)
                         DrawTri(
                             baseIndex + i,
                             centerIndex,
-                            baseIndex + ((i + 1) % RingPointCount)
+                            baseIndex + ((i + 1) % ActualRingPointCount)
                             );
                     else
                         DrawTri(
                             baseIndex + i,
-                            baseIndex + ((i + 1) % RingPointCount),
+                            baseIndex + ((i + 1) % ActualRingPointCount),
                             centerIndex
                             );
                 }
@@ -234,8 +235,8 @@ public static class MeshGenerator
         switch (TubeType)
         {
             case TubeType.Solid:
-                numVerts = RingPointCount * sampled.Count;
-                numTris = RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
+                numVerts = ActualRingPointCount * sampled.Count;
+                numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                 shouldDrawConnectingFace = true;
                 InitLists();
                 GenerateVertexLayer(true);
@@ -243,8 +244,8 @@ public static class MeshGenerator
                 CreateTubeEndPlates();  
                 break;
             case TubeType.Hollow:
-                numVerts = RingPointCount * sampled.Count * 2;
-                numTris = RingPointCount * numRings * 6 * 2;
+                numVerts = ActualRingPointCount * sampled.Count * 2;
+                numTris = ActualRingPointCount * numRings * 6 * 2;
                 bool is360degree = TubeArc == 360.0f && MeshGenerator.IsTubeArcConstant;
                 if (is360degree)
                     shouldDrawConnectingFace = true;
