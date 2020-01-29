@@ -144,14 +144,20 @@ public partial class BeizerCurve
             {
                 time = segments[i].GetTimeAtLength(remainingDistance);
                 position = GetSegmentPositionAtTime(i, time);
-                return new PointOnCurve(time,remainingDistance,position,i);
+                var retr = new PointOnCurve(time,remainingDistance,position,i);
+                retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (i - 1 >= 0 ? segments[i - 1].cummulativeLength : 0);
+                return retr;
             }
             remainingDistance-= segments[i].length;
         }
         int finalSegmentIndex = NumSegments - 1;
         time = 1.0f;
         position = GetSegmentPositionAtTime(finalSegmentIndex,time);
-        return new PointOnCurve(time,segments[finalSegmentIndex].length,position,finalSegmentIndex);
+        {
+            var retr = new PointOnCurve(time, segments[finalSegmentIndex].length, position, finalSegmentIndex);
+            retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (finalSegmentIndex - 1 >= 0 ? segments[finalSegmentIndex - 1].cummulativeLength : 0);
+            return retr;
+        }
     }
 
     public void SolvePositionAtTimeTangents(int startIndex, int length, float time, out Vector3 leftTangent, out Vector3 rightTangent, out Vector3 preLeftTangent, out Vector3 postRightTangent)

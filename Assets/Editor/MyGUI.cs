@@ -11,7 +11,7 @@ public static class MyGUI
 
     #region 
     private const int WireCylinderLineCount = 4;
-    private const int NumCylinderSamples = 10;//TODO: rethink
+    private const int NumCylinderSamples = 10;//Constant here is probably fine
     public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BeizerCurve positionCurve)
     {
         var linearSizeCurve = new LinearEvaluatable(startKeyframeXY,endKeyframeXY);
