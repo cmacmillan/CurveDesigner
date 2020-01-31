@@ -12,7 +12,7 @@ public static class MyGUI
     #region 
     private const int WireCylinderLineCount = 4;
     private const int NumCylinderSamples = 10;//Constant here is probably fine
-    public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BeizerCurve positionCurve)
+    public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BeizerCurve positionCurve,bool drawStartCap=true)
     {
         var linearSizeCurve = new LinearEvaluatable(startKeyframeXY,endKeyframeXY);
         List<Vector3> outputPoints = new List<Vector3>();
@@ -23,7 +23,8 @@ public static class MyGUI
         positionCurve.CreateRingPointsAlongCurve(inputPoints, outputPoints, linearSizeCurve, 360.0f, 0.0f, WireCylinderLineCount, 0, true);
 
         var startForward = (inputPoints[1].position - inputPoints[0].position).normalized;
-        Handles.DrawWireDisc(startPoint.position,startForward,startKeyframeXY.y);
+        if (drawStartCap)
+            Handles.DrawWireDisc(startPoint.position,startForward,startKeyframeXY.y);
         var endForward= (inputPoints[inputPoints.Count-1].position - inputPoints[inputPoints.Count-2].position).normalized;
         Handles.DrawWireDisc(endPoint.position,endForward,endKeyframeXY.y);
 
@@ -718,7 +719,7 @@ public static class MyGUI
                             for (int n=centerIndex;n<rightIndex;n++)
                                 DrawCurveFromIndex(n,topTex,clonedCurve,Color.white,4);
                             //////
-                            EditWireCylinder(centerDataAtDistance, rightDataAtDistance,centerXY,rightXY,positionCurve);
+                            EditWireCylinder(centerDataAtDistance, rightDataAtDistance,centerXY,rightXY,positionCurve,!left);
                         }
                     }
                 }
