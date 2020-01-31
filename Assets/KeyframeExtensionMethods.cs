@@ -75,9 +75,9 @@ public static class KeyframeExtensionMethods
                 key.outWeight = Mathf.Clamp01((value - key.time) / segmentLength);
                 break;
         }
-        SetKeyframeY(curve,index,type,yBefore);
         keys[index] = key;
         curve.keys = keys;
+        SetKeyframeY(curve,index,type,yBefore); 
     }
 
     public static void SetKeyframeY(this AnimationCurve curve, int index, PGIndex type, float value,bool setRelativeValue=false)
