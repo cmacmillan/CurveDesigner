@@ -480,29 +480,7 @@ public static class MyGUI
                         //////Actually update the point's position///////
                         positionCurve[hotPoint.indexInList] = newPointPosition;
                         /////////////////////////////////////////////////
-
-                        {//Update curve length
-                            //Only recalculating the two segments this edit might affect
-                            switch (modifiedPointType)
-                            {
-                                case PGIndex.Position:
-                                    if (pointGroupIndex-1>=0)
-                                        positionCurve.segments[pointGroupIndex-1].Recalculate(positionCurve,pointGroupIndex-1);
-                                    if (pointGroupIndex<positionCurve.segments.Count)
-                                        positionCurve.segments[pointGroupIndex].Recalculate(positionCurve,pointGroupIndex);
-                                    break;
-                                case PGIndex.RightTangent:
-                                    positionCurve.segments[pointGroupIndex].Recalculate(positionCurve,pointGroupIndex);
-                                    if (pointGroupIndex-1>=0)
-                                        positionCurve.segments[pointGroupIndex-1].Recalculate(positionCurve,pointGroupIndex-1);
-                                    break;
-                                case PGIndex.LeftTangent:
-                                    positionCurve.segments[pointGroupIndex-1].Recalculate(positionCurve,pointGroupIndex-1);
-                                    if (pointGroupIndex+1<positionCurve.segments.Count)
-                                        positionCurve.segments[pointGroupIndex].Recalculate(positionCurve,pointGroupIndex);
-                                    break;
-                            }
-                        }
+                        positionCurve.Recalculate();
 
                         {
                             Keyframe[] keys = sizeCurve.keys;
