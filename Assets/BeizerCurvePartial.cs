@@ -20,9 +20,10 @@ public partial class BeizerCurve
         float distanceFromFull = 360.0f - TubeArc;
         void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
         {
-            //Old Method: 
-            //Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
-            Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
+            //Method 1:
+            Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
+            //Method 2:
+            //Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
             previousTangent = tangentVect;
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
             var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceFromStartOfCurve) + offset);

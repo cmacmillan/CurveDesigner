@@ -12,7 +12,7 @@ public static class MyGUI
     #region 
     private const int WireCylinderLineCount = 4;
     private const int NumCylinderSamples = 10;//Constant here is probably fine
-    public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BeizerCurve positionCurve,bool drawStartCap=true)
+    public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BeizerCurve positionCurve,bool shouldDrawCenter,bool isLeft,List<PointInfo> points,Curve3D curve)
     {
         var linearSizeCurve = new LinearEvaluatable(startKeyframeXY,endKeyframeXY);
         List<Vector3> outputPoints = new List<Vector3>();
@@ -23,10 +23,24 @@ public static class MyGUI
         positionCurve.CreateRingPointsAlongCurve(inputPoints, outputPoints, linearSizeCurve, 360.0f, 0.0f, WireCylinderLineCount, 0, true);
 
         var startForward = (inputPoints[1].position - inputPoints[0].position).normalized;
-        if (drawStartCap)
+        if (shouldDrawCenter)
             Handles.DrawWireDisc(startPoint.position,startForward,startKeyframeXY.y);
         var endForward= (inputPoints[inputPoints.Count-1].position - inputPoints[inputPoints.Count-2].position).normalized;
         Handles.DrawWireDisc(endPoint.position,endForward,endKeyframeXY.y);
+        if (isLeft || shouldDrawCenter)
+            for (int line = 0; line < WireCylinderLineCount; line++)
+            {
+                var lineTarget = outputPoints[line];
+                points.Add(new PointInfo(lineTarget,Color.white,curve.diamondIcon,-1,PointType.SizePoint));
+                Handles.DrawLine(startPoint.position,lineTarget);
+            }
+        if (!isLeft || shouldDrawCenter) 
+            for (int line = 0; line < WireCylinderLineCount; line++)
+            {
+                var lineTarget = outputPoints[line + NumCylinderSamples * WireCylinderLineCount];
+                points.Add(new PointInfo(lineTarget,Color.white,curve.diamondIcon,-1,PointType.SizePoint));
+                Handles.DrawLine(endPoint.position,lineTarget);
+            }
 
         List<Vector3> linePoints = new List<Vector3>(NumCylinderSamples+1);//one extra sample
         for (int line=0;line<WireCylinderLineCount;line++)
@@ -94,6 +108,7 @@ public static class MyGUI
         ValuePoint = 3,
         ValuePointLeftTangent = 4,
         ValuePointRightTangent = 5,
+        SizePoint = 6,
     }
     public static PGIndex PointTypeToPGIndex(PointType type)
     {
@@ -108,7 +123,7 @@ public static class MyGUI
                 throw new ArgumentException();
         }
     }
-    private class PointInfo
+    public class PointInfo
     {
         public PointType type;
         public Color color;
@@ -173,6 +188,14 @@ public static class MyGUI
             return closestPoint;
         }
 
+            void DrawCurveFromIndex(int index, Texture2D tex, BeizerCurve pointProvider, Color color, float thickness)
+            {
+                var point1 = curve.transform.TransformPoint(pointProvider[index, 0]);
+                var point2 = curve.transform.TransformPoint(pointProvider[index, 3]);
+                var tangent1 = curve.transform.TransformPoint(pointProvider[index, 1]);
+                var tangent2 = curve.transform.TransformPoint(pointProvider[index, 2]);
+                Handles.DrawBezier(point1, point2, tangent1, tangent2, color, tex, thickness);
+            }
         void PopulatePoints(){
             points = new List<PointInfo>();
             hotPoint = null;
@@ -295,6 +318,71 @@ public static class MyGUI
             }
             curveSplitPoint = new CurveSplitPointInfo(segmentIndex, time);
             #endregion
+
+            if (curve.editMode == EditMode.Size)
+            {
+                var keys = sizeCurve.keys;
+                int i = 0;
+                var clonedCurve = new BeizerCurve(positionCurve);//hmm
+                for (int c = 0; c < keys.Length; c++)
+                {
+                    bool left = c > 0;
+                    bool right = c < keys.Length - 1;
+                    Texture2D bottomTex;
+                    Texture2D topTex;
+                    if (c % 2 == 0)
+                    {
+                        bottomTex = curve.blueLineBottomTex;
+                        topTex = curve.blueLineTopTex;
+                    }
+                    else
+                    {
+                        bottomTex = curve.redLineBottomTex;
+                        topTex = curve.redLineTopTex;
+                    }
+                    int leftIndex = -1;
+                    int centerIndex = -1;
+                    int rightIndex = -1;
+                    PointOnCurve centerDataAtDistance = null;
+                    PointOnCurve leftDataAtDistance = null;
+                    PointOnCurve rightDataAtDistance = null;
+                    Vector2 leftXY = Vector2.zero;
+                    Vector2 centerXY = Vector2.zero;
+                    Vector2 rightXY = Vector2.zero;
+                    if (left)
+                    {
+                        leftDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.LeftTangent));
+                        leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(leftDataAtDistance.segmentIndex, leftDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                        clonedCurve.Recalculate();
+                        leftXY = new Vector2(sizeCurve.GetKeyframeX(c, PGIndex.LeftTangent), sizeCurve.GetKeyframeY(c, PGIndex.LeftTangent));
+                    }
+
+                    centerDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.Position));
+                    centerIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(centerDataAtDistance.segmentIndex, centerDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                    clonedCurve.Recalculate();
+
+                    centerXY = new Vector2(sizeCurve.GetKeyframeX(c, PGIndex.Position), sizeCurve.GetKeyframeY(c, PGIndex.Position));
+
+                    if (left)
+                    {
+                        for (int n = leftIndex; n < centerIndex; n++)
+                            DrawCurveFromIndex(n, bottomTex, clonedCurve, Color.white, 4);
+                        //////
+                        EditWireCylinder(leftDataAtDistance, centerDataAtDistance, leftXY, centerXY, positionCurve, true, true, points, curve);
+                    }
+                    if (right)
+                    {
+                        rightXY = new Vector2(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent), sizeCurve.GetKeyframeY(c, PGIndex.RightTangent));
+                        rightDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent));
+                        rightIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(rightDataAtDistance.segmentIndex, rightDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                        clonedCurve.Recalculate();
+                        for (int n = centerIndex; n < rightIndex; n++)
+                            DrawCurveFromIndex(n, topTex, clonedCurve, Color.white, 4);
+                        //////
+                        EditWireCylinder(centerDataAtDistance, rightDataAtDistance, centerXY, rightXY, positionCurve, !left, false, points, curve);
+                    }
+                }
+            }
 
             if (curve.IsAPointSelected)
             {
@@ -568,10 +656,10 @@ public static class MyGUI
                         switch (curve.editMode)
                         {
                             case EditMode.PositionCurve:
-                                if (hotPoint.type== PointType.SplitPoint)
+                                if (hotPoint.type == PointType.SplitPoint)
                                 {
                                     //Multiply by 3 because there are tangents filling up the list
-                                    hotPoint.indexInList = 3*positionCurve.InsertSegmentAfterIndex(curveSplitPoint,positionCurve.placeLockedPoints,positionCurve.splitInsertionBehaviour);
+                                    hotPoint.indexInList = 3 * positionCurve.InsertSegmentAfterIndex(curveSplitPoint, positionCurve.placeLockedPoints, positionCurve.splitInsertionBehaviour);
                                     curve.hotPointIndex = hotPoint.indexInList;
                                     PopulatePoints();
                                     positionCurve.Recalculate();
@@ -580,7 +668,7 @@ public static class MyGUI
                                 {
                                     curve.selectedPointsIndex.Clear();
                                 }
-                                var currentIndexToSelect= BeizerCurve.GetParentVirtualIndex(hotPoint.indexInList);
+                                var currentIndexToSelect = BeizerCurve.GetParentVirtualIndex(hotPoint.indexInList);
                                 curve.selectedPointsIndex.Add(currentIndexToSelect);
                                 break;
                             case EditMode.Size:
@@ -590,7 +678,7 @@ public static class MyGUI
                                     hotPoint.dataIndex = extraIndex;
                                     hotPoint.type = PointType.ValuePoint;//We've inserted a point, so now we are editing a value point
 
-                                    var index = BeizerCurve.GetVirtualIndexByType(extraIndex,PointTypeToPGIndex(PointType.ValuePoint));
+                                    var index = BeizerCurve.GetVirtualIndexByType(extraIndex, PointTypeToPGIndex(PointType.ValuePoint));
                                     curve.hotPointIndex = index;
                                     hotPoint.indexInList = index;
                                 }
@@ -625,81 +713,9 @@ public static class MyGUI
                 break;
             case EventType.Repaint:
                 #region repaint
-
-                void DrawCurveFromIndex(int index,Texture2D tex,BeizerCurve pointProvider,Color color,float thickness)
-                {
-                    var point1 = curve.transform.TransformPoint(pointProvider[index, 0]);
-                    var point2 = curve.transform.TransformPoint(pointProvider[index, 3]);
-                    var tangent1 = curve.transform.TransformPoint(pointProvider[index, 1]);
-                    var tangent2 = curve.transform.TransformPoint(pointProvider[index, 2]);
-                    Handles.DrawBezier(point1, point2, tangent1, tangent2, color, tex, thickness);
-                }
                 for (int i = 0; i < positionCurve.NumSegments; i++)
                 {
                     DrawCurveFromIndex(i,curve.lineTex,positionCurve,new Color(.6f,.6f,.6f),lineThickness);
-                }
-                if (curve.editMode == EditMode.Size)
-                {
-                    var keys = sizeCurve.keys;
-                    int i = 0;
-                    var clonedCurve = new BeizerCurve(positionCurve);//hmm
-                    for (int c = 0; c < keys.Length; c++)
-                    {
-                        bool left = c > 0;
-                        bool right = c < keys.Length - 1;
-                        Texture2D bottomTex;
-                        Texture2D topTex;
-                        if (c % 2 == 0)
-                        {
-                            bottomTex = curve.blueLineBottomTex;
-                            topTex = curve.blueLineTopTex;
-                        } else
-                        {
-                            bottomTex = curve.redLineBottomTex;
-                            topTex = curve.redLineTopTex;
-                        }
-                        int leftIndex=-1;
-                        int centerIndex=-1;
-                        int rightIndex=-1;
-                        PointOnCurve centerDataAtDistance=null;
-                        PointOnCurve leftDataAtDistance=null;
-                        PointOnCurve rightDataAtDistance=null;
-                        Vector2 leftXY = Vector2.zero;
-                        Vector2 centerXY = Vector2.zero;
-                        Vector2 rightXY = Vector2.zero;
-                        if (left)
-                        {
-                            leftDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent));
-                            leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(leftDataAtDistance.segmentIndex,leftDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
-                            clonedCurve.Recalculate();
-                            leftXY = new Vector2(sizeCurve.GetKeyframeX(c,PGIndex.LeftTangent),sizeCurve.GetKeyframeY(c,PGIndex.LeftTangent));
-                        }
-
-                        centerDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.Position));
-                        centerIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(centerDataAtDistance.segmentIndex, centerDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
-                        clonedCurve.Recalculate();
-
-                        centerXY = new Vector2(sizeCurve.GetKeyframeX(c,PGIndex.Position),sizeCurve.GetKeyframeY(c,PGIndex.Position));
-
-                        if (left)
-                        {
-                            for (int n=leftIndex;n<centerIndex;n++)
-                                DrawCurveFromIndex(n,bottomTex,clonedCurve,Color.white,4);
-                            //////
-                            EditWireCylinder(leftDataAtDistance, centerDataAtDistance,leftXY,centerXY,positionCurve);
-                        }
-                        if (right)
-                        {
-                            rightXY = new Vector2(sizeCurve.GetKeyframeX(c,PGIndex.RightTangent),sizeCurve.GetKeyframeY(c,PGIndex.RightTangent));
-                            rightDataAtDistance= clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent));
-                            rightIndex= clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(rightDataAtDistance.segmentIndex,rightDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
-                            clonedCurve.Recalculate();
-                            for (int n=centerIndex;n<rightIndex;n++)
-                                DrawCurveFromIndex(n,topTex,clonedCurve,Color.white,4);
-                            //////
-                            EditWireCylinder(centerDataAtDistance, rightDataAtDistance,centerXY,rightXY,positionCurve,!left);
-                        }
-                    }
                 }
 
                 switch (curve.editMode)
