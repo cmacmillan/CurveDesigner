@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.NewUI;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -13,7 +14,7 @@ public class Curve3DInspector : Editor
     {
         base.OnInspectorGUI();
     }
-    private void OnSceneGUI()
+    /*private void OnSceneGUI()
     {
         var curve = target as Curve3D;
         Undo.RecordObject(curve, "curve");
@@ -55,5 +56,40 @@ public class Curve3DInspector : Editor
 
         Handles.EndGUI();
 
+    }*/
+    private void OnSceneGUI()
+    {
+        var curve3d = (target as Curve3D);
+        Curve3DSettings.circleTexture = curve3d.circleIcon;
+        Curve3DSettings.squareTexture = curve3d.squareIcon;
+        Curve3DSettings.diamondTexture = curve3d.diamondIcon;
+        var curveEditor = new CurveComposite(curve3d);//prob shouldn't do this every frame
+        switch (Event.current.type)
+        {
+            case EventType.Repaint:
+                Draw(curveEditor);
+                //
+                GL.PushMatrix();
+                curve3d.testmat.SetPass(0);
+                GL.LoadOrtho();
+                GL.Begin(GL.TRIANGLES);
+                GL.Vertex3(0, 0, -10f);
+                GL.Vertex3(1, 1, -10f);
+                GL.Vertex3(0, 1, -10f);
+                GL.End();
+                GL.PopMatrix();
+                break;
+        }
+    }
+    void Draw(IComposite drawTarget)
+    {
+        List<IDraw> draws = new List<IDraw>();
+        drawTarget.Draw(draws);
+        draws.Sort((a, b) => Mathf.CeilToInt(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
+        Handles.BeginGUI();
+        foreach (var draw in draws)
+            if (draw.DistFromCamera()>0)
+                draw.Draw();
+        Handles.EndGUI();
     }
 }
