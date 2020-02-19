@@ -10,5 +10,13 @@ namespace Assets.NewUI
         public float distanceFromClick;
         public float distanceFromCamera;
         public IClickCommand commandToExecute;
+        public IComposite owner;
+        public ClickHitData(IComposite owner,float distanceFromClick, float distanceFromCamera,IClickCommand command)
+        {
+            this.distanceFromClick = distanceFromClick;
+            this.distanceFromCamera = distanceFromCamera;
+            this.commandToExecute = command;
+            this.owner = owner;
+        }
     }
 }

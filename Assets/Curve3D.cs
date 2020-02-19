@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.NewUI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -6,6 +7,10 @@ using UnityEngine;
 
 public class Curve3D : MonoBehaviour
 {
+    [NonSerialized]
+    public ClickHitData elementClickedDown;
+    public CurveComposite UICurve=null;
+
     public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
     public Texture2D lineTex;

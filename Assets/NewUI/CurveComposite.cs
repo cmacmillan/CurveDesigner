@@ -30,11 +30,6 @@ namespace Assets.NewUI
             base.Draw(drawList);
         }
 
-        public override ClickHitData Click(Vector2 position)
-        {
-            throw new NotImplementedException();
-        }
-
         public override IEnumerable<IComposite> GetChildren()
         {
             yield return _positionCurve;

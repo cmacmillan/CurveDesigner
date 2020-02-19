@@ -9,25 +9,27 @@ namespace Assets.NewUI
 {
     public class PointComposite : IComposite
     {
-        private IPositionProvider position;
-        private PointTextureType pointTexture;
-        private IClickCommand clickAction;
+        private IPositionProvider _position;
+        private PointTextureType _pointTexture;
+        private IClickCommand _clickAction;
         
         public PointComposite(IPositionProvider positionProvider,PointTextureType textureType,IClickCommand clickAction)
         {
-            this.position = positionProvider;
-            this.pointTexture = textureType;
-            this.clickAction = clickAction;
+            this._position = positionProvider;
+            this._pointTexture = textureType;
+            this._clickAction = clickAction;
         }
 
-        public override ClickHitData Click(Vector2 mousePos)
+        public override void Click(Vector2 position, List<ClickHitData> clickHits)
         {
-            throw new NotImplementedException();
+            GUITools.WorldToGUISpace(_position.Position,out Vector2 guiPosition,out float screenDepth);
+            float distance = Vector2.Distance(position,guiPosition);
+            clickHits.Add(new ClickHitData(this,distance,screenDepth,_clickAction));
         }
 
         public override void Draw(List<IDraw> drawList)
         {
-            drawList.Add(new PointDraw(position.Position, pointTexture));
+            drawList.Add(new PointDraw(_position.Position, _pointTexture));
         }
     }
 }

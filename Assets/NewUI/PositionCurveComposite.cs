@@ -17,11 +17,6 @@ namespace Assets.NewUI
                 pointGroups.Add(new PositionPointGroupComposite(group));
         }
 
-        public override ClickHitData Click(Vector2 position)
-        {
-            throw new NotImplementedException();
-        }
-
         public override IEnumerable<IComposite> GetChildren()
         {
             return pointGroups;

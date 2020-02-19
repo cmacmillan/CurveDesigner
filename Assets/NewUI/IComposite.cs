@@ -21,6 +21,10 @@ namespace Assets.NewUI
         {
             return Enumerable.Empty<IComposite>();
         }
-        public abstract ClickHitData Click(Vector2 position);
+        public virtual void Click(Vector2 position,List<ClickHitData> clickHits)
+        {
+            foreach (var i in GetChildren())
+                i.Click(position, clickHits);
+        }
     }
 }

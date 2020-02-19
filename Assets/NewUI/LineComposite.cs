@@ -17,10 +17,6 @@ namespace Assets.NewUI
             this._start = start;
             this._end = end;
         }
-        public override ClickHitData Click(Vector2 position)
-        {
-            throw new NotImplementedException();
-        }
 
         public override void Draw(List<IDraw> drawList)
         {

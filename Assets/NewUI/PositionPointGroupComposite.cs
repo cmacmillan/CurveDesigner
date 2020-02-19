@@ -22,24 +22,19 @@ namespace Assets.NewUI
         {
             _pointGroup = group;
             var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position);
-            centerPoint = new PointComposite(centerPointPosition,PointTextureType.circle,null);
+            centerPoint = new PointComposite(centerPointPosition,PointTextureType.circle,new PositionPointClickCommand(group,PGIndex.Position));
             if (_pointGroup.hasLeftTangent)
             {
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent);
-                leftTangentPoint = new PointComposite(endPoint,PointTextureType.square,null);
+                leftTangentPoint = new PointComposite(endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent));
                 leftTangentLine = new LineComposite(centerPointPosition,endPoint);
             }
             if (_pointGroup.hasRightTangent)
             {
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent);
-                rightTangentPoint = new PointComposite(endPoint,PointTextureType.square,null);
+                rightTangentPoint = new PointComposite(endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent));
                 rightTangentLine = new LineComposite(centerPointPosition, endPoint);
             }
-        }
-
-        public override ClickHitData Click(Vector2 position)
-        {
-            return null;
         }
 
         public override IEnumerable<IComposite> GetChildren()
