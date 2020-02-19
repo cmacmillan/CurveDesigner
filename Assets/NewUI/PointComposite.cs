@@ -29,10 +29,5 @@ namespace Assets.NewUI
         {
             drawList.Add(new PointDraw(position.Position, pointTexture));
         }
-
-        public override IEnumerable<IComposite> GetChildren()
-        {
-            return Enumerable.Empty<IComposite>();
-        }
     }
 }

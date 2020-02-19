@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.NewUI
@@ -21,7 +22,7 @@ namespace Assets.NewUI
         }
         public float DistFromCamera()
         {
-            return _distFromCamera;
+            return _distFromCamera+(int)IDrawSortLayers.Points;
         }
         public void Draw()
         {
@@ -30,12 +31,14 @@ namespace Assets.NewUI
         }
         private static void DrawPoint(Rect position, Color color, Texture2D tex)
         {
+            Handles.BeginGUI();
             Color oldColor = GUI.color;
             GUI.color = color;
             GUI.DrawTexture(position, tex);
             GUI.color = oldColor;
+            Handles.EndGUI();
         }
-        private static Texture2D GetPointTexture(PointTextureType type)
+        public static Texture2D GetPointTexture(PointTextureType type)
         {
             switch (type)
             {

@@ -13,6 +13,11 @@ namespace Assets.NewUI
         {
             return new Rect(position.x - halfWidth, position.y - halfHeight, 2 * halfWidth, 2 * halfHeight);
         }
+        public static float CameraDistanceToPoint(Vector3 worldPos)
+        {
+            WorldToGUISpace(worldPos, out Vector2 guiPosition, out float depth);
+            return depth;
+        }
         public static bool WorldToGUISpace(Vector3 worldPos, out Vector2 guiPosition, out float screenDepth)
         {
             var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;//Consider replacing with Camera.current?

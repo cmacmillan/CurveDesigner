@@ -16,4 +16,10 @@ namespace Assets.NewUI
         void Draw();
         float DistFromCamera();
     } 
+    public enum IDrawSortLayers
+    {
+        Points = 0,
+        Lines = 1000,
+        Curves = 2000
+    }
 }

@@ -10,17 +10,31 @@ namespace Assets.NewUI
     public class PositionPointGroupComposite : IComposite
     {
         private PointGroup _pointGroup;
+
         private PointComposite leftTangentPoint = null;
+        private LineComposite leftTangentLine = null;
+
         private PointComposite rightTangentPoint = null;
+        private LineComposite rightTangentLine = null;
+
         private PointComposite centerPoint = null;
         public PositionPointGroupComposite(PointGroup group)
         {
             _pointGroup = group;
+            var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position);
+            centerPoint = new PointComposite(centerPointPosition,PointTextureType.circle,null);
             if (_pointGroup.hasLeftTangent)
-                leftTangentPoint = new PointComposite(new PointGroupPointPositionProvider(_pointGroup,PGIndex.LeftTangent),PointTextureType.square,null);
+            {
+                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent);
+                leftTangentPoint = new PointComposite(endPoint,PointTextureType.square,null);
+                leftTangentLine = new LineComposite(centerPointPosition,endPoint);
+            }
             if (_pointGroup.hasRightTangent)
-                rightTangentPoint = new PointComposite(new PointGroupPointPositionProvider(_pointGroup,PGIndex.RightTangent),PointTextureType.square,null);
-            centerPoint = new PointComposite(new PointGroupPointPositionProvider(_pointGroup,PGIndex.Position),PointTextureType.circle,null);
+            {
+                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent);
+                rightTangentPoint = new PointComposite(endPoint,PointTextureType.square,null);
+                rightTangentLine = new LineComposite(centerPointPosition, endPoint);
+            }
         }
 
         public override ClickHitData Click(Vector2 position)
@@ -31,10 +45,16 @@ namespace Assets.NewUI
         public override IEnumerable<IComposite> GetChildren()
         {
             if (leftTangentPoint != null)
+            {
                 yield return leftTangentPoint;
+                yield return leftTangentLine;
+            }
             yield return centerPoint;
             if (rightTangentPoint != null)
+            {
                 yield return rightTangentPoint;
+                yield return rightTangentLine;
+            }
         }
     }
 }

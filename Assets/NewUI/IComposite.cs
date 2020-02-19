@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -16,7 +17,10 @@ namespace Assets.NewUI
             foreach (var i in GetChildren())
                 i.Draw(drawList);
         }
-        public abstract IEnumerable<IComposite> GetChildren();
+        public virtual IEnumerable<IComposite> GetChildren()
+        {
+            return Enumerable.Empty<IComposite>();
+        }
         public abstract ClickHitData Click(Vector2 position);
     }
 }

@@ -340,6 +340,7 @@ MonoBehaviour:
       length: 210.80411
       cummulativeLength: 324.20676
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
+  testmat: {fileID: 2100000, guid: 0e90a4cb812bdd440b225015a4705b31, type: 2}
   blueLineTopTex: {fileID: 2800000, guid: 33887fc6b45dbe54aa6bf742e9fd4d14, type: 3}
   blueLineBottomTex: {fileID: 2800000, guid: 20745495dfb37944995b27a700e31b4c, type: 3}
   redLineTopTex: {fileID: 2800000, guid: 33887fc6b45dbe54aa6bf742e9fd4d14, type: 3}

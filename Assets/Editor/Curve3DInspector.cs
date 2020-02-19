@@ -63,21 +63,12 @@ public class Curve3DInspector : Editor
         Curve3DSettings.circleTexture = curve3d.circleIcon;
         Curve3DSettings.squareTexture = curve3d.squareIcon;
         Curve3DSettings.diamondTexture = curve3d.diamondIcon;
+        Curve3DSettings.defaultLineTexture = curve3d.lineTex;
         var curveEditor = new CurveComposite(curve3d);//prob shouldn't do this every frame
         switch (Event.current.type)
         {
             case EventType.Repaint:
                 Draw(curveEditor);
-                //
-                GL.PushMatrix();
-                curve3d.testmat.SetPass(0);
-                GL.LoadOrtho();
-                GL.Begin(GL.TRIANGLES);
-                GL.Vertex3(0, 0, -10f);
-                GL.Vertex3(1, 1, -10f);
-                GL.Vertex3(0, 1, -10f);
-                GL.End();
-                GL.PopMatrix();
                 break;
         }
     }
@@ -86,10 +77,25 @@ public class Curve3DInspector : Editor
         List<IDraw> draws = new List<IDraw>();
         drawTarget.Draw(draws);
         draws.Sort((a, b) => Mathf.CeilToInt(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
-        Handles.BeginGUI();
         foreach (var draw in draws)
             if (draw.DistFromCamera()>0)
                 draw.Draw();
-        Handles.EndGUI();
     }
 }
+/*
+//we could dick around trying to draw our own lines/icons so that we can sort using the depth buffer, but I say we do that laterS
+GL.PushMatrix();
+curve3d.testmat.SetPass(0);
+GL.LoadOrtho();
+GL.Begin(GL.TRIANGLES);
+GL.Color(Color.green);
+GL.Vertex3(0, 0, -10f);
+GL.Vertex3(1, 1, -10f);
+GL.Vertex3(0, 1, -10f);
+GL.Color(Color.blue);
+GL.Vertex3(0, 0, -5f);
+GL.Vertex3(1, 1, -5f);
+GL.Vertex3(0, 1, -5f);
+GL.End();
+GL.PopMatrix();
+*/
