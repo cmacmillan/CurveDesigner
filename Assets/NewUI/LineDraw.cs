@@ -13,19 +13,27 @@ namespace Assets.NewUI
         private Vector3 _startPoint;
         private Vector3 _endPoint;
         private float _distanceToPoint;
-        public LineDraw(Vector3 startPoint,Vector3 endPoint)
+        private IComposite _creator;
+        public LineDraw(IComposite creator,Vector3 startPoint,Vector3 endPoint)
         {
+            this._creator = creator;
             this._startPoint = startPoint;
             this._endPoint = endPoint;
             var avg = (_startPoint + _endPoint) / 2.0f;
             this._distanceToPoint = GUITools.CameraDistanceToPoint(avg);
         }
+
+        public IComposite Creator()
+        {
+            return _creator;
+        }
+
         public float DistFromCamera()
         {
             return _distanceToPoint + (int)IDrawSortLayers.Lines;
         }
 
-        public void Draw()
+        public void Draw(DrawMode mode)
         {
             Handles.DrawAAPolyLine(CurveSegmentDraw.GetLineTextureByType(LineTextureType.Default), new Vector3[] { _startPoint, _endPoint});
         }

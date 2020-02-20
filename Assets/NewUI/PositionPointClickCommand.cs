@@ -23,7 +23,7 @@ namespace Assets.NewUI
         public void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData data)
         {
             var oldPointPosition = _group.GetWorldPositionByIndex(_index);
-            var newPointPosition = curve.transform.InverseTransformPoint(GUITools.GUIToWorldSpace(mousePos+ curve.pointDragOffset,data.distanceFromCamera));
+            var newPointPosition = curve.transform.InverseTransformPoint(GUITools.GUIToWorldSpace(mousePos,data.distanceFromCamera));
             _group.SetWorldPositionByIndex(_index,newPointPosition);
         }
 

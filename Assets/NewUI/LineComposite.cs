@@ -20,7 +20,7 @@ namespace Assets.NewUI
 
         public override void Draw(List<IDraw> drawList)
         {
-            drawList.Add(new LineDraw(_start.Position,_end.Position));
+            drawList.Add(new LineDraw(this,_start.Position,_end.Position));
         }
     }
 }

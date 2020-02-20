@@ -25,7 +25,7 @@ namespace Assets.NewUI
                 var point2 = _curve.transform.TransformPoint(_curve.positionCurve[i, 3]);
                 var tangent1 = _curve.transform.TransformPoint(_curve.positionCurve[i, 1]);
                 var tangent2 = _curve.transform.TransformPoint(_curve.positionCurve[i, 2]);
-                drawList.Add(new CurveSegmentDraw(point1,point2,tangent1,tangent2,LineTextureType.Default,new Color(.6f, .6f, .6f)));
+                drawList.Add(new CurveSegmentDraw(this,point1,point2,tangent1,tangent2,LineTextureType.Default,new Color(.6f, .6f, .6f)));
             }
             base.Draw(drawList);
         }

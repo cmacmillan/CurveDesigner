@@ -534,7 +534,7 @@ public static class MyGUI
                 {
                     case EditMode.PositionCurve:
                         var oldPointPosition = positionCurve[hotPoint.indexInList];
-                        var newPointPosition = curve.transform.InverseTransformPoint(GUIToWorldSpace(MousePos + curve.pointDragOffset, hotPoint.screenDepth));
+                        var newPointPosition = curve.transform.InverseTransformPoint(GUIToWorldSpace(MousePos, hotPoint.screenDepth));
 
                         #region update size curve
                         //Build keyframe info 
@@ -686,7 +686,7 @@ public static class MyGUI
                             default:
                                 throw new System.InvalidOperationException();
                         }
-                        curve.pointDragOffset = hotPoint.guiPos - MousePos;
+                        //curve.pointDragOffset = hotPoint.guiPos - MousePos;
                         OnDrag();
                     }
                 }

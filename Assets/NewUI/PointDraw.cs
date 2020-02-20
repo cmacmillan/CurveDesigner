@@ -14,20 +14,24 @@ namespace Assets.NewUI
         float _distFromCamera;
         int _size;
         PointTextureType type;
-        public PointDraw(Vector3 position,PointTextureType type,int size = 5)
+        Color _color;
+        IComposite _creator;
+        public PointDraw(IComposite creator,Vector3 position,PointTextureType type,Color color,int size = 5)
         {
             GUITools.WorldToGUISpace(position, out _guiPos, out _distFromCamera);
+            this._color = color;
             this._size = size;
             this.type = type;
+            this._creator = creator;
         }
         public float DistFromCamera()
         {
             return _distFromCamera+(int)IDrawSortLayers.Points;
         }
-        public void Draw()
+        public void Draw(DrawMode mode)
         {
             var rect = GUITools.GetRectCenteredAtPosition(_guiPos, _size, _size);
-            DrawPoint(rect,Color.white,GetPointTexture(type));
+            DrawPoint(rect, mode.Tint(_color),GetPointTexture(type));
         }
         private static void DrawPoint(Rect position, Color color, Texture2D tex)
         {
@@ -51,6 +55,11 @@ namespace Assets.NewUI
                 default:
                     throw new KeyNotFoundException();
             }
+        }
+
+        public IComposite Creator()
+        {
+            return _creator;
         }
     }
 }

@@ -21,10 +21,10 @@ namespace Assets.NewUI
         {
             return Enumerable.Empty<IComposite>();
         }
-        public virtual void Click(Vector2 position,List<ClickHitData> clickHits)
+        public virtual void Click(Vector2 mousePosition,List<ClickHitData> clickHits)
         {
             foreach (var i in GetChildren())
-                i.Click(position, clickHits);
+                i.Click(mousePosition, clickHits);
         }
     }
 }

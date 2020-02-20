@@ -76,30 +76,29 @@ public class Curve3DInspector : Editor
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.Repaint:
-                Draw(curveEditor);
+                Draw(curveEditor,MousePos,elementClickedDown);
                 break;
             case EventType.MouseDown:
-                var clicked = GetClickedElement(curveEditor,MousePos);
-                Debug.Log("down");
+                var clicked = GetClosestElementToCursor(curveEditor, MousePos);
                 if (clicked != null)
                 {
                     GUIUtility.hotControl = controlID;
                     curve3d.elementClickedDown = clicked;
-                    clicked.commandToExecute.ClickDown(MousePos);
-                    clicked.commandToExecute.ClickDrag(MousePos,curve3d,clicked);
+                    var clickPos = MousePos + clicked.offset;
+                    clicked.commandToExecute.ClickDown(clickPos);
+                    clicked.commandToExecute.ClickDrag(clickPos, curve3d, clicked);
                     Event.current.Use();
                 }
                 break;
             case EventType.MouseDrag:
-                Debug.Log("drag");
                 if (elementClickedDown != null)
                 {
-                    elementClickedDown.commandToExecute.ClickDrag(MousePos,curve3d,elementClickedDown);
+                    var clickPos = MousePos + elementClickedDown.offset;
+                    elementClickedDown.commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown);
                     Event.current.Use();
                 }
                 break;
             case EventType.MouseUp:
-                Debug.Log("up");
                 if (elementClickedDown != null)
                 {
                     GUIUtility.hotControl = 0;
@@ -114,7 +113,7 @@ public class Curve3DInspector : Editor
         }
     }
     private const float ClickRadius = 10;
-    ClickHitData GetClickedElement(IComposite root,Vector2 clickPosition)
+    ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition)
     {
         List<ClickHitData> hits = new List<ClickHitData>();
         root.Click(clickPosition, hits);
@@ -124,14 +123,24 @@ public class Curve3DInspector : Editor
         reducedHits.Sort((a, b) => (int)Mathf.Sign(a.distanceFromCamera - b.distanceFromCamera));
         return reducedHits[0];
     }
-    void Draw(IComposite root)
+    void Draw(IComposite root,Vector2 mousePos,ClickHitData currentlyHeldDown)
     {
+        ClickHitData closestElementToCursor = null;
+        if (currentlyHeldDown==null)
+            closestElementToCursor = GetClosestElementToCursor(root,mousePos);
         List<IDraw> draws = new List<IDraw>();
         root.Draw(draws);
         draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
         foreach (var draw in draws)
-            if (draw.DistFromCamera()>0)
-                draw.Draw();
+            if (draw.DistFromCamera() > 0)
+            {
+                if (closestElementToCursor != null && draw.Creator() == closestElementToCursor.owner)
+                    draw.Draw(DrawMode.hovered);
+                else if (currentlyHeldDown != null && draw.Creator() == currentlyHeldDown.owner)
+                    draw.Draw(DrawMode.clicked);
+                else
+                    draw.Draw(DrawMode.normal);
+            }
     }
 }
 /*

@@ -22,8 +22,10 @@ namespace Assets.NewUI
         private Color _color;
         private float _width;
         private float _distanceToPoint;
-        public CurveSegmentDraw(Vector3 startPoint, Vector3 endPoint, Vector3 startTangent, Vector3 endTangent,LineTextureType texture,Color lineColor,float width=5)
+        private IComposite _creator;
+        public CurveSegmentDraw(IComposite creator,Vector3 startPoint, Vector3 endPoint, Vector3 startTangent, Vector3 endTangent,LineTextureType texture,Color lineColor,float width=5)
         {
+            this._creator = creator;
             this._startPoint = startPoint;
             this._endPoint = endPoint;
             this._startTangent = startTangent;
@@ -39,7 +41,7 @@ namespace Assets.NewUI
             return _distanceToPoint + (int)IDrawSortLayers.Curves;
         }
 
-        public void Draw()
+        public void Draw(DrawMode mode)
         {
             Handles.DrawBezier(_startPoint,_endPoint,_startTangent,_endTangent,_color,GetLineTextureByType(_textureType),_width);
         }
@@ -52,6 +54,11 @@ namespace Assets.NewUI
                 default:
                     throw new KeyNotFoundException();
             }
+        }
+
+        public IComposite Creator()
+        {
+            return _creator;
         }
     }
 }

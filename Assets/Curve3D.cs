@@ -189,7 +189,6 @@ public class Curve3D : MonoBehaviour
     }
     public List<int> selectedPointsIndex = new List<int>();
     public int hotPointIndex=-1;
-    public Vector2 pointDragOffset;
 
     void Start()
     {
