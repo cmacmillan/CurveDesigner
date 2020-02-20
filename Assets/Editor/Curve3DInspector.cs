@@ -62,6 +62,7 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
+        Undo.RecordObject(curve3d, "curve");
         ClickHitData elementClickedDown = curve3d.elementClickedDown;
         Curve3DSettings.circleTexture = curve3d.circleIcon;
         Curve3DSettings.squareTexture = curve3d.squareIcon;
