@@ -10,10 +10,12 @@ namespace Assets.NewUI
     public class CurveComposite : IComposite
     {
         private PositionCurveComposite _positionCurve;
+        private SizeCurveComposite _sizeCurve;
         private Curve3D _curve;
         public CurveComposite(Curve3D curve)
         {
             _positionCurve = new PositionCurveComposite(curve.positionCurve);
+            _sizeCurve = new SizeCurveComposite(curve.curveSizeAnimationCurve);
             this._curve = curve;
         }
 
@@ -32,7 +34,10 @@ namespace Assets.NewUI
 
         public override IEnumerable<IComposite> GetChildren()
         {
-            yield return _positionCurve;
+            if (_curve.editMode == EditMode.PositionCurve)
+                yield return _positionCurve;
+            else if (_curve.editMode == EditMode.Size)
+                yield return _sizeCurve;
         }
     }
 }
