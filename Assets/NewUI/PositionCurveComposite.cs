@@ -10,16 +10,32 @@ namespace Assets.NewUI
     public class PositionCurveComposite : IComposite
     {
         private List<PositionPointGroupComposite> pointGroups = null;
-        public PositionCurveComposite(BeizerCurve curve)
+        private SplitterPointComposite _splitterPoint = null;
+        public PositionCurveComposite(IComposite parent,Curve3D curve) : base(parent)
         {
+            _splitterPoint = new SplitterPointComposite(this,curve,PointTextureType.circle,PositionCurveSplitCommandFactory.Instance,Color.green);
             pointGroups = new List<PositionPointGroupComposite>();
-            foreach (var group in curve.PointGroups)
-                pointGroups.Add(new PositionPointGroupComposite(group));
+            foreach (var group in curve.positionCurve.PointGroups)
+                pointGroups.Add(new PositionPointGroupComposite(this,group));
+        }
+
+        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
+        {
+            _splitterPoint.FindSplitPoint();
+            base.Click(mousePosition, clickHits);
+        }
+
+        public override void Draw(List<IDraw> drawList,ClickHitData clicked)
+        {
+            _splitterPoint.FindSplitPoint();
+            base.Draw(drawList,clicked);
         }
 
         public override IEnumerable<IComposite> GetChildren()
         {
-            return pointGroups;
+            yield return _splitterPoint;
+            foreach (var i in pointGroups)
+                yield return i;
         }
     }
 }

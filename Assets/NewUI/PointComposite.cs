@@ -13,8 +13,8 @@ namespace Assets.NewUI
         private PointTextureType _pointTexture;
         private IClickCommand _clickAction;
         private Color _color;
-        
-        public PointComposite(IPositionProvider positionProvider,PointTextureType textureType,IClickCommand clickAction,Color color)
+
+        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color) : base(parent)
         {
             this._position = positionProvider;
             this._pointTexture = textureType;
@@ -29,7 +29,7 @@ namespace Assets.NewUI
             clickHits.Add(new ClickHitData(this,distance,screenDepth,_clickAction,guiPosition-mousePosition));
         }
 
-        public override void Draw(List<IDraw> drawList)
+        public override void Draw(List<IDraw> drawList,ClickHitData clicked)
         {
             drawList.Add(new PointDraw(this,_position.Position, _pointTexture,_color));
         }

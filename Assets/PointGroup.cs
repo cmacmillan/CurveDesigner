@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CurveSplitPointInfo
+public class CurveSplitPointInfo : ISegmentTime
 {
     public int segmentIndex;
     public float time;
@@ -11,6 +11,10 @@ public class CurveSplitPointInfo
         this.segmentIndex = segmentIndex;
         this.time = time;
     }
+
+    public int SegmentIndex { get { return segmentIndex; } }
+
+    public float Time { get { return time; } }
 }
 public enum PGIndex
 {

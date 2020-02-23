@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 [System.Serializable]
-public class PointOnCurve
+public class PointOnCurve : ISegmentTime
 {
     public PointOnCurve(PointOnCurve pointToClone)
     {
@@ -30,4 +30,13 @@ public class PointOnCurve
     /// </summary>
     public float distanceFromStartOfSegment;
     public float distanceFromStartOfCurve;
+
+    public int SegmentIndex { get { return segmentIndex; } }
+
+    public float Time { get { return time; } }
+}
+public interface ISegmentTime
+{
+    int SegmentIndex { get; } 
+    float Time { get; }
 }

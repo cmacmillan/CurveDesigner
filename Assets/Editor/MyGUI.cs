@@ -523,7 +523,7 @@ public static class MyGUI
 
         float GetSplitPointDistance()
         {
-            return positionCurve.GetPointAtSegmentIndexAndTime(curveSplitPoint.segmentIndex,curveSplitPoint.time);
+            return positionCurve.GetDistanceAtSegmentIndexAndTime(curveSplitPoint.segmentIndex,curveSplitPoint.time);
         }
 
         void OnDrag()
@@ -577,7 +577,7 @@ public static class MyGUI
                                 var key = sizeCurve.keys[i];
                                 var data = keyframes[i];
                                 key.weightedMode = WeightedMode.Both;
-                                key.time = positionCurve.GetPointAtSegmentIndexAndTime(data.segmentIndex,data.progressAlongSegment);
+                                key.time = positionCurve.GetDistanceAtSegmentIndexAndTime(data.segmentIndex,data.progressAlongSegment);
                                 keys[i] = key;
                             }
                             sizeCurve.keys = keys;
@@ -588,14 +588,14 @@ public static class MyGUI
                                 var data = keyframes[i];
                                 if (i > 0)
                                 {
-                                    var leftX = positionCurve.GetPointAtSegmentIndexAndTime(data.leftTangentIndex,data.leftTangentProgressAlongSegment);
+                                    var leftX = positionCurve.GetDistanceAtSegmentIndexAndTime(data.leftTangentIndex,data.leftTangentProgressAlongSegment);
                                     var leftY = data.leftTangentValue;
                                     sizeCurve.SetKeyframeX(i,PGIndex.LeftTangent,leftX);
                                     sizeCurve.SetKeyframeY(i,PGIndex.LeftTangent,leftY);
                                 }
                                 if (i < sizeCurve.keys.Length - 1)
                                 {
-                                    var rightX = positionCurve.GetPointAtSegmentIndexAndTime(data.rightTangentIndex,data.rightTangentProgressAlongSegment);
+                                    var rightX = positionCurve.GetDistanceAtSegmentIndexAndTime(data.rightTangentIndex,data.rightTangentProgressAlongSegment);
                                     var rightY = data.rightTangentValue;
                                     sizeCurve.SetKeyframeX(i, PGIndex.RightTangent, rightX);
                                     sizeCurve.SetKeyframeY(i, PGIndex.RightTangent,rightY);

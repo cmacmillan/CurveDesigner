@@ -18,22 +18,22 @@ namespace Assets.NewUI
         private LineComposite rightTangentLine = null;
 
         private PointComposite centerPoint = null;
-        public PositionPointGroupComposite(PointGroup group)
+        public PositionPointGroupComposite(IComposite parent, PointGroup group) : base(parent)
         {
             _pointGroup = group;
             var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position);
-            centerPoint = new PointComposite(centerPointPosition,PointTextureType.circle,new PositionPointClickCommand(group,PGIndex.Position),Color.green);
+            centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,new PositionPointClickCommand(group,PGIndex.Position),Color.green);
             if (_pointGroup.hasLeftTangent)
             {
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent);
-                leftTangentPoint = new PointComposite(endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent),Color.green);
-                leftTangentLine = new LineComposite(centerPointPosition,endPoint);
+                leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent),Color.green);
+                leftTangentLine = new LineComposite(this,centerPointPosition,endPoint);
             }
             if (_pointGroup.hasRightTangent)
             {
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent);
-                rightTangentPoint = new PointComposite(endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent),Color.green);
-                rightTangentLine = new LineComposite(centerPointPosition, endPoint);
+                rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent),Color.green);
+                rightTangentLine = new LineComposite(this,centerPointPosition, endPoint);
             }
         }
 

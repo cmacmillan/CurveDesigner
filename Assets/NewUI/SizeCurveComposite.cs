@@ -10,7 +10,7 @@ namespace Assets.NewUI
     class SizeCurveComposite : IComposite
     {
         private AnimationCurve _curve;
-        public SizeCurveComposite(AnimationCurve animCurve)
+        public SizeCurveComposite(IComposite parent,AnimationCurve animCurve) : base(parent)
         {
             _curve = animCurve;
         }

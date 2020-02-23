@@ -206,19 +206,19 @@ MonoBehaviour:
       isPointLocked: 1
       leftTangent: {x: 0, y: 0, z: 0}
       rightTangent: {x: 22.28572, y: 45.617443, z: 15.35733}
-      position: {x: 0, y: 0, z: 0}
+      position: {x: -0.00016784668, y: 0.00012207031, z: -0.000030517578}
     - hasLeftTangent: 1
       hasRightTangent: 1
       isPointLocked: 1
-      leftTangent: {x: -29.776535, y: -17.113674, z: -8.507378}
-      rightTangent: {x: 29.776535, y: 17.113674, z: 8.507378}
-      position: {x: 79.93531, y: 73.3624, z: 23.527374}
+      leftTangent: {x: -21.084618, y: -68.40674, z: -15.6605835}
+      rightTangent: {x: 21.084618, y: 68.40674, z: 15.6605835}
+      position: {x: 106.98841, y: 91.49959, z: 24.017532}
     - hasLeftTangent: 1
       hasRightTangent: 0
       isPointLocked: 1
-      leftTangent: {x: 17.10498, y: 172.50037, z: 6.062996}
+      leftTangent: {x: 6.708252, y: 143.78836, z: -2.9044037}
       rightTangent: {x: 0, y: 0, z: 0}
-      position: {x: 191.44168, y: 51.1802, z: 23.980576}
+      position: {x: 192.17834, y: 51.484474, z: 24.095322}
     placeLockedPoints: 1
     isCurveOutOfDate: 0
     splitInsertionBehaviour: 1
@@ -226,119 +226,119 @@ MonoBehaviour:
     - samples:
       - segmentIndex: 0
         time: 0
-        position: {x: 0, y: 0, z: 0}
+        position: {x: -0.00016784668, y: 0.00012207031, z: -0.000030517578}
         distanceFromStartOfSegment: 0
         distanceFromStartOfCurve: 0
       - segmentIndex: 0
         time: 0.1
-        position: {x: 6.849653, y: 12.677117, z: 4.1608987}
-        distanceFromStartOfSegment: 14.998004
-        distanceFromStartOfCurve: 14.998004
+        position: {x: 7.841658, y: 11.800164, z: 3.981457}
+        distanceFromStartOfSegment: 14.716911
+        distanceFromStartOfCurve: 14.716911
       - segmentIndex: 0
         time: 0.2
-        position: {x: 14.012442, y: 23.503874, z: 7.527354}
-        distanceFromStartOfSegment: 28.40909
-        distanceFromStartOfCurve: 28.40909
+        position: {x: 17.660238, y: 20.466118, z: 6.891595}
+        distanceFromStartOfSegment: 28.132282
+        distanceFromStartOfCurve: 28.132282
       - segmentIndex: 0
         time: 0.3
-        position: {x: 21.466265, y: 32.729088, z: 10.246601}
-        distanceFromStartOfSegment: 40.57701
-        distanceFromStartOfCurve: 40.57701
+        position: {x: 28.952377, y: 26.952425, z: 9.000496}
+        distanceFromStartOfSegment: 41.3244
+        distanceFromStartOfCurve: 41.3244
       - segmentIndex: 0
         time: 0.4
-        position: {x: 29.18902, y: 40.60156, z: 12.465878}
-        distanceFromStartOfSegment: 51.826096
-        distanceFromStartOfCurve: 51.826096
+        position: {x: 41.214874, y: 32.213528, z: 10.57827}
+        distanceFromStartOfSegment: 54.760822
+        distanceFromStartOfCurve: 54.760822
       - segmentIndex: 0
         time: 0.5
-        position: {x: 37.1586, y: 47.37011, z: 14.332419}
-        distanceFromStartOfSegment: 62.44737
-        distanceFromStartOfCurve: 62.44737
+        position: {x: 53.944534, y: 37.203873, z: 11.895031}
+        distanceFromStartOfSegment: 68.49696
+        distanceFromStartOfCurve: 68.49696
       - segmentIndex: 0
         time: 0.6
-        position: {x: 45.35291, y: 53.28355, z: 15.9934635}
-        distanceFromStartOfSegment: 72.688194
-        distanceFromStartOfCurve: 72.688194
+        position: {x: 66.63817, y: 42.877888, z: 13.22089}
+        distanceFromStartOfSegment: 82.464096
+        distanceFromStartOfCurve: 82.464096
       - segmentIndex: 0
         time: 0.7
-        position: {x: 53.749832, y: 58.590687, z: 17.596243}
-        distanceFromStartOfSegment: 82.750145
-        distanceFromStartOfCurve: 82.750145
+        position: {x: 78.792564, y: 50.190025, z: 14.825956}
+        distanceFromStartOfSegment: 96.739
+        distanceFromStartOfCurve: 96.739
       - segmentIndex: 0
         time: 0.8
-        position: {x: 62.32728, y: 63.54033, z: 19.287998}
-        distanceFromStartOfSegment: 92.796715
-        distanceFromStartOfCurve: 92.796715
+        position: {x: 89.90453, y: 60.094734, z: 16.980347}
+        distanceFromStartOfSegment: 111.779625
+        distanceFromStartOfCurve: 111.779625
       - segmentIndex: 0
         time: 0.9
-        position: {x: 71.06314, y: 68.381294, z: 21.215961}
-        distanceFromStartOfSegment: 102.968605
-        distanceFromStartOfCurve: 102.968605
+        position: {x: 99.47089, y: 73.54643, z: 19.954166}
+        distanceFromStartOfSegment: 128.55183
+        distanceFromStartOfCurve: 128.55183
       - segmentIndex: 0
         time: 1
-        position: {x: 79.93531, y: 73.3624, z: 23.527374}
-        distanceFromStartOfSegment: 113.40266
-        distanceFromStartOfCurve: 113.40266
-      length: 113.40266
-      cummulativeLength: 113.40266
+        position: {x: 106.98841, y: 91.49959, z: 24.017532}
+        distanceFromStartOfSegment: 148.435
+        distanceFromStartOfCurve: 148.435
+      length: 148.435
+      cummulativeLength: 148.435
     - samples:
       - segmentIndex: 1
         time: 0
-        position: {x: 79.93531, y: 73.3624, z: 23.527374}
+        position: {x: 106.98841, y: 91.49959, z: 24.017532}
         distanceFromStartOfSegment: 0
-        distanceFromStartOfCurve: 113.40266
+        distanceFromStartOfCurve: 148.435
       - segmentIndex: 1
         time: 0.1
-        position: {x: 90.75502, y: 81.55743, z: 25.771059}
-        distanceFromStartOfSegment: 13.757135
-        distanceFromStartOfCurve: 127.15979
+        position: {x: 114.67841, y: 110.884285, z: 27.746815}
+        distanceFromStartOfSegment: 21.18514
+        distanceFromStartOfCurve: 169.62013
       - segmentIndex: 1
         time: 0.2
-        position: {x: 104.60824, y: 94.18713, z: 27.423388}
-        distanceFromStartOfSegment: 32.576042
-        distanceFromStartOfCurve: 145.9787
+        position: {x: 124.58865, y: 127.40989, z: 29.760464}
+        distanceFromStartOfSegment: 40.559433
+        distanceFromStartOfCurve: 188.99443
       - segmentIndex: 1
         time: 0.3
-        position: {x: 120.38498, y: 108.72074, z: 28.522926}
-        distanceFromStartOfSegment: 54.05488
-        distanceFromStartOfCurve: 167.45753
+        position: {x: 135.95561, y: 140.19969, z: 30.391722}
+        distanceFromStartOfSegment: 57.682087
+        distanceFromStartOfCurve: 206.11708
       - segmentIndex: 1
         time: 0.4
-        position: {x: 136.97525, y: 122.62748, z: 29.10823}
-        distanceFromStartOfSegment: 75.710754
-        distanceFromStartOfCurve: 189.1134
+        position: {x: 148.0158, y: 148.37703, z: 29.973818}
+        distanceFromStartOfSegment: 72.25917
+        distanceFromStartOfCurve: 220.69417
       - segmentIndex: 1
         time: 0.5
-        position: {x: 153.26906, y: 133.37657, z: 29.217865}
-        distanceFromStartOfSegment: 95.23108
-        distanceFromStartOfCurve: 208.63373
+        position: {x: 160.0057, y: 151.06519, z: 28.839994}
+        distanceFromStartOfSegment: 84.59894
+        distanceFromStartOfCurve: 233.03394
       - segmentIndex: 1
         time: 0.6
-        position: {x: 168.15643, y: 138.43724, z: 28.890388}
-        distanceFromStartOfSegment: 110.958496
-        distanceFromStartOfCurve: 224.36115
+        position: {x: 171.16183, y: 147.3875, z: 27.323484}
+        distanceFromStartOfSegment: 96.44311
+        distanceFromStartOfCurve: 244.87811
       - segmentIndex: 1
         time: 0.7
-        position: {x: 180.52737, y: 135.2787, z: 28.16436}
-        distanceFromStartOfSegment: 123.74692
-        distanceFromStartOfCurve: 237.14957
+        position: {x: 180.72066, y: 136.46727, z: 25.757528}
+        distanceFromStartOfSegment: 111.040184
+        distanceFromStartOfCurve: 259.4752
       - segmentIndex: 1
         time: 0.8
-        position: {x: 189.27187, y: 121.3702, z: 27.07834}
-        distanceFromStartOfSegment: 140.21179
-        distanceFromStartOfCurve: 253.61444
+        position: {x: 187.91869, y: 117.42782, z: 24.475357}
+        distanceFromStartOfSegment: 131.4352
+        distanceFromStartOfCurve: 279.87018
       - segmentIndex: 1
         time: 0.9
-        position: {x: 193.27998, y: 94.18097, z: 25.670895}
-        distanceFromStartOfSegment: 167.73088
-        distanceFromStartOfCurve: 281.13354
+        position: {x: 191.9924, y: 89.392456, z: 23.81021}
+        distanceFromStartOfSegment: 159.77278
+        distanceFromStartOfCurve: 308.20776
       - segmentIndex: 1
         time: 1
-        position: {x: 191.44168, y: 51.1802, z: 23.980576}
-        distanceFromStartOfSegment: 210.80411
-        distanceFromStartOfCurve: 324.20676
-      length: 210.80411
-      cummulativeLength: 324.20676
+        position: {x: 192.17834, y: 51.484474, z: 24.095322}
+        distanceFromStartOfSegment: 197.6823
+        distanceFromStartOfCurve: 346.1173
+      length: 197.6823
+      cummulativeLength: 346.1173
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
   testmat: {fileID: 2100000, guid: 0e90a4cb812bdd440b225015a4705b31, type: 2}
   blueLineTopTex: {fileID: 2800000, guid: 33887fc6b45dbe54aa6bf742e9fd4d14, type: 3}
@@ -440,7 +440,6 @@ MonoBehaviour:
   oldTubeType: 0
   selectedPointsIndex: 06000000
   hotPointIndex: -1
-  pointDragOffset: {x: 5.8323364, y: 1.4929504}
 --- !u!4 &388121353
 Transform:
   m_ObjectHideFlags: 0

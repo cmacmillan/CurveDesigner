@@ -12,15 +12,24 @@ namespace Assets.NewUI
         private PositionCurveComposite _positionCurve;
         private SizeCurveComposite _sizeCurve;
         private Curve3D _curve;
-        public CurveComposite(Curve3D curve)
+        public CurveComposite(IComposite parent,Curve3D curve) : base(parent)
         {
-            _positionCurve = new PositionCurveComposite(curve.positionCurve);
-            _sizeCurve = new SizeCurveComposite(curve.curveSizeAnimationCurve);
+            _positionCurve = new PositionCurveComposite(this,curve);
+            _sizeCurve = new SizeCurveComposite(this,curve.curveSizeAnimationCurve);
             this._curve = curve;
         }
 
-        public override void Draw(List<IDraw> drawList)
+        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
+            _curve.positionCurve.Recalculate();
+
+
+            base.Click(mousePosition, clickHits);
+        }
+
+        public override void Draw(List<IDraw> drawList,ClickHitData clickedElement)
+        {
+            _curve.positionCurve.Recalculate();
             for (int i = 0; i < _curve.positionCurve.NumSegments; i++)
             {
                 var point1 = _curve.transform.TransformPoint(_curve.positionCurve[i, 0]);
@@ -29,7 +38,7 @@ namespace Assets.NewUI
                 var tangent2 = _curve.transform.TransformPoint(_curve.positionCurve[i, 2]);
                 drawList.Add(new CurveSegmentDraw(this,point1,point2,tangent1,tangent2,LineTextureType.Default,new Color(.6f, .6f, .6f)));
             }
-            base.Draw(drawList);
+            base.Draw(drawList,clickedElement);
         }
 
         public override IEnumerable<IComposite> GetChildren()

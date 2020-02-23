@@ -54,18 +54,18 @@ public partial class BeizerCurve
         PointGroups.Add(pointB);
     }
 
-    public int InsertSegmentAfterIndex(CurveSplitPointInfo splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
+    public int InsertSegmentAfterIndex(ISegmentTime splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
     {
-        var prePointGroup = PointGroups[splitPoint.segmentIndex];
-        var postPointGroup = PointGroups[splitPoint.segmentIndex + 1];
+        var prePointGroup = PointGroups[splitPoint.SegmentIndex];
+        var postPointGroup = PointGroups[splitPoint.SegmentIndex + 1];
         PointGroup point = new PointGroup(lockPlacedPoint);
-        var basePosition = this.GetSegmentPositionAtTime(splitPoint.segmentIndex, splitPoint.time);
+        var basePosition = this.GetSegmentPositionAtTime(splitPoint.SegmentIndex, splitPoint.Time);
         point.SetWorldPositionByIndex(PGIndex.Position,basePosition);
         Vector3 leftTangent;
         Vector3 rightTangent;
         Vector3 preLeftTangent;
         Vector3 postRightTangent;
-        SolvePositionAtTimeTangents(GetVirtualIndex(splitPoint.segmentIndex, 0), 4, splitPoint.time, out leftTangent, out rightTangent, out preLeftTangent, out postRightTangent);
+        SolvePositionAtTimeTangents(GetVirtualIndex(splitPoint.SegmentIndex, 0), 4, splitPoint.Time, out leftTangent, out rightTangent, out preLeftTangent, out postRightTangent);
 
         void prePointModify()
         {
@@ -99,8 +99,8 @@ public partial class BeizerCurve
             point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
         }
 
-        PointGroups.Insert(splitPoint.segmentIndex+1,point);
-        return (splitPoint.segmentIndex+1);
+        PointGroups.Insert(splitPoint.SegmentIndex+1,point);
+        return (splitPoint.SegmentIndex+1);
     }
 
     public void AddDefaultSegment()
@@ -125,7 +125,7 @@ public partial class BeizerCurve
         return Mathf.Max(curveLength/MaxSamples,curveLength/(samplesPerSegment*NumSegments));
     }
 
-    public float GetPointAtSegmentIndexAndTime(int segmentIndex, float time)
+    public float GetDistanceAtSegmentIndexAndTime(int segmentIndex, float time)
     {
         var segmentLen = segments[segmentIndex].GetDistanceAtTime(time);
         if (segmentIndex > 0)

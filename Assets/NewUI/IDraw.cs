@@ -53,6 +53,6 @@ namespace Assets.NewUI
     {
         Points = 0,
         Lines = 1000,
-        Curves = 2000
+        Curves = 2000,
     }
 }
