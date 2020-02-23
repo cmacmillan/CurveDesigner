@@ -19,9 +19,9 @@ namespace Assets.NewUI
             switch (mode)
             {
                 case DrawMode.clicked:
-                    return DarkenColor(c,.3f);
+                    return DarkenColor(c,.2f);
                 case DrawMode.hovered:
-                    return DesaturateColor(c,.5f);
+                    return DesaturateColor(c,.8f);
                 case DrawMode.normal:
                 default:
                     return c;

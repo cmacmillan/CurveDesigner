@@ -13,7 +13,7 @@ namespace Assets.NewUI
         private SplitterPointComposite _splitterPoint = null;
         public PositionCurveComposite(IComposite parent,Curve3D curve) : base(parent)
         {
-            _splitterPoint = new SplitterPointComposite(this,curve,PointTextureType.circle,PositionCurveSplitCommandFactory.Instance,Color.green);
+            _splitterPoint = new SplitterPointComposite(this,curve,PointTextureType.circle,PositionCurveSplitCommandFactory.Instance,Curve3DSettings.Green);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in curve.positionCurve.PointGroups)
                 pointGroups.Add(new PositionPointGroupComposite(this,group));

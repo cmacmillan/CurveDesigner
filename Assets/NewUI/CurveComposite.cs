@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.NewUI
@@ -12,18 +13,25 @@ namespace Assets.NewUI
         private PositionCurveComposite _positionCurve;
         private SizeCurveComposite _sizeCurve;
         private Curve3D _curve;
+
         public CurveComposite(IComposite parent,Curve3D curve) : base(parent)
         {
-            _positionCurve = new PositionCurveComposite(this,curve);
-            _sizeCurve = new SizeCurveComposite(this,curve.curveSizeAnimationCurve);
+            Undo.undoRedoPerformed -= Initialize;
+            Undo.undoRedoPerformed += Initialize;
             this._curve = curve;
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            _positionCurve = new PositionCurveComposite(this,_curve);
+            _sizeCurve = new SizeCurveComposite(this,_curve.curveSizeAnimationCurve);
+            _curve.positionCurve.Recalculate();
         }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
             _curve.positionCurve.Recalculate();
-
-
             base.Click(mousePosition, clickHits);
         }
 

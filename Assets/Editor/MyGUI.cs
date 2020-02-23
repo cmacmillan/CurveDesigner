@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.NewUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -211,7 +212,7 @@ public static class MyGUI
                     {
                         var pointIndexType = BeizerCurve.GetPointTypeByIndex(i);
                         bool isPositionPoint = pointIndexType == PGIndex.Position;
-                        var color = Color.green;
+                        var color = Curve3DSettings.Green;
                         var tex = isPositionPoint ? curve.circleIcon : curve.squareIcon;
                         points.Add(new PointInfo(curve.transform.TransformPoint(positionCurve[i]), color, tex, i,PointType.Position));
                     }

@@ -22,17 +22,17 @@ namespace Assets.NewUI
         {
             _pointGroup = group;
             var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position);
-            centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,new PositionPointClickCommand(group,PGIndex.Position),Color.green);
+            centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,new PositionPointClickCommand(group,PGIndex.Position),Curve3DSettings.Green);
             if (_pointGroup.hasLeftTangent)
             {
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent);
-                leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent),Color.green);
+                leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent),Curve3DSettings.Green);
                 leftTangentLine = new LineComposite(this,centerPointPosition,endPoint);
             }
             if (_pointGroup.hasRightTangent)
             {
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent);
-                rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent),Color.green);
+                rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent), Curve3DSettings.Green);
                 rightTangentLine = new LineComposite(this,centerPointPosition, endPoint);
             }
         }

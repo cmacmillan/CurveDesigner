@@ -33,7 +33,7 @@ namespace Assets.NewUI
             List<ClickHitData> pointHits = new List<ClickHitData>();
             _point.Click(mousePosition, clickHits);
             foreach (var i in clickHits)
-                i.distanceFromCamera += sortOverrideExtraDistance;//put splitter point "behind" all other points so they take priority
+                i.isLowPriority = true;
             clickHits.AddRange(pointHits);
         }
         public void FindSplitPoint()

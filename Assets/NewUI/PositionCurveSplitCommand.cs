@@ -19,16 +19,16 @@ namespace Assets.NewUI
         public void ClickDown(Vector2 mousePos)
         {
             _curve.positionCurve.InsertSegmentAfterIndex(_splitter._splitPoint,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
+            _curve.UICurve.Initialize();
+            //_curve.elementClickedDown
         }
 
         public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData data)
         {
-            throw new NotImplementedException();
         }
 
         public void ClickUp(Vector2 mousePos)
         {
-            throw new NotImplementedException();
         }
     }
     public class PositionCurveSplitCommandFactory : ISplitCommandFactory
