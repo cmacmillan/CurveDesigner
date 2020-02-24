@@ -15,14 +15,16 @@ namespace Assets.NewUI
     {
         private PointGroup _group;
         private PGIndex _type;
-        public PointGroupPointPositionProvider(PointGroup group,PGIndex type)
+        private Curve3D curve;
+        public PointGroupPointPositionProvider(PointGroup group,PGIndex type, Curve3D curve)
         {
+            this.curve = curve;
             _group = group;
             _type = type;
         }
         public Vector3 Position {
-            get { return _group.GetWorldPositionByIndex(_type); }
-            set { _group.SetWorldPositionByIndex(_type,value); }
+            get { return curve.transform.TransformPoint(_group.GetWorldPositionByIndex(_type)); }
+            set { _group.SetWorldPositionByIndex(_type,curve.transform.InverseTransformPoint(value)); }
         }
     }
 }

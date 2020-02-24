@@ -18,20 +18,20 @@ namespace Assets.NewUI
         private LineComposite rightTangentLine = null;
 
         private PointComposite centerPoint = null;
-        public PositionPointGroupComposite(IComposite parent, PointGroup group) : base(parent)
+        public PositionPointGroupComposite(IComposite parent, PointGroup group, Curve3D curve) : base(parent)
         {
             _pointGroup = group;
-            var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position);
+            var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position,curve);
             centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,new PositionPointClickCommand(group,PGIndex.Position),Curve3DSettings.Green);
             if (_pointGroup.hasLeftTangent)
             {
-                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent);
+                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent,curve);
                 leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent),Curve3DSettings.Green);
                 leftTangentLine = new LineComposite(this,centerPointPosition,endPoint);
             }
             if (_pointGroup.hasRightTangent)
             {
-                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent);
+                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent,curve);
                 rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent), Curve3DSettings.Green);
                 rightTangentLine = new LineComposite(this,centerPointPosition, endPoint);
             }

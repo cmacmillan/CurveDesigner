@@ -21,12 +21,6 @@ namespace Assets.NewUI
         public static bool WorldToGUISpace(Vector3 worldPos, out Vector2 guiPosition, out float screenDepth)
         {
             var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;//Consider replacing with Camera.current?
-            /*Vector4 correctWorldPos = new Vector4(worldPos.x,worldPos.y,worldPos.z,1);
-            var projected = Curve3DSettings.LayoutPVMatrix*correctWorldPos;
-            var beforez = projected.z;
-            projected /= projected.w;
-            Vector3 screen_pos = new Vector3(sceneCam.pixelWidth*(projected.x+1)/2.0f, sceneCam.pixelHeight*(projected.y+1)/2.0f, projected.z);
-            screenDepth = beforez;//screen_pos.z;*/
             Vector3 screen_pos = sceneCam.WorldToScreenPoint(worldPos);
             screenDepth = screen_pos.z;
             if (screen_pos.z < 0)

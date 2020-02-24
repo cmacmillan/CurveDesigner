@@ -16,7 +16,7 @@ namespace Assets.NewUI
             _splitterPoint = new SplitterPointComposite(this,curve,PointTextureType.circle,PositionCurveSplitCommandFactory.Instance,Curve3DSettings.Green);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in curve.positionCurve.PointGroups)
-                pointGroups.Add(new PositionPointGroupComposite(this,group));
+                pointGroups.Add(new PositionPointGroupComposite(this,group,curve));
         }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)

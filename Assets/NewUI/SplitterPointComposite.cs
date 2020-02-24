@@ -54,6 +54,6 @@ namespace Assets.NewUI
             _splitPoint = _curve.positionCurve.GetPointAtDistance(distance);
         }
 
-        public Vector3 Position { get { return _splitPoint.position; } set => throw new NotImplementedException(); }
+        public Vector3 Position { get { return _curve.transform.TransformPoint(_splitPoint.position); } set => throw new NotImplementedException(); }
     }
 }
