@@ -11,10 +11,10 @@ namespace Assets.NewUI
     {
         private PointGroup _pointGroup;
 
-        private PointComposite leftTangentPoint = null;
+        public PointComposite leftTangentPoint = null;
         private LineComposite leftTangentLine = null;
 
-        private PointComposite rightTangentPoint = null;
+        public PointComposite rightTangentPoint = null;
         private LineComposite rightTangentLine = null;
 
         private PointComposite centerPoint = null;

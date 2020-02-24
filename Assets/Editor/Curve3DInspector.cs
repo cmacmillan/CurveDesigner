@@ -75,8 +75,13 @@ public class Curve3DInspector : Editor
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
         switch (Event.current.GetTypeForControl(controlID))
         {
+            case EventType.Layout:
+                var view= UnityEditor.SceneView.lastActiveSceneView.camera.worldToCameraMatrix;
+                var projection = UnityEditor.SceneView.lastActiveSceneView.camera.projectionMatrix;
+                Curve3DSettings.LayoutPVMatrix = projection * view;
+                break;
             case EventType.Repaint:
-                Draw(curveEditor,MousePos,elementClickedDown);
+                Draw(curveEditor, MousePos, elementClickedDown);
                 break;
             case EventType.MouseDown:
                 if (Event.current.button == 0)
@@ -102,12 +107,15 @@ public class Curve3DInspector : Editor
                 }
                 break;
             case EventType.MouseUp:
-                if (elementClickedDown != null)
+                if (Event.current.button == 0)
                 {
-                    GUIUtility.hotControl = 0;
-                    elementClickedDown.commandToExecute.ClickUp(MousePos);
-                    curve3d.elementClickedDown = null;
-                    Event.current.Use();
+                    if (elementClickedDown != null)
+                    {
+                        GUIUtility.hotControl = 0;
+                        elementClickedDown.commandToExecute.ClickUp(MousePos);
+                        curve3d.elementClickedDown = null;
+                        Event.current.Use();
+                    }
                 }
                 break;
             case EventType.MouseMove:

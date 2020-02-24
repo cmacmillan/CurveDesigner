@@ -12,7 +12,7 @@ namespace Assets.NewUI
     public interface IClickCommand
     {
         void ClickDown(Vector2 mousePos);
-        void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData data);
+        void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData clicked);
         void ClickUp(Vector2 mousePos);
     }
     public interface ISplitCommandFactory

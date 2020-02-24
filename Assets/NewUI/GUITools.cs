@@ -21,6 +21,12 @@ namespace Assets.NewUI
         public static bool WorldToGUISpace(Vector3 worldPos, out Vector2 guiPosition, out float screenDepth)
         {
             var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;//Consider replacing with Camera.current?
+            /*Vector4 correctWorldPos = new Vector4(worldPos.x,worldPos.y,worldPos.z,1);
+            var projected = Curve3DSettings.LayoutPVMatrix*correctWorldPos;
+            var beforez = projected.z;
+            projected /= projected.w;
+            Vector3 screen_pos = new Vector3(sceneCam.pixelWidth*(projected.x+1)/2.0f, sceneCam.pixelHeight*(projected.y+1)/2.0f, projected.z);
+            screenDepth = beforez;//screen_pos.z;*/
             Vector3 screen_pos = sceneCam.WorldToScreenPoint(worldPos);
             screenDepth = screen_pos.z;
             if (screen_pos.z < 0)
@@ -40,11 +46,11 @@ namespace Assets.NewUI
         }
         public static Vector2 ScreenSpaceToGuiSpace(Vector2 screenPos)
         {
-            return new Vector2(screenPos.x, Camera.current.pixelHeight - screenPos.y);//Consider replacing with UnityEditor.SceneView.lastActiveSceneView.camera
+            return new Vector2(screenPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - screenPos.y);//Consider replacing with UnityEditor.SceneView.lastActiveSceneView.camera
         }
         public static Vector2 GuiSpaceToScreenSpace(Vector2 guiPos)
         {
-            return new Vector2(guiPos.x, Camera.current.pixelHeight - guiPos.y);
+            return new Vector2(guiPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - guiPos.y);
         }
     }
 }
