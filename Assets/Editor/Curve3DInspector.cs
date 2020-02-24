@@ -75,11 +75,6 @@ public class Curve3DInspector : Editor
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
         switch (Event.current.GetTypeForControl(controlID))
         {
-            case EventType.Layout:
-                var view= UnityEditor.SceneView.lastActiveSceneView.camera.worldToCameraMatrix;
-                var projection = UnityEditor.SceneView.lastActiveSceneView.camera.projectionMatrix;
-                Curve3DSettings.LayoutPVMatrix = projection * view;
-                break;
             case EventType.Repaint:
                 Draw(curveEditor, MousePos, elementClickedDown);
                 break;

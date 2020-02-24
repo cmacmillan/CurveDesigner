@@ -14,7 +14,7 @@ public partial class BeizerCurve
     public bool placeLockedPoints = true;
     public bool isCurveOutOfDate = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour;
-    [SerializeField]
+    [System.NonSerialized]
     [HideInInspector]
     public List<Segment> segments = null;
     

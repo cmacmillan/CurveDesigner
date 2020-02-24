@@ -9,6 +9,7 @@ public class Curve3D : MonoBehaviour
 {
     [NonSerialized]
     public ClickHitData elementClickedDown;
+    [NonSerialized]
     public CurveComposite UICurve=null;
 
     public EditMode editMode=EditMode.PositionCurve;
