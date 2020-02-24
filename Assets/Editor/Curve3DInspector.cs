@@ -1,4 +1,5 @@
 ﻿using Assets.NewUI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,6 +64,7 @@ public class Curve3DInspector : Editor
     {
         var curve3d = (target as Curve3D);
         Undo.RecordObject(curve3d, "curve");
+        UpdateMesh(curve3d);
         ClickHitData elementClickedDown = curve3d.elementClickedDown;
         Curve3DSettings.circleTexture = curve3d.circleIcon;
         Curve3DSettings.squareTexture = curve3d.squareIcon;
@@ -89,6 +91,7 @@ public class Curve3DInspector : Editor
                         var clickPos = MousePos + clicked.offset;
                         clicked.commandToExecute.ClickDown(clickPos);
                         clicked.commandToExecute.ClickDrag(clickPos, curve3d, clicked);
+                        curve3d.lastMeshUpdateStartTime= DateTime.Now;
                         Event.current.Use();
                     }
                 }
@@ -99,6 +102,7 @@ public class Curve3DInspector : Editor
                     var clickPos = MousePos + elementClickedDown.offset;
                     elementClickedDown.commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown);
                     Event.current.Use();
+                    curve3d.lastMeshUpdateStartTime= DateTime.Now;
                 }
                 break;
             case EventType.MouseUp:
@@ -108,6 +112,7 @@ public class Curve3DInspector : Editor
                     {
                         GUIUtility.hotControl = 0;
                         elementClickedDown.commandToExecute.ClickUp(MousePos);
+                        curve3d.lastMeshUpdateStartTime= DateTime.Now;
                         curve3d.elementClickedDown = null;
                         Event.current.Use();
                     }
@@ -117,6 +122,33 @@ public class Curve3DInspector : Editor
                 HandleUtility.Repaint();
                 break;
         }
+    }
+    private void UpdateMesh(Curve3D curve)
+    {
+        if (!MeshGenerator.IsBuzy)
+        {
+            if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime)
+            {
+                if (curve.mesh == null)
+                {
+                    curve.mesh = new Mesh();
+                    curve.filter.mesh = curve.mesh;
+                } else
+                {
+                    curve.mesh.Clear();
+                }
+                curve.mesh.SetVertices(MeshGenerator.vertices);
+                curve.mesh.SetTriangles(MeshGenerator.triangles,0);
+                curve.mesh.RecalculateNormals();
+                curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
+            }
+            if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
+            {
+                MeshGenerator.StartGenerating(curve);
+            }
+        }
+        if (curve.HaveCurveSettingsChanged())
+            curve.lastMeshUpdateStartTime = DateTime.Now;
     }
     private const float SmallClickRadius = 5;
     private const float LargeClickRadius = 20;

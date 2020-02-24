@@ -26,6 +26,7 @@ namespace Assets.NewUI
         {
             _positionCurve = new PositionCurveComposite(this,_curve);
             _sizeCurve = new SizeCurveComposite(this,_curve.curveSizeAnimationCurve);
+            _curve.lastMeshUpdateStartTime = DateTime.Now;
             _curve.positionCurve.Recalculate();
         }
 
