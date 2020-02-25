@@ -63,6 +63,40 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
+        ///
+        Handles.BeginGUI();
+        GUILayout.BeginArea(new Rect(20, 20, 150, 60));
+        var rect = EditorGUILayout.BeginVertical();
+        GUI.color = Color.yellow;
+        GUI.Box(rect, GUIContent.none);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.Label("Edit Curve");
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
+        GUI.color = Color.red;
+        if (GUILayout.Button("Clear"))
+        {
+            Debug.Log("cleared");
+            curve3d.selectedPointsIndex.Clear();
+            curve3d.hotPointIndex = -1;
+            curve3d.positionCurve.Initialize();
+            curve3d.positionCurve.isCurveOutOfDate = true;
+            curve3d.UICurve.Initialize();
+        }
+        //GUI.color = Color.white;
+        //EditorGUI.CurveField(new Rect(0, 0, 20, 20),curve.curveSizeAnimationCurve);
+        GUILayout.EndHorizontal();
+        GUILayout.EndArea();
+
+        Handles.EndGUI();
+
+
+        ///
+        curve3d.positionCurve.owner = curve3d;
         Undo.RecordObject(curve3d, "curve");
         UpdateMesh(curve3d);
         ClickHitData elementClickedDown = curve3d.elementClickedDown;

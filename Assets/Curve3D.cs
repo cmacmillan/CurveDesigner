@@ -12,6 +12,8 @@ public class Curve3D : MonoBehaviour
     [NonSerialized]
     public CurveComposite UICurve=null;
 
+    public bool isClosedLoop = false;
+
     public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
     public Texture2D lineTex;

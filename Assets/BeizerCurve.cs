@@ -9,11 +9,12 @@ public partial class BeizerCurve
     [SerializeField]
     [HideInInspector]
     public List<PointGroup> PointGroups;
-    public int NumControlPoints { get { return PointGroups.Count*3-2; } }
-    public int NumSegments { get { return PointGroups.Count-1; } }
+    public int NumControlPoints { get { return owner.isClosedLoop?PointGroups.Count*3:PointGroups.Count*3-2; } }
+    public int NumSegments { get { return owner.isClosedLoop?PointGroups.Count:PointGroups.Count-1; } }
     public bool placeLockedPoints = true;
     public bool isCurveOutOfDate = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour;
+    public Curve3D owner;
     [System.NonSerialized]
     [HideInInspector]
     public List<Segment> segments = null;
@@ -46,11 +47,13 @@ public partial class BeizerCurve
         PointGroups = new List<PointGroup>();
         var pointA = new PointGroup(placeLockedPoints);
         pointA.SetWorldPositionByIndex(PGIndex.Position, Vector3.zero);
+        pointA.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0));
         pointA.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(1,0,0));
         PointGroups.Add(pointA);
         var pointB = new PointGroup(placeLockedPoints);
         pointB.SetWorldPositionByIndex(PGIndex.Position, new Vector3(1,1,0));
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0));
+        pointB.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(1,0,0));
         PointGroups.Add(pointB);
     }
 
@@ -282,8 +285,13 @@ public partial class BeizerCurve
     }
     #endregion
 
-    public static PGIndex GetPointTypeByIndex(int virtualIndex)
+    public PGIndex GetPointTypeByIndex(int virtualIndex)
     {
+        var length = PointGroups.Count * 3;
+        if (virtualIndex == length - 1)
+            return PGIndex.LeftTangent;
+        if (virtualIndex == length - 2)
+            return PGIndex.RightTangent;
         int offsetIndex = virtualIndex - GetParentVirtualIndex(virtualIndex);
         return (PGIndex)offsetIndex;
     }
@@ -319,7 +327,9 @@ public partial class BeizerCurve
         return retrVal;
     }
 
-    public static int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
-    public static int GetParentVirtualIndex(int childVirtualIndex) { return GetPointGroupIndex(childVirtualIndex) * 3; }
-    public static int GetPointGroupIndex(int childIndex) { return ((childIndex + 1) / 3); }
+    public int GetVirtualIndex(int segmentIndex,int pointIndex) { return segmentIndex * 3 + pointIndex; }
+    public int GetParentVirtualIndex(int childVirtualIndex) { return GetPointGroupIndex(childVirtualIndex) * 3; }
+    public int GetPointGroupIndex(int childIndex) {
+        return ((childIndex + 1) / 3)%PointGroups.Count;
+    }
 }

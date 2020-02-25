@@ -23,13 +23,13 @@ namespace Assets.NewUI
             _pointGroup = group;
             var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position,curve);
             centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,new PositionPointClickCommand(group,PGIndex.Position),Curve3DSettings.Green);
-            if (_pointGroup.hasLeftTangent)
+            //left tangent
             {
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent,curve);
                 leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent),Curve3DSettings.Green);
                 leftTangentLine = new LineComposite(this,centerPointPosition,endPoint);
             }
-            if (_pointGroup.hasRightTangent)
+            //right tangent
             {
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent,curve);
                 rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent), Curve3DSettings.Green);

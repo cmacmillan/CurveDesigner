@@ -153,6 +153,7 @@ public static class MyGUI
     private const float lineClickDistance=15.0f;
     private const int plusButtonDistance = 30;
     private const int lineThickness = 12;
+    /*
     public static void EditBezierCurve(Curve3D curve)
     {
         curve.TryInitialize();
@@ -730,17 +731,6 @@ public static class MyGUI
                             if (i.hasRightTangent)
                                 Handles.DrawAAPolyLine(curve.lineTex, new Vector3[2] { curve.transform.TransformPoint(i.GetWorldPositionByIndex(PGIndex.Position)), curve.transform.TransformPoint(i.GetWorldPositionByIndex(PGIndex.RightTangent)) });
                         }
-                        /*draw curve debug line
-                        var curveLen = positionCurve.GetLength();
-                        float time;
-                        var prevPoint = positionCurve.GetPositionAtDistance(0,out time);
-                        for (int i = 0; i < 100; i++)
-                        {
-                            var currPoint = positionCurve.GetPositionAtDistance((i/100.0f)*curveLen,out time);
-                            Debug.DrawLine(prevPoint, currPoint);
-                            prevPoint = currPoint;    
-                        }
-                        */
                         if (curve.IsAPointSelected)
                         {
                             hotPoint.color = Color.yellow;
@@ -806,6 +796,6 @@ public static class MyGUI
                 break;
                 #endregion
         }
-    }
+    }*/
 }
 

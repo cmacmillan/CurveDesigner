@@ -31,12 +31,6 @@ public class PointGroup
     #region fields
     [HideInInspector]
     [SerializeField]
-    public bool hasLeftTangent=false;
-    [SerializeField]
-    [HideInInspector]
-    public bool hasRightTangent=false;
-    [HideInInspector]
-    [SerializeField]
     private bool isPointLocked=false;
     /// <summary>
     /// The right tangent in space relative to central point
@@ -58,8 +52,6 @@ public class PointGroup
     public PointGroup() { }
     public PointGroup(PointGroup clone)
     {
-        this.hasLeftTangent = clone.hasLeftTangent;
-        this.hasRightTangent = clone.hasRightTangent;
         this.isPointLocked = clone.isPointLocked;
         this.leftTangent = clone.leftTangent;
         this.rightTangent = clone.rightTangent;
@@ -68,16 +60,7 @@ public class PointGroup
 
     public bool DoesEditAffectBothSegments(PGIndex index)
     {
-        switch (index)
-        {
-            case PGIndex.LeftTangent:
-                return this.hasRightTangent;
-            case PGIndex.RightTangent:
-                return this.hasLeftTangent;
-            case PGIndex.Position:
-            default:
-                return true;
-        }
+        return true;
     }
 
     #region Get/Set methods
@@ -92,7 +75,7 @@ public class PointGroup
     public void SetPointLocked(bool state)
     {
         isPointLocked = state;
-        if (state == true && hasLeftTangent && hasRightTangent)
+        if (state == true)
         {
             rightTangent = reflectAcrossPosition(leftTangent);
         }
@@ -102,23 +85,17 @@ public class PointGroup
         switch (index)
         {
             case PGIndex.LeftTangent:
-                hasLeftTangent = true;
                 leftTangent = value - position;
-                if (hasRightTangent && isPointLocked)
-                {
+                if (isPointLocked)
                     rightTangent = reflectAcrossPosition(leftTangent);
-                }
                 return;
             case PGIndex.Position:
                 position = value;
                 return;
             case PGIndex.RightTangent:
-                hasRightTangent = true;
                 rightTangent = value - position;
-                if (hasLeftTangent && isPointLocked)
-                {
+                if (isPointLocked)
                     leftTangent = reflectAcrossPosition(rightTangent);
-                }
                 return;
             default:
                 throw new System.ArgumentException();
@@ -129,14 +106,10 @@ public class PointGroup
         switch (index)
         {
             case PGIndex.LeftTangent:
-                if (!hasLeftTangent)
-                    throw new System.ArgumentException();
                 return leftTangent + position;
             case PGIndex.Position:
                 return position;
             case PGIndex.RightTangent:
-                if (!hasRightTangent)
-                    throw new System.ArgumentException();
                 return rightTangent + position;
             default:
                 throw new System.ArgumentException();
@@ -146,8 +119,6 @@ public class PointGroup
 
     public PointGroup(bool lockState)
     {
-        hasLeftTangent = false;
-        hasRightTangent = false;
         SetPointLocked(lockState);
     }
 }

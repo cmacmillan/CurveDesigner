@@ -4,7 +4,6 @@ using UnityEngine;
 
 public partial class BeizerCurve
 {
-
     private static Vector3 GetArbitraryOrthoVector(Vector3 vect)//I think this does the same thing
     {
         if (vect != Vector3.right)
