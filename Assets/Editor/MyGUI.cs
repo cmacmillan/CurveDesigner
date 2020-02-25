@@ -21,7 +21,7 @@ public static class MyGUI
         for (int i = 0; i < NumCylinderSamples+1; i++)//one extra sample
             inputPoints.Add(positionCurve.GetPointAtDistance(Mathf.Lerp(startKeyframeXY.x, endKeyframeXY.x, i / (float)NumCylinderSamples)));
 
-        positionCurve.CreateRingPointsAlongCurve(inputPoints, outputPoints, linearSizeCurve, 360.0f, 0.0f, WireCylinderLineCount, 0, true);
+        positionCurve.CreateRingPointsAlongCurve(inputPoints, outputPoints, linearSizeCurve, 360.0f, 0.0f, WireCylinderLineCount, 0, true,null);
 
         var startForward = (inputPoints[1].position - inputPoints[0].position).normalized;
         if (shouldDrawCenter)

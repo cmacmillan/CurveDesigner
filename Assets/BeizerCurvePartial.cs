@@ -14,32 +14,47 @@ public partial class BeizerCurve
     {
         return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
     }
-    public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior)
+    public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior,Vector3? referenceDirection)
     {
         float distanceFromFull = 360.0f - TubeArc;
         void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, Vector3? previousForwardVector,ref Vector3 previousTangent)
         {
-            //Method 1:
             Vector3 tangentVect;
-            if (previousForwardVector.HasValue)
+            /*if (referenceDirection.HasValue)
             {
-                Vector3 nextTangentVect = NormalTangent(previousForwardVector.Value,previousTangent);
-                tangentVect = NormalTangent(forwardVector, nextTangentVect);
-                tangentVect = (tangentVect + nextTangentVect) / 2.0f;
+                //var reference = referenceDirection.Value;
+                //var referenceForward = Vector3.ProjectOnPlane(forwardVector.normalized,reference);
+                tangentVect = referenceDirection.Value;//NormalTangent(referenceForward,reference);
             }
             else
-            {
-                tangentVect = NormalTangent(forwardVector, previousTangent);
-            }
-            //Method 2:
-            //Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
+            {*/
+
+                if (previousForwardVector.HasValue)
+                {
+                    Vector3 nextTangentVect = NormalTangent(previousForwardVector.Value, previousTangent);
+                    tangentVect = NormalTangent(forwardVector, nextTangentVect);
+                    tangentVect = (tangentVect + nextTangentVect) / 2.0f;
+                }
+                else
+                {
+                    tangentVect = NormalTangent(forwardVector, previousTangent);
+                }
+            //}
             previousTangent = tangentVect;
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
             var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceFromStartOfCurve) + offset);
             for (int j = 0; j < RingPointCount; j++)
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
-                Vector3 rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
+                Vector3 rotatedVect;
+                if (referenceDirection.HasValue)
+                {
+                    var reference = referenceDirection.Value;
+                    var referenceForward = Vector3.ProjectOnPlane(forwardVector.normalized,reference);
+                    rotatedVect = Quaternion.AngleAxis(theta,referenceForward) * reference;
+                }
+                else
+                    rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
                 listToAppend.Add(startPoint.position + rotatedVect * size);
             }
         }

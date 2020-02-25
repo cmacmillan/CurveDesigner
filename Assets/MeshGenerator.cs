@@ -72,6 +72,10 @@ public static class MeshGenerator
                 list.Capacity = capacity;
         }
     }
+    private static Vector3 GetReferenceDirection()
+    {
+        return Vector3.up;
+    }
     private static void GenerateMesh()
     {
         //Debug.Log("started thread");
@@ -220,7 +224,7 @@ public static class MeshGenerator
                 numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                 shouldDrawConnectingFace = true;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true,GetReferenceDirection());
                 TrianglifyLayer(true);
                 if (!IsClosedLoop)
                     CreateTubeEndPlates();
@@ -234,8 +238,8 @@ public static class MeshGenerator
                 else
                     shouldDrawConnectingFace = false;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true);
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, false);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true,GetReferenceDirection());
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, false,GetReferenceDirection());
                 TrianglifyLayer(true);
                 TrianglifyLayer(false);
                 if (!is360degree)
