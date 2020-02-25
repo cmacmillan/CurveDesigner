@@ -288,6 +288,8 @@ public partial class BeizerCurve
     public PGIndex GetPointTypeByIndex(int virtualIndex)
     {
         var length = PointGroups.Count * 3;
+        if (virtualIndex == length)
+            return PGIndex.Position;
         if (virtualIndex == length - 1)
             return PGIndex.LeftTangent;
         if (virtualIndex == length - 2)
