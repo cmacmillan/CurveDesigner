@@ -27,6 +27,7 @@ public static class MeshGenerator
     public static bool IsTubeArcConstant { get { return true; } }
     public static float Rotation = 0.0f;
     public static float TubeThickness = 0.0f;
+    public static bool IsClosedLoop = false;
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -45,6 +46,7 @@ public static class MeshGenerator
             MeshGenerator.TubeType = curve.tubeType;
             MeshGenerator.sizeCurve = Curve3D.CopyAnimationCurve(curve.curveSizeAnimationCurve);
             MeshGenerator.TubeThickness = curve.tubeThickness;
+            MeshGenerator.IsClosedLoop = curve.isClosedLoop;
 
             Thread thread = new Thread(GenerateMesh);
             thread.Start();
@@ -98,11 +100,13 @@ public static class MeshGenerator
         }
         void TrianglifyLayer(bool isExterior)
         {//generate tris
+            int additionalRing = IsClosedLoop ? 1 : 0;
+            int numVertsInALayer = (numRings+1) * ActualRingPointCount;
             int basePoint = isExterior ? 0 :numVerts/2;
-            for (int i = 0; i < numRings; i++)
+            for (int i = 0; i < numRings+additionalRing; i++)
             {
-                int ringIndex = i * ActualRingPointCount;
-                int nextRingIndex = ringIndex + ActualRingPointCount;
+                int ringIndex = (i * ActualRingPointCount)%numVertsInALayer;
+                int nextRingIndex = (ringIndex + ActualRingPointCount)%numVertsInALayer;
                 for (int j = 0; j < ActualRingPointCount; j++)
                 {
                     if (!shouldDrawConnectingFace && (j + 1) >= ActualRingPointCount)
@@ -129,11 +133,13 @@ public static class MeshGenerator
         }
         void ConnectTubeInteriorAndExterior()
         {
+            int additionalRing = IsClosedLoop ? 1 : 0;
+            int numVertsInALayer = (numRings+1) * ActualRingPointCount;
             int interiorBase = numVerts / 2;
-            for (int i = 0; i < numRings; i++)
+            for (int i = 0; i < numRings+additionalRing; i++)
             {
-                int ringIndex = i * ActualRingPointCount;
-                int nextRingIndex = ringIndex + ActualRingPointCount;
+                int ringIndex = (i * ActualRingPointCount)%numVertsInALayer;
+                int nextRingIndex = (ringIndex + ActualRingPointCount)%numVertsInALayer;
                 DrawQuad(
                         ringIndex,
                         nextRingIndex,
@@ -216,7 +222,8 @@ public static class MeshGenerator
                 InitLists();
                 curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true);
                 TrianglifyLayer(true);
-                CreateTubeEndPlates();  
+                if (!IsClosedLoop)
+                    CreateTubeEndPlates();
                 break;
             case TubeType.Hollow:
                 numVerts = ActualRingPointCount * sampled.Count * 2;
@@ -233,7 +240,8 @@ public static class MeshGenerator
                 TrianglifyLayer(false);
                 if (!is360degree)
                     ConnectTubeInteriorAndExterior();
-                ConnectTubeInteriorExteriorEnds();
+                if (!IsClosedLoop)
+                    ConnectTubeInteriorExteriorEnds();
                 break;
         }
         IsBuzy = false;

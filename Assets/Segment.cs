@@ -12,17 +12,19 @@ public class Segment
     /// Cummulative length including current segment
     /// </summary>
     public float cummulativeLength=-1;
-    public Segment(BeizerCurve owner,int segmentIndex)
+    public Segment(BeizerCurve owner,int segmentIndex, bool isLastSegment)
     {
-        Recalculate(owner,segmentIndex);
+        Recalculate(owner,segmentIndex,isLastSegment);
     }
-    public void Recalculate(BeizerCurve owner,int segmentIndex)
+    public void Recalculate(BeizerCurve owner,int segmentIndex, bool isLastSegment)
     {
+        bool shouldPerformOneLessSample = isLastSegment && owner.owner.isClosedLoop;//Here we create a gap so we can seamlessly attach points in a closed loop
+        int sampleReduction = shouldPerformOneLessSample ?1:0;
         samples.Clear();
         float len = 0;
         Vector3 previousPosition = owner.GetSegmentPositionAtTime(segmentIndex, 0.0f);
         AddLength(segmentIndex, 0.0f, 0, previousPosition);
-        for (int i = 1; i <= _numSegmentLengthSamples; i++)//we include the end point with <=
+        for (int i = 1; i <= _numSegmentLengthSamples-sampleReduction; i++)//we include the end point with <=
         {
             var time = i / (float)_numSegmentLengthSamples;
             Vector3 currentPosition = owner.GetSegmentPositionAtTime(segmentIndex, time);

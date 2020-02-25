@@ -222,7 +222,7 @@ public partial class BeizerCurve
             segments.Clear();
         for (int i = 0; i < NumSegments; i++)
         {
-            segments.Add(new Segment(this, i));
+            segments.Add(new Segment(this, i,i==NumSegments-1));
         }
         CalculateCummulativeLengths();
     }
