@@ -17,7 +17,7 @@ public partial class BeizerCurve
     }
     //private const bool shouldScaleCorners=true;
     private const float startShrinkCurveAmount=1.0f;
-    private const float maxShrinkAmount = -5;
+    private const float maxShrinkAmount = -2;
     public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior)
     {
         float distanceFromFull = 360.0f - TubeArc;
