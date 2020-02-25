@@ -105,7 +105,7 @@ public static class MeshGenerator
                 int nextRingIndex = ringIndex + ActualRingPointCount;
                 for (int j = 0; j < ActualRingPointCount; j++)
                 {
-                    if (!shouldDrawConnectingFace && (j + 1) >= ActualRingPointCount)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
+                    if (!shouldDrawConnectingFace && (j + 1) >= ActualRingPointCount)
                         continue;
                     if (isExterior)
                         DrawQuad(

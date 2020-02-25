@@ -15,18 +15,37 @@ public partial class BeizerCurve
     {
         return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
     }
+    //private const bool shouldScaleCorners=true;
+    private const float startShrinkCurveAmount=1.0f;
+    private const float maxShrinkAmount = -5;
     public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior)
     {
         float distanceFromFull = 360.0f - TubeArc;
-        void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, ref Vector3 previousTangent)
+        void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, Vector3? previousForwardVector,ref Vector3 previousTangent)
         {
             //Method 1:
-            Vector3 tangentVect = NormalTangent(forwardVector, previousTangent);
+            float curveTurnScaleFactor;
+            Vector3 tangentVect;
+            if (previousForwardVector.HasValue)
+            {
+                Vector3 nextTangentVect = NormalTangent(previousForwardVector.Value,previousTangent);
+                tangentVect = NormalTangent(forwardVector, nextTangentVect);
+                tangentVect = (tangentVect + nextTangentVect) / 2.0f;
+                float negOneToPosOne = Vector3.Dot(previousForwardVector.Value.normalized,forwardVector.normalized);
+                float zeroToOne = (negOneToPosOne + 1.0f) / 2.0f;
+                //float remapped = zeroToOne;
+                curveTurnScaleFactor = Mathf.Lerp(maxShrinkAmount,1.0f,zeroToOne);
+            }
+            else
+            {
+                curveTurnScaleFactor = 1;
+                tangentVect = NormalTangent(forwardVector, previousTangent);
+            }
             //Method 2:
             //Vector3 tangentVect = NormalTangent(forwardVector, Vector3.up);
             previousTangent = tangentVect;
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
-            var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceFromStartOfCurve) + offset);
+            var size = curveTurnScaleFactor*Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceFromStartOfCurve) + offset);
             for (int j = 0; j < RingPointCount; j++)
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
@@ -35,12 +54,13 @@ public partial class BeizerCurve
             }
         }
         Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (points[1].position - points[0].position).normalized) * Vector3.right;
-        for (int i = 0; i < points.Count - 1; i++)
+        GenerateRing(points[0], (points[1].position - points[0].position).normalized, null, ref lastTangent);
+        for (int i = 1; i < points.Count - 1; i++)
         {
-            GenerateRing(points[i], (points[i + 1].position - points[i].position).normalized, ref lastTangent);
+            GenerateRing(points[i], (points[i + 1].position - points[i].position).normalized, points[i].position - points[i-1].position, ref lastTangent);
         }
         int finalIndex = points.Count - 1;
-        GenerateRing(points[finalIndex], (points[finalIndex].position - points[finalIndex - 1].position).normalized, ref lastTangent);
+        GenerateRing(points[finalIndex], (points[finalIndex].position - points[finalIndex - 1].position).normalized, null, ref lastTangent);
     }
 }
 public class AnimationCurveIEvaluatableAdapter : IEvaluatable
