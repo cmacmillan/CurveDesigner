@@ -14,7 +14,11 @@ public partial class BeizerCurve
     {
         return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
     }
-    public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior,Vector3? referenceDirection)
+    int mod(int x, int m)
+    {
+        return (x % m + m) % m;
+    }
+    public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior,Vector3? referenceDirection, bool isClosedLoop)
     {
         float distanceFromFull = 360.0f - TubeArc;
         void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, Vector3? previousForwardVector,ref Vector3 previousTangent)
@@ -47,25 +51,32 @@ public partial class BeizerCurve
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
                 Vector3 rotatedVect;
-                if (referenceDirection.HasValue)
+                /*if (referenceDirection.HasValue)
                 {
                     var reference = referenceDirection.Value;
                     var referenceForward = Vector3.ProjectOnPlane(forwardVector.normalized,reference);
                     rotatedVect = Quaternion.AngleAxis(theta,referenceForward) * reference;
                 }
-                else
+                else*/
                     rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
                 listToAppend.Add(startPoint.position + rotatedVect * size);
             }
         }
         Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (points[1].position - points[0].position).normalized) * Vector3.right;
-        GenerateRing(points[0], (points[1].position - points[0].position).normalized, null, ref lastTangent);
-        for (int i = 1; i < points.Count - 1; i++)
-        {
-            GenerateRing(points[i], (points[i + 1].position - points[i].position).normalized, points[i].position - points[i-1].position, ref lastTangent);
-        }
         int finalIndex = points.Count - 1;
-        GenerateRing(points[finalIndex], (points[finalIndex].position - points[finalIndex - 1].position).normalized, null, ref lastTangent);
+        if (isClosedLoop)
+        {
+            for (int i = 0; i < points.Count; i++)
+                GenerateRing(points[i], (points[mod((i + 1),points.Count)].position - points[i].position).normalized, points[i].position - points[mod((i - 1),points.Count)].position, ref lastTangent);
+        } else
+        {
+            GenerateRing(points[0], (points[1].position - points[0].position).normalized, null, ref lastTangent);
+            for (int i = 1; i < points.Count - 1; i++)
+            {
+                GenerateRing(points[i], (points[i + 1].position - points[i].position).normalized, points[i].position - points[i - 1].position, ref lastTangent);
+            }
+            GenerateRing(points[finalIndex], (points[finalIndex].position - points[finalIndex - 1].position).normalized, null, ref lastTangent);
+        }
     }
 }
 public class AnimationCurveIEvaluatableAdapter : IEvaluatable

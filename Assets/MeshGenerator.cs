@@ -224,7 +224,7 @@ public static class MeshGenerator
                 numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                 shouldDrawConnectingFace = true;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true,GetReferenceDirection());
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true,GetReferenceDirection(),IsClosedLoop);
                 TrianglifyLayer(true);
                 if (!IsClosedLoop)
                     CreateTubeEndPlates();
@@ -238,8 +238,8 @@ public static class MeshGenerator
                 else
                     shouldDrawConnectingFace = false;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true,GetReferenceDirection());
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, false,GetReferenceDirection());
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true,GetReferenceDirection(),IsClosedLoop);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, false,GetReferenceDirection(),IsClosedLoop);
                 TrianglifyLayer(true);
                 TrianglifyLayer(false);
                 if (!is360degree)
