@@ -60,7 +60,7 @@ public partial class BeizerCurve
     public int InsertSegmentAfterIndex(ISegmentTime splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
     {
         var prePointGroup = PointGroups[splitPoint.SegmentIndex];
-        var postPointGroup = PointGroups[splitPoint.SegmentIndex + 1];
+        var postPointGroup = PointGroups[(splitPoint.SegmentIndex + 1)%PointGroups.Count];
         PointGroup point = new PointGroup(lockPlacedPoint);
         var basePosition = this.GetSegmentPositionAtTime(splitPoint.SegmentIndex, splitPoint.Time);
         point.SetWorldPositionByIndex(PGIndex.Position,basePosition);
