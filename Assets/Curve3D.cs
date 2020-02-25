@@ -13,6 +13,9 @@ public class Curve3D : MonoBehaviour
     public CurveComposite UICurve=null;
 
     public bool isClosedLoop = false;
+    [SerializeField]
+    [HideInInspector]
+    private bool oldIsClosedLoop;
 
     public EditMode editMode=EditMode.PositionCurve;
     public BeizerCurve positionCurve;
@@ -177,8 +180,14 @@ public class Curve3D : MonoBehaviour
         retr|=CheckField(tubeThickness, ref oldTubeThickness);
         retr|=CheckField(type, ref oldType);
         retr|=CheckField(tubeType, ref oldTubeType);
+        if (CheckField(isClosedLoop, ref oldIsClosedLoop))
+        {
+            retr = true;
+            positionCurve.Recalculate();
+            UICurve.Initialize();
+        }
 
-        retr |= CheckAnimationCurve(curveSizeAnimationCurve,ref _oldCurveSizeAnimationCurve);
+        retr|=CheckAnimationCurve(curveSizeAnimationCurve,ref _oldCurveSizeAnimationCurve);
 
         return retr;
     }

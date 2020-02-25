@@ -182,7 +182,9 @@ public class Curve3DInspector : Editor
             }
         }
         if (curve.HaveCurveSettingsChanged())
+        {
             curve.lastMeshUpdateStartTime = DateTime.Now;
+        }
     }
     private const float SmallClickRadius = 5;
     private const float LargeClickRadius = 20;
