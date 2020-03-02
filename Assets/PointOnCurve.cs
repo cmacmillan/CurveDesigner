@@ -14,6 +14,7 @@ public class PointOnCurve : ISegmentTime
         this.distanceFromStartOfCurve = pointToClone.distanceFromStartOfCurve;
         this.segmentIndex = pointToClone.segmentIndex;
         this.tangent = pointToClone.tangent;
+        this.reference = pointToClone.reference;
     }
     public PointOnCurve(float time, float distanceFromStartOfSegment, Vector3 position,int segmentIndex,Vector3 tangent)
     {
@@ -26,6 +27,7 @@ public class PointOnCurve : ISegmentTime
     public int segmentIndex;
     public float time;
     public Vector3 tangent;
+    public Vector3 reference;
 
     public Vector3 position;
     /// <summary>
