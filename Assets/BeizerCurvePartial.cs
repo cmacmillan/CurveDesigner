@@ -20,16 +20,20 @@ public partial class BeizerCurve
     }
     public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior,Vector3? referenceDirection, bool isClosedLoop)
     {
+        //Double reflection method for calculating RMF
+        Vector3 DoubleReflectionRMF(Vector3 x0,Vector3 x1,Vector3 t0,Vector3 t1,Vector3 r0)
+        {
+            Vector3 v1 = x1 - x0;
+            float c1 = Vector3.Dot(v1, v1);
+            Vector3 rL = r0- (2.0f / c1) * Vector3.Dot(v1, r0) * v1;
+            Vector3 tL = t0 - (2.0f / c1) * Vector3.Dot(v1, t0) * v1;
+            Vector3 v2 = t1 - tL;
+            float c2 = Vector3.Dot(v2, v2);
+            return rL - (2.0f / c2) * Vector3.Dot(v2, rL) * v2;
+        }
         Vector3 GetReference(PointOnCurve currentPoint, PointOnCurve previousPoint, Vector3 previousReference)
         {
-            //Double reflection method for calculating RMF
-            Vector3 v1 = currentPoint.position - previousPoint.position;
-            float c1 = Vector3.Dot(v1, v1);
-            Vector3 rl = previousReference - (2.0f / c1) * Vector3.Dot(v1, previousReference) * v1;
-            Vector3 tl = previousPoint.tangent.normalized - (2.0f / c1) * Vector3.Dot(v1, previousPoint.tangent.normalized) * v1;
-            Vector3 v2 = currentPoint.tangent.normalized - tl;
-            float c2 = Vector3.Dot(v2, v2);
-            return rl - (2.0f / c2) * Vector3.Dot(v2, rl) * v2;
+            return DoubleReflectionRMF(previousPoint.position,currentPoint.position,previousPoint.tangent.normalized,currentPoint.tangent.normalized,previousReference);
         }
         float distanceFromFull = 360.0f - TubeArc;
         void GenerateRing(PointOnCurve currentPoint, Vector3 referenceVector)
@@ -54,10 +58,12 @@ public partial class BeizerCurve
                 referenceVectors.Add(referenceVector);
             }
         }
-
         if (isClosedLoop)
         {
-            float angleDifference = Vector3.SignedAngle(referenceVectors[points.Count-1],referenceVectors[0],points[0].tangent);
+            //angle difference between the final reference vector, and the first reference vector projected backwards
+            Vector3 finalReferenceVector = referenceVectors[points.Count - 1];
+            Vector3 firstReferenceVectorProjectedBackwards = GetReference(points[points.Count-1],points[0],referenceVectors[0]);
+            float angleDifference = Vector3.SignedAngle(finalReferenceVector,firstReferenceVectorProjectedBackwards,points[points.Count-1].tangent);
             for (int i = 1; i < points.Count; i++)
                 referenceVectors[i] = Quaternion.AngleAxis((i/(float)(points.Count-1))*angleDifference,points[i].tangent) *referenceVectors[i];
         }
