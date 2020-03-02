@@ -36,9 +36,16 @@ namespace Assets.NewUI
             base.Click(mousePosition, clickHits);
         }
 
+        private const float normalLength = 10.0f;
         public override void Draw(List<IDraw> drawList,ClickHitData clickedElement)
         {
             _curve.positionCurve.Recalculate();
+            var samples = _curve.positionCurve.GetPoints();
+            foreach (var i in samples)
+            {
+                var reference = Quaternion.AngleAxis(_curve.curveRotation, i.tangent) * i.reference;
+                drawList.Add(new LineDraw(this,i.position,reference*normalLength+i.position,Color.yellow));
+            }
             for (int i = 0; i < _curve.positionCurve.NumSegments; i++)
             {
                 var point1 = _curve.transform.TransformPoint(_curve.positionCurve[i, 0]);

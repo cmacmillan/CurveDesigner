@@ -14,13 +14,18 @@ namespace Assets.NewUI
         private Vector3 _endPoint;
         private float _distanceToPoint;
         private IComposite _creator;
-        public LineDraw(IComposite creator,Vector3 startPoint,Vector3 endPoint)
+        private Color color;
+        public LineDraw(IComposite creator,Vector3 startPoint,Vector3 endPoint,Color? color=null)
         {
             this._creator = creator;
             this._startPoint = startPoint;
             this._endPoint = endPoint;
             var avg = (_startPoint + _endPoint) / 2.0f;
             this._distanceToPoint = GUITools.CameraDistanceToPoint(avg);
+            if (color.HasValue)
+                this.color = color.Value;
+            else
+                this.color = Color.white;
         }
 
         public IComposite Creator()
@@ -35,7 +40,10 @@ namespace Assets.NewUI
 
         public void Draw(DrawMode mode)
         {
+            Color beforeColor = Handles.color;
+            Handles.color = color;
             Handles.DrawAAPolyLine(CurveSegmentDraw.GetLineTextureByType(LineTextureType.Default), new Vector3[] { _startPoint, _endPoint});
+            Handles.color = beforeColor;
         }
     }
 }
