@@ -20,63 +20,49 @@ public partial class BeizerCurve
     }
     public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior,Vector3? referenceDirection, bool isClosedLoop)
     {
-        float distanceFromFull = 360.0f - TubeArc;
-        void GenerateRing(PointOnCurve startPoint, Vector3 forwardVector, Vector3? previousForwardVector,ref Vector3 previousTangent)
+        Vector3 GetReference(PointOnCurve currentPoint, PointOnCurve previousPoint, Vector3 previousReference)
         {
-            Vector3 tangentVect;
-            /*if (referenceDirection.HasValue)
-            {
-                //var reference = referenceDirection.Value;
-                //var referenceForward = Vector3.ProjectOnPlane(forwardVector.normalized,reference);
-                tangentVect = referenceDirection.Value;//NormalTangent(referenceForward,reference);
-            }
-            else
-            {*/
-
-                if (previousForwardVector.HasValue)
-                {
-                    Vector3 nextTangentVect = NormalTangent(previousForwardVector.Value, previousTangent);
-                    tangentVect = NormalTangent(forwardVector, nextTangentVect);
-                    tangentVect = (tangentVect + nextTangentVect) / 2.0f;
-                }
-                else
-                {
-                    tangentVect = NormalTangent(forwardVector, previousTangent);
-                }
-            //}
-            previousTangent = tangentVect;
+            //Double reflection method for calculating RMF
+            Vector3 v1 = currentPoint.position - previousPoint.position;
+            float c1 = Vector3.Dot(v1, v1);
+            Vector3 rl = previousReference - (2.0f / c1) * Vector3.Dot(v1, previousReference) * v1;
+            Vector3 tl = previousPoint.tangent.normalized - (2.0f / c1) * Vector3.Dot(v1, previousPoint.tangent.normalized) * v1;
+            Vector3 v2 = currentPoint.tangent.normalized - tl;
+            float c2 = Vector3.Dot(v2, v2);
+            return rl - (2.0f / c2) * Vector3.Dot(v2, rl) * v2;
+        }
+        float distanceFromFull = 360.0f - TubeArc;
+        void GenerateRing(PointOnCurve currentPoint, Vector3 referenceVector)
+        {
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
-            var size = Mathf.Max(0, sizeCurve.Evaluate(startPoint.distanceFromStartOfCurve) + offset);
+            var size = Mathf.Max(0, sizeCurve.Evaluate(currentPoint.distanceFromStartOfCurve) + offset);
             for (int j = 0; j < RingPointCount; j++)
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
-                Vector3 rotatedVect;
-                /*if (referenceDirection.HasValue)
-                {
-                    var reference = referenceDirection.Value;
-                    var referenceForward = Vector3.ProjectOnPlane(forwardVector.normalized,reference);
-                    rotatedVect = Quaternion.AngleAxis(theta,referenceForward) * reference;
-                }
-                else*/
-                    rotatedVect = Quaternion.AngleAxis(theta, forwardVector) * tangentVect;
-                listToAppend.Add(startPoint.position + rotatedVect * size);
+                Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * referenceVector;
+                listToAppend.Add(currentPoint.position + rotatedVect * size);
             }
         }
-        Vector3 lastTangent = Quaternion.FromToRotation(Vector3.forward, (points[1].position - points[0].position).normalized) * Vector3.right;
-        int finalIndex = points.Count - 1;
+        List<Vector3> referenceVectors = new List<Vector3>(points.Count);
+        {
+            Vector3 referenceVector = NormalTangent(points[0].tangent, Vector3.up);
+            referenceVector = referenceVector.normalized;
+            referenceVectors.Add(referenceVector);
+            for (int i = 1; i < points.Count; i++)
+            {
+                referenceVector = GetReference(points[i], points[i - 1], referenceVector).normalized;
+                referenceVectors.Add(referenceVector);
+            }
+        }
+
         if (isClosedLoop)
         {
-            for (int i = 0; i < points.Count; i++)
-                GenerateRing(points[i], (points[mod((i + 1),points.Count)].position - points[i].position).normalized, points[i].position - points[mod((i - 1),points.Count)].position, ref lastTangent);
-        } else
-        {
-            GenerateRing(points[0], (points[1].position - points[0].position).normalized, null, ref lastTangent);
-            for (int i = 1; i < points.Count - 1; i++)
-            {
-                GenerateRing(points[i], (points[i + 1].position - points[i].position).normalized, points[i].position - points[i - 1].position, ref lastTangent);
-            }
-            GenerateRing(points[finalIndex], (points[finalIndex].position - points[finalIndex - 1].position).normalized, null, ref lastTangent);
+            float angleDifference = Vector3.SignedAngle(referenceVectors[points.Count-1],referenceVectors[0],points[0].tangent);
+            for (int i = 1; i < points.Count; i++)
+                referenceVectors[i] = Quaternion.AngleAxis((i/(float)(points.Count-1))*angleDifference,points[i].tangent) *referenceVectors[i];
         }
+        for (int i = 0; i < points.Count; i++)
+            GenerateRing(points[i], referenceVectors[i]);
     }
 }
 public class AnimationCurveIEvaluatableAdapter : IEvaluatable

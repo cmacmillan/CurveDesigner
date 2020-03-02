@@ -87,6 +87,13 @@ public class Curve3DInspector : Editor
             curve3d.positionCurve.isCurveOutOfDate = true;
             curve3d.UICurve.Initialize();
         }
+        if (GUILayout.Button("Lock"))
+        {
+            foreach (var i in curve3d.positionCurve.PointGroups)
+            {
+                i.SetPointLocked(true);
+            }
+        }
         //GUI.color = Color.white;
         //EditorGUI.CurveField(new Rect(0, 0, 20, 20),curve.curveSizeAnimationCurve);
         GUILayout.EndHorizontal();

@@ -18,6 +18,11 @@ public partial class BeizerCurve
     [System.NonSerialized]
     [HideInInspector]
     public List<Segment> segments = null;
+
+    private Vector3 GetTangent(int index)
+    {
+        return (this[index + 1] - this[index]);//.normalized;
+    }
     
     public BeizerCurve() { }
     public BeizerCurve(BeizerCurve curveToClone)
@@ -139,25 +144,25 @@ public partial class BeizerCurve
     public PointOnCurve GetPointAtDistance(float distance)
     {
         float remainingDistance= distance;
-        float time;
-        Vector3 position;
         for (int i=0;i<NumSegments;i++)
         {
             if (remainingDistance < segments[i].length)
             {
-                time = segments[i].GetTimeAtLength(remainingDistance);
-                position = GetSegmentPositionAtTime(i, time);
-                var retr = new PointOnCurve(time,remainingDistance,position,i);
+                float time = segments[i].GetTimeAtLength(remainingDistance);
+                Vector3 position = GetSegmentPositionAtTime(i, time);
+                Vector3 tangent = GetSegmentTangentAtTime(i, time);
+                var retr = new PointOnCurve(time,remainingDistance,position,i,tangent);
                 retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (i - 1 >= 0 ? segments[i - 1].cummulativeLength : 0);
                 return retr;
             }
             remainingDistance-= segments[i].length;
         }
-        int finalSegmentIndex = NumSegments - 1;
-        time = 1.0f;
-        position = GetSegmentPositionAtTime(finalSegmentIndex,time);
         {
-            var retr = new PointOnCurve(time, segments[finalSegmentIndex].length, position, finalSegmentIndex);
+            int finalSegmentIndex = NumSegments - 1;
+            float time = 1.0f;
+            Vector3 position = GetSegmentPositionAtTime(finalSegmentIndex, time);
+            Vector3 tangent = GetSegmentTangentAtTime(finalSegmentIndex, time);
+            var retr = new PointOnCurve(time, segments[finalSegmentIndex].length, position, finalSegmentIndex,tangent);
             retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (finalSegmentIndex - 1 >= 0 ? segments[finalSegmentIndex - 1].cummulativeLength : 0);
             return retr;
         }
@@ -175,6 +180,18 @@ public partial class BeizerCurve
     public Vector3 GetSegmentPositionAtTime(int segmentIndex,float time)
     {
         return SolvePositionAtTime(GetVirtualIndex(segmentIndex,0),4,time);
+    }
+    public Vector3 GetSegmentTangentAtTime(int segmentIndex, float time)
+    {
+        return SolveTangentAtTime(GetVirtualIndex(segmentIndex,0),3,time);
+    }
+    private Vector3 SolveTangentAtTime(int startIndex, int length, float time)
+    {
+        if (length==2)
+            return Vector3.Lerp(GetTangent(startIndex), GetTangent(startIndex + 1), time);
+        Vector3 firstHalf = SolveTangentAtTime(startIndex, length - 1, time);
+        Vector3 secondHalf = SolveTangentAtTime(startIndex + 1, length - 1, time);
+        return Vector3.Lerp(firstHalf, secondHalf, time);
     }
 
     private Vector3 SolvePositionAtTime(int startIndex, int length, float time)

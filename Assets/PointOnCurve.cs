@@ -13,16 +13,19 @@ public class PointOnCurve : ISegmentTime
         this.position = pointToClone.position;
         this.distanceFromStartOfCurve = pointToClone.distanceFromStartOfCurve;
         this.segmentIndex = pointToClone.segmentIndex;
+        this.tangent = pointToClone.tangent;
     }
-    public PointOnCurve(float time, float distanceFromStartOfSegment, Vector3 position,int segmentIndex)
+    public PointOnCurve(float time, float distanceFromStartOfSegment, Vector3 position,int segmentIndex,Vector3 tangent)
     {
         this.time = time;
         this.distanceFromStartOfSegment = distanceFromStartOfSegment;
         this.position = position;
         this.segmentIndex = segmentIndex;
+        this.tangent = tangent;
     }
     public int segmentIndex;
     public float time;
+    public Vector3 tangent;
 
     public Vector3 position;
     /// <summary>
