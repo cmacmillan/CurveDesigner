@@ -18,7 +18,7 @@ public partial class BeizerCurve
     {
         return (x % m + m) % m;
     }
-    public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior,Vector3? referenceDirection, bool isClosedLoop)
+    public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IEvaluatable sizeCurve, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior, bool isClosedLoop)
     {
         float distanceFromFull = 360.0f - TubeArc;
         for (int i = 0; i < points.Count; i++)
@@ -32,6 +32,20 @@ public partial class BeizerCurve
                 Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
                 listToAppend.Add(currentPoint.position + rotatedVect * size);
             }
+        }
+    }
+    public void CreateRectanglePointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, float Rotation, bool isClosedLoop, float thickness, IEvaluatable sizeCurve)
+    {
+        for (int i = 0; i < points.Count; i++)
+        {
+            PointOnCurve currentPoint = points[i];
+            var center = currentPoint.position;
+            var up = currentPoint.reference.normalized*thickness/2.0f;
+            var right = Vector3.Cross(up,currentPoint.tangent).normalized*Mathf.Max(0,sizeCurve.Evaluate(currentPoint.distanceFromStartOfCurve))/2.0f;
+            listToAppend.Add(center+up+right);
+            listToAppend.Add(center+up-right);
+            listToAppend.Add(center-up-right);
+            listToAppend.Add(center-up+right);
         }
     }
 }

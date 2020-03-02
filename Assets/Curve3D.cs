@@ -12,6 +12,9 @@ public class Curve3D : MonoBehaviour
     [NonSerialized]
     public CurveComposite UICurve=null;
 
+    public bool drawNormals = true;
+    public float normalsLength = 1.0f;
+
     public bool isClosedLoop = false;
     [SerializeField]
     [HideInInspector]
@@ -135,20 +138,15 @@ public class Curve3D : MonoBehaviour
     private float oldCurveRotation= -1;
 
     [Min(0)]
-    public float tubeThickness = .1f;
+    public float thickness = .1f;
     [HideInInspector]
     [SerializeField]
     private float oldTubeThickness = -1;
 
-    public CurveType type = CurveType.Tube;
+    public CurveType type = CurveType.HollowTube;
     [HideInInspector]
     [SerializeField]
     private CurveType oldType;
-
-    public TubeType tubeType = TubeType.Hollow;
-    [SerializeField]
-    [HideInInspector]
-    private TubeType oldTubeType;
 
     public bool HaveCurveSettingsChanged()
     {
@@ -177,9 +175,8 @@ public class Curve3D : MonoBehaviour
         retr|=CheckField(curveRadius, ref oldCurveRadius);
         retr|=CheckField(arcOfTube, ref oldArcOfTube);
         retr|=CheckField(curveRotation, ref oldCurveRotation);
-        retr|=CheckField(tubeThickness, ref oldTubeThickness);
+        retr|=CheckField(thickness, ref oldTubeThickness);
         retr|=CheckField(type, ref oldType);
-        retr|=CheckField(tubeType, ref oldTubeType);
         if (CheckField(isClosedLoop, ref oldIsClosedLoop))
         {
             retr = true;
@@ -239,13 +236,9 @@ public enum EditMode
 }
 public enum CurveType
 {
-    Tube = 0,
+    HollowTube = 0,
     Flat = 1,
     DoubleBeizer = 2,
     NoMesh = 3,
-}
-public enum TubeType
-{
-    Hollow = 0,
-    Solid = 1,
+    Cylinder = 4,
 }

@@ -16,8 +16,6 @@ public static class MeshGenerator
 
     public static BeizerCurve curve;
 
-    public static TubeType TubeType;
-
     public static AnimationCurve sizeCurve;
 
     public static int RingPointCount = 8;
@@ -26,8 +24,9 @@ public static class MeshGenerator
     public static float TubeArc = 360.0f;
     public static bool IsTubeArcConstant { get { return true; } }
     public static float Rotation = 0.0f;
-    public static float TubeThickness = 0.0f;
+    public static float Thickness = 0.0f;
     public static bool IsClosedLoop = false;
+    public static CurveType CurveType;
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -43,10 +42,10 @@ public static class MeshGenerator
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
             MeshGenerator.TubeArc = curve.arcOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
-            MeshGenerator.TubeType = curve.tubeType;
             MeshGenerator.sizeCurve = Curve3D.CopyAnimationCurve(curve.curveSizeAnimationCurve);
-            MeshGenerator.TubeThickness = curve.tubeThickness;
+            MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
+            MeshGenerator.CurveType = curve.type;
 
             Thread thread = new Thread(GenerateMesh);
             thread.Start();
@@ -71,10 +70,6 @@ public static class MeshGenerator
             if (capacity > list.Capacity)
                 list.Capacity = capacity;
         }
-    }
-    private static Vector3 GetReferenceDirection()
-    {
-        return Vector3.up;
     }
     private static void GenerateMesh()
     {
@@ -102,30 +97,30 @@ public static class MeshGenerator
             triangles.Add(point2);
             triangles.Add(point3);
         }
-        void TrianglifyLayer(bool isExterior)
+        void TrianglifyLayer(bool isExterior,int numPointsPerRing)
         {//generate tris
             int additionalRing = IsClosedLoop ? 1 : 0;
-            int numVertsInALayer = (numRings+1) * ActualRingPointCount;
+            int numVertsInALayer = (numRings+1) * numPointsPerRing;
             int basePoint = isExterior ? 0 :numVerts/2;
             for (int i = 0; i < numRings+additionalRing; i++)
             {
-                int ringIndex = (i * ActualRingPointCount)%numVertsInALayer;
-                int nextRingIndex = (ringIndex + ActualRingPointCount)%numVertsInALayer;
-                for (int j = 0; j < ActualRingPointCount; j++)
+                int ringIndex = (i * numPointsPerRing)%numVertsInALayer;
+                int nextRingIndex = (ringIndex + numPointsPerRing)%numVertsInALayer;
+                for (int j = 0; j < numPointsPerRing; j++)
                 {
-                    if (!shouldDrawConnectingFace && (j + 1) >= ActualRingPointCount)
+                    if (!shouldDrawConnectingFace && (j + 1) >= numPointsPerRing)
                         continue;
                     if (isExterior)
                         DrawQuad(
                             ringIndex + j+basePoint,
-                            ringIndex + ((j + 1) % ActualRingPointCount)+basePoint,
+                            ringIndex + ((j + 1) % numPointsPerRing)+basePoint,
                             nextRingIndex + j+basePoint,
-                            nextRingIndex + ((j + 1) % ActualRingPointCount)+basePoint);
+                            nextRingIndex + ((j + 1) % numPointsPerRing)+basePoint);
                     else //flipped
                         DrawQuad(
-                            ringIndex + ((j + 1) % ActualRingPointCount)+basePoint,
+                            ringIndex + ((j + 1) % numPointsPerRing)+basePoint,
                             ringIndex + j+basePoint,
-                            nextRingIndex + ((j + 1) % ActualRingPointCount)+basePoint,
+                            nextRingIndex + ((j + 1) % numPointsPerRing)+basePoint,
                             nextRingIndex + j+basePoint);
                 }
             }
@@ -217,19 +212,19 @@ public static class MeshGenerator
             TrianglifyRingToCenter(startRingBaseIndex, AddRingCenterVertexFromAverage(startRingBaseIndex),true);
             TrianglifyRingToCenter(endRingBaseIndex, AddRingCenterVertexFromAverage(endRingBaseIndex),false);
         }
-        switch (TubeType)
+        switch (CurveType)
         {
-            case TubeType.Solid:
+            case CurveType.Cylinder:
                 numVerts = ActualRingPointCount * sampled.Count;
                 numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                 shouldDrawConnectingFace = true;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true,GetReferenceDirection(),IsClosedLoop);
-                TrianglifyLayer(true);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, Thickness, ActualRingPointCount, Rotation, true,IsClosedLoop);
+                TrianglifyLayer(true,ActualRingPointCount);
                 if (!IsClosedLoop)
                     CreateTubeEndPlates();
                 break;
-            case TubeType.Hollow:
+            case CurveType.HollowTube:
                 numVerts = ActualRingPointCount * sampled.Count * 2;
                 numTris = ActualRingPointCount * numRings * 6 * 2;
                 bool is360degree = TubeArc == 360.0f && MeshGenerator.IsTubeArcConstant;
@@ -238,14 +233,22 @@ public static class MeshGenerator
                 else
                     shouldDrawConnectingFace = false;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, true,GetReferenceDirection(),IsClosedLoop);
-                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, TubeThickness, ActualRingPointCount, Rotation, false,GetReferenceDirection(),IsClosedLoop);
-                TrianglifyLayer(true);
-                TrianglifyLayer(false);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, Thickness, ActualRingPointCount, Rotation, true,IsClosedLoop);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, new AnimationCurveIEvaluatableAdapter(sizeCurve), TubeArc, Thickness, ActualRingPointCount, Rotation, false,IsClosedLoop);
+                TrianglifyLayer(true,ActualRingPointCount);
+                TrianglifyLayer(false,ActualRingPointCount);
                 if (!is360degree)
                     ConnectTubeInteriorAndExterior();
                 if (!IsClosedLoop)
                     ConnectTubeInteriorExteriorEnds();
+                break;
+            case CurveType.Flat:
+                numVerts = 4 * sampled.Count;
+                numTris = 8*(sampled.Count - 1);
+                InitLists();
+                curve.CreateRectanglePointsAlongCurve(sampled, vertices, Rotation, IsClosedLoop, Thickness, new AnimationCurveIEvaluatableAdapter(sizeCurve));
+                shouldDrawConnectingFace = true;
+                TrianglifyLayer(true,4);
                 break;
         }
         IsBuzy = false;
