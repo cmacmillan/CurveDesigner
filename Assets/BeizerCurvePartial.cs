@@ -25,7 +25,7 @@ public partial class BeizerCurve
         {
             PointOnCurve currentPoint = points[i];
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
-            var size = Mathf.Max(0, sizeCurve.Evaluate(currentPoint.distanceFromStartOfCurve) + offset);
+            var size = Mathf.Max(0, sizeCurve.Evaluate(currentPoint.distanceFromStartOfCurve) + offset)/2.0f;
             for (int j = 0; j < RingPointCount; j++)
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
@@ -40,12 +40,14 @@ public partial class BeizerCurve
         {
             PointOnCurve currentPoint = points[i];
             var center = currentPoint.position;
-            var up = currentPoint.reference.normalized*thickness/2.0f;
-            var right = Vector3.Cross(up,currentPoint.tangent).normalized*Mathf.Max(0,sizeCurve.Evaluate(currentPoint.distanceFromStartOfCurve))/2.0f;
-            listToAppend.Add(center+up+right);
-            listToAppend.Add(center+up-right);
-            listToAppend.Add(center-up-right);
-            listToAppend.Add(center-up+right);
+            var up = Quaternion.AngleAxis(Rotation,currentPoint.tangent)*currentPoint.reference.normalized;
+            var right = Vector3.Cross(up, currentPoint.tangent).normalized;
+            var scaledUp = up * thickness / 2.0f;
+            var scaledRight = right*Mathf.Max(0,sizeCurve.Evaluate(currentPoint.distanceFromStartOfCurve))/2.0f;
+            listToAppend.Add(center+scaledUp+scaledRight);
+            listToAppend.Add(center+scaledUp-scaledRight);
+            listToAppend.Add(center-scaledUp-scaledRight);
+            listToAppend.Add(center-scaledUp+scaledRight);
         }
     }
 }
