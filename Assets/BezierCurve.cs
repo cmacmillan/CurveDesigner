@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//A class which defines a chain of 3rd order beizer curves (4 control points per segment)
+//A class which defines a chain of 3rd order bezier curves (4 control points per segment)
 [System.Serializable]
-public partial class BeizerCurve
+public partial class BezierCurve
 {
     [SerializeField]
     [HideInInspector]
@@ -24,8 +24,8 @@ public partial class BeizerCurve
         return (this[index + 1] - this[index]);//.normalized;
     }
     
-    public BeizerCurve() { }
-    public BeizerCurve(BeizerCurve curveToClone)
+    public BezierCurve() { }
+    public BezierCurve(BezierCurve curveToClone)
     {
         PointGroups = new List<PointGroup>();
         foreach (var i in curveToClone.PointGroups)

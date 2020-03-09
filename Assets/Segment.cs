@@ -12,11 +12,11 @@ public class Segment
     /// Cummulative length including current segment
     /// </summary>
     public float cummulativeLength=-1;
-    public Segment(BeizerCurve owner,int segmentIndex, bool isLastSegment)
+    public Segment(BezierCurve owner,int segmentIndex, bool isLastSegment)
     {
         Recalculate(owner,segmentIndex,isLastSegment);
     }
-    public void Recalculate(BeizerCurve owner,int segmentIndex, bool isLastSegment)
+    public void Recalculate(BezierCurve owner,int segmentIndex, bool isLastSegment)
     {
         bool shouldPerformOneLessSample = isLastSegment && owner.owner.isClosedLoop;//Here we create a gap so we can seamlessly attach points in a closed loop
         int sampleReduction = shouldPerformOneLessSample ?1:0;

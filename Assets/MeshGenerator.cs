@@ -14,7 +14,7 @@ public static class MeshGenerator
 
     public static DateTime lastUpdateTime;
 
-    public static BeizerCurve curve;
+    public static BezierCurve curve;
 
     public static AnimationCurve sizeCurve;
 
@@ -33,7 +33,7 @@ public static class MeshGenerator
         if (!IsBuzy)
         {
             IsBuzy = true;
-            BeizerCurve clonedCurve = new BeizerCurve(curve.positionCurve);
+            BezierCurve clonedCurve = new BezierCurve(curve.positionCurve);
             lastUpdateTime = curve.lastMeshUpdateStartTime;
 
             MeshGenerator.curve = clonedCurve;

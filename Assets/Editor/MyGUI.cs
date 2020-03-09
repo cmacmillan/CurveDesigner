@@ -6,14 +6,14 @@ using UnityEditor;
 using UnityEngine;
 public static class MyGUI
 {
-    private static readonly int _BeizerHint = "MyGUI.Beizer".GetHashCode();
+    private static readonly int _bezierHint = "MyGUI.bezier".GetHashCode();
 
     private const int _pointHitboxSize = 10;
 
     #region 
     private const int WireCylinderLineCount = 4;
     private const int NumCylinderSamples = 10;//Constant here is probably fine
-    public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BeizerCurve positionCurve,bool shouldDrawCenter,bool isLeft,List<PointInfo> points,Curve3D curve)
+    public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BezierCurve positionCurve,bool shouldDrawCenter,bool isLeft,List<PointInfo> points,Curve3D curve)
     {
         var linearSizeCurve = new LinearEvaluatable(startKeyframeXY,endKeyframeXY);
         List<Vector3> outputPoints = new List<Vector3>();
@@ -161,7 +161,7 @@ public static class MyGUI
 
         var sizeCurve = curve.curveSizeAnimationCurve;
 
-        int controlID = GUIUtility.GetControlID(_BeizerHint, FocusType.Passive);
+        int controlID = GUIUtility.GetControlID(_bezierHint, FocusType.Passive);
         var MousePos = Event.current.mousePosition;
 
         if (positionCurve.isCurveOutOfDate && GUIUtility.hotControl!=controlID)//we only cache when NOT moving the point
@@ -190,7 +190,7 @@ public static class MyGUI
             return closestPoint;
         }
 
-            void DrawCurveFromIndex(int index, Texture2D tex, BeizerCurve pointProvider, Color color, float thickness)
+            void DrawCurveFromIndex(int index, Texture2D tex, bezierCurve pointProvider, Color color, float thickness)
             {
                 var point1 = curve.transform.TransformPoint(pointProvider[index, 0]);
                 var point2 = curve.transform.TransformPoint(pointProvider[index, 3]);
@@ -211,7 +211,7 @@ public static class MyGUI
                     linePlaceTexture = curve.circleIcon;
                     for (int i = 0; i < positionCurve.NumControlPoints; i++)
                     {
-                        var pointIndexType = BeizerCurve.GetPointTypeByIndex(i);
+                        var pointIndexType = bezierCurve.GetPointTypeByIndex(i);
                         bool isPositionPoint = pointIndexType == PGIndex.Position;
                         var color = Curve3DSettings.Green;
                         var tex = isPositionPoint ? curve.circleIcon : curve.squareIcon;
@@ -325,7 +325,7 @@ public static class MyGUI
             {
                 var keys = sizeCurve.keys;
                 int i = 0;
-                var clonedCurve = new BeizerCurve(positionCurve);//hmm
+                var clonedCurve = new bezierCurve(positionCurve);//hmm
                 for (int c = 0; c < keys.Length; c++)
                 {
                     bool left = c > 0;
@@ -354,13 +354,13 @@ public static class MyGUI
                     if (left)
                     {
                         leftDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.LeftTangent));
-                        leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(leftDataAtDistance.segmentIndex, leftDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                        leftIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(leftDataAtDistance.segmentIndex, leftDataAtDistance.time), false, bezierCurve.SplitInsertionNeighborModification.RetainCurveShape);
                         clonedCurve.Recalculate();
                         leftXY = new Vector2(sizeCurve.GetKeyframeX(c, PGIndex.LeftTangent), sizeCurve.GetKeyframeY(c, PGIndex.LeftTangent));
                     }
 
                     centerDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.Position));
-                    centerIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(centerDataAtDistance.segmentIndex, centerDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                    centerIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(centerDataAtDistance.segmentIndex, centerDataAtDistance.time), false, bezierCurve.SplitInsertionNeighborModification.RetainCurveShape);
                     clonedCurve.Recalculate();
 
                     centerXY = new Vector2(sizeCurve.GetKeyframeX(c, PGIndex.Position), sizeCurve.GetKeyframeY(c, PGIndex.Position));
@@ -376,7 +376,7 @@ public static class MyGUI
                     {
                         rightXY = new Vector2(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent), sizeCurve.GetKeyframeY(c, PGIndex.RightTangent));
                         rightDataAtDistance = clonedCurve.GetPointAtDistance(sizeCurve.GetKeyframeX(c, PGIndex.RightTangent));
-                        rightIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(rightDataAtDistance.segmentIndex, rightDataAtDistance.time), false, BeizerCurve.SplitInsertionNeighborModification.RetainCurveShape);
+                        rightIndex = clonedCurve.InsertSegmentAfterIndex(new CurveSplitPointInfo(rightDataAtDistance.segmentIndex, rightDataAtDistance.time), false, bezierCurve.SplitInsertionNeighborModification.RetainCurveShape);
                         clonedCurve.Recalculate();
                         for (int n = centerIndex; n < rightIndex; n++)
                             DrawCurveFromIndex(n, topTex, clonedCurve, Color.white, 4);
@@ -541,9 +541,9 @@ public static class MyGUI
                         #region update size curve
                         //Build keyframe info 
                         List<KeyframeInfo> keyframes = new List<KeyframeInfo>(sizeCurve.keys.Length);
-                        var modifiedPointType = BeizerCurve.GetPointTypeByIndex(hotPoint.indexInList);
+                        var modifiedPointType = bezierCurve.GetPointTypeByIndex(hotPoint.indexInList);
                         var pointGroup = positionCurve.GetPointGroupByIndex(hotPoint.indexInList);
-                        var pointGroupIndex = BeizerCurve.GetPointGroupIndex(hotPoint.indexInList);
+                        var pointGroupIndex = bezierCurve.GetPointGroupIndex(hotPoint.indexInList);
                         for (int i = 0; i < sizeCurve.keys.Length; i++)
                         {
                             var key = sizeCurve.keys[i];
@@ -617,7 +617,7 @@ public static class MyGUI
                             {
                                 var key = RemoveKeyframe(sizeCurve,hotPoint.dataIndex);
                                 var extrIndex = InsertKeyframeAtSplitPoint(sizeCurve, key);
-                                var index = BeizerCurve.GetVirtualIndexByType(extrIndex, PointTypeToPGIndex(PointType.ValuePoint));
+                                var index = bezierCurve.GetVirtualIndexByType(extrIndex, PointTypeToPGIndex(PointType.ValuePoint));
                                 curve.hotPointIndex = index;
                                 hotPoint.indexInList = index;
                             }
@@ -670,7 +670,7 @@ public static class MyGUI
                                 {
                                     curve.selectedPointsIndex.Clear();
                                 }
-                                var currentIndexToSelect = BeizerCurve.GetParentVirtualIndex(hotPoint.indexInList);
+                                var currentIndexToSelect = bezierCurve.GetParentVirtualIndex(hotPoint.indexInList);
                                 curve.selectedPointsIndex.Add(currentIndexToSelect);
                                 break;
                             case EditMode.Size:
@@ -680,7 +680,7 @@ public static class MyGUI
                                     hotPoint.dataIndex = extraIndex;
                                     hotPoint.type = PointType.ValuePoint;//We've inserted a point, so now we are editing a value point
 
-                                    var index = BeizerCurve.GetVirtualIndexByType(extraIndex, PointTypeToPGIndex(PointType.ValuePoint));
+                                    var index = bezierCurve.GetVirtualIndexByType(extraIndex, PointTypeToPGIndex(PointType.ValuePoint));
                                     curve.hotPointIndex = index;
                                     hotPoint.indexInList = index;
                                 }
@@ -738,7 +738,7 @@ public static class MyGUI
                             var pointGroup = positionCurve.GetPointGroupByIndex(renderPoint.indexInList);
                             if (pointGroup.GetIsPointLocked())
                             {
-                                switch (BeizerCurve.GetPointTypeByIndex(hotPoint.indexInList))
+                                switch (bezierCurve.GetPointTypeByIndex(hotPoint.indexInList))
                                 {
                                     case PGIndex.Position:
                                         break;

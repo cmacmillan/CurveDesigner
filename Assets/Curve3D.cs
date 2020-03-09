@@ -21,7 +21,7 @@ public class Curve3D : MonoBehaviour
     private bool oldIsClosedLoop;
 
     public EditMode editMode=EditMode.PositionCurve;
-    public BeizerCurve positionCurve;
+    public BezierCurve positionCurve;
     public Texture2D lineTex;
     public Material testmat;
 
@@ -238,7 +238,7 @@ public enum CurveType
 {
     HollowTube = 0,
     Flat = 1,
-    DoubleBeizer = 2,
+    DoubleBezier = 2,
     NoMesh = 3,
     Cylinder = 4,
 }
