@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace Assets.NewUI
 {
@@ -55,6 +56,50 @@ namespace Assets.NewUI
     }
     public class BezierCurve2D
     {
+        private class TestInfoProvider : I2DCurveInfoProvider
+        {
+            public float GetLength()
+            {
+                return 10.0f;
+            }
+
+            public bool IsClosedLoop()
+            {
+                return false;
+            }
+        }
+        public static void Test()
+        {
+            {
+                BezierCurve2D curve = new BezierCurve2D(new TestInfoProvider());
+                var group1 = new PointGroup2D();
+                group1.position = new Vector2(1, 1);
+                group1.right = new WeightAndTangent(0, 0);
+                curve.pointGroups.Add(group1);
+                var group2 = new PointGroup2D();
+                group2.position = new Vector2(2, 0);
+                group2.left = new WeightAndTangent(0, 0);
+                curve.pointGroups.Add(group2);
+                curve.Recalculate();
+                Assert.AreApproximatelyEqual(curve.GetY(1.5f), 0.5f);
+            }
+            //
+            {
+                BezierCurve2D curve = new BezierCurve2D(new TestInfoProvider());
+                var group1 = new PointGroup2D();
+                group1.position = new Vector2(1, 1);
+                group1.right = new WeightAndTangent(.5f, 0);
+                curve.pointGroups.Add(group1);
+                var group2 = new PointGroup2D();
+                group2.position = new Vector2(2, 0);
+                group2.left = new WeightAndTangent(.5f, 0);
+                curve.pointGroups.Add(group2);
+                curve.Recalculate();
+                Assert.AreApproximatelyEqual(curve.GetY(1.5f), 0.5f);
+            }
+        }
+
+
         public int NumSegments { get { return _infoProvider.IsClosedLoop()?pointGroups.Count:pointGroups.Count-1; } }
         public I2DCurveInfoProvider _infoProvider;
         List<PointGroup2D> pointGroups = new List<PointGroup2D>();
@@ -166,11 +211,15 @@ namespace Assets.NewUI
             if (x < pointGroups[0].position.x)
                 throw new ArgumentException();
             int index;
-            for (index = 0; index < pointGroups.Count && pointGroups[index].position.x<x; index++) ;
+            for (index = 0; index < pointGroups.Count; index++)
+                if (pointGroups[index].position.x > x)
+                    break;
             segmentIndex = index - 1;
             var segment = _segments[segmentIndex];
             int sampleIndex = 0;
-            for (sampleIndex = 0; sampleIndex < segment.samples.Count && segment.samples[sampleIndex].position.x < x; sampleIndex++);
+            for (sampleIndex = 0; sampleIndex < segment.samples.Count; sampleIndex++)
+                if (segment.samples[sampleIndex].position.x > x)
+                    break;
             Segment2DSample lower = segment.samples[sampleIndex - 1];
             Segment2DSample upper = segment.samples[sampleIndex];
             float lerp = (x - lower.position.x)/(upper.position.x - lower.position.x);

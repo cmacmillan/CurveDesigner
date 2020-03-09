@@ -206,6 +206,11 @@ public class Curve3D : MonoBehaviour
     void Update()
     {
     }
+    [ContextMenu("Test")]
+    void Test()
+    {
+    BezierCurve2D.Test();
+    }
 }
 public class KeyframeInfo
 {
