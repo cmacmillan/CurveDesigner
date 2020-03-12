@@ -9,9 +9,9 @@ namespace Assets.NewUI
 {
     public class SizeCurveComposite : IComposite
     {
-        private LinearValueDistanceSampler<float> _distanceSampler;
+        private FloatLinearDistanceSampler _distanceSampler;
         private SplitterPointComposite _splitterPoint = null;
-        public SizeCurveComposite(IComposite parent,LinearValueDistanceSampler<float> distanceSampler,Curve3D curve) : base(parent)
+        public SizeCurveComposite(IComposite parent,FloatLinearDistanceSampler distanceSampler,Curve3D curve) : base(parent)
         {
             _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle,SizeCurveSplitCommandFactory.Instance, Curve3DSettings.Green);
             _distanceSampler = distanceSampler;

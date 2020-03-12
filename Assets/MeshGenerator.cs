@@ -43,7 +43,7 @@ public static class MeshGenerator
             MeshGenerator.VertexDensity = curve.curveVertexDensity;
             MeshGenerator.TubeArc = curve.arcOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
-            MeshGenerator.sizeDistanceSampler = new LinearValueDistanceSampler<float>(curve.sizeDistanceSampler);
+            MeshGenerator.sizeDistanceSampler = new FloatLinearDistanceSampler(curve.sizeDistanceSampler);
             MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;

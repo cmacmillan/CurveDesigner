@@ -7,25 +7,21 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public interface IDistanceSampler<T> where T : struct
-    {
-        T GetValueAtDistance(float distance,T? defaultValue=null);
-    }
     [System.Serializable]
-    public class DistanceValue<T> where T : struct
+    public class FloatDistanceValue
     {
-        public T value;
+        public float value;
         [SerializeField]
-        private LinearValueDistanceSampler<T> _owner;
+        private FloatLinearDistanceSampler _owner;
         [SerializeField]
         private float _distance;
-        public DistanceValue(T value, float distance, LinearValueDistanceSampler<T> owner)
+        public FloatDistanceValue(float value, float distance, FloatLinearDistanceSampler owner)
         {
             this.value = value;
             this._owner = owner;
             this._distance = distance;
         }
-        public DistanceValue(DistanceValue<T> objToClone, LinearValueDistanceSampler<T> newOwner)
+        public FloatDistanceValue(FloatDistanceValue objToClone,FloatLinearDistanceSampler newOwner)
         {
             this.value = objToClone.value;
             this._distance = objToClone._distance;
@@ -40,24 +36,18 @@ namespace Assets.NewUI
             }
         }
     }
-    [Serializable]
-    public class LinearValueDistanceSampler<T> : IDistanceSampler<T> where T : struct
+    [System.Serializable]
+    public class FloatLinearDistanceSampler : IDistanceSampler<float>
     {
         [SerializeField]
-        private Func<T, T, float, T> _lerpFunction;
-        [SerializeField]
-        private List<DistanceValue<T>> _points = new List<DistanceValue<T>>();
-        public LinearValueDistanceSampler(Func<T,T,float,T> lerpFunction)
+        private List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
+        public FloatLinearDistanceSampler() { }
+        public FloatLinearDistanceSampler(FloatLinearDistanceSampler objToClone)
         {
-            this._lerpFunction = lerpFunction;
-        }
-        public LinearValueDistanceSampler(LinearValueDistanceSampler<T> objToClone)
-        {
-            this._lerpFunction = objToClone._lerpFunction;
             foreach (var i in objToClone._points)
-                _points.Add(new DistanceValue<T>(i,this));
+                _points.Add(new FloatDistanceValue(i,this));
         }
-        public T GetValueAtDistance(float distance,T? defaultValue=null)
+        public float GetValueAtDistance(float distance,float? defaultValue=null)
         {
             if (_points.Count == 0)
                 return (defaultValue.HasValue?defaultValue.Value:default);
@@ -68,24 +58,24 @@ namespace Assets.NewUI
             {
                 var current = _points[i];
                 if (current.Distance >= distance)
-                    return _lerpFunction(previous.value,current.value,(distance-previous.Distance)/(current.Distance-previous.Distance));
+                    return Mathf.Lerp(previous.value,current.value,(distance-previous.Distance)/(current.Distance-previous.Distance));
                 previous = current;
             }
             return _points[_points.Count - 1].value;
         }
-        public void InsertPointAtDistance(float distance,T? defaultValue=null)
+        public void InsertPointAtDistance(float distance,float? defaultValue=null)
         {
             var value = GetValueAtDistance(distance, defaultValue);
-            _points.Add(new DistanceValue<T>(value, distance, this));
+            _points.Add(new FloatDistanceValue(value, distance, this));
             SortPoints();
         }
         public void SortPoints()
         {
             _points.OrderBy((a) => a.Distance);
         }
-        public List<DistanceValue<T>> GetPointsBelowDistance(float distance)
+        public List<FloatDistanceValue> GetPointsBelowDistance(float distance)
         {
-            List<DistanceValue<T>> retr = new List<DistanceValue<T>>();
+            List<FloatDistanceValue> retr = new List<FloatDistanceValue>();
             foreach (var i in _points)
                 if (i.Distance <= distance)
                     retr.Add(i);
