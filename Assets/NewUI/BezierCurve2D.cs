@@ -1,4 +1,5 @@
-﻿using System;
+﻿///NOTE: THIS FILE ISN'T FINISHED AND DOESN'T WORK
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,20 +59,20 @@ namespace Assets.NewUI
     {
         private class TestInfoProvider : I2DCurveInfoProvider
         {
-            public float GetLength()
+            public TestInfoProvider(bool isClosedLoop,float length)
             {
-                return 10.0f;
+                this.isClosedLoop = isClosedLoop;
+                this.length = length;
             }
-
-            public bool IsClosedLoop()
-            {
-                return false;
-            }
+            private bool isClosedLoop;
+            private float length;
+            public float GetLength() { return length; }
+            public bool IsClosedLoop() { return isClosedLoop; }
         }
         public static void Test()
         {
             {
-                BezierCurve2D curve = new BezierCurve2D(new TestInfoProvider());
+                BezierCurve2D curve = new BezierCurve2D(new TestInfoProvider(false,10.0f));
                 var group1 = new PointGroup2D();
                 group1.position = new Vector2(1, 1);
                 group1.right = new WeightAndTangent(0, 0);
@@ -83,9 +84,8 @@ namespace Assets.NewUI
                 curve.Recalculate();
                 Assert.AreApproximatelyEqual(curve.GetY(1.5f), 0.5f);
             }
-            //
             {
-                BezierCurve2D curve = new BezierCurve2D(new TestInfoProvider());
+                BezierCurve2D curve = new BezierCurve2D(new TestInfoProvider(false,10.0f));
                 var group1 = new PointGroup2D();
                 group1.position = new Vector2(1, 1);
                 group1.right = new WeightAndTangent(.5f, 0);
@@ -95,6 +95,25 @@ namespace Assets.NewUI
                 group2.left = new WeightAndTangent(.5f, 0);
                 curve.pointGroups.Add(group2);
                 curve.Recalculate();
+                Assert.AreApproximatelyEqual(curve.GetY(1),1);
+                Assert.AreApproximatelyEqual(curve.GetY(-10),1);
+                Assert.AreApproximatelyEqual(curve.GetY(3),0);
+                Assert.AreApproximatelyEqual(curve.GetY(13),0);
+                Assert.AreApproximatelyEqual(curve.GetY(2),0);
+                Assert.AreApproximatelyEqual(curve.GetY(1.5f), 0.5f);
+            }
+            {
+                BezierCurve2D curve = new BezierCurve2D(new TestInfoProvider(true,2.0f));
+                var group1 = new PointGroup2D();
+                group1.position = new Vector2(0, 0);
+                group1.right = new WeightAndTangent(0, 0);
+                curve.pointGroups.Add(group1);
+                var group2 = new PointGroup2D();
+                group2.position = new Vector2(1, 1);
+                group2.left = new WeightAndTangent(0, 0);
+                curve.pointGroups.Add(group2);
+                curve.Recalculate();
+                Assert.AreApproximatelyEqual(curve.GetY(.5f), 0.5f);
                 Assert.AreApproximatelyEqual(curve.GetY(1.5f), 0.5f);
             }
         }
@@ -203,6 +222,10 @@ namespace Assets.NewUI
         }
         public float GetY(float x)
         {
+            if (_infoProvider.IsClosedLoop())
+                x = mod(x, _infoProvider.GetLength());
+            else
+                x = Mathf.Clamp(x, 0, _infoProvider.GetLength());
             GetSegmentIndexAtTimeAtX(x, out int segmentIndex, out float time);
             return SegmentPositionAtTime(segmentIndex,time).y;
         }

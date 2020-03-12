@@ -7,46 +7,61 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class PositionCurveSplitCommand : IClickCommand
+    public abstract class SplitCommand : IClickCommand
     {
-        private Curve3D _curve;
-        private SplitterPointComposite _splitter;
-        public PositionCurveSplitCommand(Curve3D curve,SplitterPointComposite splitter)
+        protected Curve3D _curve;
+        protected SplitterPointComposite _splitter;
+        public SplitCommand(Curve3D curve,SplitterPointComposite splitter)
         {
             this._curve = curve;
             this._splitter = splitter;
         }
-        public void ClickDown(Vector2 mousePos)
+        public virtual void ClickDown(Vector2 mousePos) { }
+        public virtual void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked) { }
+        public virtual void ClickUp(Vector2 mousePos) { }
+    }
+    public class PositionCurveSplitCommand : SplitCommand
+    {
+        public PositionCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
+        public override void ClickDown(Vector2 mousePos)
         {
             _curve.positionCurve.InsertSegmentAfterIndex(_splitter._splitPoint,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
             _curve.UICurve.Initialize();
-            //_curve.elementClickedDown
-        }
-
-        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData data)
-        {
-        }
-
-        public void ClickUp(Vector2 mousePos)
-        {
         }
     }
-    public class PositionCurveSplitCommandFactory : ISplitCommandFactory
+    public class SizeCurveSplitCommand : SplitCommand
     {
-        //factory should be a singleton
-        private static PositionCurveSplitCommandFactory _instance = null;
-        public static PositionCurveSplitCommandFactory Instance
+        public SizeCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
+        public override void ClickDown(Vector2 mousePos)
+        {
+            _curve.sizeDistanceSampler.InsertPointAtDistance(_splitter._splitPoint.distanceFromStartOfCurve,_curve.curveRadius);
+        }
+    }
+    public abstract class Singleton<T> where T : class, new()
+    {
+        private static T _instance = null;
+        public static T Instance
         {
             get
             {
                 if (_instance == null)
-                    _instance = new PositionCurveSplitCommandFactory();
+                    _instance = new T();
                 return _instance;
             }
         }
+    }
+    public class PositionCurveSplitCommandFactory : Singleton<PositionCurveSplitCommandFactory>, ISplitCommandFactory
+    {
         public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
         {
             return new PositionCurveSplitCommand(curve,owner);
+        }
+    }
+    public class SizeCurveSplitCommandFactory : Singleton<SizeCurveSplitCommandFactory>, ISplitCommandFactory
+    {
+        public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
+        {
+            return new SizeCurveSplitCommand(curve, owner);
         }
     }
 }

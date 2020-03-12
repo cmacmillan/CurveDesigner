@@ -13,6 +13,7 @@ public static class MyGUI
     #region 
     private const int WireCylinderLineCount = 4;
     private const int NumCylinderSamples = 10;//Constant here is probably fine
+    /*
     public static void EditWireCylinder(PointOnCurve startPoint,PointOnCurve endPoint,Vector2 startKeyframeXY,Vector2 endKeyframeXY,BezierCurve positionCurve,bool shouldDrawCenter,bool isLeft,List<PointInfo> points,Curve3D curve)
     {
         var linearSizeCurve = new LinearEvaluatable(startKeyframeXY,endKeyframeXY);
@@ -54,6 +55,7 @@ public static class MyGUI
             Handles.DrawPolyLine(linePoints.ToArray());
         }
     }
+    */
     #endregion
 
     #region gui tools

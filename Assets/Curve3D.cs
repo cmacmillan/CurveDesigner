@@ -61,11 +61,7 @@ public class Curve3D : MonoBehaviour
     public bool lockYAxis;
     public bool lockZAxis;
 
-
-    public AnimationCurve curveSizeAnimationCurve;
-    [SerializeField]
-    [HideInInspector]
-    private AnimationCurve _oldCurveSizeAnimationCurve = new AnimationCurve();
+    public FloatLinearValueDistanceSampler sizeDistanceSampler = new FloatLinearValueDistanceSampler();
 
     public static AnimationCurve CopyAnimationCurve(AnimationCurve curve)
     {
@@ -184,7 +180,7 @@ public class Curve3D : MonoBehaviour
             UICurve.Initialize();
         }
 
-        retr|=CheckAnimationCurve(curveSizeAnimationCurve,ref _oldCurveSizeAnimationCurve);
+        //retr|=CheckAnimationCurve(curveSizeAnimationCurve,ref _oldCurveSizeAnimationCurve);
 
         return retr;
     }

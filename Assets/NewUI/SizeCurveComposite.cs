@@ -7,12 +7,31 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    class SizeCurveComposite : IComposite
+    public class SizeCurveComposite : IComposite
     {
-        private AnimationCurve _curve;
-        public SizeCurveComposite(IComposite parent,AnimationCurve animCurve) : base(parent)
+        private LinearValueDistanceSampler<float> _distanceSampler;
+        private SplitterPointComposite _splitterPoint = null;
+        public SizeCurveComposite(IComposite parent,LinearValueDistanceSampler<float> distanceSampler,Curve3D curve) : base(parent)
         {
-            _curve = animCurve;
+            _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle,SizeCurveSplitCommandFactory.Instance, Curve3DSettings.Green);
+            _distanceSampler = distanceSampler;
+        }
+
+        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
+        {
+            _splitterPoint.FindSplitPoint();
+            base.Click(mousePosition, clickHits);
+        }
+
+        public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
+        {
+            _splitterPoint.FindSplitPoint();
+            base.Draw(drawList, clickedElement);
+        }
+
+        public override IEnumerable<IComposite> GetChildren()
+        {
+            yield return _splitterPoint;
         }
     }
 }
