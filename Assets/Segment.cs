@@ -47,7 +47,7 @@ public class Segment
     {
         samples.Add(new PointOnCurve(time, length, position, segmentIndex,tangent));
     }
-    public float GetTimeAtLength(float length)
+    public float GetTimeAtLength(float length,out PointOnCurve lowerPoint,out Vector3 lowerReference)
     {
         if (length < 0 || length > this.length)
             throw new System.ArgumentException("Length out of bounds");
@@ -61,10 +61,14 @@ public class Segment
             {
                 float fullPieceLength = currentPoint.distanceFromStartOfSegment - previousPoint.distanceFromStartOfSegment;
                 float partialPieceLength = length - previousPoint.distanceFromStartOfSegment;
+                lowerPoint = previousPoint;
+                lowerReference = lowerPoint.reference;
                 return Mathf.Lerp(previousPoint.time, currentPoint.time, partialPieceLength / fullPieceLength);
             }
             previousPoint = currentPoint;
         }
+        lowerPoint = samples[samples.Count - 1];
+        lowerReference = lowerPoint.reference;
         return samples[samples.Count - 1].time;
     }
     public float GetDistanceAtTime(float time)

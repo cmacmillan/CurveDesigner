@@ -5,13 +5,7 @@ using UnityEngine;
 
 public partial class BezierCurve
 {
-    private static Vector3 GetArbitraryOrthoVector(Vector3 vect)//I think this does the same thing
-    {
-        if (vect != Vector3.right)
-            return Vector3.Cross(Vector3.right, vect).normalized;
-        return Vector3.Cross(Vector3.up, vect).normalized;
-    }
-    private Vector3 NormalTangent(Vector3 forwardVector, Vector3 previous)//as this, but maybe this one is slower
+    private static Vector3 NormalTangent(Vector3 forwardVector, Vector3 previous)
     {
         return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
     }

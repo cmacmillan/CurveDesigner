@@ -141,26 +141,22 @@ public partial class BezierCurve
         return segmentLen;
     }
 
-    /// <summary>
-    /// points produced by this method don't have correct reference vectors
-    /// </summary>
-    /// <param name="distance"></param>
-    /// <returns></returns>
     public PointOnCurve GetPointAtDistance(float distance)
     {
         float remainingDistance= distance;
-        for (int i=0;i<NumSegments;i++)
+        for (int segmentIndex=0;segmentIndex<NumSegments;segmentIndex++)
         {
-            if (remainingDistance < segments[i].length)
+            if (remainingDistance < segments[segmentIndex].length)
             {
-                float time = segments[i].GetTimeAtLength(remainingDistance);
-                Vector3 position = GetSegmentPositionAtTime(i, time);
-                Vector3 tangent = GetSegmentTangentAtTime(i, time);
-                var retr = new PointOnCurve(time,remainingDistance,position,i,tangent);
-                retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (i - 1 >= 0 ? segments[i - 1].cummulativeLength : 0);
+                float time = segments[segmentIndex].GetTimeAtLength(remainingDistance,out PointOnCurve lowerPoint,out Vector3 lowerReference);
+                Vector3 position = GetSegmentPositionAtTime(segmentIndex, time);
+                Vector3 tangent = GetSegmentTangentAtTime(segmentIndex, time);
+                var retr = new PointOnCurve(time,remainingDistance,position,segmentIndex,tangent);
+                retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (segmentIndex - 1 >= 0 ? segments[segmentIndex - 1].cummulativeLength : 0);
+                retr.CalculateReference(lowerPoint,lowerReference);
                 return retr;
             }
-            remainingDistance-= segments[i].length;
+            remainingDistance-= segments[segmentIndex].length;
         }
         {
             int finalSegmentIndex = NumSegments - 1;
@@ -228,10 +224,15 @@ public partial class BezierCurve
     }
     #endregion
 
+
     #region length calculation
     public float GetLength()
     {
         return segments[NumSegments - 1].cummulativeLength;
+    }
+    public static Vector3 GetDefaultReferenceVector(Vector3 tangent)
+    {
+        return NormalTangent(tangent, Vector3.up);
     }
     /// <summary>
     /// must call after modifying points
@@ -246,29 +247,16 @@ public partial class BezierCurve
             segments.Add(new Segment(this, i,i==NumSegments-1));
         CalculateCummulativeLengths();
         ///Calculate reference vectors
-        //Double reflection method for calculating RMF
-        Vector3 DoubleReflectionRMF(Vector3 x0,Vector3 x1,Vector3 t0,Vector3 t1,Vector3 r0)
-        {
-            Vector3 v1 = x1 - x0;
-            float c1 = Vector3.Dot(v1, v1);
-            Vector3 rL = r0- (2.0f / c1) * Vector3.Dot(v1, r0) * v1;
-            Vector3 tL = t0 - (2.0f / c1) * Vector3.Dot(v1, t0) * v1;
-            Vector3 v2 = t1 - tL;
-            float c2 = Vector3.Dot(v2, v2);
-            return rL - (2.0f / c2) * Vector3.Dot(v2, rL) * v2;
-        }
-        Vector3 GetReference(PointOnCurve currentPoint, PointOnCurve previousPoint, Vector3 previousReference)
-        {
-            return DoubleReflectionRMF(previousPoint.position,currentPoint.position,previousPoint.tangent.normalized,currentPoint.tangent.normalized,previousReference);
-        }
         List<PointOnCurve> points = GetPoints();
         {
-            Vector3 referenceVector = NormalTangent(points[0].tangent, Vector3.up);
+            Vector3 referenceVector = GetDefaultReferenceVector(points[0].tangent);
             referenceVector = referenceVector.normalized;
             points[0].reference = referenceVector;
             for (int i = 1; i < points.Count; i++)
             {
-                referenceVector = GetReference(points[i], points[i - 1], referenceVector).normalized;
+                var point = points[i];
+                point.CalculateReference(points[i - 1], referenceVector);
+                referenceVector =  point.reference.normalized;
                 points[i].reference = referenceVector;
             }
         }
@@ -276,7 +264,9 @@ public partial class BezierCurve
         {
             //angle difference between the final reference vector, and the first reference vector projected backwards
             Vector3 finalReferenceVector = points[points.Count - 1].reference;
-            Vector3 firstReferenceVectorProjectedBackwards = GetReference(points[points.Count-1],points[0],points[0].reference);
+            var point = points[points.Count - 1];
+            point.CalculateReference(points[0], points[0].reference);
+            Vector3 firstReferenceVectorProjectedBackwards = point.reference;
             float angleDifference = Vector3.SignedAngle(finalReferenceVector,firstReferenceVectorProjectedBackwards,points[points.Count-1].tangent);
             for (int i = 1; i < points.Count; i++)
                 points[i].reference = Quaternion.AngleAxis((i/(float)(points.Count-1))*angleDifference,points[i].tangent) *points[i].reference;
