@@ -52,6 +52,7 @@ namespace Assets.NewUI
     public enum IDrawSortLayers
     {
         Points = 0,
+        Circles = 500,
         Lines = 1000,
         Curves = 2000,
     }
