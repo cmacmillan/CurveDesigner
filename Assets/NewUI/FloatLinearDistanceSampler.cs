@@ -11,8 +11,8 @@ namespace Assets.NewUI
     public class FloatDistanceValue
     {
         public float value;
-        [SerializeField]
-        private FloatLinearDistanceSampler _owner;
+        [NonSerialized]
+        public FloatLinearDistanceSampler _owner;
         [SerializeField]
         private float _distance;
         public FloatDistanceValue(float value, float distance, FloatLinearDistanceSampler owner)
@@ -37,7 +37,7 @@ namespace Assets.NewUI
         }
     }
     [System.Serializable]
-    public class FloatLinearDistanceSampler : IDistanceSampler<float>
+    public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver
     {
         [SerializeField]
         private List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
@@ -80,6 +80,17 @@ namespace Assets.NewUI
                 if (i.Distance <= distance)
                     retr.Add(i);
             return retr;
+        }
+
+        public void OnBeforeSerialize()
+        {
+            //Do nothing
+        }
+
+        public void OnAfterDeserialize()
+        {
+            foreach (var i in _points)
+                i._owner = this;
         }
     }
 }

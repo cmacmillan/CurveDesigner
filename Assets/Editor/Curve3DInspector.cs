@@ -102,7 +102,6 @@ public class Curve3DInspector : Editor
         Handles.EndGUI();
 
         curve3d.positionCurve.Recalculate();
-
         ///
         curve3d.positionCurve.owner = curve3d;
         Undo.RecordObject(curve3d, "curve");
