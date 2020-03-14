@@ -103,6 +103,7 @@ public class Curve3DInspector : Editor
 
         ///
         curve3d.positionCurve.owner = curve3d;
+        curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
         Undo.RecordObject(curve3d, "curve");
         UpdateMesh(curve3d);
         ClickHitData elementClickedDown = curve3d.elementClickedDown;

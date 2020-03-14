@@ -41,11 +41,8 @@ namespace Assets.NewUI
             _curve.positionCurve.Recalculate();
             if (_curve.drawNormals)
             {
-                float sampleDist = 10.0f;
-                List<PointOnCurve> points = new List<PointOnCurve>();
-                float length = _curve.positionCurve.GetLength();
-                for (float f = 0; f < length; f += sampleDist)
-                    points.Add(_curve.positionCurve.GetPointAtDistance(f));
+                float sampleDist = _curve.GetNormalDensityDistance();
+                List<PointOnCurve> points = _curve.positionCurve.GetPointsWithSpacing(sampleDist);
                 foreach (var i in points)
                 {
                     var reference = Quaternion.AngleAxis(_curve.curveRotation, i.tangent) * i.reference;

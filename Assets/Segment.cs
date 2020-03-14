@@ -18,16 +18,15 @@ public class Segment
     }
     public void Recalculate(BezierCurve owner,int segmentIndex, bool isLastSegment)
     {
-        bool shouldPerformOneLessSample = isLastSegment && owner.owner.isClosedLoop;//Here we create a gap so we can seamlessly attach points in a closed loop
-        //int sampleReduction = shouldPerformOneLessSample ?1:0;
+        bool shouldPerformOneLessSample = isLastSegment && owner.owner.isClosedLoop;
         samples.Clear();
         float len = 0;
         Vector3 previousPosition = owner.GetSegmentPositionAtTime(segmentIndex, 0.0f);
         AddLength(segmentIndex, 0.0f, 0, previousPosition,owner.GetSegmentTangentAtTime(segmentIndex,0.0f));
-        int numSamples = _numSegmentLengthSamples - 1;
-        for (int i = 1; i <= numSamples; i++)//we include the end point with <=
+        int numSamplesMinusOne = _numSegmentLengthSamples - 1;
+        for (int i = 1; i <= numSamplesMinusOne; i++)//we include the end point with <=
         {
-            var time = i / (float)numSamples;
+            var time = i / (float)numSamplesMinusOne;
             Vector3 currentPosition = owner.GetSegmentPositionAtTime(segmentIndex, time);
             var dist = Vector3.Distance(currentPosition, previousPosition);
             len += dist;

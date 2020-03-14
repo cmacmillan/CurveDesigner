@@ -9,12 +9,13 @@ public partial class BezierCurve
     [SerializeField]
     [HideInInspector]
     public List<PointGroup> PointGroups;
-    public int NumControlPoints { get { return owner.isClosedLoop?PointGroups.Count*3:PointGroups.Count*3-2; } }
-    public int NumSegments { get { return owner.isClosedLoop?PointGroups.Count:PointGroups.Count-1; } }
+    public int NumControlPoints { get { return isClosedLoop?PointGroups.Count*3:PointGroups.Count*3-2; } }
+    public int NumSegments { get { return isClosedLoop?PointGroups.Count:PointGroups.Count-1; } }
     public bool placeLockedPoints = true;
     public bool isCurveOutOfDate = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour;
     public Curve3D owner;
+    public bool isClosedLoop;
     [System.NonSerialized]
     [HideInInspector]
     public List<Segment> segments = null;
@@ -32,6 +33,7 @@ public partial class BezierCurve
         {
             PointGroups.Add(new PointGroup(i));
         }
+        this.isClosedLoop = curveToClone.isClosedLoop;
         this.segments = new List<Segment>(curveToClone.segments.Count);
         foreach (var i in curveToClone.segments)
             segments.Add(new Segment(i));
@@ -143,6 +145,7 @@ public partial class BezierCurve
 
     public PointOnCurve GetPointAtDistance(float distance)
     {
+        distance = Mathf.Clamp(distance, 0, GetLength());
         float remainingDistance= distance;
         for (int segmentIndex=0;segmentIndex<NumSegments;segmentIndex++)
         {
@@ -249,7 +252,7 @@ public partial class BezierCurve
             segments.Add(new Segment(this, i,i==NumSegments-1));
         CalculateCummulativeLengths();
         ///Calculate reference vectors
-        List<PointOnCurve> points = GetPoints();
+        List<PointOnCurve> points = GetSamplePoints();
         {
             Vector3 referenceVector = GetDefaultReferenceVector(points[0].tangent);
             referenceVector = referenceVector.normalized;
@@ -262,7 +265,7 @@ public partial class BezierCurve
                 points[i].reference = referenceVector;
             }
         }
-        if (owner.isClosedLoop)
+        if (isClosedLoop)
         {
             //angle difference between the final reference vector, and the first reference vector projected backwards
             Vector3 finalReferenceVector = points[points.Count - 1].reference;
@@ -274,24 +277,23 @@ public partial class BezierCurve
                 points[i].reference = Quaternion.AngleAxis((i/(float)(points.Count-1))*angleDifference,points[i].tangent) *points[i].reference;
         }
     }
-    public List<PointOnCurve> GetPoints()
+    public List<PointOnCurve> GetPointsWithSpacing(float spacing)
+    {
+        var retr = new List<PointOnCurve>();
+        float length = GetLength();
+        int numInLength = Mathf.CeilToInt(length / spacing);
+        int sampleReduction = isClosedLoop ?1:0;
+        for (int i=0;i<=numInLength-sampleReduction;i++)
+            retr.Add(GetPointAtDistance(i*length/numInLength));
+        return retr;
+    }
+
+    public List<PointOnCurve> GetSamplePoints()
     {
         List<PointOnCurve> retr = new List<PointOnCurve>();
-        //bool isFirstSegment = true;//We only want to add the first point of the first segment, every other segment should omit the first point
         foreach (var i in segments)
-        {
-            int c = 0;
             foreach (var j in i.samples)
-            {
                 retr.Add(j);
-                /*if (c > 0 || isFirstSegment)
-                {
-                    retr.Add(j);
-                    isFirstSegment = false;
-                }*/
-                c++;
-            }
-        }
         return retr;
     }
     private void CalculateCummulativeLengths()

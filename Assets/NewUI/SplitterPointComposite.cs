@@ -38,7 +38,7 @@ namespace Assets.NewUI
         }
         public void FindSplitPoint()
         {
-            var samples = _curve.positionCurve.GetPoints();
+            var samples = _curve.positionCurve.GetSamplePoints();
             foreach (var i in samples)
             {
                 i.position = _curve.transform.TransformPoint(i.position);

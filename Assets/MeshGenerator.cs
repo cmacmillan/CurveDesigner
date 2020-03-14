@@ -21,7 +21,7 @@ public static class MeshGenerator
 
     public static int RingPointCount = 8;
     public static float Radius=3.0f;
-    public static float VertexDensity=1.0f;
+    public static float VertexSampleDistance = 1.0f;
     public static float TubeArc = 360.0f;
     public static bool IsTubeArcConstant { get { return true; } }
     public static float Rotation = 0.0f;
@@ -40,7 +40,7 @@ public static class MeshGenerator
             MeshGenerator.curve = clonedCurve;
             MeshGenerator.RingPointCount = curve.ringPointCount;
             MeshGenerator.Radius = curve.curveRadius;
-            MeshGenerator.VertexDensity = curve.curveVertexDensity;
+            MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
             MeshGenerator.TubeArc = curve.arcOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
             MeshGenerator.sizeDistanceSampler = new FloatLinearDistanceSampler(curve.sizeDistanceSampler);
@@ -78,7 +78,7 @@ public static class MeshGenerator
         int numVerts;
         int numTris;
         bool shouldDrawConnectingFace;
-        var sampled = curve.GetPoints();
+        var sampled = curve.GetPointsWithSpacing(VertexSampleDistance);
         int numRings = sampled.Count - 1;
         int ActualRingPointCount = RingPointCount - (TubeArc == 360.0 ? 1 : 0);
         void DrawQuad(int side1Point1, int side1Point2, int side2Point1, int side2Point2)
@@ -178,6 +178,12 @@ public static class MeshGenerator
                     );
             }
         }
+        void CreateFlatEndPlates()
+        {
+            DrawQuad(1,0,2,3);
+            var end = numVerts - 4;
+            DrawQuad(end, end+1, end + 3, end + 2);
+        }
         void CreateTubeEndPlates()
         {
             //center point is average of ring
@@ -245,11 +251,12 @@ public static class MeshGenerator
                 break;
             case CurveType.Flat:
                 numVerts = 4 * sampled.Count;
-                numTris = 8*(sampled.Count - 1);
+                numTris = 8*(sampled.Count - 1)+4;
                 InitLists();
                 curve.CreateRectanglePointsAlongCurve(sampled, vertices, Rotation, IsClosedLoop, Thickness, sizeDistanceSampler,Radius);
                 shouldDrawConnectingFace = true;
                 TrianglifyLayer(true,4);
+                CreateFlatEndPlates();
                 break;
         }
         IsBuzy = false;

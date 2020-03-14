@@ -14,6 +14,17 @@ public class Curve3D : MonoBehaviour
 
     public bool drawNormals = true;
     public float normalsLength = 1.0f;
+    public float normalVertexDensity = 1.0f;
+
+    private const float _densityToDistanceDistanceMax = 100.0f;
+    private float DensityToDistance(float density)
+    {
+        if (density <= 0.0f)
+            return _densityToDistanceDistanceMax;
+        return Mathf.Min(_densityToDistanceDistanceMax, 10.0f / density);
+    }
+    public float GetNormalDensityDistance() { return DensityToDistance(normalVertexDensity); }
+    public float GetVertexDensityDistance() { return DensityToDistance(vertexDensity);}
 
     public bool isClosedLoop = false;
     [SerializeField]
@@ -102,11 +113,11 @@ public class Curve3D : MonoBehaviour
     }
 
 
-    [Min(.001f)]
-    public float curveVertexDensity=1.0f;
+    [Min(0)]
+    public float vertexDensity = 1.0f;
     [SerializeField]
     [HideInInspector]
-    private float oldCurveVertexDensity=-1;
+    private float oldVertexDensity = -1;
 
     [Min(0)]
     public float curveRadius =3.0f;
@@ -167,7 +178,7 @@ public class Curve3D : MonoBehaviour
         bool retr = false;
 
         retr|=CheckField(ringPointCount, ref oldRingPointCount);
-        retr|=CheckField(curveVertexDensity, ref oldCurveVertexDensity);
+        retr|=CheckField(vertexDensity, ref oldVertexDensity);
         retr|=CheckField(curveRadius, ref oldCurveRadius);
         retr|=CheckField(arcOfTube, ref oldArcOfTube);
         retr|=CheckField(curveRotation, ref oldCurveRotation);
