@@ -31,6 +31,11 @@ public class PointOnCurve : ISegmentTime
 
     public void CalculateReference(PointOnCurve previousPoint, Vector3 previousReference)
     {
+        if (previousPoint.position == this.position)
+        {
+            reference = previousReference;
+            return;
+        }
         Vector3 DoubleReflectionRMF(Vector3 x0, Vector3 x1, Vector3 t0, Vector3 t1, Vector3 r0)
         {
             Vector3 v1 = x1 - x0;

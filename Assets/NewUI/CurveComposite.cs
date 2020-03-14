@@ -41,7 +41,7 @@ namespace Assets.NewUI
             _curve.positionCurve.Recalculate();
             if (_curve.drawNormals)
             {
-                float sampleDist = 1.0f;
+                float sampleDist = 10.0f;
                 List<PointOnCurve> points = new List<PointOnCurve>();
                 float length = _curve.positionCurve.GetLength();
                 for (float f = 0; f < length; f += sampleDist)

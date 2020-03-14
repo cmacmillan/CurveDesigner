@@ -165,6 +165,8 @@ public partial class BezierCurve
             Vector3 tangent = GetSegmentTangentAtTime(finalSegmentIndex, time);
             var retr = new PointOnCurve(time, segments[finalSegmentIndex].length, position, finalSegmentIndex,tangent);
             retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (finalSegmentIndex - 1 >= 0 ? segments[finalSegmentIndex - 1].cummulativeLength : 0);
+            var finalSegmentSamples = segments[finalSegmentIndex].samples;
+            retr.reference = finalSegmentSamples[finalSegmentSamples.Count - 1].reference;
             return retr;
         }
     }
@@ -275,17 +277,18 @@ public partial class BezierCurve
     public List<PointOnCurve> GetPoints()
     {
         List<PointOnCurve> retr = new List<PointOnCurve>();
-        bool isFirstSegment = true;//We only want to add the first point of the first segment, every other segment should omit the first point
+        //bool isFirstSegment = true;//We only want to add the first point of the first segment, every other segment should omit the first point
         foreach (var i in segments)
         {
             int c = 0;
             foreach (var j in i.samples)
             {
-                if (c > 0 || isFirstSegment)
+                retr.Add(j);
+                /*if (c > 0 || isFirstSegment)
                 {
                     retr.Add(j);
                     isFirstSegment = false;
-                }
+                }*/
                 c++;
             }
         }
