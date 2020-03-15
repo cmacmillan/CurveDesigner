@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class LinePointPositionModifyClickCommand : IClickCommand
+    public class LinePointPositionClickCommand : IClickCommand
     {
         private ILinePoint _point;
         private Curve3D _curve;
-        public LinePointPositionModifyClickCommand(ILinePoint point,Curve3D curve)
+        public LinePointPositionClickCommand(ILinePoint point,Curve3D curve)
         {
             _point = point;
             _curve = curve;

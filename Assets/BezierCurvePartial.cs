@@ -25,7 +25,7 @@ public partial class BezierCurve
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
                 Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
-                listToAppend.Add(currentPoint.position + rotatedVect * size);
+                listToAppend.Add(currentPoint.GetRingPoint(theta,size));
             }
         }
     }

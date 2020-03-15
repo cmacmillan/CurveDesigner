@@ -29,6 +29,12 @@ public class PointOnCurve : ISegmentTime
     public Vector3 tangent;
     public Vector3 reference;
 
+    public Vector3 GetRingPoint(float angle, float length)
+    {
+        Vector3 rotatedVect = Quaternion.AngleAxis(angle, tangent) * reference;
+        return position + rotatedVect * length;
+    }
+
     public void CalculateReference(PointOnCurve previousPoint, Vector3 previousReference)
     {
         if (previousPoint.position == this.position)
