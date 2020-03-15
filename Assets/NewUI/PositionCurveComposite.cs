@@ -19,18 +19,6 @@ namespace Assets.NewUI
                 pointGroups.Add(new PositionPointGroupComposite(this,group,curve));
         }
 
-        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
-        {
-            _splitterPoint.FindSplitPoint();
-            base.Click(mousePosition, clickHits);
-        }
-
-        public override void Draw(List<IDraw> drawList,ClickHitData clicked)
-        {
-            _splitterPoint.FindSplitPoint();
-            base.Draw(drawList,clicked);
-        }
-
         public override IEnumerable<IComposite> GetChildren()
         {
             yield return _splitterPoint;

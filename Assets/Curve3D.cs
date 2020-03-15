@@ -10,7 +10,7 @@ public class Curve3D : MonoBehaviour
     [NonSerialized]
     public ClickHitData elementClickedDown;
     [NonSerialized]
-    public CurveComposite UICurve=null;
+    public UICurve UICurve=null;
 
     public bool drawNormals = true;
     public float normalsLength = 1.0f;

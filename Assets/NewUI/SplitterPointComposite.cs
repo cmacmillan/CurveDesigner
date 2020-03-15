@@ -11,7 +11,6 @@ namespace Assets.NewUI
     {
         private PointComposite _point;
         private Curve3D _curve;
-        public PointOnCurve _splitPoint;
         private const float _maxSplitClickDistance = 10;
         public SplitterPointComposite(IComposite parent,Curve3D _curve,PointTextureType textureType,ISplitCommandFactory commandFactory,Color color) : base (parent)
         {
@@ -36,24 +35,6 @@ namespace Assets.NewUI
                 i.isLowPriority = true;
             clickHits.AddRange(pointHits);
         }
-        public void FindSplitPoint()
-        {
-            var samples = _curve.positionCurve.GetSamplePoints();
-            foreach (var i in samples)
-            {
-                i.position = _curve.transform.TransformPoint(i.position);
-            }
-            int segmentIndex;
-            float time;
-            UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
-            foreach (var i in samples)
-            {
-                i.position = _curve.transform.InverseTransformPoint(i.position);
-            }
-            float distance = _curve.positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);
-            _splitPoint = _curve.positionCurve.GetPointAtDistance(distance);
-        }
-
-        public Vector3 Position { get { return _curve.transform.TransformPoint(_splitPoint.position); } set => throw new NotImplementedException(); }
+        public Vector3 Position { get { return _curve.transform.TransformPoint(_curve.UICurve.pointClosestToCursor.position); } set => throw new NotImplementedException(); }
     }
 }

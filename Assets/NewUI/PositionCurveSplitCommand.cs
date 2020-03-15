@@ -25,7 +25,7 @@ namespace Assets.NewUI
         public PositionCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
         public override void ClickDown(Vector2 mousePos)
         {
-            _curve.positionCurve.InsertSegmentAfterIndex(_splitter._splitPoint,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
+            _curve.positionCurve.InsertSegmentAfterIndex(_curve.UICurve.pointClosestToCursor,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
         }
     }
@@ -34,7 +34,7 @@ namespace Assets.NewUI
         public SizeCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
         public override void ClickDown(Vector2 mousePos)
         {
-            _curve.sizeDistanceSampler.InsertPointAtDistance(_splitter._splitPoint.distanceFromStartOfCurve,_curve.curveRadius);
+            _curve.sizeDistanceSampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.curveRadius);
             _curve.UICurve.Initialize();//See above
         }
     }

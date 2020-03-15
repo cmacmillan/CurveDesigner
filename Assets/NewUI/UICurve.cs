@@ -8,13 +8,14 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class CurveComposite : IComposite
+    public class UICurve : IComposite
     {
         private PositionCurveComposite _positionCurve;
         private SizeCurveComposite _sizeCurve;
         private Curve3D _curve;
+        public PointOnCurve pointClosestToCursor;
 
-        public CurveComposite(IComposite parent,Curve3D curve) : base(parent)
+        public UICurve(IComposite parent,Curve3D curve) : base(parent)
         {
             Undo.undoRedoPerformed -= Initialize;
             Undo.undoRedoPerformed += Initialize;
@@ -30,15 +31,31 @@ namespace Assets.NewUI
             _curve.positionCurve.Recalculate();
         }
 
+        public void FindPointClosestToCursor()
+        {
+            var samples = _curve.positionCurve.GetSamplePoints();
+            foreach (var i in samples)
+                i.position = _curve.transform.TransformPoint(i.position);
+            int segmentIndex;
+            float time;
+            UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
+            foreach (var i in samples)
+                i.position = _curve.transform.InverseTransformPoint(i.position);
+            float distance = _curve.positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);
+            pointClosestToCursor = _curve.positionCurve.GetPointAtDistance(distance);
+        }
+
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
             _curve.positionCurve.Recalculate();
+            FindPointClosestToCursor();
             base.Click(mousePosition, clickHits);
         }
 
         public override void Draw(List<IDraw> drawList,ClickHitData clickedElement)
         {
             _curve.positionCurve.Recalculate();
+            FindPointClosestToCursor();
             if (_curve.drawNormals)
             {
                 float sampleDist = _curve.GetNormalDensityDistance();

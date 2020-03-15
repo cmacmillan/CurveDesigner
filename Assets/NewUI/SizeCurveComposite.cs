@@ -11,26 +11,14 @@ namespace Assets.NewUI
     {
         private FloatLinearDistanceSampler _distanceSampler;
         private SplitterPointComposite _splitterPoint = null;
-        private List<CircleSizeComposite> points = new List<CircleSizeComposite>();
+        private List<SizeCircleComposite> points = new List<SizeCircleComposite>();
         public SizeCurveComposite(IComposite parent,FloatLinearDistanceSampler distanceSampler,Curve3D curve) : base(parent)
         {
             _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle,SizeCurveSplitCommandFactory.Instance, Curve3DSettings.Green);
             _distanceSampler = distanceSampler;
             curve.positionCurve.Recalculate();
             foreach (var i in curve.sizeDistanceSampler.GetPointsBelowDistance(curve.positionCurve.GetLength()))
-                points.Add(new CircleSizeComposite(this,i,curve.positionCurve));
-        }
-
-        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
-        {
-            _splitterPoint.FindSplitPoint();
-            base.Click(mousePosition, clickHits);
-        }
-
-        public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
-        {
-            _splitterPoint.FindSplitPoint();
-            base.Draw(drawList, clickedElement);
+                points.Add(new SizeCircleComposite(this,i,curve.positionCurve,curve));
         }
 
         public override IEnumerable<IComposite> GetChildren()

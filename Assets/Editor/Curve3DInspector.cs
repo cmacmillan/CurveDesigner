@@ -112,7 +112,7 @@ public class Curve3DInspector : Editor
         Curve3DSettings.diamondTexture = curve3d.diamondIcon;
         Curve3DSettings.defaultLineTexture = curve3d.lineTex;
         if (curve3d.UICurve==null)
-            curve3d.UICurve = new CurveComposite(null,curve3d);//prob shouldn't do this every frame
+            curve3d.UICurve = new UICurve(null,curve3d);//prob shouldn't do this every frame
         var curveEditor = curve3d.UICurve;
         var MousePos = Event.current.mousePosition;
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
