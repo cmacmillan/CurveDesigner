@@ -63,7 +63,7 @@ public class Curve3D : MonoBehaviour
         if (!isInitialized)
         {
             isInitialized = true;
-            positionCurve.Initialize();
+            ResetCurve();
         }
     }
 

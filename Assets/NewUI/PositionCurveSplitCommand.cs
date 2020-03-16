@@ -34,7 +34,7 @@ namespace Assets.NewUI
         public SizeCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
         public override void ClickDown(Vector2 mousePos)
         {
-            _curve.sizeDistanceSampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.curveRadius);
+            _curve.sizeDistanceSampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.curveRadius);
             _curve.UICurve.Initialize();//See above
         }
     }

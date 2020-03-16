@@ -226,7 +226,7 @@ public static class MeshGenerator
                 numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                 shouldDrawConnectingFace = true;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, Rotation, true,IsClosedLoop,Radius);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, Rotation, true,IsClosedLoop,Radius,curve.GetLength());
                 TrianglifyLayer(true,ActualRingPointCount);
                 if (!IsClosedLoop)
                     CreateTubeEndPlates();
@@ -240,8 +240,8 @@ public static class MeshGenerator
                 else
                     shouldDrawConnectingFace = false;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, Rotation, true,IsClosedLoop,Radius);
-                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, Rotation, false,IsClosedLoop,Radius);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, Rotation, true,IsClosedLoop,Radius,curve.GetLength());
+                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, Rotation, false,IsClosedLoop,Radius,curve.GetLength());
                 TrianglifyLayer(true,ActualRingPointCount);
                 TrianglifyLayer(false,ActualRingPointCount);
                 if (!is360degree)
@@ -253,7 +253,7 @@ public static class MeshGenerator
                 numVerts = 4 * sampled.Count;
                 numTris = 8*(sampled.Count - 1)+4;
                 InitLists();
-                curve.CreateRectanglePointsAlongCurve(sampled, vertices, Rotation, IsClosedLoop, Thickness, sizeDistanceSampler,Radius);
+                curve.CreateRectanglePointsAlongCurve(sampled, vertices, Rotation, IsClosedLoop, Thickness, sizeDistanceSampler,Radius,curve.GetLength());
                 shouldDrawConnectingFace = true;
                 TrianglifyLayer(true,4);
                 CreateFlatEndPlates();

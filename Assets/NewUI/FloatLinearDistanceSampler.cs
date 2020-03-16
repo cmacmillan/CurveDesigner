@@ -41,18 +41,29 @@ namespace Assets.NewUI
     {
         [SerializeField]
         private List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
-        public FloatLinearDistanceSampler() { }
+        public FloatLinearDistanceSampler() {
+        }
         public FloatLinearDistanceSampler(FloatLinearDistanceSampler objToClone)
         {
             foreach (var i in objToClone._points)
                 _points.Add(new FloatDistanceValue(i,this));
         }
-        public float GetValueAtDistance(float distance,float? defaultValue=null)
+        public float GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,float? defaultValue=null)
         {
             if (_points.Count == 0)
                 return (defaultValue.HasValue?defaultValue.Value:default);
+            var firstPoint = _points[0];
+            var lastPoint = _points[_points.Count - 1];
+            var lastDistance = curveLength - lastPoint.Distance;
+            float endSegmentDistance = firstPoint.Distance + lastDistance;
             if (_points[0].Distance >= distance)
-                return _points[0].value;
+                if (isClosedLoop)
+                {
+                    float lerpVal = (lastDistance+distance)/endSegmentDistance;
+                    return Mathf.Lerp(lastPoint.value,firstPoint.value,lerpVal);
+                }
+                else
+                    return _points[0].value;
             var previous = _points[0];
             for (int i = 1; i < _points.Count; i++)
             {
@@ -61,11 +72,17 @@ namespace Assets.NewUI
                     return Mathf.Lerp(previous.value,current.value,(distance-previous.Distance)/(current.Distance-previous.Distance));
                 previous = current;
             }
-            return _points[_points.Count - 1].value;
+            if (isClosedLoop)
+            {
+                float lerpVal = (distance-lastPoint.Distance) / endSegmentDistance;
+                return Mathf.Lerp(lastPoint.value,firstPoint.value,lerpVal);
+            }
+            else
+                return _points[_points.Count - 1].value;
         }
-        public void InsertPointAtDistance(float distance,float? defaultValue=null)
+        public void InsertPointAtDistance(float distance,bool isClosedLoop,float curveLength,float? defaultValue=null)
         {
-            var value = GetValueAtDistance(distance, defaultValue);
+            var value = GetValueAtDistance(distance, isClosedLoop, curveLength,defaultValue);
             _points.Add(new FloatDistanceValue(value, distance, this));
             SortPoints();
         }
