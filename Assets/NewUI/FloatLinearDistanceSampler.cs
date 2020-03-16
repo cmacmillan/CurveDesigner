@@ -51,7 +51,7 @@ namespace Assets.NewUI
         {
             if (_points.Count == 0)
                 return (defaultValue.HasValue?defaultValue.Value:default);
-            if (_points[0].Distance <= distance)
+            if (_points[0].Distance >= distance)
                 return _points[0].value;
             var previous = _points[0];
             for (int i = 1; i < _points.Count; i++)
@@ -71,7 +71,7 @@ namespace Assets.NewUI
         }
         public void SortPoints()
         {
-            _points.OrderBy((a) => a.Distance);
+            _points = _points.OrderBy((a) => a.Distance).ToList();
         }
         public List<FloatDistanceValue> GetPointsBelowDistance(float distance)
         {

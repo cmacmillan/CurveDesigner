@@ -8,9 +8,10 @@ namespace Assets.NewUI
 {
     public enum DrawMode
     {
-        normal=0,
-        hovered=1,
-        clicked=2,
+        unknown=0,
+        normal=1,
+        hovered=2,
+        clicked=3,
     }
     public static class DrawModeExtensionMethods
     {

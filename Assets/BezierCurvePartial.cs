@@ -20,7 +20,7 @@ public partial class BezierCurve
         {
             PointOnCurve currentPoint = points[i];
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
-            var size = Mathf.Max(0, distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,TubeDefaultSize) + offset)/2.0f;
+            var size = Mathf.Max(0, distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,TubeDefaultSize) + offset);
             for (int j = 0; j < RingPointCount; j++)
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
@@ -38,7 +38,7 @@ public partial class BezierCurve
             var up = Quaternion.AngleAxis(Rotation,currentPoint.tangent)*currentPoint.reference.normalized;
             var right = Vector3.Cross(up, currentPoint.tangent).normalized;
             var scaledUp = up * thickness / 2.0f;
-            var scaledRight = right*Mathf.Max(0,distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,TubeDefaultSize))/2.0f;
+            var scaledRight = right*Mathf.Max(0,distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,TubeDefaultSize));
             listToAppend.Add(center+scaledUp+scaledRight);
             listToAppend.Add(center+scaledUp-scaledRight);
             listToAppend.Add(center-scaledUp-scaledRight);
