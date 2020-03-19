@@ -26,8 +26,10 @@ namespace Assets.NewUI
             this.value = objToClone.value;
             this._distance = objToClone._distance;
             _owner = newOwner;
-        } 
-        public float Distance {
+        }
+
+        public float DistanceAlongCurve
+        {
             get { return _distance; }
             set
             {
@@ -35,8 +37,6 @@ namespace Assets.NewUI
                 _owner.SortPoints();
             }
         }
-
-        public float DistanceAlongCurve { get { return _distance; } set { _distance = value; } }
     }
     [System.Serializable]
     public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver
@@ -56,9 +56,9 @@ namespace Assets.NewUI
                 return (defaultValue.HasValue?defaultValue.Value:default);
             var firstPoint = _points[0];
             var lastPoint = _points[_points.Count - 1];
-            var lastDistance = curveLength - lastPoint.Distance;
-            float endSegmentDistance = firstPoint.Distance + lastDistance;
-            if (_points[0].Distance >= distance)
+            var lastDistance = curveLength - lastPoint.DistanceAlongCurve;
+            float endSegmentDistance = firstPoint.DistanceAlongCurve+ lastDistance;
+            if (_points[0].DistanceAlongCurve>= distance)
                 if (isClosedLoop)
                 {
                     float lerpVal = (lastDistance+distance)/endSegmentDistance;
@@ -70,13 +70,13 @@ namespace Assets.NewUI
             for (int i = 1; i < _points.Count; i++)
             {
                 var current = _points[i];
-                if (current.Distance >= distance)
-                    return Mathf.Lerp(previous.value,current.value,(distance-previous.Distance)/(current.Distance-previous.Distance));
+                if (current.DistanceAlongCurve>= distance)
+                    return Mathf.Lerp(previous.value,current.value,(distance-previous.DistanceAlongCurve)/(current.DistanceAlongCurve-previous.DistanceAlongCurve));
                 previous = current;
             }
             if (isClosedLoop)
             {
-                float lerpVal = (distance-lastPoint.Distance) / endSegmentDistance;
+                float lerpVal = (distance-lastPoint.DistanceAlongCurve) / endSegmentDistance;
                 return Mathf.Lerp(lastPoint.value,firstPoint.value,lerpVal);
             }
             else
@@ -90,7 +90,7 @@ namespace Assets.NewUI
         }
         public void SortPoints()
         {
-            _points = _points.OrderBy((a) => a.Distance).ToList();
+            _points = _points.OrderBy((a) => a.DistanceAlongCurve).ToList();
         }
         public List<FloatDistanceValue> GetPoints(Curve3D curve)
         {
@@ -100,7 +100,7 @@ namespace Assets.NewUI
         {
             List<FloatDistanceValue> retr = new List<FloatDistanceValue>();
             foreach (var i in _points)
-                if (i.Distance <= distance)
+                if (i.DistanceAlongCurve <= distance)
                     retr.Add(i);
             return retr;
         }
