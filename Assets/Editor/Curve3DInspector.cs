@@ -103,8 +103,11 @@ public class Curve3DInspector : Editor
         ///
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
-        curve3d.positionCurve.Recalculate();
+        curve3d.positionCurve.Recalculate(); 
         curve3d.CacheAverageSize();
+        var rotationPoints = curve3d.rotationDistanceSampler.GetPoints(curve3d);
+        if (curve3d.previousRotations.Count != rotationPoints.Count)
+            curve3d.CopyRotations();
         Undo.RecordObject(curve3d, "curve");
         UpdateMesh(curve3d);
         ClickHitData elementClickedDown = curve3d.elementClickedDown;
@@ -164,6 +167,7 @@ public class Curve3DInspector : Editor
                 HandleUtility.Repaint();
                 break;
         }
+        curve3d.CopyRotations();
     }
     private void UpdateMesh(Curve3D curve)
     {

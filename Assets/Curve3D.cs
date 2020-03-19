@@ -31,6 +31,15 @@ public class Curve3D : MonoBehaviour
     public float GetNormalDensityDistance() { return VisualNormalsLength()*normalGapSizeMultiplier; }
 
     [HideInInspector]
+    public List<float> previousRotations = new List<float>();
+    public void CopyRotations()
+    {
+        previousRotations.Clear();
+        foreach (var i in rotationDistanceSampler.GetPoints(this))
+            previousRotations.Add(i.value);
+    }
+
+    [HideInInspector]
     public float averageSize;
     public void CacheAverageSize()
     {

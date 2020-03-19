@@ -18,7 +18,7 @@ namespace Assets.NewUI
             var blueColor = new Color(0,.8f,1.0f);
             _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle, RotationCurveSplitCommandFactory.Instance, blueColor);
             foreach (var i in distanceSampler.GetPoints(curve))
-                _points.Add(new EditRotationComposite(this,i,curve,blueColor));
+                _points.Add(new EditRotationComposite(this,i,curve,distanceSampler,blueColor));
         }
         public override IEnumerable<IComposite> GetChildren()
         {

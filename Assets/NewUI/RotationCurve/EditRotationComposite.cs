@@ -12,14 +12,14 @@ namespace Assets.NewUI
         public FloatDistanceValue _point;
         public PointAlongCurveComposite _centerPoint;
         private PointComposite _rotationHandlePoint;
-        private Curve3D _curve;
+        public Curve3D _curve;
 
-        public EditRotationComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,Color color): base(parent)
+        public EditRotationComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,FloatLinearDistanceSampler sampler,Color color): base(parent)
         {
             _point = value;
             _curve = curve;
             _centerPoint = new PointAlongCurveComposite(this,value,curve,color);
-            _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this), color);
+            _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color);
         }
 
         public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
@@ -36,25 +36,49 @@ namespace Assets.NewUI
             yield return _rotationHandlePoint;
         }
 
+        public Vector3 GetVectorByAngle(float angle, out PointOnCurve point)
+        {
+            point = _curve.positionCurve.GetPointAtDistance(_point.DistanceAlongCurve);
+            return Quaternion.AngleAxis(angle, point.tangent) * (point.reference.normalized);
+        }
+
         public Vector3 Position {
             get
             {
-                var point = _curve.positionCurve.GetPointAtDistance(_point.DistanceAlongCurve);
-                return Quaternion.AngleAxis(_point.value,point.tangent)*(point.reference.normalized*_curve.averageSize)+point.position;
+                return GetVectorByAngle(_point.value,out PointOnCurve point)*_curve.averageSize+point.position;
             }
         }
     }
     public class EditRotationClickCommand : IClickCommand
     {
         private EditRotationComposite _owner;
-        public EditRotationClickCommand(EditRotationComposite owner)
+        private FloatDistanceValue _value;
+        private FloatLinearDistanceSampler _sampler;
+        private Curve3D _curve;
+        private int Index {
+            get
+            {
+                var points = _sampler.GetPoints(_curve);
+                for (int i = 0; i < points.Count; i++)
+                    if (points[i] == _value)
+                        return i;
+                throw new KeyNotFoundException();
+            }
+        }
+        public EditRotationClickCommand(EditRotationComposite owner,FloatDistanceValue value,FloatLinearDistanceSampler sampler,Curve3D curve)
         {
             _owner = owner;
+            _value = value;
+            _sampler = sampler;
+            _curve = curve;
         }
         private void Set()
         {
             if (CirclePlaneTools.GetCursorPointOnPlane(_owner._centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference))
-                _owner._point.value = Vector3.SignedAngle(centerReference,cursorHitPosition-centerPoint,centerForward);
+            {
+                var previousVector = _owner.GetVectorByAngle(_owner._curve.previousRotations[Index],out PointOnCurve point);
+                _owner._point.value += Vector3.SignedAngle(previousVector,cursorHitPosition-centerPoint,centerForward);
+            }
         }
         public void ClickDown(Vector2 mousePos)
         {
