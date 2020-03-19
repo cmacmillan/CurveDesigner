@@ -13,10 +13,6 @@ public partial class BezierCurve
     {
         return (x % m + m) % m;
     }
-    public static float mod(float x, float m)
-    {
-        return (x % m + m) % m;
-    }
     public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IDistanceSampler<float> sizeSampler, float TubeArc, float TubeThickness, int RingPointCount, IDistanceSampler<float> rotationSampler, bool isExterior, bool isClosedLoop,float DefaultSize, float DefaultRotation, float curveLength)
     {
         float distanceFromFull = 360.0f - TubeArc;
@@ -25,7 +21,7 @@ public partial class BezierCurve
             PointOnCurve currentPoint = points[i];
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
             var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,DefaultSize) + offset);
-            var rotation = mod(rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,DefaultRotation), 360);
+            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, DefaultRotation);
             for (int j = 0; j < RingPointCount; j++)
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + rotation;
@@ -40,7 +36,7 @@ public partial class BezierCurve
         {
             PointOnCurve currentPoint = points[i];
             var center = currentPoint.position;
-            var rotation = mod(rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,DefaultRotation), 360);
+            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, DefaultRotation);
             var up = Quaternion.AngleAxis(rotation,currentPoint.tangent)*currentPoint.reference.normalized;
             var right = Vector3.Cross(up, currentPoint.tangent).normalized;
             var scaledUp = up * thickness / 2.0f;

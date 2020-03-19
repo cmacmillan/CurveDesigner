@@ -66,7 +66,7 @@ namespace Assets.NewUI
                 var curveLength = _curve.positionCurve.GetLength();
                 foreach (var i in points)
                 {
-                    var rotation = BezierCurve.mod(_curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop,curveLength,_curve.curveRotation),360.0f);
+                    var rotation = _curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength, _curve.curveRotation);
                     var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
                     drawList.Add(new LineDraw(this, i.position, reference * visualNormalLength+ i.position, Color.yellow));
                 }
