@@ -9,7 +9,7 @@ namespace Assets.NewUI
 {
     public interface IPositionProvider
     {
-        Vector3 Position { get; set; }
+        Vector3 Position { get; }
     }
     public class PointGroupPointPositionProvider : IPositionProvider
     {
@@ -24,7 +24,6 @@ namespace Assets.NewUI
         }
         public Vector3 Position {
             get { return curve.transform.TransformPoint(_group.GetWorldPositionByIndex(_type)); }
-            set { _group.SetWorldPositionByIndex(_type,curve.transform.InverseTransformPoint(value)); }
         }
     }
 }

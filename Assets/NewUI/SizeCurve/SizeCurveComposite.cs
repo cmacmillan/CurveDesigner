@@ -17,7 +17,7 @@ namespace Assets.NewUI
             _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle,SizeCurveSplitCommandFactory.Instance, Curve3DSettings.Green);
             _distanceSampler = distanceSampler;
             curve.positionCurve.Recalculate();
-            foreach (var i in curve.sizeDistanceSampler.GetPointsBelowDistance(curve.positionCurve.GetLength()))
+            foreach (var i in distanceSampler.GetPoints(curve))
                 points.Add(new SizeCircleComposite(this,i,curve.positionCurve,curve));
         }
 

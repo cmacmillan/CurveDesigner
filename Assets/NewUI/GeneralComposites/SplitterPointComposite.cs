@@ -35,6 +35,6 @@ namespace Assets.NewUI
                 i.isLowPriority = true;
             clickHits.AddRange(pointHits);
         }
-        public Vector3 Position { get { return _curve.transform.TransformPoint(_curve.UICurve.pointClosestToCursor.position); } set => throw new NotImplementedException(); }
+        public Vector3 Position { get { return _curve.transform.TransformPoint(_curve.UICurve.pointClosestToCursor.position); } }
     }
 }

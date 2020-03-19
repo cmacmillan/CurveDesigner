@@ -12,6 +12,7 @@ namespace Assets.NewUI
     {
         private PositionCurveComposite _positionCurve;
         private SizeCurveComposite _sizeCurve;
+        private RotationCurveComposite _rotationCurve;
         private Curve3D _curve;
         public PointOnCurve pointClosestToCursor;
 
@@ -27,6 +28,7 @@ namespace Assets.NewUI
         {
             _positionCurve = new PositionCurveComposite(this,_curve);
             _sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve);
+            _rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve);
             _curve.lastMeshUpdateStartTime = DateTime.Now;
             _curve.positionCurve.Recalculate();
         }
@@ -79,10 +81,18 @@ namespace Assets.NewUI
 
         public override IEnumerable<IComposite> GetChildren()
         {
-            if (_curve.editMode == EditMode.PositionCurve)
-                yield return _positionCurve;
-            else if (_curve.editMode == EditMode.Size)
-                yield return _sizeCurve;
+            switch (_curve.editMode)
+            {
+                case EditMode.PositionCurve:
+                    yield return _positionCurve;
+                    break;
+                case EditMode.Size:
+                    yield return _sizeCurve;
+                    break;
+                case EditMode.Rotation:
+                    yield return _rotationCurve;
+                    break;
+            }
         }
     }
 }

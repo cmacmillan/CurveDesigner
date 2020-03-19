@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Assets.NewUI
 {
     [System.Serializable]
-    public class FloatDistanceValue
+    public class FloatDistanceValue : ILinePoint
     {
         public float value;
         [NonSerialized]
@@ -35,6 +35,8 @@ namespace Assets.NewUI
                 _owner.SortPoints();
             }
         }
+
+        public float DistanceAlongCurve { get { return _distance; } set { _distance = value; } }
     }
     [System.Serializable]
     public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver
@@ -90,7 +92,11 @@ namespace Assets.NewUI
         {
             _points = _points.OrderBy((a) => a.Distance).ToList();
         }
-        public List<FloatDistanceValue> GetPointsBelowDistance(float distance)
+        public List<FloatDistanceValue> GetPoints(Curve3D curve)
+        {
+            return GetPointsBelowDistance(curve.positionCurve.GetLength());
+        }
+        private List<FloatDistanceValue> GetPointsBelowDistance(float distance)
         {
             List<FloatDistanceValue> retr = new List<FloatDistanceValue>();
             foreach (var i in _points)

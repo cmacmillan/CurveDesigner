@@ -73,6 +73,7 @@ public class Curve3D : MonoBehaviour
     public bool lockZAxis;
 
     public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler();
+    public FloatLinearDistanceSampler rotationDistanceSampler = new FloatLinearDistanceSampler();
 
     public static AnimationCurve CopyAnimationCurve(AnimationCurve curve)
     {
