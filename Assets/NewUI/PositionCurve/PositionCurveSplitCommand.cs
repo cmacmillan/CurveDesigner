@@ -29,12 +29,15 @@ namespace Assets.NewUI
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
         }
     }
-    public class SizeCurveSplitCommand : SplitCommand
+    public class ValueAlongCurveSplitCommand: SplitCommand
     {
-        public SizeCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
+        private FloatLinearDistanceSampler _sampler;
+        public ValueAlongCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter,FloatLinearDistanceSampler sampler) : base(curve, splitter) {
+            _sampler = sampler;
+        }
         public override void ClickDown(Vector2 mousePos)
         {
-            _curve.sizeDistanceSampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.curveRadius);
+            _sampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.curveRadius);
             _curve.UICurve.Initialize();//See above
         }
     }
@@ -62,7 +65,14 @@ namespace Assets.NewUI
     {
         public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
         {
-            return new SizeCurveSplitCommand(curve, owner);
+            return new ValueAlongCurveSplitCommand(curve, owner,curve.sizeDistanceSampler);
+        }
+    }
+    public class RotationCurveSplitCommandFactory: Singleton<RotationCurveSplitCommandFactory>, ISplitCommandFactory
+    {
+        public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
+        {
+            return new ValueAlongCurveSplitCommand(curve, owner,curve.rotationDistanceSampler);
         }
     }
 }

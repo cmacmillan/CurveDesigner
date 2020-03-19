@@ -11,15 +11,18 @@ namespace Assets.NewUI
     {
         private FloatLinearDistanceSampler _distanceSampler;
         private List<EditRotationComposite> _points = new List<EditRotationComposite>();
+        private SplitterPointComposite _splitterPoint = null;
         public RotationCurveComposite(IComposite parent,FloatLinearDistanceSampler distanceSampler,Curve3D curve) : base(parent)
         {
             _distanceSampler = distanceSampler;
             var blueColor = new Color(0,.8f,1.0f);
+            _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle, RotationCurveSplitCommandFactory.Instance, blueColor);
             foreach (var i in distanceSampler.GetPoints(curve))
-                _points.Add(new EditRotationComposite(this));
+                _points.Add(new EditRotationComposite(this,i,curve,blueColor));
         }
         public override IEnumerable<IComposite> GetChildren()
         {
+            yield return _splitterPoint;
             foreach (var i in _points)
                 yield return i;
         }

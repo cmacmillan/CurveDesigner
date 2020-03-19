@@ -12,10 +12,6 @@ public class Curve3D : MonoBehaviour
     [NonSerialized]
     public UICurve UICurve=null;
 
-    public bool drawNormals = true;
-    public float normalsLength = 1.0f;
-    public float normalVertexDensity = 1.0f;
-
     private const float _densityToDistanceDistanceMax = 100.0f;
     private float DensityToDistance(float density)
     {
@@ -23,8 +19,16 @@ public class Curve3D : MonoBehaviour
             return _densityToDistanceDistanceMax;
         return Mathf.Min(_densityToDistanceDistanceMax, 10.0f / density);
     }
-    public float GetNormalDensityDistance() { return DensityToDistance(normalVertexDensity); }
     public float GetVertexDensityDistance() { return DensityToDistance(vertexDensity);}
+
+    public bool drawNormals = true;
+    private const float normalValueLengthDivisor = 2.0f;
+    private const float normalGapSizeMultiplier = 2.0f;
+    public float VisualNormalsLength()
+    {
+        return sizeDistanceSampler.GetAverageValue(this)/normalValueLengthDivisor;
+    }
+    public float GetNormalDensityDistance() { return VisualNormalsLength()*normalGapSizeMultiplier; }
 
     public bool isClosedLoop = false;
     [SerializeField]

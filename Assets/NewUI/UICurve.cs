@@ -62,10 +62,11 @@ namespace Assets.NewUI
             {
                 float sampleDist = _curve.GetNormalDensityDistance();
                 List<PointOnCurve> points = _curve.positionCurve.GetPointsWithSpacing(sampleDist);
+                var visualNormalLength = _curve.VisualNormalsLength();
                 foreach (var i in points)
                 {
                     var reference = Quaternion.AngleAxis(_curve.curveRotation, i.tangent) * i.reference;
-                    drawList.Add(new LineDraw(this, i.position, reference * _curve.normalsLength + i.position, Color.yellow));
+                    drawList.Add(new LineDraw(this, i.position, reference * visualNormalLength+ i.position, Color.yellow));
                 }
             }
             for (int i = 0; i < _curve.positionCurve.NumSegments; i++)
