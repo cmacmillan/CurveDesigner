@@ -63,9 +63,11 @@ namespace Assets.NewUI
                 float sampleDist = _curve.GetNormalDensityDistance();
                 List<PointOnCurve> points = _curve.positionCurve.GetPointsWithSpacing(sampleDist);
                 var visualNormalLength = _curve.VisualNormalsLength();
+                var curveLength = _curve.positionCurve.GetLength();
                 foreach (var i in points)
                 {
-                    var reference = Quaternion.AngleAxis(_curve.curveRotation, i.tangent) * i.reference;
+                    var rotation = BezierCurve.mod(_curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop,curveLength,_curve.curveRotation),360.0f);
+                    var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
                     drawList.Add(new LineDraw(this, i.position, reference * visualNormalLength+ i.position, Color.yellow));
                 }
             }

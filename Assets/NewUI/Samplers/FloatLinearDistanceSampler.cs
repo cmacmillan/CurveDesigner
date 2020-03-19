@@ -96,14 +96,6 @@ namespace Assets.NewUI
         {
             return GetPointsBelowDistance(curve.positionCurve.GetLength());
         }
-        public float GetAverageValue(Curve3D curve)
-        {
-            float avg = 0;
-            var points = GetPoints(curve);
-            foreach (var i in points)
-                avg += i.value;
-            return avg / points.Count;
-        }
         private List<FloatDistanceValue> GetPointsBelowDistance(float distance)
         {
             List<FloatDistanceValue> retr = new List<FloatDistanceValue>();

@@ -32,7 +32,7 @@ namespace Assets.NewUI
 
         public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
         {
-            linePoint.GetPositionAndForward(out Vector3 position, out Vector3 forward);
+            linePoint.GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
             drawList.Add(new CircleDraw(this,Color.white,position,forward,value.value));
             base.Draw(drawList, clickedElement);
         }
@@ -42,6 +42,35 @@ namespace Assets.NewUI
             yield return linePoint;
             foreach (var i in ringPoints)
                 yield return i;
+        }
+    }
+    public static class CirclePlaneTools
+    {
+        private static Vector2 GetClosestPoint(Vector2 lineDirection, Vector2 lineOrigin, Vector2 point)
+        {
+            lineDirection = lineDirection.normalized;
+            Vector2 normal = new Vector2(-lineDirection.y,lineDirection.x).normalized;
+            if (lineDirection.x == 0)
+                throw new NotImplementedException();
+            var rs = lineDirection.y / lineDirection.x;
+            var rt = normal.y / normal.x;
+            var x = (-lineOrigin.y - rt * point.x + point.y+rs*lineOrigin.x) /(rs-rt);
+            var y = rs * (x - lineOrigin.x) + lineOrigin.y;
+            return new Vector2(x, y);
+        }
+        public static bool GetCursorPointOnPlane(PointAlongCurveComposite linePoint,out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward, out Vector3 centerReference)
+        {
+            Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
+            Vector2 mousePos = Event.current.mousePosition;
+            Ray cursorRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
+            linePoint.GetPositionForwardAndReference(out centerPoint, out centerForward,out centerReference);
+            Plane circlePlane = new Plane(centerForward,centerPoint);
+            bool result = circlePlane.Raycast(cursorRay, out float enter);
+            if (result)
+                cursorHitPosition = cursorRay.GetPoint(enter);
+            else
+                cursorHitPosition = Vector3.zero;
+            return result;
         }
     }
     public class SizeCurveEdgeClickCommand : IClickCommand
@@ -56,27 +85,11 @@ namespace Assets.NewUI
             this._ring = ring;
             this._point = point;
         }
-        Vector2 GetClosestPoint(Vector2 lineDirection, Vector2 lineOrigin, Vector2 point)
-        {
-            lineDirection = lineDirection.normalized;
-            Vector2 normal = new Vector2(-lineDirection.y,lineDirection.x).normalized;
-            if (lineDirection.x == 0)
-                throw new NotImplementedException();
-            var rs = lineDirection.y / lineDirection.x;
-            var rt = normal.y / normal.x;
-            var x = (-lineOrigin.y - rt * point.x + point.y+rs*lineOrigin.x) /(rs-rt);
-            var y = rs * (x - lineOrigin.x) + lineOrigin.y;
-            return new Vector2(x, y);
-        }
+
         void Set()
         {
-            Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
-            Vector2 mousePos = Event.current.mousePosition;
-            Ray cursorRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
-            _owner.linePoint.GetPositionAndForward(out var position, out var forward);
-            Plane circlePlane = new Plane(forward,position);
-            if (circlePlane.Raycast(cursorRay,out float enter))
-                _ring.value = Vector3.Distance(cursorRay.GetPoint(enter),position);
+            if (CirclePlaneTools.GetCursorPointOnPlane(_owner.linePoint,out Vector3 planeHitPosition,out Vector3 centerPoint,out Vector3 centerForward,out Vector3 centerReference))
+                _ring.value = Vector3.Distance(planeHitPosition, centerPoint);
         }
         public void ClickDown(Vector2 mousePos)
         {

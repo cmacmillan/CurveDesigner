@@ -57,7 +57,6 @@ public class Curve3DInspector : Editor
         GUILayout.EndArea();
 
         Handles.EndGUI();
-
     }*/
     private static readonly int _CurveHint = "NewGUI.CURVE".GetHashCode();
     private void OnSceneGUI()
@@ -104,6 +103,8 @@ public class Curve3DInspector : Editor
         ///
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
+        curve3d.positionCurve.Recalculate();
+        curve3d.CacheAverageSize();
         Undo.RecordObject(curve3d, "curve");
         UpdateMesh(curve3d);
         ClickHitData elementClickedDown = curve3d.elementClickedDown;

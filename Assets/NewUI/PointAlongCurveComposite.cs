@@ -23,16 +23,17 @@ namespace Assets.NewUI
         public Vector3 Position {
             get
             {
-                GetPositionAndForward(out Vector3 position, out Vector3 forward);
+                GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
                 return position;
             }
         }
 
-        public void GetPositionAndForward(out Vector3 position, out Vector3 forward)
+        public void GetPositionForwardAndReference(out Vector3 position, out Vector3 forward, out Vector3 reference)
         {
             var point = _positionCurve.GetPointAtDistance(value.DistanceAlongCurve);
             position = point.position;
             forward = point.tangent;
+            reference = point.reference;
         }
 
         public override IEnumerable<IComposite> GetChildren()

@@ -26,9 +26,20 @@ public class Curve3D : MonoBehaviour
     private const float normalGapSizeMultiplier = 2.0f;
     public float VisualNormalsLength()
     {
-        return sizeDistanceSampler.GetAverageValue(this)/normalValueLengthDivisor;
+        return averageSize/normalValueLengthDivisor;
     }
     public float GetNormalDensityDistance() { return VisualNormalsLength()*normalGapSizeMultiplier; }
+
+    [HideInInspector]
+    public float averageSize;
+    public void CacheAverageSize()
+    {
+        float avg = 0;
+        var points = sizeDistanceSampler.GetPoints(this);
+        foreach (var i in points)
+            avg += i.value;
+        averageSize=avg / points.Count;
+    }
 
     public bool isClosedLoop = false;
     [SerializeField]

@@ -13,32 +13,38 @@ public partial class BezierCurve
     {
         return (x % m + m) % m;
     }
-    public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IDistanceSampler<float> distanceSampler, float TubeArc, float TubeThickness, int RingPointCount, float Rotation, bool isExterior, bool isClosedLoop,float TubeDefaultSize, float curveLength)
+    public static float mod(float x, float m)
+    {
+        return (x % m + m) % m;
+    }
+    public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IDistanceSampler<float> sizeSampler, float TubeArc, float TubeThickness, int RingPointCount, IDistanceSampler<float> rotationSampler, bool isExterior, bool isClosedLoop,float DefaultSize, float DefaultRotation, float curveLength)
     {
         float distanceFromFull = 360.0f - TubeArc;
         for (int i = 0; i < points.Count; i++)
         {
             PointOnCurve currentPoint = points[i];
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
-            var size = Mathf.Max(0, distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,TubeDefaultSize) + offset);
+            var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,DefaultSize) + offset);
+            var rotation = mod(rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,DefaultRotation), 360);
             for (int j = 0; j < RingPointCount; j++)
             {
-                float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + Rotation;
+                float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + rotation;
                 Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
                 listToAppend.Add(currentPoint.GetRingPoint(theta,size));
             }
         }
     }
-    public void CreateRectanglePointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, float Rotation, bool isClosedLoop, float thickness, IDistanceSampler<float> distanceSampler,float TubeDefaultSize,float curveLength)
+    public void CreateRectanglePointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IDistanceSampler<float> rotationSampler, bool isClosedLoop, float thickness, IDistanceSampler<float> distanceSampler,float DefaultSize,float DefaultRotation, float curveLength)
     {
         for (int i = 0; i < points.Count; i++)
         {
             PointOnCurve currentPoint = points[i];
             var center = currentPoint.position;
-            var up = Quaternion.AngleAxis(Rotation,currentPoint.tangent)*currentPoint.reference.normalized;
+            var rotation = mod(rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,DefaultRotation), 360);
+            var up = Quaternion.AngleAxis(rotation,currentPoint.tangent)*currentPoint.reference.normalized;
             var right = Vector3.Cross(up, currentPoint.tangent).normalized;
             var scaledUp = up * thickness / 2.0f;
-            var scaledRight = right*Mathf.Max(0,distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,TubeDefaultSize));
+            var scaledRight = right*Mathf.Max(0,distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,DefaultSize));
             listToAppend.Add(center+scaledUp+scaledRight);
             listToAppend.Add(center+scaledUp-scaledRight);
             listToAppend.Add(center-scaledUp-scaledRight);
