@@ -50,10 +50,10 @@ namespace Assets.NewUI
             foreach (var i in objToClone._points)
                 _points.Add(new FloatDistanceValue(i,this));
         }
-        public float GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,float? defaultValue=null)
+        public float GetValueAtDistance(float distance,bool isClosedLoop,float curveLength)
         {
             if (_points.Count == 0)
-                return (defaultValue.HasValue?defaultValue.Value:default);
+                return 0;
             var firstPoint = _points[0];
             var lastPoint = _points[_points.Count - 1];
             var lastDistance = curveLength - lastPoint.DistanceAlongCurve;
@@ -82,11 +82,13 @@ namespace Assets.NewUI
             else
                 return _points[_points.Count - 1].value;
         }
-        public void InsertPointAtDistance(float distance,bool isClosedLoop,float curveLength,float? defaultValue=null)
+        public int InsertPointAtDistance(float distance,bool isClosedLoop,float curveLength)
         {
-            var value = GetValueAtDistance(distance, isClosedLoop, curveLength,defaultValue);
-            _points.Add(new FloatDistanceValue(value, distance, this));
+            var value = GetValueAtDistance(distance, isClosedLoop, curveLength);
+            var newPoint = new FloatDistanceValue(value, distance, this);
+            _points.Add(newPoint);
             SortPoints();
+            return _points.IndexOf(newPoint);
         }
         public void SortPoints()
         {

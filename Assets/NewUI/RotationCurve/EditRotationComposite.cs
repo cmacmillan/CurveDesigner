@@ -10,7 +10,7 @@ namespace Assets.NewUI
     public class EditRotationComposite : IComposite, IPositionProvider
     {
         public FloatDistanceValue _point;
-        public PointAlongCurveComposite _centerPoint;
+        public PointAlongCurveComposite centerPoint;
         private PointComposite _rotationHandlePoint;
         public Curve3D _curve;
 
@@ -18,21 +18,21 @@ namespace Assets.NewUI
         {
             _point = value;
             _curve = curve;
-            _centerPoint = new PointAlongCurveComposite(this,value,curve,color);
+            centerPoint = new PointAlongCurveComposite(this,value,curve,color);
             _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color);
         }
 
         public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
         {
-            _centerPoint.GetPositionForwardAndReference(out Vector3 circlePosition, out Vector3 circleForward,out Vector3 circleReference);
+            centerPoint.GetPositionForwardAndReference(out Vector3 circlePosition, out Vector3 circleForward,out Vector3 circleReference);
             drawList.Add(new CircleDraw(this,Color.white,circlePosition,circleForward,_curve.averageSize));
-            drawList.Add(new LineDraw(this,_centerPoint.Position,Position));
+            drawList.Add(new LineDraw(this,centerPoint.Position,Position));
             base.Draw(drawList, clickedElement);
         }
 
         public override IEnumerable<IComposite> GetChildren()
         {
-            yield return _centerPoint;
+            yield return centerPoint;
             yield return _rotationHandlePoint;
         }
 
@@ -74,7 +74,7 @@ namespace Assets.NewUI
         }
         private void Set()
         {
-            if (CirclePlaneTools.GetCursorPointOnPlane(_owner._centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference))
+            if (CirclePlaneTools.GetCursorPointOnPlane(_owner.centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference))
             {
                 var previousVector = _owner.GetVectorByAngle(_owner._curve.previousRotations[Index],out PointOnCurve point);
                 _owner._point.value += Vector3.SignedAngle(previousVector,cursorHitPosition-centerPoint,centerForward);

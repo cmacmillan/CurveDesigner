@@ -10,9 +10,9 @@ namespace Assets.NewUI
 {
     public class UICurve : IComposite
     {
-        private PositionCurveComposite _positionCurve;
-        private SizeCurveComposite _sizeCurve;
-        private RotationCurveComposite _rotationCurve;
+        public PositionCurveComposite positionCurve;
+        public SizeCurveComposite sizeCurve;
+        public RotationCurveComposite rotationCurve;
         private Curve3D _curve;
         public PointOnCurve pointClosestToCursor;
 
@@ -26,9 +26,9 @@ namespace Assets.NewUI
 
         public void Initialize()
         {
-            _positionCurve = new PositionCurveComposite(this,_curve);
-            _sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve);
-            _rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve);
+            positionCurve = new PositionCurveComposite(this,_curve);
+            sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve);
+            rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve);
             _curve.lastMeshUpdateStartTime = DateTime.Now;
             _curve.positionCurve.Recalculate();
         }
@@ -66,7 +66,7 @@ namespace Assets.NewUI
                 var curveLength = _curve.positionCurve.GetLength();
                 foreach (var i in points)
                 {
-                    var rotation = _curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength, _curve.curveRotation);
+                    var rotation = _curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength)+_curve.curveRotation;
                     var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
                     drawList.Add(new LineDraw(this, i.position, reference * visualNormalLength+ i.position, Color.yellow));
                 }
@@ -87,13 +87,13 @@ namespace Assets.NewUI
             switch (_curve.editMode)
             {
                 case EditMode.PositionCurve:
-                    yield return _positionCurve;
+                    yield return positionCurve;
                     break;
                 case EditMode.Size:
-                    yield return _sizeCurve;
+                    yield return sizeCurve;
                     break;
                 case EditMode.Rotation:
-                    yield return _rotationCurve;
+                    yield return rotationCurve;
                     break;
             }
         }

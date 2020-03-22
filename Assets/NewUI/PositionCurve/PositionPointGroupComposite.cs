@@ -17,12 +17,16 @@ namespace Assets.NewUI
         public PointComposite rightTangentPoint = null;
         private LineComposite rightTangentLine = null;
 
-        private PointComposite centerPoint = null;
+        public PointComposite centerPoint = null;
+        public IClickCommand GetCenterPointClickCommand()
+        {
+            return new PositionPointClickCommand(_pointGroup, PGIndex.Position);
+        }
         public PositionPointGroupComposite(IComposite parent, PointGroup group, Curve3D curve) : base(parent)
         {
             _pointGroup = group;
             var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position,curve);
-            centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,new PositionPointClickCommand(group,PGIndex.Position),Curve3DSettings.Green);
+            centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,GetCenterPointClickCommand(),Curve3DSettings.Green);
             bool isCurveClosedLoop = curve.isClosedLoop;
             bool isStartPoint = group == curve.positionCurve.PointGroups[0];
             bool isEndPoint = group == curve.positionCurve.PointGroups[curve.positionCurve.PointGroups.Count-1];

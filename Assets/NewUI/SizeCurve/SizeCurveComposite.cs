@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class SizeCurveComposite : IComposite
+    public class SizeCurveComposite : IComposite, IValueAlongCurvePointProvider
     {
         private FloatLinearDistanceSampler _distanceSampler;
         private SplitterPointComposite _splitterPoint = null;
@@ -26,6 +26,11 @@ namespace Assets.NewUI
             yield return _splitterPoint;
             foreach (var i in points)
                 yield return i;
+        }
+
+        public IClickable GetPointAtIndex(int index)
+        {
+            return points[index].linePoint.point;
         }
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class PointComposite : IComposite
+    public class PointComposite : IClickable
     {
         private IPositionProvider _position;
         private PointTextureType _pointTexture;
@@ -26,12 +26,17 @@ namespace Assets.NewUI
         {
             GUITools.WorldToGUISpace(_position.Position,out Vector2 guiPosition,out float screenDepth);
             float distance = Vector2.Distance(mousePosition,guiPosition);
-            clickHits.Add(new ClickHitData(this,distance,screenDepth,_clickAction,guiPosition-mousePosition));
+            clickHits.Add(new ClickHitData(this,distance,screenDepth,guiPosition-mousePosition));
         }
 
         public override void Draw(List<IDraw> drawList,ClickHitData clicked)
         {
             drawList.Add(new PointDraw(this,_position.Position, _pointTexture,_color));
+        }
+
+        public override IClickCommand GetClickCommand()
+        {
+            return _clickAction;
         }
     }
 }

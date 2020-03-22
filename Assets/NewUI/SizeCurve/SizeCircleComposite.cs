@@ -11,6 +11,7 @@ namespace Assets.NewUI
     {
         private BezierCurve _positionCurve;
         private List<PointComposite> ringPoints = new List<PointComposite>();
+        private Curve3D _curve;
         public PointAlongCurveComposite linePoint;
         public FloatDistanceValue value;
 
@@ -22,10 +23,11 @@ namespace Assets.NewUI
             var purpleColor = new Color(.6f, .6f, .9f);
             linePoint = new PointAlongCurveComposite(this, value, curve,purpleColor);
             this._positionCurve = positionCurve;
+            this._curve = curve;
             for (int i = 0; i < ringPointCount; i++)
             {
                 var edgePointProvider = new SizeCircleEdgePointPositionProvider(value,i,curve);
-                var clickCommmand = new SizeCurveEdgeClickCommand(value,edgePointProvider,this);
+                var clickCommmand = new SizeCurveEdgeClickCommand(value,edgePointProvider,this,curve);
                 ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor));
             }
         }
@@ -33,7 +35,7 @@ namespace Assets.NewUI
         public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
         {
             linePoint.GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
-            drawList.Add(new CircleDraw(this,Color.white,position,forward,value.value));
+            drawList.Add(new CircleDraw(this,Color.white,position,forward,value.value+_curve.curveRadius));
             base.Draw(drawList, clickedElement);
         }
 
@@ -78,18 +80,20 @@ namespace Assets.NewUI
         private FloatDistanceValue _ring;
         private SizeCircleEdgePointPositionProvider _point;
         private SizeCircleComposite _owner;
+        private Curve3D curve;
 
-        public SizeCurveEdgeClickCommand(FloatDistanceValue ring, SizeCircleEdgePointPositionProvider point,SizeCircleComposite owner)
+        public SizeCurveEdgeClickCommand(FloatDistanceValue ring, SizeCircleEdgePointPositionProvider point,SizeCircleComposite owner,Curve3D curve)
         {
             this._owner = owner;
             this._ring = ring;
             this._point = point;
+            this.curve = curve;
         }
 
         void Set()
         {
             if (CirclePlaneTools.GetCursorPointOnPlane(_owner.linePoint,out Vector3 planeHitPosition,out Vector3 centerPoint,out Vector3 centerForward,out Vector3 centerReference))
-                _ring.value = Vector3.Distance(planeHitPosition, centerPoint);
+                _ring.value = Vector3.Distance(planeHitPosition, centerPoint)-curve.curveRadius;
         }
         public void ClickDown(Vector2 mousePos)
         {
@@ -120,7 +124,7 @@ namespace Assets.NewUI
 
         public Vector3 Position {
             get {
-                return curve.positionCurve.GetPointAtDistance(_ring.DistanceAlongCurve).GetRingPoint(360.0f*_ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value);
+                return curve.positionCurve.GetPointAtDistance(_ring.DistanceAlongCurve).GetRingPoint(360.0f*_ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value+curve.curveRadius);
             }
         }
     }

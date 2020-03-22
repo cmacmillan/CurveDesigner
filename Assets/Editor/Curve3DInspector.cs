@@ -134,8 +134,9 @@ public class Curve3DInspector : Editor
                         GUIUtility.hotControl = controlID;
                         curve3d.elementClickedDown = clicked;
                         var clickPos = MousePos + clicked.offset;
-                        clicked.commandToExecute.ClickDown(clickPos);
-                        clicked.commandToExecute.ClickDrag(clickPos, curve3d, clicked);
+                        var commandToExecute = clicked.owner.GetClickCommand();
+                        commandToExecute.ClickDown(clickPos);
+                        commandToExecute.ClickDrag(clickPos, curve3d, clicked);
                         curve3d.lastMeshUpdateStartTime= DateTime.Now;
                         Event.current.Use();
                     }
@@ -145,7 +146,8 @@ public class Curve3DInspector : Editor
                 if (elementClickedDown != null)
                 {
                     var clickPos = MousePos + elementClickedDown.offset;
-                    elementClickedDown.commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown);
+                    var commandToExecute = elementClickedDown.owner.GetClickCommand();
+                    commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown);
                     Event.current.Use();
                     curve3d.lastMeshUpdateStartTime= DateTime.Now;
                 }
@@ -156,7 +158,8 @@ public class Curve3DInspector : Editor
                     if (elementClickedDown != null)
                     {
                         GUIUtility.hotControl = 0;
-                        elementClickedDown.commandToExecute.ClickUp(MousePos);
+                        var commandToExecute = elementClickedDown.owner.GetClickCommand();
+                        commandToExecute.ClickUp(MousePos);
                         curve3d.lastMeshUpdateStartTime= DateTime.Now;
                         curve3d.elementClickedDown = null;
                         Event.current.Use();

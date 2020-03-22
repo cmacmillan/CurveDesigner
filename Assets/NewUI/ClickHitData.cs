@@ -11,15 +11,13 @@ namespace Assets.NewUI
         public float distanceFromClick;
         public float distanceFromCamera;
         public bool isLowPriority;
-        public IClickCommand commandToExecute;
-        public IComposite owner;
+        public IClickable owner;
         public Vector2 offset;
-        public ClickHitData(IComposite owner,float distanceFromClick, float distanceFromCamera,IClickCommand command, Vector2 offset, bool isLowPriority=false)
+        public ClickHitData(IClickable owner,float distanceFromClick, float distanceFromCamera, Vector2 offset, bool isLowPriority=false)
         {
             this.isLowPriority = isLowPriority;
             this.distanceFromClick = distanceFromClick;
             this.distanceFromCamera = distanceFromCamera;
-            this.commandToExecute = command;
             this.owner = owner;
             this.offset = offset;
         }

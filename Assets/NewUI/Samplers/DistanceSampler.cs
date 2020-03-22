@@ -9,6 +9,6 @@ namespace Assets.NewUI
 {
     public interface IDistanceSampler<T> where T : struct
     {
-        T GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,T? defaultValue=null);
+        T GetValueAtDistance(float distance,bool isClosedLoop,float curveLength);
     }
 }

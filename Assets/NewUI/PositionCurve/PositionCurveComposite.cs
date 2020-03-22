@@ -9,7 +9,7 @@ namespace Assets.NewUI
 {
     public class PositionCurveComposite : IComposite
     {
-        private List<PositionPointGroupComposite> pointGroups = null;
+        public List<PositionPointGroupComposite> pointGroups = null;
         private SplitterPointComposite _splitterPoint = null;
         public PositionCurveComposite(IComposite parent,Curve3D curve) : base(parent)
         {

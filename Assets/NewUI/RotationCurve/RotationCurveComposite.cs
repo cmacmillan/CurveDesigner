@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class RotationCurveComposite : IComposite 
+    public class RotationCurveComposite : IComposite, IValueAlongCurvePointProvider
     {
         private FloatLinearDistanceSampler _distanceSampler;
         private List<EditRotationComposite> _points = new List<EditRotationComposite>();
@@ -25,6 +25,11 @@ namespace Assets.NewUI
             yield return _splitterPoint;
             foreach (var i in _points)
                 yield return i;
+        }
+
+        public IClickable GetPointAtIndex(int index)
+        {
+            return _points[index].centerPoint.point;
         }
     }
 }

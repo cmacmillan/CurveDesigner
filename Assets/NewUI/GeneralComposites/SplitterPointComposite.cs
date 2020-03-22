@@ -30,11 +30,12 @@ namespace Assets.NewUI
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
             List<ClickHitData> pointHits = new List<ClickHitData>();
-            _point.Click(mousePosition, clickHits);
-            foreach (var i in clickHits)
+            _point.Click(mousePosition, pointHits);
+            foreach (var i in pointHits)
                 i.isLowPriority = true;
             clickHits.AddRange(pointHits);
         }
+
         public Vector3 Position { get { return _curve.transform.TransformPoint(_curve.UICurve.pointClosestToCursor.position); } }
     }
 }
