@@ -25,8 +25,12 @@ namespace Assets.NewUI
         public PositionCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
         public override void ClickDown(Vector2 mousePos)
         {
+            foreach (var i in _curve.DistanceSamplers)
+                i.StartInsertToBackingCurve(_curve.positionCurve);
             _curve.positionCurve.InsertSegmentAfterIndex(_curve.UICurve.pointClosestToCursor,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
+            foreach (var i in _curve.DistanceSamplers)
+                i.FinishInsertToBackingCurve(_curve.positionCurve);
             var selected = _curve.UICurve.positionCurve.pointGroups[_curve.UICurve.pointClosestToCursor.segmentIndex+1].centerPoint;
             _curve.elementClickedDown.owner = selected;
         }
@@ -45,7 +49,7 @@ namespace Assets.NewUI
         }
         public override void ClickDown(Vector2 mousePos)
         {
-            int index = _sampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength());
+            int index = _sampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             _curve.UICurve.Initialize();//See above
             var selected = _pointsProvider(_curve).GetPointAtIndex(index);
             _curve.elementClickedDown.owner = selected;

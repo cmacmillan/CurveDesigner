@@ -20,8 +20,8 @@ public partial class BezierCurve
         {
             PointOnCurve currentPoint = points[i];
             float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
-            var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength) + offset+DefaultSize);
-            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength)+DefaultRotation;
+            var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,this) + offset+DefaultSize);
+            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength,this)+DefaultRotation;
             for (int j = 0; j < RingPointCount; j++)
             {
                 float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + rotation;
@@ -36,11 +36,11 @@ public partial class BezierCurve
         {
             PointOnCurve currentPoint = points[i];
             var center = currentPoint.position;
-            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength)+DefaultRotation;
+            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength,this)+DefaultRotation;
             var up = Quaternion.AngleAxis(rotation,currentPoint.tangent)*currentPoint.reference.normalized;
             var right = Vector3.Cross(up, currentPoint.tangent).normalized;
             var scaledUp = up * thickness / 2.0f;
-            var scaledRight = right*Mathf.Max(0,distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength)+DefaultSize);
+            var scaledRight = right*Mathf.Max(0,distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,this)+DefaultSize);
             listToAppend.Add(center+scaledUp+scaledRight);
             listToAppend.Add(center+scaledUp-scaledRight);
             listToAppend.Add(center-scaledUp-scaledRight);

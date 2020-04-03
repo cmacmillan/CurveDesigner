@@ -19,7 +19,7 @@ namespace Assets.NewUI
 
         void SetPosition()
         {
-            _point.DistanceAlongCurve = _curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve;
+            _point.SetDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.positionCurve);
         }
 
         public void ClickDown(Vector2 mousePos)
@@ -38,6 +38,7 @@ namespace Assets.NewUI
     }
     public interface ILinePoint
     {
-        float DistanceAlongCurve { get; set; } 
+        void SetDistance(float distance, BezierCurve curve, bool shouldSort = true);
+        float GetDistance(BezierCurve curve);
     }
 }

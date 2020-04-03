@@ -84,6 +84,8 @@ public class Curve3DInspector : Editor
             curve3d.hotPointIndex = -1;
             curve3d.positionCurve.Initialize();
             curve3d.positionCurve.isCurveOutOfDate = true;
+            curve3d.sizeDistanceSampler = new FloatLinearDistanceSampler();
+            curve3d.rotationDistanceSampler = new FloatLinearDistanceSampler();
             curve3d.UICurve.Initialize();
         }
         if (GUILayout.Button("Lock"))

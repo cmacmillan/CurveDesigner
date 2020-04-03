@@ -96,6 +96,15 @@ public class Curve3D : MonoBehaviour
     public bool lockYAxis;
     public bool lockZAxis;
 
+    public IEnumerable<FloatLinearDistanceSampler> DistanceSamplers
+    {
+        get
+        {
+            yield return sizeDistanceSampler;
+            yield return rotationDistanceSampler;
+        }
+    }
+
     public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler();
     public FloatLinearDistanceSampler rotationDistanceSampler = new FloatLinearDistanceSampler();
 

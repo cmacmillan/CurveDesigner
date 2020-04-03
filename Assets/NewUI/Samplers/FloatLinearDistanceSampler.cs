@@ -8,34 +8,47 @@ using UnityEngine;
 namespace Assets.NewUI
 {
     [System.Serializable]
-    public class FloatDistanceValue : ILinePoint
+    public class CurveTrackingDistance
+    {
+        public virtual void SetDistance(float distance,BezierCurve curve, bool shouldSort = true)
+        {
+            var point = curve.GetPointAtDistance(distance);
+            _segmentIndex = point.segmentIndex;
+            _timeAlongSegment = point.time;
+        }
+        public float GetDistance(BezierCurve curve)
+        {
+            return curve.GetDistanceAtSegmentIndexAndTime(_segmentIndex, _timeAlongSegment);
+        }
+        [SerializeField]
+        protected float _timeAlongSegment=0;
+        [SerializeField]
+        protected int _segmentIndex=0;
+    }
+    [System.Serializable]
+    public class FloatDistanceValue : CurveTrackingDistance, ILinePoint
     {
         public float value;
         [NonSerialized]
         public FloatLinearDistanceSampler _owner;
-        [SerializeField]
-        private float _distance;
-        public FloatDistanceValue(float value, float distance, FloatLinearDistanceSampler owner)
+        public FloatDistanceValue(float value, float distance, FloatLinearDistanceSampler owner, BezierCurve curve)
         {
             this.value = value;
             this._owner = owner;
-            this._distance = distance;
+            this.SetDistance(distance,curve);
         }
-        public FloatDistanceValue(FloatDistanceValue objToClone,FloatLinearDistanceSampler newOwner)
+        public FloatDistanceValue(FloatDistanceValue objToClone,FloatLinearDistanceSampler newOwner,BezierCurve curve)
         {
             this.value = objToClone.value;
-            this._distance = objToClone._distance;
             _owner = newOwner;
+            this._timeAlongSegment = objToClone._timeAlongSegment;
+            this._segmentIndex = objToClone._segmentIndex;
         }
-
-        public float DistanceAlongCurve
+        public override void SetDistance(float distance, BezierCurve curve,bool shouldSort=true)
         {
-            get { return _distance; }
-            set
-            {
-                _distance = value;
-                _owner.SortPoints();
-            }
+            base.SetDistance(distance, curve);
+            if (shouldSort)
+                _owner.SortPoints(curve);
         }
     }
     [System.Serializable]
@@ -45,20 +58,36 @@ namespace Assets.NewUI
         private List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
         public FloatLinearDistanceSampler() {
         }
-        public FloatLinearDistanceSampler(FloatLinearDistanceSampler objToClone)
+        public FloatLinearDistanceSampler(FloatLinearDistanceSampler objToClone, BezierCurve curve)
         {
             foreach (var i in objToClone._points)
-                _points.Add(new FloatDistanceValue(i,this));
+                _points.Add(new FloatDistanceValue(i,this,curve));
         }
-        public float GetValueAtDistance(float distance,bool isClosedLoop,float curveLength)
+        //////////////
+        List<float> backingCurveModificationDistances;
+        public void StartInsertToBackingCurve(BezierCurve backingCurve)
+        {
+            backingCurveModificationDistances = new List<float>();
+            foreach (var i in _points)
+                backingCurveModificationDistances.Add(i.GetDistance(backingCurve));
+        }
+        public void FinishInsertToBackingCurve(BezierCurve backingCurve)
+        {
+            for (int i = 0; i < _points.Count; i++)
+                _points[i].SetDistance(backingCurveModificationDistances[i],backingCurve,false);
+            backingCurveModificationDistances = null;
+        }
+        //////////////
+
+        public float GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve)
         {
             if (_points.Count == 0)
                 return 0;
             var firstPoint = _points[0];
             var lastPoint = _points[_points.Count - 1];
-            var lastDistance = curveLength - lastPoint.DistanceAlongCurve;
-            float endSegmentDistance = firstPoint.DistanceAlongCurve+ lastDistance;
-            if (_points[0].DistanceAlongCurve>= distance)
+            var lastDistance = curveLength - lastPoint.GetDistance(curve);
+            float endSegmentDistance = firstPoint.GetDistance(curve)+ lastDistance;
+            if (_points[0].GetDistance(curve)>= distance)
                 if (isClosedLoop)
                 {
                     float lerpVal = (lastDistance+distance)/endSegmentDistance;
@@ -70,39 +99,39 @@ namespace Assets.NewUI
             for (int i = 1; i < _points.Count; i++)
             {
                 var current = _points[i];
-                if (current.DistanceAlongCurve>= distance)
-                    return Mathf.Lerp(previous.value,current.value,(distance-previous.DistanceAlongCurve)/(current.DistanceAlongCurve-previous.DistanceAlongCurve));
+                if (current.GetDistance(curve)>= distance)
+                    return Mathf.Lerp(previous.value,current.value,(distance-previous.GetDistance(curve))/(current.GetDistance(curve)-previous.GetDistance(curve)));
                 previous = current;
             }
             if (isClosedLoop)
             {
-                float lerpVal = (distance-lastPoint.DistanceAlongCurve) / endSegmentDistance;
+                float lerpVal = (distance-lastPoint.GetDistance(curve)) / endSegmentDistance;
                 return Mathf.Lerp(lastPoint.value,firstPoint.value,lerpVal);
             }
             else
                 return _points[_points.Count - 1].value;
         }
-        public int InsertPointAtDistance(float distance,bool isClosedLoop,float curveLength)
+        public int InsertPointAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve)
         {
-            var value = GetValueAtDistance(distance, isClosedLoop, curveLength);
-            var newPoint = new FloatDistanceValue(value, distance, this);
+            var value = GetValueAtDistance(distance, isClosedLoop, curveLength,curve);
+            var newPoint = new FloatDistanceValue(value, distance, this,curve);
             _points.Add(newPoint);
-            SortPoints();
+            SortPoints(curve);
             return _points.IndexOf(newPoint);
         }
-        public void SortPoints()
+        public void SortPoints(BezierCurve curve)
         {
-            _points = _points.OrderBy((a) => a.DistanceAlongCurve).ToList();
+            _points = _points.OrderBy((a) => a.GetDistance(curve)).ToList();
         }
         public List<FloatDistanceValue> GetPoints(Curve3D curve)
         {
-            return GetPointsBelowDistance(curve.positionCurve.GetLength());
+            return GetPointsBelowDistance(curve.positionCurve.GetLength(),curve.positionCurve);
         }
-        private List<FloatDistanceValue> GetPointsBelowDistance(float distance)
+        private List<FloatDistanceValue> GetPointsBelowDistance(float distance,BezierCurve curve)
         {
             List<FloatDistanceValue> retr = new List<FloatDistanceValue>();
             foreach (var i in _points)
-                if (i.DistanceAlongCurve <= distance)
+                if (i.GetDistance(curve) <= distance)
                     retr.Add(i);
             return retr;
         }

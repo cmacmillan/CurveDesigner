@@ -38,7 +38,7 @@ namespace Assets.NewUI
 
         public Vector3 GetVectorByAngle(float angle, out PointOnCurve point)
         {
-            point = _curve.positionCurve.GetPointAtDistance(_point.DistanceAlongCurve);
+            point = _curve.positionCurve.GetPointAtDistance(_point.GetDistance(_curve.positionCurve));
             return Quaternion.AngleAxis(angle, point.tangent) * (point.reference.normalized);
         }
 

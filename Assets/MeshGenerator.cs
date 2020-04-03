@@ -44,8 +44,8 @@ public static class MeshGenerator
             MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
             MeshGenerator.TubeArc = curve.arcOfTube;
             MeshGenerator.Rotation = curve.curveRotation;
-            MeshGenerator.sizeDistanceSampler = new FloatLinearDistanceSampler(curve.sizeDistanceSampler);
-            MeshGenerator.rotationDistanceSampler = new FloatLinearDistanceSampler(curve.rotationDistanceSampler);
+            MeshGenerator.sizeDistanceSampler = new FloatLinearDistanceSampler(curve.sizeDistanceSampler,clonedCurve);
+            MeshGenerator.rotationDistanceSampler = new FloatLinearDistanceSampler(curve.rotationDistanceSampler,clonedCurve);
             MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
@@ -274,11 +274,11 @@ public static class MeshGenerator
                 {
                     PointOnCurve currentPoint = sampled[i];
                     var center = currentPoint.position;
-                    var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength) + Rotation;
+                    var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength,curve) + Rotation;
                     var up = Quaternion.AngleAxis(rotation, currentPoint.tangent) * currentPoint.reference.normalized;
                     var right = Vector3.Cross(up, currentPoint.tangent).normalized;
                     var scaledUp = up * Thickness / 2.0f;
-                    var scaledRight = right * Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength) + Radius);
+                    var scaledRight = right * Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength,curve) + Radius);
 
                     var upRight = center + scaledUp + scaledRight;
                     var upLeft = center + scaledUp - scaledRight;

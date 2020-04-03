@@ -124,7 +124,7 @@ namespace Assets.NewUI
 
         public Vector3 Position {
             get {
-                return curve.positionCurve.GetPointAtDistance(_ring.DistanceAlongCurve).GetRingPoint(360.0f*_ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value+curve.curveRadius);
+                return curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve)).GetRingPoint(360.0f*_ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value+curve.curveRadius);
             }
         }
     }

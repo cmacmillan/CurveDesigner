@@ -30,7 +30,7 @@ namespace Assets.NewUI
 
         public void GetPositionForwardAndReference(out Vector3 position, out Vector3 forward, out Vector3 reference)
         {
-            var point = _positionCurve.GetPointAtDistance(value.DistanceAlongCurve);
+            var point = _positionCurve.GetPointAtDistance(value.GetDistance(_positionCurve));
             position = point.position;
             forward = point.tangent;
             reference = point.reference;
