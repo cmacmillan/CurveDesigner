@@ -64,7 +64,7 @@ public class Curve3DInspector : Editor
         var curve3d = (target as Curve3D);
         ///
         Handles.BeginGUI();
-        GUILayout.BeginArea(new Rect(20, 20, 150, 60));
+        GUILayout.BeginArea(new Rect(20, 20, 210, 60));
         var rect = EditorGUILayout.BeginVertical();
         GUI.color = Color.yellow;
         GUI.Box(rect, GUIContent.none);
@@ -92,6 +92,10 @@ public class Curve3DInspector : Editor
             {
                 i.SetPointLocked(true);
             }
+        }
+        if (GUILayout.Button("Export to Obj"))
+        {
+            ObjMeshExporter.DoExport(curve3d.gameObject,false);
         }
         //GUI.color = Color.white;
         //EditorGUI.CurveField(new Rect(0, 0, 20, 20),curve.curveSizeAnimationCurve);

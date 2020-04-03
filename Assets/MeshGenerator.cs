@@ -100,6 +100,7 @@ public static class MeshGenerator
             triangles.Add(point2);
             triangles.Add(point3);
         }
+        //var rand = new System.Random();
         void TrianglifyLayer(bool isExterior,int numPointsPerRing)
         {//generate tris
             int additionalRing = IsClosedLoop ? 1 : 0;
@@ -113,18 +114,19 @@ public static class MeshGenerator
                 {
                     if (!shouldDrawConnectingFace && (j + 1) >= numPointsPerRing)
                         continue;
+
                     if (isExterior)
                         DrawQuad(
-                            ringIndex + j+basePoint,
-                            ringIndex + ((j + 1) % numPointsPerRing)+basePoint,
-                            nextRingIndex + j+basePoint,
-                            nextRingIndex + ((j + 1) % numPointsPerRing)+basePoint);
+                            ringIndex + j + basePoint,
+                            ringIndex + ((j + 1) % numPointsPerRing) + basePoint,
+                            nextRingIndex + j + basePoint,
+                            nextRingIndex + ((j + 1) % numPointsPerRing) + basePoint);
                     else //flipped
                         DrawQuad(
-                            ringIndex + ((j + 1) % numPointsPerRing)+basePoint,
-                            ringIndex + j+basePoint,
-                            nextRingIndex + ((j + 1) % numPointsPerRing)+basePoint,
-                            nextRingIndex + j+basePoint);
+                            ringIndex + ((j + 1) % numPointsPerRing) + basePoint,
+                            ringIndex + j + basePoint,
+                            nextRingIndex + ((j + 1) % numPointsPerRing) + basePoint,
+                            nextRingIndex + j + basePoint);
                 }
             }
         }
@@ -311,7 +313,6 @@ public static class MeshGenerator
 
                         if (true)
                         {
-
                             //top
                             DrawTri(previousUpRightIndex, previousUpLeftIndex, topAverageIndex);
                             DrawTri(previousUpLeftIndex, upLeftIndex, topAverageIndex);
@@ -323,7 +324,6 @@ public static class MeshGenerator
                             DrawTri(downLeftIndex, previousDownLeftIndex, bottomAverageIndex);
                             DrawTri(downRightIndex, downLeftIndex, bottomAverageIndex);
                             DrawTri(previousDownRightIndex, downRightIndex, bottomAverageIndex);
-
                         }
                         else
                         {
