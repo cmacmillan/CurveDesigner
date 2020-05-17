@@ -19,13 +19,13 @@ namespace Assets.NewUI
             _point = value;
             _curve = curve;
             centerPoint = new PointAlongCurveComposite(this,value,curve,color);
-            _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color);
+            _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color,curve);
         }
 
         public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
         {
             centerPoint.GetPositionForwardAndReference(out Vector3 circlePosition, out Vector3 circleForward,out Vector3 circleReference);
-            drawList.Add(new CircleDraw(this,Color.white,circlePosition,circleForward,_curve.averageSize));
+            drawList.Add(new CircleDraw(this,Color.white, _curve.transform.TransformPoint(circlePosition),_curve.transform.TransformDirection(circleForward),_curve.averageSize));
             drawList.Add(new LineDraw(this,centerPoint.Position,Position));
             base.Draw(drawList, clickedElement);
         }
@@ -45,7 +45,7 @@ namespace Assets.NewUI
         public Vector3 Position {
             get
             {
-                return GetVectorByAngle(_point.value,out PointOnCurve point)*_curve.averageSize+point.position;
+                return _curve.transform.TransformPoint(GetVectorByAngle(_point.value, out PointOnCurve point) * _curve.averageSize + point.position);
             }
         }
     }
@@ -74,10 +74,10 @@ namespace Assets.NewUI
         }
         private void Set()
         {
-            if (CirclePlaneTools.GetCursorPointOnPlane(_owner.centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference))
+            if (CirclePlaneTools.GetCursorPointOnPlane(_owner.centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference,_curve))
             {
                 var previousVector = _owner.GetVectorByAngle(_owner._curve.previousRotations[Index],out PointOnCurve point);
-                _owner._point.value += Vector3.SignedAngle(previousVector,cursorHitPosition-centerPoint,centerForward);
+                _owner._point.value += Vector3.SignedAngle(_curve.transform.TransformDirection(previousVector),cursorHitPosition-centerPoint,centerForward);
             }
         }
         public void ClickDown(Vector2 mousePos)

@@ -68,7 +68,7 @@ namespace Assets.NewUI
                 {
                     var rotation = _curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve)+_curve.curveRotation;
                     var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
-                    drawList.Add(new LineDraw(this, i.position, reference * visualNormalLength+ i.position, Color.yellow));
+                    drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));
                 }
             }
             for (int i = 0; i < _curve.positionCurve.NumSegments; i++)

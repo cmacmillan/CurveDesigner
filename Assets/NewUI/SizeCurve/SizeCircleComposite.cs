@@ -28,14 +28,14 @@ namespace Assets.NewUI
             {
                 var edgePointProvider = new SizeCircleEdgePointPositionProvider(value,i,curve);
                 var clickCommmand = new SizeCurveEdgeClickCommand(value,edgePointProvider,this,curve);
-                ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor));
+                ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor,curve));
             }
         }
 
         public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
         {
             linePoint.GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
-            drawList.Add(new CircleDraw(this,Color.white,position,forward,value.value+_curve.curveRadius));
+            drawList.Add(new CircleDraw(this,Color.white,_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),value.value+_curve.curveRadius));
             base.Draw(drawList, clickedElement);
         }
 
@@ -60,12 +60,15 @@ namespace Assets.NewUI
             var y = rs * (x - lineOrigin.x) + lineOrigin.y;
             return new Vector2(x, y);
         }
-        public static bool GetCursorPointOnPlane(PointAlongCurveComposite linePoint,out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward, out Vector3 centerReference)
+        public static bool GetCursorPointOnPlane(PointAlongCurveComposite linePoint,out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward, out Vector3 centerReference, Curve3D curve)
         {
             Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
             Vector2 mousePos = Event.current.mousePosition;
             Ray cursorRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
             linePoint.GetPositionForwardAndReference(out centerPoint, out centerForward,out centerReference);
+            centerForward = curve.transform.TransformDirection(centerForward);
+            centerReference = curve.transform.TransformDirection(centerReference);
+            centerPoint = curve.transform.TransformPoint(centerPoint);
             Plane circlePlane = new Plane(centerForward,centerPoint);
             bool result = circlePlane.Raycast(cursorRay, out float enter);
             if (result)
@@ -92,7 +95,7 @@ namespace Assets.NewUI
 
         void Set()
         {
-            if (CirclePlaneTools.GetCursorPointOnPlane(_owner.linePoint,out Vector3 planeHitPosition,out Vector3 centerPoint,out Vector3 centerForward,out Vector3 centerReference))
+            if (CirclePlaneTools.GetCursorPointOnPlane(_owner.linePoint,out Vector3 planeHitPosition,out Vector3 centerPoint,out Vector3 centerForward,out Vector3 centerReference,curve))
                 _ring.value = Vector3.Distance(planeHitPosition, centerPoint)-curve.curveRadius;
         }
         public void ClickDown(Vector2 mousePos)
@@ -124,7 +127,7 @@ namespace Assets.NewUI
 
         public Vector3 Position {
             get {
-                return curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve)).GetRingPoint(360.0f*_ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value+curve.curveRadius);
+                return curve.transform.TransformPoint(curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve)).GetRingPoint(360.0f * _ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value + curve.curveRadius));
             }
         }
     }

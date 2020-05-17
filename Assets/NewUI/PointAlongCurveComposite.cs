@@ -16,7 +16,7 @@ namespace Assets.NewUI
         public PointAlongCurveComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,Color color) : base(parent)
         {
             this.value = value;
-            point = new PointComposite(this, this, PointTextureType.square, new LinePointPositionClickCommand(value, curve),color);
+            point = new PointComposite(this, this, PointTextureType.square, new LinePointPositionClickCommand(value, curve),color,curve);
             _positionCurve = curve.positionCurve;
         }
 
@@ -24,7 +24,7 @@ namespace Assets.NewUI
             get
             {
                 GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
-                return position;
+                return _positionCurve.owner.transform.TransformPoint(position);
             }
         }
 

@@ -63,6 +63,7 @@ public class Curve3DInspector : Editor
     {
         var curve3d = (target as Curve3D);
         ///
+        /*
         Handles.BeginGUI();
         GUILayout.BeginArea(new Rect(20, 20, 210, 60));
         var rect = EditorGUILayout.BeginVertical();
@@ -105,6 +106,7 @@ public class Curve3DInspector : Editor
         GUILayout.EndArea();
 
         Handles.EndGUI();
+        */
 
         ///
         curve3d.positionCurve.owner = curve3d;
@@ -128,6 +130,24 @@ public class Curve3DInspector : Editor
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
         switch (Event.current.GetTypeForControl(controlID))
         {
+            case EventType.KeyDown:
+                if (Event.current.keyCode== KeyCode.Tab)
+                {
+                    switch (curve3d.editMode)
+                    {
+                        case EditMode.PositionCurve:
+                            curve3d.editMode = EditMode.Rotation;
+                            break;
+                        case EditMode.Rotation:
+                            curve3d.editMode = EditMode.Size;
+                            break;
+                        case EditMode.Size:
+                            curve3d.editMode = EditMode.PositionCurve;
+                            break;
+                    }
+                    
+                }
+                break;
             case EventType.Repaint:
                 Draw(curveEditor, MousePos, elementClickedDown);
                 break;

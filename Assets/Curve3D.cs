@@ -45,9 +45,14 @@ public class Curve3D : MonoBehaviour
     {
         float avg = 0;
         var points = sizeDistanceSampler.GetPoints(this);
-        foreach (var i in points)
-            avg += i.value;
-        averageSize=avg / points.Count;
+        averageSize = 0;
+        if (points.Count > 0)
+        {
+            foreach (var i in points)
+                avg += i.value;
+            averageSize = avg / points.Count;
+        }
+        averageSize += curveRadius;
     }
 
     public bool isClosedLoop = false;
