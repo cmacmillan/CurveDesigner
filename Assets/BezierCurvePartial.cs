@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static MeshGenerator;
 
 public partial class BezierCurve
 {
@@ -13,6 +14,26 @@ public partial class BezierCurve
     {
         return (x % m + m) % m;
     }
+    public MeshIndexRing CreateRingPointsAlongCurve(ref int pointIndex, PointOnCurve currentPoint, List<Vector3> listToAppend, IDistanceSampler<float> sizeSampler, float TubeArc, float TubeThickness, int RingPointCount, IDistanceSampler<float> rotationSampler, bool isExterior, bool isClosedLoop, float DefaultSize, float DefaultRotation, float curveLength)
+    {
+        float distanceFromFull = 360.0f - TubeArc;
+        float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
+        var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, this) + offset + DefaultSize);
+        var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, this) + DefaultRotation;
+        var ring = new MeshIndexRing();
+        float rotationStepSize = TubeArc / (RingPointCount - (TubeArc == 360.0 ? 0.0f : 1.0f));
+        for (int j = 0; j < RingPointCount; j++)
+        {
+            float theta = (j*rotationStepSize) + distanceFromFull / 2 + rotation;
+            Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
+            ring.points.Add(new MeshIndexRingPoint(theta, pointIndex));
+            listToAppend.Add(currentPoint.GetRingPoint(theta, size));
+            pointIndex++;
+        }
+        ring.minTheta = distanceFromFull / 2 + rotation;
+        ring.maxTheta = ring.minTheta + TubeArc;
+        return ring;
+    } 
     public void CreateRingPointsAlongCurve(List<PointOnCurve> points, List<Vector3> listToAppend, IDistanceSampler<float> sizeSampler, float TubeArc, float TubeThickness, int RingPointCount, IDistanceSampler<float> rotationSampler, bool isExterior, bool isClosedLoop,float DefaultSize, float DefaultRotation, float curveLength)
     {
         float distanceFromFull = 360.0f - TubeArc;

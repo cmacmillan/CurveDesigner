@@ -8,6 +8,22 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
+    public class MeshIndexRingPoint
+    {
+        public MeshIndexRingPoint(float angle, int index)
+        {
+            this.angle = angle;
+            this.index = index;
+        }
+        public float angle;
+        public int index;
+    }
+    public class MeshIndexRing
+    {
+        public float minTheta;
+        public float maxTheta;
+        public List<MeshIndexRingPoint> points = new List<MeshIndexRingPoint>();
+    }
     public static List<Vector3> vertices;
     public static List<int> triangles;
 
@@ -50,7 +66,7 @@ public static class MeshGenerator
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
 
-            Thread thread = new Thread(GenerateMesh);
+            Thread thread = new Thread(TryFinallyGenerateMesh);
             thread.Start();
         }
     }
@@ -72,6 +88,17 @@ public static class MeshGenerator
             list.Clear();
             if (capacity > list.Capacity)
                 list.Capacity = capacity;
+        }
+    }
+    private static void TryFinallyGenerateMesh()
+    {
+        try
+        {
+            GenerateMesh();
+        }
+        finally
+        {
+            IsBuzy = false;
         }
     }
     private static void GenerateMesh()
@@ -223,6 +250,109 @@ public static class MeshGenerator
             TrianglifyRingToCenter(startRingBaseIndex, AddRingCenterVertexFromAverage(startRingBaseIndex),true);
             TrianglifyRingToCenter(endRingBaseIndex, AddRingCenterVertexFromAverage(endRingBaseIndex),false);
         }
+        MeshIndexRing CreateRingPointsAlongCurveWithPrevious(MeshIndexRing previousRing, ref int pointIndexInList, PointOnCurve currentPoint, List<Vector3> listToAppend, IDistanceSampler<float> sizeSampler, float TubeArc, float TubeThickness, int RingPointCount, IDistanceSampler<float> rotationSampler, bool isExterior, bool isClosedLoop, float DefaultSize, float DefaultRotation, float curveLength)
+        {
+            var ring = new MeshIndexRing();
+            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, curve) + DefaultRotation;
+            float distanceFromFull = 360.0f - TubeArc;
+            float currentThetaMin = distanceFromFull / 2 + rotation;
+            float currentThetaMax = TubeArc + currentThetaMin;
+            float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
+            var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, curve) + offset + DefaultSize);
+
+            int minPreviousRingOverlapIndex = int.MaxValue;//The smallest index from previous ring that is within both rings theta
+            for (int i = 0; i < previousRing.points.Count; i++)
+                if (previousRing.points[i].angle >= currentThetaMin)
+                {
+                    minPreviousRingOverlapIndex = i;
+                    break;
+                }
+
+            int maxPreviousRingOverlapIndex = int.MinValue;
+            for (int i = previousRing.points.Count - 1; i >= 0; i--)
+                if (previousRing.points[i].angle <= currentThetaMax)
+                {
+                    maxPreviousRingOverlapIndex = i;
+                    break;
+                }
+
+            ring.minTheta = currentThetaMin;
+            ring.maxTheta = currentThetaMax;
+
+            for (int i = minPreviousRingOverlapIndex; i <= maxPreviousRingOverlapIndex; i++)
+            {
+                float theta = previousRing.points[i].angle;
+                Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
+                ring.points.Add(new MeshIndexRingPoint(theta, pointIndexInList));
+                listToAppend.Add(currentPoint.GetRingPoint(theta, size));
+                pointIndexInList++;
+                if (i > minPreviousRingOverlapIndex)
+                {
+                    int currentPointIndex = listToAppend.Count - 1;
+                    int previousPointIndex = currentPointIndex - 1;
+                    int acrossIndex = previousRing.points[i].index;
+                    int acrossPreviousIndex = previousRing.points[i - 1].index;//acrossIndex-1;//problem
+                    DrawQuad(acrossPreviousIndex,acrossIndex, previousPointIndex,currentPointIndex);
+                }
+            }
+            ///////////////////////////////////////////////START MIN////////////////////////////////////////////
+            if (minPreviousRingOverlapIndex > 0)//remember gotta do the same for max
+            {
+                float theta = currentThetaMin;
+                Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
+                ring.points.Insert(0, new MeshIndexRingPoint(theta, pointIndexInList));
+                listToAppend.Add(currentPoint.GetRingPoint(theta, size));
+                pointIndexInList++;
+                int currentPointIndex = ring.points[0].index;
+                int previousPointIndex = ring.points[1].index;//out of range
+                int crossIndex = previousRing.points[minPreviousRingOverlapIndex].index;
+                int previousCrossIndex = previousRing.points[minPreviousRingOverlapIndex - 1].index;
+                DrawQuad(previousPointIndex, currentPointIndex, crossIndex, previousCrossIndex);
+            }
+            //
+            if (minPreviousRingOverlapIndex != int.MaxValue && minPreviousRingOverlapIndex > 1)//if there is some min overlap
+            {
+                int minSplitPointCount = minPreviousRingOverlapIndex - 1;
+                int oldRingMinPointIndex = previousRing.points[0].index;
+                int newRingMinPointIndex = ring.points[0].index;
+                Vector3 startPos = listToAppend[newRingMinPointIndex];
+                Vector3 totalDirectionVector = listToAppend[newRingMinPointIndex] - startPos;
+                int splitStartIndex = listToAppend.Count;
+                int newRingTipConnectPoint;
+                //Then draw tip
+                DrawTri(previousRing.points[0].index, previousRing.points[1].index, newRingMinPointIndex);
+            }
+            ////////////////////////////////////////////////END MIN/////////////////////////////////////////////
+            ///////////////////////////////////////////////START MAX////////////////////////////////////////////
+            if (maxPreviousRingOverlapIndex < previousRing.points.Count-1)//remember gotta do the same for max
+            {
+                float theta = currentThetaMax;
+                Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
+                ring.points.Add(new MeshIndexRingPoint(theta, pointIndexInList));
+                listToAppend.Add(currentPoint.GetRingPoint(theta, size));
+                pointIndexInList++;
+                int currentPointIndex = ring.points[ring.points.Count-2].index;
+                int previousPointIndex = ring.points[ring.points.Count-1].index;//out of range
+                int crossIndex = previousRing.points[maxPreviousRingOverlapIndex].index;
+                int previousCrossIndex = previousRing.points[maxPreviousRingOverlapIndex + 1].index;
+                DrawQuad(previousPointIndex, currentPointIndex,previousCrossIndex,crossIndex);
+            }
+            //
+            if (maxPreviousRingOverlapIndex != int.MinValue&& maxPreviousRingOverlapIndex<previousRing.points.Count-2)//if there is some min overlap
+            {
+                int minSplitPointCount =  - 1;
+                int oldRingMinPointIndex = previousRing.points.Last().index;
+                int newRingMinPointIndex = ring.points.Last().index;
+                Vector3 startPos = listToAppend[newRingMinPointIndex];
+                Vector3 totalDirectionVector = listToAppend[newRingMinPointIndex] - startPos;
+                int splitStartIndex = listToAppend.Count;
+                int newRingTipConnectPoint;
+                //Then draw tip
+                DrawTri(previousRing.points.Last(1).index, previousRing.points.Last().index, newRingMinPointIndex);
+            }
+            ////////////////////////////////////////////////END MAX/////////////////////////////////////////////
+            return ring;
+        }
         switch (CurveType)
         {
             case CurveType.Cylinder:
@@ -230,13 +360,20 @@ public static class MeshGenerator
                 numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                 shouldDrawConnectingFace = true;
                 InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true,IsClosedLoop,Radius,Rotation,curve.GetLength());
-                TrianglifyLayer(true,ActualRingPointCount);
+                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
+                TrianglifyLayer(true, ActualRingPointCount);
                 if (!IsClosedLoop)
                     CreateTubeEndPlates();
                 break;
             case CurveType.HollowTube:
-                numVerts = ActualRingPointCount * sampled.Count * 2;
+                InitLists();
+                int pointIndex = 0;
+                var previousRing = curve.CreateRingPointsAlongCurve(ref pointIndex, sampled[0], vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
+                for (int i = 0; i < sampled.Count; i++)
+                    previousRing = CreateRingPointsAlongCurveWithPrevious(previousRing,ref pointIndex, sampled[i], vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
+                //NewTrianglifyLayer();
+                break; 
+                /*numVerts = ActualRingPointCount * sampled.Count * 2;
                 numTris = ActualRingPointCount * numRings * 6 * 2;
                 bool is360degree = TubeArc == 360.0f && MeshGenerator.IsTubeArcConstant;
                 if (is360degree)
@@ -252,7 +389,7 @@ public static class MeshGenerator
                     ConnectTubeInteriorAndExterior();
                 if (!IsClosedLoop)
                     ConnectTubeInteriorExteriorEnds();
-                break;
+                break;*/
             case CurveType.Flat:
                 InitLists();
                 float curveLength = curve.GetLength();
@@ -359,6 +496,12 @@ public static class MeshGenerator
                 break;
                 */
         }
-        IsBuzy = false;
+    }
+}
+public static class ListExtensionMethods
+{
+    public static T Last<T>(this List<T> lst,int indexFromLast=0)
+    {
+        return lst[lst.Count - 1-indexFromLast];
     }
 }
