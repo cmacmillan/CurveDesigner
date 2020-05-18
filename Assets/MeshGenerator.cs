@@ -24,6 +24,28 @@ public static class MeshGenerator
         public float maxTheta;
         public List<MeshIndexRingPoint> points = new List<MeshIndexRingPoint>();
     }
+    public class ThreadMesh
+    {
+        public ThreadMesh(Mesh meshToCopy)
+        {
+            tris = meshToCopy.triangles;
+            verts = meshToCopy.vertices;
+            uv = meshToCopy.uv;
+            normals = meshToCopy.normals;
+        }
+        public void WriteToMesh(Mesh meshToWriteTo)
+        {
+            meshToWriteTo.vertices = verts;
+            meshToWriteTo.triangles = tris;
+            meshToWriteTo.normals = normals;
+            meshToWriteTo.uv = uv;
+        }
+        public int[] tris;
+        public Vector3[] verts;
+        public Vector3[] normals;
+        public Vector2[] uv;
+        //currently only support uv0
+    }
     public static List<Vector3> vertices;
     public static List<int> triangles;
 
@@ -45,6 +67,7 @@ public static class MeshGenerator
     public static float Thickness = 0.0f;
     public static bool IsClosedLoop = false;
     public static CurveType CurveType;
+    public static ThreadMesh meshToTile;
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -65,6 +88,7 @@ public static class MeshGenerator
             MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
+            MeshGenerator.meshToTile = curve.meshToTile == null ? null : new ThreadMesh(curve.meshToTile);
 
             Thread thread = new Thread(TryFinallyGenerateMesh);
             thread.Start();
@@ -486,15 +510,21 @@ public static class MeshGenerator
                     previousDownLeftIndex = downLeftIndex;
                 }
                 break;
-                /*
-                 * numVerts = 4 * sampled.Count;
-                numTris = 8*(sampled.Count - 1)+4;
-                curve.CreateRectanglePointsAlongCurve(sampled, vertices, rotationDistanceSampler, IsClosedLoop, Thickness, sizeDistanceSampler,Radius,Rotation,curve.GetLength());
-                shouldDrawConnectingFace = true;
-                TrianglifyLayer(true,4);
-                CreateFlatEndPlates();
+            /*
+             * numVerts = 4 * sampled.Count;
+            numTris = 8*(sampled.Count - 1)+4;
+            curve.CreateRectanglePointsAlongCurve(sampled, vertices, rotationDistanceSampler, IsClosedLoop, Thickness, sizeDistanceSampler,Radius,Rotation,curve.GetLength());
+            shouldDrawConnectingFace = true;
+            TrianglifyLayer(true,4);
+            CreateFlatEndPlates();
+            break;
+            */
+            case CurveType.Mesh:
+                foreach (var i in meshToTile.verts)
+                    vertices.Add(i);
+                foreach (var i in meshToTile.tris)
+                    triangles.Add(i);
                 break;
-                */
         }
     }
 }

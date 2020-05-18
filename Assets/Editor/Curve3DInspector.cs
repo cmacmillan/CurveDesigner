@@ -204,17 +204,17 @@ public class Curve3DInspector : Editor
         {
             if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime)
             {
-                if (curve.mesh == null)
+                if (curve.displayMesh == null)
                 {
-                    curve.mesh = new Mesh();
-                    curve.filter.mesh = curve.mesh;
+                    curve.displayMesh = new Mesh();
+                    curve.filter.mesh = curve.displayMesh;
                 } else
                 {
-                    curve.mesh.Clear();
+                    curve.displayMesh.Clear();
                 }
-                curve.mesh.SetVertices(MeshGenerator.vertices);
-                curve.mesh.SetTriangles(MeshGenerator.triangles,0);
-                curve.mesh.RecalculateNormals();
+                curve.displayMesh.SetVertices(MeshGenerator.vertices);
+                curve.displayMesh.SetTriangles(MeshGenerator.triangles,0);
+                curve.displayMesh.RecalculateNormals();
                 curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
             }
             if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)

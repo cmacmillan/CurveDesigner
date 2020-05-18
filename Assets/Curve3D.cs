@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Curve3D : MonoBehaviour
 {
@@ -65,6 +66,8 @@ public class Curve3D : MonoBehaviour
     public Texture2D lineTex;
     public Material testmat;
 
+    public Mesh meshToTile;
+
     public Texture2D blueLineTopTex;
     public Texture2D blueLineBottomTex;
     public Texture2D redLineTopTex;
@@ -79,7 +82,8 @@ public class Curve3D : MonoBehaviour
     public MeshFilter filter;
     public DateTime lastMeshUpdateStartTime;
     public DateTime lastMeshUpdateEndTime;
-    public Mesh mesh;
+    [FormerlySerializedAs("mesh")]
+    public Mesh displayMesh;
     private bool isInitialized = false;
 
     [ContextMenu("Reset curve")]
@@ -292,4 +296,5 @@ public enum CurveType
     DoubleBezier = 2,
     NoMesh = 3,
     Cylinder = 4,
+    Mesh = 5,
 }
