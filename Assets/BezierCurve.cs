@@ -189,7 +189,7 @@ public partial class BezierCurve
     }
     public Vector3 GetSegmentTangentAtTime(int segmentIndex, float time)
     {
-        return SolveTangentAtTime(GetVirtualIndex(segmentIndex,0),3,time);
+        return SolveTangentAtTime(GetVirtualIndex(segmentIndex,0),3,time).normalized;
     }
     private Vector3 SolveTangentAtTime(int startIndex, int length, float time)
     {

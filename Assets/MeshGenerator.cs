@@ -32,6 +32,7 @@ public static class MeshGenerator
             verts = meshToCopy.vertices;
             uv = meshToCopy.uv;
             normals = meshToCopy.normals;
+            bounds = meshToCopy.bounds;
         }
         public void WriteToMesh(Mesh meshToWriteTo)
         {
@@ -44,6 +45,7 @@ public static class MeshGenerator
         public Vector3[] verts;
         public Vector3[] normals;
         public Vector2[] uv;
+        public Bounds bounds;
         //currently only support uv0
     }
     public static List<Vector3> vertices;
@@ -380,136 +382,146 @@ public static class MeshGenerator
         switch (CurveType)
         {
             case CurveType.Cylinder:
-                numVerts = ActualRingPointCount * sampled.Count;
-                numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
-                shouldDrawConnectingFace = true;
-                InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
-                TrianglifyLayer(true, ActualRingPointCount);
-                if (!IsClosedLoop)
-                    CreateTubeEndPlates();
-                break;
-            case CurveType.HollowTube:
-                InitLists();
-                int pointIndex = 0;
-                var previousRing = curve.CreateRingPointsAlongCurve(ref pointIndex, sampled[0], vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
-                for (int i = 0; i < sampled.Count; i++)
-                    previousRing = CreateRingPointsAlongCurveWithPrevious(previousRing,ref pointIndex, sampled[i], vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
-                //NewTrianglifyLayer();
-                break; 
-                /*numVerts = ActualRingPointCount * sampled.Count * 2;
-                numTris = ActualRingPointCount * numRings * 6 * 2;
-                bool is360degree = TubeArc == 360.0f && MeshGenerator.IsTubeArcConstant;
-                if (is360degree)
-                    shouldDrawConnectingFace = true;
-                else
-                    shouldDrawConnectingFace = false;
-                InitLists();
-                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true,IsClosedLoop,Radius,Rotation,curve.GetLength());
-                curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, false,IsClosedLoop,Radius,Rotation,curve.GetLength());
-                TrianglifyLayer(true,ActualRingPointCount);
-                TrianglifyLayer(false,ActualRingPointCount);
-                if (!is360degree)
-                    ConnectTubeInteriorAndExterior();
-                if (!IsClosedLoop)
-                    ConnectTubeInteriorExteriorEnds();
-                break;*/
-            case CurveType.Flat:
-                InitLists();
-                float curveLength = curve.GetLength();
-
-                Vector3 previousUpRight=Vector3.zero;
-                int previousUpRightIndex = -1;
-
-                Vector3 previousUpLeft=Vector3.zero;
-                int previousUpLeftIndex = -1;
-
-                Vector3 previousDownRight=Vector3.zero;
-                int previousDownRightIndex = -1;
-
-                Vector3 previousDownLeft=Vector3.zero;
-                int previousDownLeftIndex = -1;
-
-
-                for (int i=0;i<sampled.Count;i++)
                 {
-                    PointOnCurve currentPoint = sampled[i];
-                    var center = currentPoint.position;
-                    var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength,curve) + Rotation;
-                    var up = Quaternion.AngleAxis(rotation, currentPoint.tangent) * currentPoint.reference.normalized;
-                    var right = Vector3.Cross(up, currentPoint.tangent).normalized;
-                    var scaledUp = up * Thickness / 2.0f;
-                    var scaledRight = right * Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength,curve) + Radius);
-
-                    var upRight = center + scaledUp + scaledRight;
-                    var upLeft = center + scaledUp - scaledRight;
-                    var downLeft = center - scaledUp - scaledRight;
-                    var downRight = center - scaledUp + scaledRight;
-
-                    int baseIndex = vertices.Count;
-
-                    int upRightIndex = baseIndex;
-                    vertices.Add(upRight);
-
-                    int upLeftIndex = baseIndex + 1;
-                    vertices.Add(upLeft);
-
-                    int downLeftIndex = baseIndex + 2;
-                    vertices.Add(downLeft);
-
-                    int downRightIndex = baseIndex + 3;
-                    vertices.Add(downRight);
-
-
-                    if (i > 0)
-                    {
-                        Vector3 topAverage = (previousUpLeft + previousUpRight + upLeft + upRight) / 4.0f;
-                        Vector3 bottomAverage = (previousDownLeft + previousDownRight + downLeft + downRight) / 4.0f;
-
-                        int topAverageIndex = baseIndex + 4;
-                        vertices.Add(topAverage);
-
-                        int bottomAverageIndex = baseIndex + 5;
-                        vertices.Add(bottomAverage);
-
-                        if (true)
-                        {
-                            //top
-                            DrawTri(previousUpRightIndex, previousUpLeftIndex, topAverageIndex);
-                            DrawTri(previousUpLeftIndex, upLeftIndex, topAverageIndex);
-                            DrawTri(upLeftIndex, upRightIndex, topAverageIndex);
-                            DrawTri(upRightIndex, previousUpRightIndex, topAverageIndex);
-
-                            //bottom
-                            DrawTri(previousDownLeftIndex, previousDownRightIndex, bottomAverageIndex);
-                            DrawTri(downLeftIndex, previousDownLeftIndex, bottomAverageIndex);
-                            DrawTri(downRightIndex, downLeftIndex, bottomAverageIndex);
-                            DrawTri(previousDownRightIndex, downRightIndex, bottomAverageIndex);
-                        }
-                        else
-                        {
-                            DrawQuad(previousUpRightIndex,previousUpLeftIndex,upRightIndex,upLeftIndex);
-                        }
-                    }
-                    /*else
-                    {
-                        DrawQuad(previousUpRightIndex,previousUpLeftIndex,upLeftIndex,upRightIndex);
-                        DrawQuad(previousDownLeftIndex, previousDownRightIndex, downRightIndex, downLeftIndex);
-                    }*/
-
-                    previousUpRight = upRight;
-                    previousUpRightIndex = upRightIndex;
-
-                    previousUpLeft = upLeft;
-                    previousUpLeftIndex = upLeftIndex;
-
-                    previousDownRight = downRight;
-                    previousDownRightIndex = downRightIndex;
-
-                    previousDownLeft = downLeft;
-                    previousDownLeftIndex = downLeftIndex;
+                    numVerts = ActualRingPointCount * sampled.Count;
+                    numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
+                    shouldDrawConnectingFace = true;
+                    InitLists();
+                    curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
+                    TrianglifyLayer(true, ActualRingPointCount);
+                    if (!IsClosedLoop)
+                        CreateTubeEndPlates();
+                    break;
                 }
-                break;
+            case CurveType.HollowTube:
+                #region hollowtube
+                {
+                    InitLists();
+                    int pointIndex = 0;
+                    var previousRing = curve.CreateRingPointsAlongCurve(ref pointIndex, sampled[0], vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
+                    for (int i = 0; i < sampled.Count; i++)
+                        previousRing = CreateRingPointsAlongCurveWithPrevious(previousRing, ref pointIndex, sampled[i], vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
+                    //NewTrianglifyLayer();
+                    break;
+                }
+            /*numVerts = ActualRingPointCount * sampled.Count * 2;
+            numTris = ActualRingPointCount * numRings * 6 * 2;
+            bool is360degree = TubeArc == 360.0f && MeshGenerator.IsTubeArcConstant;
+            if (is360degree)
+                shouldDrawConnectingFace = true;
+            else
+                shouldDrawConnectingFace = false;
+            InitLists();
+            curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true,IsClosedLoop,Radius,Rotation,curve.GetLength());
+            curve.CreateRingPointsAlongCurve(sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, false,IsClosedLoop,Radius,Rotation,curve.GetLength());
+            TrianglifyLayer(true,ActualRingPointCount);
+            TrianglifyLayer(false,ActualRingPointCount);
+            if (!is360degree)
+                ConnectTubeInteriorAndExterior();
+            if (!IsClosedLoop)
+                ConnectTubeInteriorExteriorEnds();
+            break;*/
+            #endregion
+            case CurveType.Flat:
+                #region flat
+                {
+
+                    InitLists();
+                    float curveLength = curve.GetLength();
+
+                    Vector3 previousUpRight = Vector3.zero;
+                    int previousUpRightIndex = -1;
+
+                    Vector3 previousUpLeft = Vector3.zero;
+                    int previousUpLeftIndex = -1;
+
+                    Vector3 previousDownRight = Vector3.zero;
+                    int previousDownRightIndex = -1;
+
+                    Vector3 previousDownLeft = Vector3.zero;
+                    int previousDownLeftIndex = -1;
+
+
+                    for (int i = 0; i < sampled.Count; i++)
+                    {
+                        PointOnCurve currentPoint = sampled[i];
+                        var center = currentPoint.position;
+                        var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
+                        var up = Quaternion.AngleAxis(rotation, currentPoint.tangent) * currentPoint.reference.normalized;
+                        var right = Vector3.Cross(up, currentPoint.tangent).normalized;
+                        var scaledUp = up * Thickness / 2.0f;
+                        var scaledRight = right * Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Radius);
+
+                        var upRight = center + scaledUp + scaledRight;
+                        var upLeft = center + scaledUp - scaledRight;
+                        var downLeft = center - scaledUp - scaledRight;
+                        var downRight = center - scaledUp + scaledRight;
+
+                        int baseIndex = vertices.Count;
+
+                        int upRightIndex = baseIndex;
+                        vertices.Add(upRight);
+
+                        int upLeftIndex = baseIndex + 1;
+                        vertices.Add(upLeft);
+
+                        int downLeftIndex = baseIndex + 2;
+                        vertices.Add(downLeft);
+
+                        int downRightIndex = baseIndex + 3;
+                        vertices.Add(downRight);
+
+
+                        if (i > 0)
+                        {
+                            Vector3 topAverage = (previousUpLeft + previousUpRight + upLeft + upRight) / 4.0f;
+                            Vector3 bottomAverage = (previousDownLeft + previousDownRight + downLeft + downRight) / 4.0f;
+
+                            int topAverageIndex = baseIndex + 4;
+                            vertices.Add(topAverage);
+
+                            int bottomAverageIndex = baseIndex + 5;
+                            vertices.Add(bottomAverage);
+
+                            if (true)
+                            {
+                                //top
+                                DrawTri(previousUpRightIndex, previousUpLeftIndex, topAverageIndex);
+                                DrawTri(previousUpLeftIndex, upLeftIndex, topAverageIndex);
+                                DrawTri(upLeftIndex, upRightIndex, topAverageIndex);
+                                DrawTri(upRightIndex, previousUpRightIndex, topAverageIndex);
+
+                                //bottom
+                                DrawTri(previousDownLeftIndex, previousDownRightIndex, bottomAverageIndex);
+                                DrawTri(downLeftIndex, previousDownLeftIndex, bottomAverageIndex);
+                                DrawTri(downRightIndex, downLeftIndex, bottomAverageIndex);
+                                DrawTri(previousDownRightIndex, downRightIndex, bottomAverageIndex);
+                            }
+                            else
+                            {
+                                DrawQuad(previousUpRightIndex, previousUpLeftIndex, upRightIndex, upLeftIndex);
+                            }
+                        }
+                        /*else
+                        {
+                            DrawQuad(previousUpRightIndex,previousUpLeftIndex,upLeftIndex,upRightIndex);
+                            DrawQuad(previousDownLeftIndex, previousDownRightIndex, downRightIndex, downLeftIndex);
+                        }*/
+
+                        previousUpRight = upRight;
+                        previousUpRightIndex = upRightIndex;
+
+                        previousUpLeft = upLeft;
+                        previousUpLeftIndex = upLeftIndex;
+
+                        previousDownRight = downRight;
+                        previousDownRightIndex = downRightIndex;
+
+                        previousDownLeft = downLeft;
+                        previousDownLeftIndex = downLeftIndex;
+                    }
+                    break;
+                }
             /*
              * numVerts = 4 * sampled.Count;
             numTris = 8*(sampled.Count - 1)+4;
@@ -519,12 +531,40 @@ public static class MeshGenerator
             CreateFlatEndPlates();
             break;
             */
+            #endregion
             case CurveType.Mesh:
-                foreach (var i in meshToTile.verts)
-                    vertices.Add(i);
-                foreach (var i in meshToTile.tris)
-                    triangles.Add(i);
-                break;
+                {
+                    InitLists();
+                    //we are gonna assume that the largest dimension of the bounding box is the correct direction, and that the mesh is axis aligned and it is perpendicular to the edge of the bounding box
+                    var bounds = meshToTile.bounds;
+                    //watch out for square meshes
+                    Quaternion rotation;
+                    if (bounds.extents.x >= bounds.extents.y && bounds.extents.x >= bounds.extents.z)
+                        rotation = Quaternion.FromToRotation(Vector3.right, Vector3.right);//does nothing
+                    else if (bounds.extents.y >= bounds.extents.x && bounds.extents.y >= bounds.extents.z)
+                        rotation = Quaternion.FromToRotation(Vector3.up, Vector3.right);
+                    else
+                        rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.right);
+                    Vector3 TransformPoint(Vector3 point)
+                    {
+                        return (rotation * (point - bounds.center))+ new Vector3(bounds.extents.x,0,0);
+                    }
+                    for (int i = 0; i < meshToTile.verts.Length; i++)
+                        meshToTile.verts[i] = TransformPoint(meshToTile.verts[i]);
+                    //now x is always along the mesh and normalized around the center
+                    float meshLength = bounds.extents.x;//WRONG WRONG WRONG bounds aren't up to date
+                    foreach (var i in meshToTile.verts)
+                    {
+                        var point = curve.GetPointAtDistance(i.x);
+                        var cross = Vector3.Cross(point.reference, point.tangent);
+                        vertices.Add(point.position+point.reference*i.y+cross*i.z);
+                    }
+                    /*foreach (var i in meshToTile.verts)
+                        vertices.Add(i);*/
+                    foreach (var i in meshToTile.tris)
+                        triangles.Add(i);
+                    break;
+                }
         }
     }
 }
