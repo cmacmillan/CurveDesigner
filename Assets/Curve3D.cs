@@ -198,6 +198,12 @@ public class Curve3D : MonoBehaviour
     [SerializeField]
     private CurveType oldType;
 
+    public float closeTilableMeshGap;
+    [HideInInspector]
+    [SerializeField]
+    private float oldCloseTilableMeshGap = -1;
+
+
     public bool HaveCurveSettingsChanged()
     {
         bool CheckField<T>(T field, ref T oldField)
@@ -227,6 +233,7 @@ public class Curve3D : MonoBehaviour
         retr|=CheckField(curveRotation, ref oldCurveRotation);
         retr|=CheckField(thickness, ref oldTubeThickness);
         retr|=CheckField(type, ref oldType);
+        retr |= CheckField(closeTilableMeshGap, ref oldCloseTilableMeshGap);
         if (CheckField(isClosedLoop, ref oldIsClosedLoop))
         {
             retr = true;

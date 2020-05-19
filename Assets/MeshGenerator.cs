@@ -70,6 +70,7 @@ public static class MeshGenerator
     public static bool IsClosedLoop = false;
     public static CurveType CurveType;
     public static ThreadMesh meshToTile;
+    public static float closeTilableMeshGap;
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -91,6 +92,7 @@ public static class MeshGenerator
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
             MeshGenerator.meshToTile = curve.meshToTile == null ? null : new ThreadMesh(curve.meshToTile);
+            MeshGenerator.closeTilableMeshGap = curve.closeTilableMeshGap;
 
             Thread thread = new Thread(TryFinallyGenerateMesh);
             thread.Start();
@@ -538,31 +540,53 @@ public static class MeshGenerator
                     //we are gonna assume that the largest dimension of the bounding box is the correct direction, and that the mesh is axis aligned and it is perpendicular to the edge of the bounding box
                     var bounds = meshToTile.bounds;
                     //watch out for square meshes
+                    float meshLength;
                     Quaternion rotation;
                     if (bounds.extents.x >= bounds.extents.y && bounds.extents.x >= bounds.extents.z)
+                    {
+                        meshLength = bounds.extents.x*2;
                         rotation = Quaternion.FromToRotation(Vector3.right, Vector3.right);//does nothing
+                    }
                     else if (bounds.extents.y >= bounds.extents.x && bounds.extents.y >= bounds.extents.z)
+                    {
+                        meshLength = bounds.extents.y*2;
                         rotation = Quaternion.FromToRotation(Vector3.up, Vector3.right);
+                    }
                     else
+                    {
+                        meshLength = bounds.extents.z*2;
                         rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.right);
+                    }
                     Vector3 TransformPoint(Vector3 point)
                     {
-                        return (rotation * (point - bounds.center))+ new Vector3(bounds.extents.x,0,0);
+                        return (rotation * (point - bounds.center))+ new Vector3(meshLength/2,0,0);
                     }
                     for (int i = 0; i < meshToTile.verts.Length; i++)
                         meshToTile.verts[i] = TransformPoint(meshToTile.verts[i]);
                     //now x is always along the mesh and normalized around the center
-                    float meshLength = bounds.extents.x;//WRONG WRONG WRONG bounds aren't up to date
-                    foreach (var i in meshToTile.verts)
+                    var curveLength = curve.GetLength();
+                    int vertCount = meshToTile.verts.Length;
+                    int c = 0;
+                    for (float f = 0; f < curveLength; f += meshLength)
                     {
-                        var point = curve.GetPointAtDistance(i.x);
-                        var cross = Vector3.Cross(point.reference, point.tangent);
-                        vertices.Add(point.position+point.reference*i.y+cross*i.z);
+                        foreach (var i in meshToTile.verts)
+                        {
+                            var point = curve.GetPointAtDistance(i.x+f-c*closeTilableMeshGap);
+                            var cross = Vector3.Cross(point.reference, point.tangent);
+                            vertices.Add(point.position + point.reference * i.y + cross * i.z);
+                        }
+                        foreach (var i in meshToTile.tris)
+                        {
+                            triangles.Add(i + (c * vertCount));
+                        }
+                        c++;
                     }
-                    /*foreach (var i in meshToTile.verts)
-                        vertices.Add(i);*/
-                    foreach (var i in meshToTile.tris)
-                        triangles.Add(i);
+                    for (int i=0;i<triangles.Count;i+=3)
+                    {
+                        var swap = triangles[i];
+                        triangles[i] = triangles[i + 2];
+                        triangles[i + 2] = swap;
+                    }
                     break;
                 }
         }
