@@ -48,8 +48,12 @@ public static class MeshGenerator
         public Bounds bounds;
         //currently only support uv0
     }
+
     public static List<Vector3> vertices;
     public static List<int> triangles;
+
+    public static bool hasUVs;
+    public static List<Vector2> uvs;
 
     public static bool IsBuzy = false;
 
@@ -71,6 +75,7 @@ public static class MeshGenerator
     public static CurveType CurveType;
     public static ThreadMesh meshToTile;
     public static float closeTilableMeshGap;
+    public static MeshPrimaryAxis meshPrimaryAxis;
 
     public static void StartGenerating(Curve3D curve)
     {
@@ -93,6 +98,7 @@ public static class MeshGenerator
             MeshGenerator.CurveType = curve.type;
             MeshGenerator.meshToTile = curve.meshToTile == null ? null : new ThreadMesh(curve.meshToTile);
             MeshGenerator.closeTilableMeshGap = curve.closeTilableMeshGap;
+            MeshGenerator.meshPrimaryAxis = curve.meshPrimaryAxis;
 
             Thread thread = new Thread(TryFinallyGenerateMesh);
             thread.Start();
@@ -185,10 +191,13 @@ public static class MeshGenerator
                 }
             }
         }
-        void InitLists()
+        void InitLists(bool provideUvs = false)
         {
             InitOrClear(ref vertices);
             InitOrClear(ref triangles);
+            if (provideUvs)
+                InitOrClear(ref uvs);
+            hasUVs = provideUvs;
         }
         void ConnectTubeInteriorAndExterior()
         {
@@ -536,44 +545,85 @@ public static class MeshGenerator
             #endregion
             case CurveType.Mesh:
                 {
-                    InitLists();
+                    InitLists(true);
                     //we are gonna assume that the largest dimension of the bounding box is the correct direction, and that the mesh is axis aligned and it is perpendicular to the edge of the bounding box
                     var bounds = meshToTile.bounds;
                     //watch out for square meshes
-                    float meshLength;
-                    Quaternion rotation;
-                    if (bounds.extents.x >= bounds.extents.y && bounds.extents.x >= bounds.extents.z)
+                    float meshLength=-1;
+                    float secondaryDimensionLength=-1;
                     {
-                        meshLength = bounds.extents.x*2;
-                        rotation = Quaternion.FromToRotation(Vector3.right, Vector3.right);//does nothing
+                        Quaternion rotation=Quaternion.identity;
+                        void UseXAsMainAxis()
+                        {
+                            meshLength = bounds.extents.x * 2;
+                            secondaryDimensionLength = Mathf.Max(bounds.extents.y,bounds.extents.z);
+                            rotation = Quaternion.FromToRotation(Vector3.right, Vector3.right);//does nothing
+                        }
+                        void UseYAsMainAxis()
+                        {
+                            meshLength = bounds.extents.y * 2;
+                            secondaryDimensionLength = Mathf.Max(bounds.extents.x,bounds.extents.z);
+                            rotation = Quaternion.FromToRotation(Vector3.up, Vector3.right);
+                        }
+                        void UseZAsMainAxis()
+                        {
+                            meshLength = bounds.extents.z * 2;
+                            secondaryDimensionLength = Mathf.Max(bounds.extents.x,bounds.extents.y);
+                            rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.right);
+                        }
+                        switch (meshPrimaryAxis)
+                        {
+                            case MeshPrimaryAxis.auto:
+                                if ((bounds.extents.x >= bounds.extents.y && bounds.extents.x >= bounds.extents.z))
+                                {
+                                    UseXAsMainAxis();
+                                }
+                                else if ((bounds.extents.y >= bounds.extents.x && bounds.extents.y >= bounds.extents.z))
+                                {
+                                    UseYAsMainAxis();
+                                }
+                                else
+                                {
+                                    UseZAsMainAxis();
+                                }
+                                break;
+                            case MeshPrimaryAxis.x:
+                                UseXAsMainAxis();
+                                break;
+                            case MeshPrimaryAxis.y:
+                                UseYAsMainAxis();
+                                break;
+                            case MeshPrimaryAxis.z:
+                                UseZAsMainAxis();
+                                break;
+                        }
+                        Vector3 TransformPoint(Vector3 point)
+                        {
+                            return (rotation * (point - bounds.center)) + new Vector3(meshLength / 2, 0, 0);
+                        }
+                        for (int i = 0; i < meshToTile.verts.Length; i++)
+                            meshToTile.verts[i] = TransformPoint(meshToTile.verts[i]);
+                        //now x is always along the mesh and normalized around the center
                     }
-                    else if (bounds.extents.y >= bounds.extents.x && bounds.extents.y >= bounds.extents.z)
-                    {
-                        meshLength = bounds.extents.y*2;
-                        rotation = Quaternion.FromToRotation(Vector3.up, Vector3.right);
-                    }
-                    else
-                    {
-                        meshLength = bounds.extents.z*2;
-                        rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.right);
-                    }
-                    Vector3 TransformPoint(Vector3 point)
-                    {
-                        return (rotation * (point - bounds.center))+ new Vector3(meshLength/2,0,0);
-                    }
-                    for (int i = 0; i < meshToTile.verts.Length; i++)
-                        meshToTile.verts[i] = TransformPoint(meshToTile.verts[i]);
-                    //now x is always along the mesh and normalized around the center
                     var curveLength = curve.GetLength();
                     int vertCount = meshToTile.verts.Length;
                     int c = 0;
+                    bool useUvs = meshToTile.uv.Length ==meshToTile.verts.Length;
                     for (float f = 0; f < curveLength; f += meshLength)
                     {
-                        foreach (var i in meshToTile.verts)
+                        for (int i = 0; i < meshToTile.verts.Length; i++)
                         {
-                            var point = curve.GetPointAtDistance(i.x+f-c*closeTilableMeshGap);
-                            var cross = Vector3.Cross(point.reference, point.tangent);
-                            vertices.Add(point.position + point.reference * i.y + cross * i.z);
+                            var vert = meshToTile.verts[i];
+                            var distance = vert.x + f - c * closeTilableMeshGap;
+                            var point = curve.GetPointAtDistance(distance);
+                            var rotation = rotationDistanceSampler.GetValueAtDistance(distance,IsClosedLoop,curveLength,curve)+Rotation;
+                            var size = sizeDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Radius;
+                            var sizeScale = size / secondaryDimensionLength;
+                            var reference = Quaternion.AngleAxis(rotation,point.tangent)*point.reference;
+                            var cross = Vector3.Cross(reference, point.tangent);
+                            vertices.Add(point.position + reference * vert.y*sizeScale + cross * vert.z*sizeScale);
+                            if (useUvs)
+                                uvs.Add(meshToTile.uv[i]);
                         }
                         foreach (var i in meshToTile.tris)
                         {

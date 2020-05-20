@@ -56,17 +56,10 @@ public class Curve3D : MonoBehaviour
         averageSize += curveRadius;
     }
 
-    public bool isClosedLoop = false;
-    [SerializeField]
-    [HideInInspector]
-    private bool oldIsClosedLoop;
-
     public EditMode editMode=EditMode.PositionCurve;
     public BezierCurve positionCurve;
     public Texture2D lineTex;
     public Material testmat;
-
-    public Mesh meshToTile;
 
     public Texture2D blueLineTopTex;
     public Texture2D blueLineBottomTex;
@@ -203,6 +196,20 @@ public class Curve3D : MonoBehaviour
     [SerializeField]
     private float oldCloseTilableMeshGap = -1;
 
+    public Mesh meshToTile;
+    [HideInInspector]
+    [SerializeField]
+    private Mesh oldMeshToTile=null;
+
+    public bool isClosedLoop = false;
+    [SerializeField]
+    [HideInInspector]
+    private bool oldIsClosedLoop;
+
+    public MeshPrimaryAxis meshPrimaryAxis = MeshPrimaryAxis.auto;
+    [SerializeField]
+    [HideInInspector]
+    private MeshPrimaryAxis oldMeshPrimaryAxis;
 
     public bool HaveCurveSettingsChanged()
     {
@@ -224,6 +231,7 @@ public class Curve3D : MonoBehaviour
             } 
             return false;
         }
+
         bool retr = false;
 
         retr|=CheckField(ringPointCount, ref oldRingPointCount);
@@ -233,15 +241,16 @@ public class Curve3D : MonoBehaviour
         retr|=CheckField(curveRotation, ref oldCurveRotation);
         retr|=CheckField(thickness, ref oldTubeThickness);
         retr|=CheckField(type, ref oldType);
-        retr |= CheckField(closeTilableMeshGap, ref oldCloseTilableMeshGap);
+        retr|=CheckField(closeTilableMeshGap, ref oldCloseTilableMeshGap);
+        retr|=CheckField(meshToTile, ref oldMeshToTile);
+        retr|=CheckField(meshPrimaryAxis,ref oldMeshPrimaryAxis);
+
         if (CheckField(isClosedLoop, ref oldIsClosedLoop))
         {
             retr = true;
             positionCurve.Recalculate();
             UICurve.Initialize();
         }
-
-        //retr|=CheckAnimationCurve(curveSizeAnimationCurve,ref _oldCurveSizeAnimationCurve);
 
         return retr;
     }
