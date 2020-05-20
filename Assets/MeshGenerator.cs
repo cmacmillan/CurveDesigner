@@ -609,16 +609,24 @@ public static class MeshGenerator
                     int vertCount = meshToTile.verts.Length;
                     int c = 0;
                     bool useUvs = meshToTile.uv.Length ==meshToTile.verts.Length;
+                    float GetSize(float dist)
+                    {
+                        return sizeDistanceSampler.GetValueAtDistance(dist, IsClosedLoop, curveLength, curve) + Radius;
+                    }
+                    float startSize = GetSize(0.0f);
+                    float sizeScale = startSize / secondaryDimensionLength;
                     for (float f = 0; f < curveLength; f += meshLength)
                     {
+                        //meshLength = 0;
+                        //float startMeshPos = vertCount
                         for (int i = 0; i < meshToTile.verts.Length; i++)
                         {
                             var vert = meshToTile.verts[i];
-                            var distance = vert.x + f - c * closeTilableMeshGap;
+                            var distance = vert.x*sizeScale+ f - c * closeTilableMeshGap;
                             var point = curve.GetPointAtDistance(distance);
                             var rotation = rotationDistanceSampler.GetValueAtDistance(distance,IsClosedLoop,curveLength,curve)+Rotation;
-                            var size = sizeDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Radius;
-                            var sizeScale = size / secondaryDimensionLength;
+                            var size = GetSize(distance);
+                            sizeScale = size / secondaryDimensionLength;
                             var reference = Quaternion.AngleAxis(rotation,point.tangent)*point.reference;
                             var cross = Vector3.Cross(reference, point.tangent);
                             vertices.Add(point.position + reference * vert.y*sizeScale + cross * vert.z*sizeScale);

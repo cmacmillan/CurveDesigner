@@ -78,7 +78,38 @@ namespace Assets.NewUI
             backingCurveModificationDistances = null;
         }
         //////////////
-
+        public float GetAreaUnderCurveUpToDistance(float distance, bool isClosedLoop, float curveLength, BezierCurve curve)
+        {
+            if (isClosedLoop)
+                throw new NotImplementedException();
+            if (_points.Count == 0)
+                return 0;
+            var previousPoint = _points[0];
+            var previousDistance = previousPoint.GetDistance(curve);
+            float areaUnderCurve = 0;
+            float AreaBeneathTwoPoints(float x1,float y1, float x2, float y2)
+            {
+                return ((y2 - y1)/2)*(x2-x1);
+            }
+            for (int i = 1; i < _points.Count; i++)
+            {
+                var currPoint = _points[i];
+                float currDistance = currPoint.GetDistance(curve);
+                if (currDistance < distance) 
+                {
+                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance, previousPoint.value, currDistance, currPoint.value);
+                } else //then this is the segment baybeee
+                {
+                    float segmentLength = currDistance - previousDistance;
+                    float currentY = Mathf.Lerp(previousPoint.value, currPoint.value, (distance - previousDistance) / segmentLength);
+                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance,previousPoint.value,distance,currentY);
+                    return areaUnderCurve;
+                }
+                previousPoint = currPoint;
+                previousDistance = currDistance;
+            }
+            return areaUnderCurve;
+        }
         public float GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve)
         {
             if (_points.Count == 0)
