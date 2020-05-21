@@ -650,7 +650,7 @@ public static class MeshGenerator
                     for (int i = 0; i < meshToTile.verts.Length; i++)
                     {
                         var vert = meshToTile.verts[i];
-                        var distance = GetAreaUnderCurveUpTo(vert.x);
+                        var distance = GetAreaUnderCurveUpTo(vert.x)/secondaryDimensionLength;
                         var point = curve.GetPointAtDistance(distance);
                         var rotation = rotationDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;
                         var size = GetSize(distance);
