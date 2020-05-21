@@ -78,7 +78,7 @@ namespace Assets.NewUI
             backingCurveModificationDistances = null;
         }
         //////////////
-        public float GetAreaUnderCurveUpToDistance(float distance, bool isClosedLoop, float curveLength, BezierCurve curve)
+        public float GetAreaUnderCurveUpToDistance(float distance, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
         {
             if (isClosedLoop)
                 throw new NotImplementedException();
@@ -89,7 +89,7 @@ namespace Assets.NewUI
             float areaUnderCurve = 0;
             float AreaBeneathTwoPoints(float x1,float y1, float x2, float y2)
             {
-                return ((y2 - y1)/2)*(x2-x1);
+                return ((y2 + y1)/2)*(x2-x1);
             }
             for (int i = 1; i < _points.Count; i++)
             {
@@ -97,12 +97,12 @@ namespace Assets.NewUI
                 float currDistance = currPoint.GetDistance(curve);
                 if (currDistance < distance) 
                 {
-                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance, previousPoint.value, currDistance, currPoint.value);
+                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance, previousPoint.value+baseVal, currDistance, currPoint.value+baseVal);
                 } else //then this is the segment baybeee
                 {
                     float segmentLength = currDistance - previousDistance;
-                    float currentY = Mathf.Lerp(previousPoint.value, currPoint.value, (distance - previousDistance) / segmentLength);
-                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance,previousPoint.value,distance,currentY);
+                    float currentY = Mathf.Lerp(previousPoint.value+baseVal, currPoint.value+baseVal, (distance - previousDistance) / segmentLength);
+                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance,previousPoint.value+baseVal,distance,currentY);
                     return areaUnderCurve;
                 }
                 previousPoint = currPoint;
