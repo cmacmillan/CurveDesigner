@@ -12,52 +12,6 @@ using UnityObject = UnityEngine.Object;
 [CustomEditor(typeof(Curve3D))]
 public class Curve3DInspector : Editor
 {
-    public override void OnInspectorGUI()
-    {
-        base.OnInspectorGUI();
-    }
-    /*private void OnSceneGUI()
-    {
-        var curve = target as Curve3D;
-        Undo.RecordObject(curve, "curve");
-        MyGUI.EditBezierCurve(curve);
-        Handles.BeginGUI();
-        GUILayout.BeginArea(new Rect(20, 20, 150, 60));
-        var rect = EditorGUILayout.BeginVertical();
-        GUI.color = Color.yellow;
-        GUI.Box(rect, GUIContent.none);
-
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.Label("Edit Curve");
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-
-        GUILayout.BeginHorizontal();
-        GUI.color = Color.red;
-        if (GUILayout.Button("Add"))
-        {
-            curve.positionCurve.AddDefaultSegment();
-        }
-        if (GUILayout.Button("Lock"))
-        {
-            curve.positionCurve.placeLockedPoints = !curve.positionCurve.placeLockedPoints;
-        }
-        if (GUILayout.Button("Clear"))
-        {
-            Debug.Log("cleared");
-            curve.selectedPointsIndex.Clear();
-            curve.hotPointIndex = -1;
-            curve.positionCurve.Initialize();
-            curve.positionCurve.isCurveOutOfDate = true;
-        }
-        //GUI.color = Color.white;
-        //EditorGUI.CurveField(new Rect(0, 0, 20, 20),curve.curveSizeAnimationCurve);
-        GUILayout.EndHorizontal();
-        GUILayout.EndArea();
-
-        Handles.EndGUI();
-    }*/
     private static readonly int _CurveHint = "NewGUI.CURVE".GetHashCode();
     private void OnSceneGUI()
     {
@@ -119,10 +73,10 @@ public class Curve3DInspector : Editor
         Undo.RecordObject(curve3d, "curve");
         UpdateMesh(curve3d);
         ClickHitData elementClickedDown = curve3d.elementClickedDown;
-        Curve3DSettings.circleTexture = curve3d.circleIcon;
-        Curve3DSettings.squareTexture = curve3d.squareIcon;
-        Curve3DSettings.diamondTexture = curve3d.diamondIcon;
-        Curve3DSettings.defaultLineTexture = curve3d.lineTex;
+        Curve3DSettings.circleTexture = curve3d.settings.circleIcon;
+        Curve3DSettings.squareTexture = curve3d.settings.squareIcon;
+        Curve3DSettings.diamondTexture = curve3d.settings.diamondIcon;
+        Curve3DSettings.defaultLineTexture = curve3d.settings.lineTex;
         if (curve3d.UICurve==null)
             curve3d.UICurve = new UICurve(null,curve3d);//prob shouldn't do this every frame
         var curveEditor = curve3d.UICurve;
