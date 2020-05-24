@@ -607,7 +607,6 @@ public static class MeshGenerator
                     }
                     var curveLength = curve.GetLength();
                     int vertCount = meshToTile.verts.Length;
-                    int c = 0;
                     bool useUvs = meshToTile.uv.Length ==meshToTile.verts.Length;
                     float GetSize(float dist)
                     {
@@ -615,7 +614,8 @@ public static class MeshGenerator
                     }
                     float GetAreaUnderCurveUpTo(float dist)
                     {
-                        return sizeDistanceSampler.GetAreaUnderCurveUpToDistance(dist, IsClosedLoop, curveLength, curve,Radius);
+                        //return sizeDistanceSampler.GetAreaUnderInverseCurveUpToDistance(dist, IsClosedLoop, curveLength, curve,Radius);
+                        return sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(dist, IsClosedLoop, curveLength, curve,Radius);
                     }
                     /*
                     float startSize = GetSize(0.0f);
@@ -645,25 +645,33 @@ public static class MeshGenerator
                         c++;
                     }
                     */
+                    Debug.Log(sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(0, IsClosedLoop, curveLength, curve, Radius));
                     ///temp
-                    Debug.Log(GetAreaUnderCurveUpTo(1.0f));
-                    for (int i = 0; i < meshToTile.verts.Length; i++)
+                    int c = 0;
+                    for (float f = 0; f < curveLength;)
                     {
-                        var vert = meshToTile.verts[i];
-                        var distance = GetAreaUnderCurveUpTo(vert.x)/secondaryDimensionLength;
-                        var point = curve.GetPointAtDistance(distance);
-                        var rotation = rotationDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;
-                        var size = GetSize(distance);
-                        var sizeScale = size / secondaryDimensionLength;
-                        var reference = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
-                        var cross = Vector3.Cross(reference, point.tangent);
-                        vertices.Add(point.position + reference * vert.y * sizeScale + cross * vert.z * sizeScale);
-                        if (useUvs)
-                            uvs.Add(meshToTile.uv[i]);
-                    }
-                    foreach (var i in meshToTile.tris)
-                    {
-                        triangles.Add(i + (c * vertCount));
+                        float max = 0;
+                        for (int i = 0; i < meshToTile.verts.Length; i++)
+                        {
+                            var vert = meshToTile.verts[i];
+                            var distance = GetAreaUnderCurveUpTo(vert.x/*+c*(closeTilableMeshGap+meshLength)*/);
+                            max = Mathf.Max(max, distance);
+                            var point = curve.GetPointAtDistance(distance);
+                            var rotation = rotationDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;
+                            var size = GetSize(distance);
+                            var sizeScale = size / secondaryDimensionLength;
+                            var reference = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
+                            var cross = Vector3.Cross(reference, point.tangent);
+                            vertices.Add(point.position + reference * vert.y * sizeScale + cross * vert.z * sizeScale);
+                            if (useUvs)
+                                uvs.Add(meshToTile.uv[i]);
+                        }
+                        foreach (var i in meshToTile.tris)
+                        {
+                            triangles.Add(i + (c * vertCount));
+                        }
+                        c++;
+                        f = curveLength;//max;
                     }
                     ///end temp
                     for (int i = 0; i < triangles.Count; i += 3)

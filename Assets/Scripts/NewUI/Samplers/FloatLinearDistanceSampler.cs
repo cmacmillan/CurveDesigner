@@ -78,7 +78,7 @@ namespace Assets.NewUI
             backingCurveModificationDistances = null;
         }
         //////////////
-        public float GetAreaUnderCurveUpToDistance(float distance, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
+        public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
         {
             if (isClosedLoop)
                 throw new NotImplementedException();
@@ -87,29 +87,97 @@ namespace Assets.NewUI
             var previousPoint = _points[0];
             var previousDistance = previousPoint.GetDistance(curve);
             float areaUnderCurve = 0;
+            var startingHeight = GetVal(previousPoint);
+            float firstSegmentArea = AreaBeneathTwoPoints(0,startingHeight,previousDistance,startingHeight);
+            if (targetAreaUnderCurve <firstSegmentArea)
+            {
+                return FindDistanceOfArea(targetAreaUnderCurve, -1, startingHeight, -1,startingHeight);
+            }
+            areaUnderCurve += firstSegmentArea;
+            float GetVal(FloatDistanceValue val)
+            {
+                return 1.0f / (val.value+baseVal);
+            }
             float AreaBeneathTwoPoints(float x1,float y1, float x2, float y2)
+            {
+                return ((y2 + y1)/2)*(x2-x1);
+            }
+            float square(float val)
+            {
+                return val * val;
+            }
+            float FindDistanceOfArea(float area,float x1, float y1, float x2,float y2)
+            {
+                if (y2==y1)//if flat
+                    return area / y1;
+                float b = (y2-y1)/(x2-x1);//slope
+                float a = area;
+                float denom = 2 * b;
+                float numer1 = -2*y1;
+                float numer2 = Mathf.Sqrt(square(2*y1)+4*b*2*a);
+                return (numer1+numer2) / denom;
+            }
+            for (int i = 1; i < _points.Count; i++)
+            {
+                var currPoint = _points[i];
+                float currDistance = currPoint.GetDistance(curve);
+                float currSegmentArea = AreaBeneathTwoPoints(previousDistance,GetVal(previousPoint),currDistance,GetVal(currPoint));
+                if (areaUnderCurve + currSegmentArea > targetAreaUnderCurve)//then this is the segment
+                {
+                    return previousDistance + FindDistanceOfArea(targetAreaUnderCurve-areaUnderCurve,previousDistance,GetVal(previousPoint),currDistance,GetVal(currPoint));
+                }
+                areaUnderCurve += currSegmentArea;
+                previousPoint = currPoint;
+                previousDistance = currDistance;
+            }
+            float x = previousDistance;
+            float y = GetVal(previousPoint);
+            return previousDistance + FindDistanceOfArea(targetAreaUnderCurve-areaUnderCurve,-1,y,-1,y);
+        }
+        /*
+        public float GetAreaUnderInverseCurveUpToDistance(float distance, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
+        {
+            if (isClosedLoop)
+                throw new NotImplementedException();
+            if (_points.Count == 0)
+                return 0;
+            var previousPoint = _points[0];
+            double previousDistance = previousPoint.GetDistance(curve);
+            double areaUnderCurve = 0;
+            double Lerp(double start,double end, double t)
+            {
+                t = Math.Max(Math.Min(t, 1),0);
+                return start * (1 - t) + t * end;
+            }
+            double GetVal(FloatDistanceValue val)
+            {
+                double retr = 1.0 / (val.value+baseVal);
+                return retr;
+            }
+            double AreaBeneathTwoPoints(double x1,double y1, double x2, double y2)
             {
                 return ((y2 + y1)/2)*(x2-x1);
             }
             for (int i = 1; i < _points.Count; i++)
             {
                 var currPoint = _points[i];
-                float currDistance = currPoint.GetDistance(curve);
+                double currDistance = currPoint.GetDistance(curve);
                 if (currDistance < distance) 
                 {
-                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance, previousPoint.value+baseVal, currDistance, currPoint.value+baseVal);
+                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance, GetVal(previousPoint), currDistance, GetVal(currPoint));
                 } else //then this is the segment baybeee
                 {
-                    float segmentLength = currDistance - previousDistance;
-                    float currentY = Mathf.Lerp(previousPoint.value+baseVal, currPoint.value+baseVal, (distance - previousDistance) / segmentLength);
-                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance,previousPoint.value+baseVal,distance,currentY);
-                    return areaUnderCurve;
+                    double segmentLength = currDistance - previousDistance;
+                    double currentY = Lerp(GetVal(previousPoint), GetVal(currPoint), (distance - previousDistance) / segmentLength);
+                    areaUnderCurve += AreaBeneathTwoPoints(previousDistance,GetVal(previousPoint),distance,currentY);
+                    return (float)areaUnderCurve;
                 }
                 previousPoint = currPoint;
                 previousDistance = currDistance;
             }
-            return areaUnderCurve;
+            return (float)(areaUnderCurve+(distance-previousDistance)*GetVal(previousPoint));
         }
+        */
         public float GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve)
         {
             if (_points.Count == 0)

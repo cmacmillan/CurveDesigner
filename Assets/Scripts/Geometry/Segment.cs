@@ -5,7 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class Segment
 {
-    public const int _numSegmentLengthSamples = 10;
     public List<PointOnCurve> samples = new List<PointOnCurve>();
     public float length = 0;
     /// <summary>
@@ -23,7 +22,7 @@ public class Segment
         float len = 0;
         Vector3 previousPosition = owner.GetSegmentPositionAtTime(segmentIndex, 0.0f);
         AddLength(segmentIndex, 0.0f, 0, previousPosition,owner.GetSegmentTangentAtTime(segmentIndex,0.0f));
-        int numSamplesMinusOne = _numSegmentLengthSamples - 1;
+        int numSamplesMinusOne = owner.owner.settings.samplesPerSegment - 1;
         for (int i = 1; i <= numSamplesMinusOne; i++)//we include the end point with <=
         {
             var time = i / (float)numSamplesMinusOne;
