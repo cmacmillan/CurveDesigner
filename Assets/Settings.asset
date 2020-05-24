@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95843862d2e9f1b44acc90f6c360eb25, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: 
+  samplesPerSegment: 20
   lineTex: {fileID: 2800000, guid: e3eb9de835a21a449aaea22340383d6f, type: 3}
   circleIcon: {fileID: 2800000, guid: 971f68b2bfc7a704181c2904de1fe15d, type: 3}
   squareIcon: {fileID: 2800000, guid: e33d07ce577ea5f45bc068384c03d5b0, type: 3}

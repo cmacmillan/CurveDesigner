@@ -614,39 +614,8 @@ public static class MeshGenerator
                     }
                     float GetAreaUnderCurveUpTo(float dist)
                     {
-                        //return sizeDistanceSampler.GetAreaUnderInverseCurveUpToDistance(dist, IsClosedLoop, curveLength, curve,Radius);
                         return sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(dist, IsClosedLoop, curveLength, curve,Radius);
                     }
-                    /*
-                    float startSize = GetSize(0.0f);
-                    float sizeScale = startSize / secondaryDimensionLength;
-                    for (float f = 0; f < curveLength; f += meshLength)
-                    {
-                        //meshLength = 0;
-                        //float startMeshPos = vertCount
-                        for (int i = 0; i < meshToTile.verts.Length; i++)
-                        {
-                            var vert = meshToTile.verts[i];
-                            var distance = vert.x*sizeScale+ f - c * closeTilableMeshGap;
-                            var point = curve.GetPointAtDistance(distance);
-                            var rotation = rotationDistanceSampler.GetValueAtDistance(distance,IsClosedLoop,curveLength,curve)+Rotation;
-                            var size = GetSize(distance);
-                            sizeScale = size / secondaryDimensionLength;
-                            var reference = Quaternion.AngleAxis(rotation,point.tangent)*point.reference;
-                            var cross = Vector3.Cross(reference, point.tangent);
-                            vertices.Add(point.position + reference * vert.y*sizeScale + cross * vert.z*sizeScale);
-                            if (useUvs)
-                                uvs.Add(meshToTile.uv[i]);
-                        }
-                        foreach (var i in meshToTile.tris)
-                        {
-                            triangles.Add(i + (c * vertCount));
-                        }
-                        c++;
-                    }
-                    */
-                    Debug.Log(sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(0, IsClosedLoop, curveLength, curve, Radius));
-                    ///temp
                     int c = 0;
                     for (float f = 0; f < curveLength;)
                     {
@@ -654,7 +623,7 @@ public static class MeshGenerator
                         for (int i = 0; i < meshToTile.verts.Length; i++)
                         {
                             var vert = meshToTile.verts[i];
-                            var distance = GetAreaUnderCurveUpTo(vert.x/*+c*(closeTilableMeshGap+meshLength)*/);
+                            var distance = GetAreaUnderCurveUpTo(vert.x+c*(closeTilableMeshGap+meshLength));
                             max = Mathf.Max(max, distance);
                             var point = curve.GetPointAtDistance(distance);
                             var rotation = rotationDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;
@@ -671,7 +640,7 @@ public static class MeshGenerator
                             triangles.Add(i + (c * vertCount));
                         }
                         c++;
-                        f = curveLength;//max;
+                        f = max;
                     }
                     ///end temp
                     for (int i = 0; i < triangles.Count; i += 3)
