@@ -97,10 +97,13 @@ namespace Assets.NewUI
         {
             _owner.linePoint.GetPositionForwardAndReference(out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference);
             centerPoint = curve.transform.TransformPoint(centerPoint);
-            if (!GUITools.WorldToGUISpace(centerPoint,out var centerPointGUISpace,out var centerPointDepth)) return;
-            var mousePos = Event.current.mousePosition+curve.elementClickedDown.offset;
-            var mouseWorldSpace = GUITools.GUIToWorldSpace(mousePos,centerPointDepth);
-            _ring.value = Vector3.Distance(mouseWorldSpace,centerPoint)-curve.curveRadius;
+            Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
+            var screenRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(Event.current.mousePosition));
+            GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
+            //if (!GUITools.WorldToGUISpace(centerPoint,out var centerPointGUISpace,out var centerPointDepth)) return;
+            //var mousePos = Event.current.mousePosition+curve.elementClickedDown.offset;
+            //var mouseWorldSpace = GUITools.GUIToWorldSpace(mousePos,centerPointDepth);
+            //_ring.value = Vector3.Distance(mouseWorldSpace,centerPoint)-curve.curveRadius;
         }
         public void ClickDown(Vector2 mousePos)
         {
