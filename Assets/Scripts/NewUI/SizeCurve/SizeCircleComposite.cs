@@ -101,9 +101,6 @@ namespace Assets.NewUI
             var screenRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(Event.current.mousePosition));
             Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
             _ring.value = Vector3.Distance(pos,centerPoint)-curve.curveRadius;
-            //if (!GUITools.WorldToGUISpace(centerPoint,out var centerPointGUISpace,out var centerPointDepth)) return;
-            //var mousePos = Event.current.mousePosition+curve.elementClickedDown.offset;
-            //var mouseWorldSpace = GUITools.GUIToWorldSpace(mousePos,centerPointDepth);
         }
         public void ClickDown(Vector2 mousePos)
         {

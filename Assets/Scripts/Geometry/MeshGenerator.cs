@@ -575,17 +575,11 @@ public static class MeshGenerator
                         {
                             case MeshPrimaryAxis.auto:
                                 if ((bounds.extents.x >= bounds.extents.y && bounds.extents.x >= bounds.extents.z))
-                                {
                                     UseXAsMainAxis();
-                                }
                                 else if ((bounds.extents.y >= bounds.extents.x && bounds.extents.y >= bounds.extents.z))
-                                {
                                     UseYAsMainAxis();
-                                }
                                 else
-                                {
                                     UseZAsMainAxis();
-                                }
                                 break;
                             case MeshPrimaryAxis.x:
                                 UseXAsMainAxis();
@@ -619,11 +613,12 @@ public static class MeshGenerator
                     int c = 0;
                     for (float f = 0; f < curveLength;)
                     {
-                        float max = 0;
+                        float max = float.MinValue;
+                        float totalArea = GetAreaUnderCurveUpTo(meshLength);
                         for (int i = 0; i < meshToTile.verts.Length; i++)
                         {
                             var vert = meshToTile.verts[i];
-                            var distance = GetAreaUnderCurveUpTo(vert.x+c*(closeTilableMeshGap+meshLength));
+                            var distance = GetAreaUnderCurveUpTo((vert.x + c * (closeTilableMeshGap + meshLength))/secondaryDimensionLength);
                             max = Mathf.Max(max, distance);
                             var point = curve.GetPointAtDistance(distance);
                             var rotation = rotationDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;
@@ -642,6 +637,8 @@ public static class MeshGenerator
                         c++;
                         f = max;
                     }
+                    if (c * meshToTile.verts.Length >= 65535)
+                        Debug.LogError("Too many verticies, unable to correctly model mesh");
                     ///end temp
                     for (int i = 0; i < triangles.Count; i += 3)
                     {

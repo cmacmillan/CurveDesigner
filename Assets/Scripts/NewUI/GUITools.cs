@@ -235,7 +235,6 @@ namespace Assets.NewUI
             Vector3 f = line1Point - line2Point;
             Matrix3x4 matrix = new Matrix3x4(line1Slope,slope,-line2Slope,f);
             matrix.RowReduce();
-            Debug.Log(matrix);
             return matrix[2, 3] * line2Slope + line2Point;
         }
     }
