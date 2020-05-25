@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-//Scripts from the unity reference source that have been tweaked slightly
-//I didn't write these
 public static class UnitySourceScripts
 {
     // Get the nearest 3D point.

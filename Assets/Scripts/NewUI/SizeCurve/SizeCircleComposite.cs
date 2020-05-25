@@ -95,8 +95,12 @@ namespace Assets.NewUI
 
         void Set()
         {
-            if (CirclePlaneTools.GetCursorPointOnPlane(_owner.linePoint,out Vector3 planeHitPosition,out Vector3 centerPoint,out Vector3 centerForward,out Vector3 centerReference,curve))
-                _ring.value = Vector3.Distance(planeHitPosition, centerPoint)-curve.curveRadius;
+            _owner.linePoint.GetPositionForwardAndReference(out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference);
+            centerPoint = curve.transform.TransformPoint(centerPoint);
+            if (!GUITools.WorldToGUISpace(centerPoint,out var centerPointGUISpace,out var centerPointDepth)) return;
+            var mousePos = Event.current.mousePosition+curve.elementClickedDown.offset;
+            var mouseWorldSpace = GUITools.GUIToWorldSpace(mousePos,centerPointDepth);
+            _ring.value = Vector3.Distance(mouseWorldSpace,centerPoint)-curve.curveRadius;
         }
         public void ClickDown(Vector2 mousePos)
         {

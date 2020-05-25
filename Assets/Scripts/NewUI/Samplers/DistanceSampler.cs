@@ -10,7 +10,6 @@ namespace Assets.NewUI
     public interface IDistanceSampler<T> where T : struct
     {
         T GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve);
-        //T GetAreaUnderInverseCurveUpToDistance(float distance,bool isClosedLoop, float curveLength,BezierCurve curve,float baseVal);
         T GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve, float baseVal);
     }
 }
