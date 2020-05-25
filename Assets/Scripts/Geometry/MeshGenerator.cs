@@ -596,7 +596,10 @@ public static class MeshGenerator
                             return (rotation * (point - bounds.center)) + new Vector3(meshLength / 2, 0, 0);
                         }
                         for (int i = 0; i < meshToTile.verts.Length; i++)
+                        {
                             meshToTile.verts[i] = TransformPoint(meshToTile.verts[i]);
+                            meshToTile.verts[i].x = Mathf.Max(0, meshToTile.verts[i].x);//clamp above zero, sometimes floats mess with this
+                        }
                         //now x is always along the mesh and normalized around the center
                     }
                     var curveLength = curve.GetLength();
@@ -606,19 +609,19 @@ public static class MeshGenerator
                     {
                         return sizeDistanceSampler.GetValueAtDistance(dist, IsClosedLoop, curveLength, curve) + Radius;
                     }
-                    float GetAreaUnderCurveUpTo(float dist)
+                    float GetDistanceByArea(float area)
                     {
-                        return sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(dist, IsClosedLoop, curveLength, curve,Radius);
+                        return sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve,Radius);
                     }
                     int c = 0;
                     for (float f = 0; f < curveLength;)
                     {
                         float max = float.MinValue;
-                        float totalArea = GetAreaUnderCurveUpTo(meshLength);
+                        float totalArea = GetDistanceByArea(meshLength);
                         for (int i = 0; i < meshToTile.verts.Length; i++)
                         {
                             var vert = meshToTile.verts[i];
-                            var distance = GetAreaUnderCurveUpTo((vert.x + c * (closeTilableMeshGap + meshLength))/secondaryDimensionLength);
+                            var distance = GetDistanceByArea((vert.x + c * (closeTilableMeshGap + meshLength))/secondaryDimensionLength);
                             max = Mathf.Max(max, distance);
                             var point = curve.GetPointAtDistance(distance);
                             var rotation = rotationDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;

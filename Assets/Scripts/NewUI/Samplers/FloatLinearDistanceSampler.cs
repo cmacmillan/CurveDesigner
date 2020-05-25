@@ -24,6 +24,7 @@ namespace Assets.NewUI
         protected float _timeAlongSegment=0;
         [SerializeField]
         protected int _segmentIndex=0;
+        public int SegmentIndex { get { return _segmentIndex; } }
     }
     [System.Serializable]
     public class FloatDistanceValue : CurveTrackingDistance, ILinePoint
@@ -80,18 +81,28 @@ namespace Assets.NewUI
         //////////////
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
         {
-            if (isClosedLoop)
-                throw new NotImplementedException();
-            if (_points.Count == 0)
-                return 0;
-            var previousPoint = _points[0];
+            var pointsInsideCurve = GetPointsByCurveOpenClosedStatus(curve);
+            if (pointsInsideCurve.Count == 0)
+                return targetAreaUnderCurve / baseVal;
+            var previousPoint = pointsInsideCurve[0];
             var previousDistance = previousPoint.GetDistance(curve);
             float areaUnderCurve = 0;
             var startingHeight = GetVal(previousPoint);
-            float firstSegmentArea = AreaBeneathTwoPoints(0,startingHeight,previousDistance,startingHeight);
-            if (targetAreaUnderCurve <firstSegmentArea)
+            float firstSegmentArea;
+            float valueAtStartOfCurve = -1;//only used when a closed loop
+            if (isClosedLoop)
             {
-                return FindDistanceOfArea(targetAreaUnderCurve, -1, startingHeight, -1,startingHeight);
+                var pointBefore = pointsInsideCurve[pointsInsideCurve.Count - 1];
+                float distanceFromPointBeforeToEndOfCurve = curveLength - pointBefore.GetDistance(curve);
+                valueAtStartOfCurve = Mathf.Lerp(GetVal(pointBefore),startingHeight,distanceFromPointBeforeToEndOfCurve/(distanceFromPointBeforeToEndOfCurve+previousDistance));
+                firstSegmentArea = AreaBeneathTwoPoints(0, valueAtStartOfCurve, previousDistance, startingHeight);
+                if (targetAreaUnderCurve < firstSegmentArea)
+                    return FindDistanceOfArea(targetAreaUnderCurve, 0, valueAtStartOfCurve, previousDistance, startingHeight);
+            } else
+            {
+                firstSegmentArea = AreaBeneathTwoPoints(0, startingHeight, previousDistance, startingHeight);
+                if (targetAreaUnderCurve < firstSegmentArea)
+                    return FindDistanceOfArea(targetAreaUnderCurve, -1, startingHeight, -1, startingHeight);
             }
             areaUnderCurve += firstSegmentArea;
             float GetVal(FloatDistanceValue val)
@@ -117,9 +128,9 @@ namespace Assets.NewUI
                 float numer2 = Mathf.Sqrt(square(2*y1)+4*b*2*a);
                 return (numer1+numer2) / denom;
             }
-            for (int i = 1; i < _points.Count; i++)
+            for (int i = 1; i < pointsInsideCurve.Count; i++)
             {
-                var currPoint = _points[i];
+                var currPoint = pointsInsideCurve[i];
                 float currDistance = currPoint.GetDistance(curve);
                 float currSegmentArea = AreaBeneathTwoPoints(previousDistance,GetVal(previousPoint),currDistance,GetVal(currPoint));
                 if (areaUnderCurve + currSegmentArea > targetAreaUnderCurve)//then this is the segment
@@ -130,30 +141,33 @@ namespace Assets.NewUI
                 previousPoint = currPoint;
                 previousDistance = currDistance;
             }
-            float x = previousDistance;
-            float y = GetVal(previousPoint);
-            return previousDistance + FindDistanceOfArea(targetAreaUnderCurve-areaUnderCurve,-1,y,-1,y);
+            float finalPointVal = GetVal(previousPoint);
+            if (isClosedLoop)
+                return previousDistance + FindDistanceOfArea(targetAreaUnderCurve - areaUnderCurve, previousDistance, finalPointVal, curveLength, valueAtStartOfCurve);
+            else
+                return previousDistance + FindDistanceOfArea(targetAreaUnderCurve - areaUnderCurve, -1, finalPointVal, -1, finalPointVal);
         }
         public float GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve)
         {
-            if (_points.Count == 0)
+            var pointsInsideCurve = GetPointsByCurveOpenClosedStatus(curve);
+            if (pointsInsideCurve.Count == 0)
                 return 0;
-            var firstPoint = _points[0];
-            var lastPoint = _points[_points.Count - 1];
+            var firstPoint = pointsInsideCurve[0];
+            var lastPoint = pointsInsideCurve[pointsInsideCurve.Count - 1];
             var lastDistance = curveLength - lastPoint.GetDistance(curve);
             float endSegmentDistance = firstPoint.GetDistance(curve)+ lastDistance;
-            if (_points[0].GetDistance(curve)>= distance)
+            if (pointsInsideCurve[0].GetDistance(curve)>= distance)
                 if (isClosedLoop)
                 {
                     float lerpVal = (lastDistance+distance)/endSegmentDistance;
                     return Mathf.Lerp(lastPoint.value,firstPoint.value,lerpVal);
                 }
                 else
-                    return _points[0].value;
-            var previous = _points[0];
-            for (int i = 1; i < _points.Count; i++)
+                    return pointsInsideCurve[0].value;
+            var previous = pointsInsideCurve[0];
+            for (int i = 1; i < pointsInsideCurve.Count; i++)
             {
-                var current = _points[i];
+                var current = pointsInsideCurve[i];
                 if (current.GetDistance(curve)>= distance)
                     return Mathf.Lerp(previous.value,current.value,(distance-previous.GetDistance(curve))/(current.GetDistance(curve)-previous.GetDistance(curve)));
                 previous = current;
@@ -164,7 +178,7 @@ namespace Assets.NewUI
                 return Mathf.Lerp(lastPoint.value,firstPoint.value,lerpVal);
             }
             else
-                return _points[_points.Count - 1].value;
+                return pointsInsideCurve[pointsInsideCurve.Count - 1].value;
         }
         public int InsertPointAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve)
         {
@@ -177,18 +191,28 @@ namespace Assets.NewUI
         public void SortPoints(BezierCurve curve)
         {
             _points = _points.OrderBy((a) => a.GetDistance(curve)).ToList();
+            CacheOpenCurvePoints(curve);
         }
         public List<FloatDistanceValue> GetPoints(Curve3D curve)
         {
-            return GetPointsBelowDistance(curve.positionCurve.GetLength(),curve.positionCurve);
+            return GetPointsByCurveOpenClosedStatus(curve.positionCurve);
         }
-        private List<FloatDistanceValue> GetPointsBelowDistance(float distance,BezierCurve curve)
+        private List<FloatDistanceValue> openCurvePoints;
+        public void CacheOpenCurvePoints(BezierCurve curve)
         {
-            List<FloatDistanceValue> retr = new List<FloatDistanceValue>();
+            openCurvePoints = new List<FloatDistanceValue>();
             foreach (var i in _points)
-                if (i.GetDistance(curve) <= distance)
-                    retr.Add(i);
-            return retr;
+                if (i.SegmentIndex<curve.NumSegments)
+                    openCurvePoints.Add(i);
+        }
+        private List<FloatDistanceValue> GetPointsByCurveOpenClosedStatus(BezierCurve curve, bool recalculate=true)//recalculate=false is much faster, but requires having cached earlier
+        {
+            if (recalculate)
+                CacheOpenCurvePoints(curve);
+            if (curve.isClosedLoop)
+                return _points;
+            else
+                return openCurvePoints;
         }
 
         public void OnBeforeSerialize()

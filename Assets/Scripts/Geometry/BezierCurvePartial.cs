@@ -10,7 +10,7 @@ public partial class BezierCurve
     {
         return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
     }
-    int mod(int x, int m)
+    public static int mod(int x, int m)
     {
         return (x % m + m) % m;
     }
