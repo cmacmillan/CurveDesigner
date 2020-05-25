@@ -225,7 +225,7 @@ namespace Assets.NewUI
             Vector4 row2;
         }
 
-        public static void GetClosestPointBetweenTwoLines(Vector3 line1Point, Vector3 line1Slope, Vector3 line2Point, Vector3 line2Slope)
+        public static Vector3 GetClosestPointBetweenTwoLines(Vector3 line1Point, Vector3 line1Slope, Vector3 line2Point, Vector3 line2Slope)
         {
             if (line1Slope == Vector3.zero || line2Slope == Vector3.zero)
                 throw new ArgumentException();
@@ -236,6 +236,7 @@ namespace Assets.NewUI
             Matrix3x4 matrix = new Matrix3x4(line1Slope,slope,-line2Slope,f);
             matrix.RowReduce();
             Debug.Log(matrix);
+            return matrix[2, 3] * line2Slope + line2Point;
         }
     }
 }
