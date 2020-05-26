@@ -614,15 +614,28 @@ public static class MeshGenerator
                         return sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve,Radius);
                     }
                     int c = 0;
+                    int vertexBaseOffset = 0;
+                    List<int> remappedVerts = new List<int>();
                     for (float f = 0; f < curveLength;)
                     {
                         float max = float.MinValue;
-                        float totalArea = GetDistanceByArea(meshLength);
+                        remappedVerts.Clear();
+                        int skippedVerts = 0;
                         for (int i = 0; i < meshToTile.verts.Length; i++)
                         {
                             var vert = meshToTile.verts[i];
                             var distance = GetDistanceByArea((vert.x + c * (closeTilableMeshGap + meshLength))/secondaryDimensionLength);
                             max = Mathf.Max(max, distance);
+                            if (distance > curveLength)
+                            {
+                                remappedVerts.Add(-1);
+                                skippedVerts++;
+                                continue;
+                            }
+                            else
+                            {
+                                remappedVerts.Add(i-skippedVerts);
+                            }
                             var point = curve.GetPointAtDistance(distance);
                             var rotation = rotationDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;
                             var size = GetSize(distance);
@@ -633,14 +646,25 @@ public static class MeshGenerator
                             if (useUvs)
                                 uvs.Add(meshToTile.uv[i]);
                         }
-                        foreach (var i in meshToTile.tris)
+                        for (int i = 0; i < meshToTile.tris.Length; i+=3)
                         {
-                            triangles.Add(i + (c * vertCount));
+                            var tri1 = meshToTile.tris[i];
+                            var tri2 = meshToTile.tris[i+1];
+                            var tri3 = meshToTile.tris[i+2];
+                            int remappedTri1 = remappedVerts[tri1];
+                            int remappedTri2 = remappedVerts[tri2];
+                            int remappedTri3 = remappedVerts[tri3];
+                            if (remappedTri1 == -1 || remappedTri2 == -1 || remappedTri3 == -1)
+                                continue;
+                            triangles.Add(remappedTri1+vertexBaseOffset);
+                            triangles.Add(remappedTri2+vertexBaseOffset);
+                            triangles.Add(remappedTri3+vertexBaseOffset);
                         }
+                        vertexBaseOffset += vertCount - skippedVerts;
                         c++;
                         f = max;
                     }
-                    if (c * meshToTile.verts.Length >= 65535)
+                    if (vertexBaseOffset >= 65535)
                         Debug.LogError("Too many verticies, unable to correctly model mesh");
                     ///end temp
                     for (int i = 0; i < triangles.Count; i += 3)
