@@ -64,6 +64,7 @@ namespace Assets.NewUI
         {
             foreach (var i in objToClone._points)
                 _points.Add(new FloatDistanceValue(i,this,curve));
+            CacheOpenCurvePoints(curve);
         }
         //////////////
         List<float> backingCurveModificationDistances;
