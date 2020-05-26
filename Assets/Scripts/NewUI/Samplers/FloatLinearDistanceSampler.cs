@@ -25,6 +25,7 @@ namespace Assets.NewUI
         [SerializeField]
         protected int _segmentIndex=0;
         public int SegmentIndex { get { return _segmentIndex; } }
+        public float TimeAlongSegment { get { return _timeAlongSegment; } }
     }
     [System.Serializable]
     public class FloatDistanceValue : CurveTrackingDistance, ILinePoint
@@ -190,7 +191,7 @@ namespace Assets.NewUI
         }
         public void SortPoints(BezierCurve curve)
         {
-            _points = _points.OrderBy((a) => a.GetDistance(curve)).ToList();
+            _points = _points.OrderBy((a) => a.TimeAlongSegment).OrderBy(a=>a.SegmentIndex).ToList();
             CacheOpenCurvePoints(curve);
         }
         public List<FloatDistanceValue> GetPoints(Curve3D curve)

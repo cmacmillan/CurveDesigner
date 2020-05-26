@@ -49,6 +49,7 @@ public static class MeshGenerator
         //currently only supports uv0
     }
 
+    public static bool didMeshGenerationSucceed;
     public static List<Vector3> vertices;
     public static List<int> triangles;
 
@@ -128,14 +129,16 @@ public static class MeshGenerator
     {
         try
         {
-            GenerateMesh();
+            didMeshGenerationSucceed = false;
+            if (GenerateMesh())
+                didMeshGenerationSucceed = true;
         }
         finally
         {
             IsBuzy = false;
         }
     }
-    private static void GenerateMesh()
+    private static bool GenerateMesh()
     {
         //Debug.Log("started thread");
         int numVerts;
@@ -402,7 +405,7 @@ public static class MeshGenerator
                     TrianglifyLayer(true, ActualRingPointCount);
                     if (!IsClosedLoop)
                         CreateTubeEndPlates();
-                    break;
+                    return true;
                 }
             case CurveType.HollowTube:
                 #region hollowtube
@@ -413,7 +416,7 @@ public static class MeshGenerator
                     for (int i = 0; i < sampled.Count; i++)
                         previousRing = CreateRingPointsAlongCurveWithPrevious(previousRing, ref pointIndex, sampled[i], vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
                     //NewTrianglifyLayer();
-                    break;
+                    return true;
                 }
             /*numVerts = ActualRingPointCount * sampled.Count * 2;
             numTris = ActualRingPointCount * numRings * 6 * 2;
@@ -531,7 +534,7 @@ public static class MeshGenerator
                         previousDownLeft = downLeft;
                         previousDownLeftIndex = downLeftIndex;
                     }
-                    break;
+                    return true;
                 }
             /*
              * numVerts = 4 * sampled.Count;
@@ -665,7 +668,10 @@ public static class MeshGenerator
                         f = max;
                     }
                     if (vertexBaseOffset >= 65535)
+                    {
                         Debug.LogError("Too many verticies, unable to correctly model mesh");
+                        return false;
+                    }
                     ///end temp
                     for (int i = 0; i < triangles.Count; i += 3)
                     {
@@ -673,8 +679,10 @@ public static class MeshGenerator
                         triangles[i] = triangles[i + 2];
                         triangles[i + 2] = swap;
                     }
-                    break;
+                    return true;
                 }
+            default:
+                return false;
         }
     }
 }
