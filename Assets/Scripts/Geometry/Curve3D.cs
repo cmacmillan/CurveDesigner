@@ -21,6 +21,8 @@ public class Curve3D : MonoBehaviour
     public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler();
     [HideInInspector]
     public FloatLinearDistanceSampler rotationDistanceSampler = new FloatLinearDistanceSampler();
+    [HideInInspector]
+    public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
 
     [HideInInspector]
     public float averageSize;
