@@ -65,6 +65,7 @@ public class Curve3DInspector : Editor
         ///
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
+        curve3d.positionCurve.dimensionLockMode = curve3d.lockToPositionZero;
         curve3d.positionCurve.Recalculate();
         foreach (var i in curve3d.doubleBezierSampler.secondaryCurves)
         {

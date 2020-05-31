@@ -150,7 +150,8 @@ public class Curve3D : MonoBehaviour
         retr|=CheckField(closeTilableMeshGap, ref oldCloseTilableMeshGap);
         retr|=CheckField(meshToTile, ref oldMeshToTile);
         retr|=CheckField(meshPrimaryAxis,ref oldMeshPrimaryAxis);
-        retr |= CheckField(doubleBezierSampleCount, ref oldDoubleBezierVertexDensity);
+        retr|=CheckField(doubleBezierSampleCount, ref oldDoubleBezierVertexDensity);
+        retr|=CheckField(lockToPositionZero, ref oldLockToPositionZero);
 
         if (CheckField(isClosedLoop, ref oldIsClosedLoop))
         {
@@ -209,13 +210,6 @@ public class Curve3D : MonoBehaviour
         return averageSize/normalValueLengthDivisor;
     }
     public float GetNormalDensityDistance() { return VisualNormalsLength()*normalGapSizeMultiplier; }
-}
-public enum DimensionLockMode
-{
-    none,
-    x,
-    y,
-    z
 }
 public enum EditMode
 {

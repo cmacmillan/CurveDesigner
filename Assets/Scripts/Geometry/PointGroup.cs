@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class CurveSplitPointInfo : ISegmentTime
@@ -21,6 +22,13 @@ public enum PGIndex
     LeftTangent = -1,
     Position = 0,
     RightTangent = 1
+}
+public enum DimensionLockMode
+{
+    none,
+    x,
+    y,
+    z
 }
 /// <summary>
 /// A point group groups 3 control points together, left tangent, right tangent and the point itself
@@ -80,20 +88,37 @@ public class PointGroup
             rightTangent = reflectAcrossPosition(leftTangent);
         }
     }
-    public void SetWorldPositionByIndex(PGIndex index, Vector3 value)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Vector3 LockAxis(Vector3 vector, DimensionLockMode lockMode)
+    {
+        switch (lockMode)
+        {
+            case DimensionLockMode.none:
+                return vector;
+            case DimensionLockMode.x:
+                return new Vector3(0,vector.y,vector.z);
+            case DimensionLockMode.y:
+                return new Vector3(vector.x,0,vector.z);
+            case DimensionLockMode.z:
+                return new Vector3(vector.x,vector.y,0);
+            default:
+                return Vector3.zero;
+        }
+    }
+    public void SetWorldPositionByIndex(PGIndex index, Vector3 value, DimensionLockMode dimensionLockMode)
     {
         switch (index)
         {
             case PGIndex.LeftTangent:
-                leftTangent = value - position;
+                leftTangent = LockAxis(value,dimensionLockMode) - GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode);
                 if (isPointLocked)
                     rightTangent = reflectAcrossPosition(leftTangent);
                 return;
             case PGIndex.Position:
-                position = value;
+                position = LockAxis(value, dimensionLockMode);
                 return;
             case PGIndex.RightTangent:
-                rightTangent = value - position;
+                rightTangent = LockAxis(value, dimensionLockMode) - GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode);
                 if (isPointLocked)
                     leftTangent = reflectAcrossPosition(rightTangent);
                 return;
@@ -101,16 +126,16 @@ public class PointGroup
                 throw new System.ArgumentException();
         }
     }
-    public Vector3 GetWorldPositionByIndex(PGIndex index)
+    public Vector3 GetWorldPositionByIndex(PGIndex index, DimensionLockMode dimensionLockMode)
     {
         switch (index)
         {
             case PGIndex.LeftTangent:
-                return leftTangent + position;
+                return LockAxis(leftTangent + position,dimensionLockMode);
             case PGIndex.Position:
-                return position;
+                return LockAxis(position,dimensionLockMode);
             case PGIndex.RightTangent:
-                return rightTangent + position;
+                return LockAxis(rightTangent + position, dimensionLockMode);
             default:
                 throw new System.ArgumentException();
         }
