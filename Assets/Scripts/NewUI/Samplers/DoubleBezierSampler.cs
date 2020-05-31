@@ -69,14 +69,6 @@ namespace Assets.NewUI
             secondaryCurves = secondaryCurves.OrderBy((a => a.TimeAlongSegment)).OrderBy(a => a.SegmentIndex).ToList();
             CacheOpenCurvePoints(curve);
         }
-        private BackingCurveModificationTracker<BezierCurveDistanceValue> _backingCurveModificationTracker;
-        public BackingCurveModificationTracker<BezierCurveDistanceValue> BackingCurveModificationTracker { get
-            {
-                if (_backingCurveModificationTracker == null)
-                    _backingCurveModificationTracker = new BackingCurveModificationTracker<BezierCurveDistanceValue>();
-                return _backingCurveModificationTracker;
-            }
-        }
         public int InsertPointAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve)
         {
             var newPoint = new BezierCurveDistanceValue(this, distance,curve);
@@ -93,7 +85,7 @@ namespace Assets.NewUI
                 reference = point.reference;
                 return point.position;
             }
-            Vector3 SamplePosition(BezierCurveDistanceValue value, out Vector3 myRef)
+        Vector3 SamplePosition(BezierCurveDistanceValue value, out Vector3 myRef)
             {
                 var samp = value.secondaryCurve.GetPointAtDistance(secondaryCurveDistance * value.secondaryCurve.GetLength());
                 myRef = samp.reference;

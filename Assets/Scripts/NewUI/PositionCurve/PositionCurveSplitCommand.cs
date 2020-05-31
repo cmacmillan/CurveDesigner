@@ -37,20 +37,41 @@ namespace Assets.NewUI
             _curve.elementClickedDown.owner = selected;
         }
     }
+    public class BackingCurveModificationTracker<T> where T : CurveTrackingDistance
+    {
+        private BezierCurve backingCurve;
+        private List<T> points;
+        List<float> backingCurveModificationDistances;
+        public BackingCurveModificationTracker(BezierCurve backingCurve,List<T> points)
+        {
+            this.points = points;
+            this.backingCurve = backingCurve;
+            backingCurveModificationDistances = new List<float>();
+            foreach (var i in points)
+                backingCurveModificationDistances.Add(i.GetDistance(backingCurve));
+        }
+        public void FinishInsertToBackingCurve()
+        {
+            for (int i = 0; i < points.Count; i++)
+                points[i].SetDistance(backingCurveModificationDistances[i],backingCurve,false);
+            backingCurveModificationDistances = null;
+        }
+    }
     public class PositionCurveSplitCommand : SplitCommand
     {
         public PositionCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
         public override void ClickDown(Vector2 mousePos)
         {
+            List<BackingCurveModificationTracker<FloatDistanceValue>> distanceSamplerModificationTrackers = new List<BackingCurveModificationTracker<FloatDistanceValue>>();
             foreach (var i in _curve.DistanceSamplers)
-                i.BackingCurveModificationTracker.StartInsertToBackingCurve(_curve.positionCurve,i._points);
+                distanceSamplerModificationTrackers.Add(new BackingCurveModificationTracker<FloatDistanceValue>(_curve.positionCurve,i._points));
             var doubleBezier = _curve.doubleBezierSampler;
-            doubleBezier.BackingCurveModificationTracker.StartInsertToBackingCurve(_curve.positionCurve,doubleBezier.secondaryCurves);
+            var doubleBezierModificationTracker = new BackingCurveModificationTracker<BezierCurveDistanceValue>(_curve.positionCurve,doubleBezier.secondaryCurves);
             _curve.positionCurve.InsertSegmentAfterIndex(_curve.UICurve.pointClosestToCursor,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
-            foreach (var i in _curve.DistanceSamplers)
-                i.BackingCurveModificationTracker.FinishInsertToBackingCurve(_curve.positionCurve,i._points);
-            doubleBezier.BackingCurveModificationTracker.FinishInsertToBackingCurve(_curve.positionCurve, doubleBezier.secondaryCurves);
+            foreach (var i in distanceSamplerModificationTrackers)
+                i.FinishInsertToBackingCurve();
+            doubleBezierModificationTracker.FinishInsertToBackingCurve();
             var selected = _curve.UICurve.positionCurve.pointGroups[_curve.UICurve.pointClosestToCursor.segmentIndex+1].centerPoint;
             _curve.elementClickedDown.owner = selected;
         }

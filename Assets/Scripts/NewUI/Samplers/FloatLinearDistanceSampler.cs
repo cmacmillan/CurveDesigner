@@ -7,22 +7,6 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class BackingCurveModificationTracker<T> where T : CurveTrackingDistance
-    {
-        List<float> backingCurveModificationDistances;
-        public void StartInsertToBackingCurve(BezierCurve backingCurve,List<T> points)
-        {
-            backingCurveModificationDistances = new List<float>();
-            foreach (var i in points)
-                backingCurveModificationDistances.Add(i.GetDistance(backingCurve));
-        }
-        public void FinishInsertToBackingCurve(BezierCurve backingCurve, List<T> points)
-        {
-            for (int i = 0; i < points.Count; i++)
-                points[i].SetDistance(backingCurveModificationDistances[i],backingCurve,false);
-            backingCurveModificationDistances = null;
-        }
-    }
     //When inheriting from this class make sure that you override SortPoints
     [System.Serializable]
     public class CurveTrackingDistance : ILinePoint
@@ -90,16 +74,6 @@ namespace Assets.NewUI
                 _points.Add(new FloatDistanceValue(i,this,curve));
             CacheOpenCurvePoints(curve);
         }
-        //////////////
-        private BackingCurveModificationTracker<FloatDistanceValue> _backingCurveModificationTracker;
-        public BackingCurveModificationTracker<FloatDistanceValue> BackingCurveModificationTracker { get
-            {
-                if (_backingCurveModificationTracker == null)
-                    _backingCurveModificationTracker = new BackingCurveModificationTracker<FloatDistanceValue>();
-                return _backingCurveModificationTracker;
-            }
-        }
-        //////////////
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
         {
             var pointsInsideCurve = GetPointsByCurveOpenClosedStatus(curve);
