@@ -56,6 +56,18 @@ namespace Assets.NewUI
             base.Click(mousePosition, clickHits);
         }
 
+        public static void GetCurveDraw(List<IDraw> drawList,BezierCurve curve, Transform transform, IComposite owner)
+        {
+            for (int i = 0; i < curve.NumSegments; i++)
+            {
+                var point1 = transform.TransformPoint(curve[i, 0]);
+                var point2 = transform.TransformPoint(curve[i, 3]);
+                var tangent1 = transform.TransformPoint(curve[i, 1]);
+                var tangent2 = transform.TransformPoint(curve[i, 2]);
+                drawList.Add(new CurveSegmentDraw(owner, point1, point2, tangent1, tangent2, LineTextureType.Default, new Color(.6f, .6f, .6f)));
+            }
+        }
+
         public override void Draw(List<IDraw> drawList,ClickHitData clickedElement)
         {
             _curve.positionCurve.Recalculate();
@@ -73,14 +85,7 @@ namespace Assets.NewUI
                     drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));
                 }
             }
-            for (int i = 0; i < _curve.positionCurve.NumSegments; i++)
-            {
-                var point1 = _curve.transform.TransformPoint(_curve.positionCurve[i, 0]);
-                var point2 = _curve.transform.TransformPoint(_curve.positionCurve[i, 3]);
-                var tangent1 = _curve.transform.TransformPoint(_curve.positionCurve[i, 1]);
-                var tangent2 = _curve.transform.TransformPoint(_curve.positionCurve[i, 2]);
-                drawList.Add(new CurveSegmentDraw(this,point1,point2,tangent1,tangent2,LineTextureType.Default,new Color(.6f, .6f, .6f)));
-            }
+            GetCurveDraw(drawList,_curve.positionCurve,_curve.transform,this);
             base.Draw(drawList,clickedElement);
         }
 

@@ -11,15 +11,22 @@ namespace Assets.NewUI
     {
         public PositionCurveComposite positionCurve;
         public PointAlongCurveComposite centerPoint;
+        private Curve3D _curve;
         public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve,BezierCurveDistanceValue secondaryBezierCurve) : base (parent)
         {
             this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve);
+            this._curve = curve;
             centerPoint = new PointAlongCurveComposite(this,secondaryBezierCurve,curve,UnityEngine.Color.green);
         }
         public override IEnumerable<IComposite> GetChildren()
         {
             yield return positionCurve;
             yield return centerPoint;
+        }
+        public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
+        {
+            UICurve.GetCurveDraw(drawList,positionCurve.positionCurve,_curve.transform,this);
+            base.Draw(drawList, clickedElement);
         }
     }
 }

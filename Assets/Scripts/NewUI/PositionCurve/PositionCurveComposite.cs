@@ -11,8 +11,10 @@ namespace Assets.NewUI
     {
         public List<PositionPointGroupComposite> pointGroups = null;
         private SplitterPointComposite _splitterPoint = null;
+        public BezierCurve positionCurve;
         public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve) : base(parent)
         {
+            this.positionCurve = positionCurve;
             _splitterPoint = new SplitterPointComposite(this,curve,PointTextureType.circle,PositionCurveSplitCommandFactory.Instance,Curve3DSettings.Green);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in positionCurve.PointGroups)
