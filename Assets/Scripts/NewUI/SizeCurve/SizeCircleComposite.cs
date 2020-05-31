@@ -28,7 +28,7 @@ namespace Assets.NewUI
             {
                 var edgePointProvider = new SizeCircleEdgePointPositionProvider(value,i,curve);
                 var clickCommmand = new SizeCurveEdgeClickCommand(value,edgePointProvider,this,curve);
-                ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor,curve));
+                ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor));
             }
         }
 

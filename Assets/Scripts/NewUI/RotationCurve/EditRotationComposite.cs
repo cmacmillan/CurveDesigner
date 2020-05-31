@@ -19,7 +19,7 @@ namespace Assets.NewUI
             _point = value;
             _curve = curve;
             centerPoint = new PointAlongCurveComposite(this,value,curve,color);
-            _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color,curve);
+            _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color);
         }
 
         public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)

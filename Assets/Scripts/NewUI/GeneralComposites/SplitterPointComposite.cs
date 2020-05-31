@@ -15,7 +15,7 @@ namespace Assets.NewUI
         public SplitterPointComposite(IComposite parent,Curve3D _curve,PointTextureType textureType,ISplitCommandFactory commandFactory,Color color) : base (parent)
         {
             this._curve = _curve;
-            this._point = new PointComposite(this,this,textureType,commandFactory.Create(this,_curve),color,_curve);
+            this._point = new PointComposite(this,this,textureType,commandFactory.Create(this,_curve),color);
         }
         public override void Draw(List<IDraw> drawlist,ClickHitData clickedElement)
         {

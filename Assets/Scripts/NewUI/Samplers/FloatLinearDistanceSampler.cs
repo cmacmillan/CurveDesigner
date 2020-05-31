@@ -7,16 +7,42 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    [System.Serializable]
-    public class CurveTrackingDistance
+    public class BackingCurveModificationTracker<T> where T : CurveTrackingDistance
     {
+        List<float> backingCurveModificationDistances;
+        public void StartInsertToBackingCurve(BezierCurve backingCurve,List<T> points)
+        {
+            backingCurveModificationDistances = new List<float>();
+            foreach (var i in points)
+                backingCurveModificationDistances.Add(i.GetDistance(backingCurve));
+        }
+        public void FinishInsertToBackingCurve(BezierCurve backingCurve, List<T> points)
+        {
+            for (int i = 0; i < points.Count; i++)
+                points[i].SetDistance(backingCurveModificationDistances[i],backingCurve,false);
+            backingCurveModificationDistances = null;
+        }
+    }
+    //When inheriting from this class make sure that you override SortPoints
+    [System.Serializable]
+    public class CurveTrackingDistance : ILinePoint
+    {
+        public CurveTrackingDistance(float distance, BezierCurve curve)
+        {
+            this.SetDistance(distance,curve,false);
+        }
+        public CurveTrackingDistance(CurveTrackingDistance objToClone)
+        {
+            this._timeAlongSegment = objToClone._timeAlongSegment;
+            this._segmentIndex = objToClone._segmentIndex;
+        }
         public virtual void SetDistance(float distance,BezierCurve curve, bool shouldSort = true)
         {
             var point = curve.GetPointAtDistance(distance);
             _segmentIndex = point.segmentIndex;
             _timeAlongSegment = point.time;
         }
-        public float GetDistance(BezierCurve curve)
+        public virtual float GetDistance(BezierCurve curve)
         {
             return curve.GetDistanceAtSegmentIndexAndTime(_segmentIndex, _timeAlongSegment);
         }
@@ -28,27 +54,25 @@ namespace Assets.NewUI
         public float TimeAlongSegment { get { return _timeAlongSegment; } }
     }
     [System.Serializable]
-    public class FloatDistanceValue : CurveTrackingDistance, ILinePoint
+    public class FloatDistanceValue : CurveTrackingDistance
     {
         public float value;
         [NonSerialized]
         public FloatLinearDistanceSampler _owner;
-        public FloatDistanceValue(float value, float distance, FloatLinearDistanceSampler owner, BezierCurve curve)
+        public FloatDistanceValue(float value, float distance, FloatLinearDistanceSampler owner, BezierCurve curve) : base(distance,curve)
         {
             this.value = value;
             this._owner = owner;
-            this.SetDistance(distance,curve);
+            _owner.SortPoints(curve);
         }
-        public FloatDistanceValue(FloatDistanceValue objToClone,FloatLinearDistanceSampler newOwner,BezierCurve curve)
+        public FloatDistanceValue(FloatDistanceValue objToClone,FloatLinearDistanceSampler newOwner,BezierCurve curve) : base(objToClone)
         {
             this.value = objToClone.value;
             _owner = newOwner;
-            this._timeAlongSegment = objToClone._timeAlongSegment;
-            this._segmentIndex = objToClone._segmentIndex;
         }
-        public override void SetDistance(float distance, BezierCurve curve,bool shouldSort=true)
+        public override void SetDistance(float distance, BezierCurve curve, bool shouldSort = true)
         {
-            base.SetDistance(distance, curve);
+            base.SetDistance(distance, curve, shouldSort);
             if (shouldSort)
                 _owner.SortPoints(curve);
         }
@@ -57,7 +81,7 @@ namespace Assets.NewUI
     public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver
     {
         [SerializeField]
-        private List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
+        public List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
         public FloatLinearDistanceSampler() {
         }
         public FloatLinearDistanceSampler(FloatLinearDistanceSampler objToClone, BezierCurve curve)
@@ -67,18 +91,13 @@ namespace Assets.NewUI
             CacheOpenCurvePoints(curve);
         }
         //////////////
-        List<float> backingCurveModificationDistances;
-        public void StartInsertToBackingCurve(BezierCurve backingCurve)
-        {
-            backingCurveModificationDistances = new List<float>();
-            foreach (var i in _points)
-                backingCurveModificationDistances.Add(i.GetDistance(backingCurve));
-        }
-        public void FinishInsertToBackingCurve(BezierCurve backingCurve)
-        {
-            for (int i = 0; i < _points.Count; i++)
-                _points[i].SetDistance(backingCurveModificationDistances[i],backingCurve,false);
-            backingCurveModificationDistances = null;
+        private BackingCurveModificationTracker<FloatDistanceValue> _backingCurveModificationTracker;
+        public BackingCurveModificationTracker<FloatDistanceValue> BackingCurveModificationTracker { get
+            {
+                if (_backingCurveModificationTracker == null)
+                    _backingCurveModificationTracker = new BackingCurveModificationTracker<FloatDistanceValue>();
+                return _backingCurveModificationTracker;
+            }
         }
         //////////////
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)

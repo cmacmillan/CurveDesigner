@@ -65,6 +65,12 @@ public class Curve3D : MonoBehaviour
     private float oldVertexDensity = -1;
 
     [Min(0)]
+    public int doubleBezierSampleCount = 1;
+    [SerializeField]
+    [HideInInspector]
+    private int oldDoubleBezierVertexDensity = -1;
+
+    [Min(0)]
     public float curveRadius =3.0f;
     [SerializeField]
     [HideInInspector]
@@ -144,6 +150,7 @@ public class Curve3D : MonoBehaviour
         retr|=CheckField(closeTilableMeshGap, ref oldCloseTilableMeshGap);
         retr|=CheckField(meshToTile, ref oldMeshToTile);
         retr|=CheckField(meshPrimaryAxis,ref oldMeshPrimaryAxis);
+        retr |= CheckField(doubleBezierSampleCount, ref oldDoubleBezierVertexDensity);
 
         if (CheckField(isClosedLoop, ref oldIsClosedLoop))
         {
@@ -215,6 +222,7 @@ public enum EditMode
     PositionCurve = 0,
     Rotation = 1,
     Size = 2,
+    DoubleBezier = 3,
 }
 public enum CurveType
 {

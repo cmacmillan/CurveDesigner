@@ -11,12 +11,12 @@ namespace Assets.NewUI
     {
         public List<PositionPointGroupComposite> pointGroups = null;
         private SplitterPointComposite _splitterPoint = null;
-        public PositionCurveComposite(IComposite parent,Curve3D curve) : base(parent)
+        public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve) : base(parent)
         {
             _splitterPoint = new SplitterPointComposite(this,curve,PointTextureType.circle,PositionCurveSplitCommandFactory.Instance,Curve3DSettings.Green);
             pointGroups = new List<PositionPointGroupComposite>();
-            foreach (var group in curve.positionCurve.PointGroups)
-                pointGroups.Add(new PositionPointGroupComposite(this,group,curve));
+            foreach (var group in positionCurve.PointGroups)
+                pointGroups.Add(new PositionPointGroupComposite(this,group,curve.transform,positionCurve));
         }
 
         public override IEnumerable<IComposite> GetChildren()

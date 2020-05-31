@@ -20,17 +20,37 @@ namespace Assets.NewUI
         public virtual void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked) { }
         public virtual void ClickUp(Vector2 mousePos) { }
     }
+    public class DoubleBezierCurveSplitCommand : SplitCommand
+    {
+        private DoubleBezierSampler sampler;
+        private Curve3D _curve;
+        public DoubleBezierCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter,DoubleBezierSampler sampler) : base(curve, splitter)
+        {
+            _curve = curve;
+            this.sampler = sampler; 
+        }
+        public override void ClickDown(Vector2 mousePos)
+        {
+            int index = sampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
+            _curve.UICurve.Initialize();
+            var selected = _curve.UICurve.doubleBezierCurve.GetPointAtIndex(index);
+            _curve.elementClickedDown.owner = selected;
+        }
+    }
     public class PositionCurveSplitCommand : SplitCommand
     {
         public PositionCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
         public override void ClickDown(Vector2 mousePos)
         {
             foreach (var i in _curve.DistanceSamplers)
-                i.StartInsertToBackingCurve(_curve.positionCurve);
+                i.BackingCurveModificationTracker.StartInsertToBackingCurve(_curve.positionCurve,i._points);
+            var doubleBezier = _curve.doubleBezierSampler;
+            doubleBezier.BackingCurveModificationTracker.StartInsertToBackingCurve(_curve.positionCurve,doubleBezier.secondaryCurves);
             _curve.positionCurve.InsertSegmentAfterIndex(_curve.UICurve.pointClosestToCursor,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
             foreach (var i in _curve.DistanceSamplers)
-                i.FinishInsertToBackingCurve(_curve.positionCurve);
+                i.BackingCurveModificationTracker.FinishInsertToBackingCurve(_curve.positionCurve,i._points);
+            doubleBezier.BackingCurveModificationTracker.FinishInsertToBackingCurve(_curve.positionCurve, doubleBezier.secondaryCurves);
             var selected = _curve.UICurve.positionCurve.pointGroups[_curve.UICurve.pointClosestToCursor.segmentIndex+1].centerPoint;
             _curve.elementClickedDown.owner = selected;
         }
@@ -95,6 +115,13 @@ namespace Assets.NewUI
         public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
         {
             return new ValueAlongCurveSplitCommand(curve, owner,curve.rotationDistanceSampler,GetRotationCurve);
+        }
+    }
+    public class DoubleBezierCurveSplitCommandFactory : Singleton<DoubleBezierCurveSplitCommandFactory>, ISplitCommandFactory
+    {
+        public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
+        {
+            return new DoubleBezierCurveSplitCommand(curve, owner, curve.doubleBezierSampler);
         }
     }
 }

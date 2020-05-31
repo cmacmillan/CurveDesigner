@@ -13,6 +13,7 @@ namespace Assets.NewUI
         public PositionCurveComposite positionCurve;
         public SizeCurveComposite sizeCurve;
         public RotationCurveComposite rotationCurve;
+        public DoubleBezierCurveComposite doubleBezierCurve;
         private Curve3D _curve;
         public PointOnCurve pointClosestToCursor;
 
@@ -26,9 +27,10 @@ namespace Assets.NewUI
 
         public void Initialize()
         {
-            positionCurve = new PositionCurveComposite(this,_curve);
+            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve);
             sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve);
             rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve);
+            doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve);
             _curve.lastMeshUpdateStartTime = DateTime.Now;
             _curve.positionCurve.Recalculate();
         }
@@ -94,6 +96,9 @@ namespace Assets.NewUI
                     break;
                 case EditMode.Rotation:
                     yield return rotationCurve;
+                    break;
+                case EditMode.DoubleBezier:
+                    yield return doubleBezierCurve;
                     break;
             }
         }

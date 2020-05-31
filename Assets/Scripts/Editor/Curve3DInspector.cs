@@ -65,7 +65,12 @@ public class Curve3DInspector : Editor
         ///
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
-        curve3d.positionCurve.Recalculate(); 
+        curve3d.positionCurve.Recalculate();
+        foreach (var i in curve3d.doubleBezierSampler.secondaryCurves)
+        {
+            i.secondaryCurve.owner = curve3d;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
+            i.secondaryCurve.Recalculate();
+        }
         curve3d.CacheAverageSize();
         var rotationPoints = curve3d.rotationDistanceSampler.GetPoints(curve3d);
         if (curve3d.previousRotations.Count != rotationPoints.Count)

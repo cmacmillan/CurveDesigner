@@ -13,15 +13,13 @@ namespace Assets.NewUI
         private PointTextureType _pointTexture;
         private IClickCommand _clickAction;
         private Color _color;
-        public Curve3D _curve; 
 
-        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color, Curve3D curve) : base(parent)
+        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color) : base(parent)
         {
             this._position = positionProvider;
             this._pointTexture = textureType;
             this._clickAction = clickAction;
             this._color = color;
-            this._curve = curve;
         }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)

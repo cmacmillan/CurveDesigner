@@ -62,9 +62,11 @@ public static class MeshGenerator
 
     public static BezierCurve curve;
 
+    public static DoubleBezierSampler doubleBezierSampler;
     public static IDistanceSampler<float> sizeDistanceSampler;
     public static IDistanceSampler<float> rotationDistanceSampler;
 
+    public static int doubleBezierSampleCount=20;
     public static int RingPointCount = 8;
     public static float Radius=3.0f;
     public static float VertexSampleDistance = 1.0f;
@@ -94,6 +96,8 @@ public static class MeshGenerator
             MeshGenerator.Rotation = curve.curveRotation;
             MeshGenerator.sizeDistanceSampler = new FloatLinearDistanceSampler(curve.sizeDistanceSampler,clonedCurve);
             MeshGenerator.rotationDistanceSampler = new FloatLinearDistanceSampler(curve.rotationDistanceSampler,clonedCurve);
+            MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);
+            MeshGenerator.doubleBezierSampleCount = curve.doubleBezierSampleCount;
             MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
@@ -443,6 +447,34 @@ public static class MeshGenerator
                     return true;
                 }
             #endregion
+            case CurveType.DoubleBezier:
+                {
+                    InitLists();
+                    var primaryCurveSamples = curve.GetPointsWithSpacing(VertexSampleDistance);
+                    List<Vector3> posBuffer = new List<Vector3>();
+                    foreach (var primaryCurvePoint in primaryCurveSamples)
+                    {
+                        for (float c = 0; c <= doubleBezierSampleCount; c++)
+                        {
+                            float progress = c / (float)doubleBezierSampleCount;
+                            var relativePos = doubleBezierSampler.SampleAt(primaryCurvePoint.distanceFromStartOfCurve, progress, curve,out Vector3 reference);
+                            //Lets say x is forward
+                            var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference);
+                            Vector3 TransformVector3(Vector3 vect)
+                            {
+                                return primaryCurvePoint.tangent * vect.x + primaryCurvePoint.reference * vect.y + cross * vect.z;
+                            }
+                            var absolutePos = primaryCurvePoint.position +TransformVector3(relativePos);
+                            vertices.Add(absolutePos+TransformVector3(reference)*Thickness/2);
+                            posBuffer.Add(absolutePos-TransformVector3(reference)*Thickness/2);
+                        }
+                        vertices.AddRange(posBuffer);
+                    }
+                    numVerts = vertices.Count;
+                    shouldDrawConnectingFace = false;
+                    TrianglifyLayer(true, doubleBezierSampleCount);
+                    return true;
+                }
             case CurveType.Mesh:
                 {
                     InitLists(true);

@@ -17,7 +17,7 @@ public class Segment
     }
     public void Recalculate(BezierCurve owner,int segmentIndex, bool isLastSegment)
     {
-        bool shouldPerformOneLessSample = isLastSegment && owner.owner.isClosedLoop;
+        bool shouldPerformOneLessSample = isLastSegment && owner.isClosedLoop;
         samples.Clear();
         float len = 0;
         Vector3 previousPosition = owner.GetSegmentPositionAtTime(segmentIndex, 0.0f);
