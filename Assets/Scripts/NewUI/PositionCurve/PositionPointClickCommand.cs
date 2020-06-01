@@ -12,7 +12,7 @@ namespace Assets.NewUI
         private PointGroup _group;
         private PGIndex _index;
         private BezierCurve positionCurve;
-        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve)
+        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve)/*,Quaternion? toTangentSpaceRotation=null)*/
         {
             this._group = group;
             this._index = indexType;
@@ -24,9 +24,34 @@ namespace Assets.NewUI
 
         public void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData data)
         {
-            var oldPointPosition = _group.GetWorldPositionByIndex(_index,positionCurve.dimensionLockMode);
-            var newPointPosition = curve.transform.InverseTransformPoint(GUITools.GUIToWorldSpace(mousePos,data.distanceFromCamera));
-            _group.SetWorldPositionByIndex(_index,newPointPosition,positionCurve.dimensionLockMode);
+            var dimensionLockMode = positionCurve.dimensionLockMode;
+            var oldPointPosition = _group.GetWorldPositionByIndex(_index,dimensionLockMode);
+            Vector3 worldPos;
+            if (dimensionLockMode== DimensionLockMode.none)
+                worldPos = GUITools.GUIToWorldSpace(mousePos, data.distanceFromCamera);
+            else
+            {
+                Vector3 planeNormal = Vector3.zero;
+                switch (dimensionLockMode)
+                {
+                    case DimensionLockMode.x:
+                        planeNormal = Vector3.right;
+                        break;
+                    case DimensionLockMode.y:
+                        planeNormal = Vector3.up;
+                        break;
+                    case DimensionLockMode.z:
+                        planeNormal = Vector3.forward;
+                        break;
+                }
+                var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
+                Ray r = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
+                Plane p = new Plane(planeNormal,oldPointPosition);
+                p.Raycast(r, out float enter);
+                worldPos = r.GetPoint(enter);
+            }
+            var newPointPosition = curve.transform.InverseTransformPoint(worldPos);
+            _group.SetWorldPositionByIndex(_index,newPointPosition,dimensionLockMode);
         }
 
         public void ClickUp(Vector2 mousePos)
