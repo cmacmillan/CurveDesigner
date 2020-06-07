@@ -103,12 +103,13 @@ namespace Assets.NewUI
                 distanceSamplerModificationTrackers.Add(new BackingCurveModificationTracker<FloatDistanceValue>(_curve.positionCurve,i._points));
             var doubleBezier = _curve.doubleBezierSampler;
             var doubleBezierModificationTracker = new BackingCurveModificationTracker<BezierCurveDistanceValue>(_curve.positionCurve,doubleBezier.secondaryCurves);
-            _curve.positionCurve.InsertSegmentAfterIndex(_curve.UICurve.positionCurve.PointClosestToCursor,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
+            var closestPoint = _curve.UICurve.positionCurve.PointClosestToCursor;
+            _curve.positionCurve.InsertSegmentAfterIndex(closestPoint,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
             foreach (var i in distanceSamplerModificationTrackers)
                 i.FinishInsertToBackingCurve();
             doubleBezierModificationTracker.FinishInsertToBackingCurve();
-            var selected = _curve.UICurve.positionCurve.pointGroups[_curve.UICurve.positionCurve.PointClosestToCursor.segmentIndex+1].centerPoint;
+            var selected = _curve.UICurve.positionCurve.pointGroups[closestPoint.segmentIndex+1].centerPoint;
             _curve.elementClickedDown.owner = selected;
         }
     }
