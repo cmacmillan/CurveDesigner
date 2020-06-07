@@ -10,8 +10,8 @@ namespace Assets.NewUI
     public class TransformBlob
     {
         private Transform _baseTransform;
-        private Matrix4x4? _additionalTransform;
-        public TransformBlob(Transform baseTransform, Matrix4x4? additionalTransform = null) {
+        private DynamicMatrix4x4 _additionalTransform;
+        public TransformBlob(Transform baseTransform, DynamicMatrix4x4 additionalTransform = null) {
             _baseTransform = baseTransform;
             _additionalTransform = additionalTransform;
         }
@@ -22,10 +22,21 @@ namespace Assets.NewUI
         public Vector3 TransformPoint(Vector3 point)
         {
             var retr = _baseTransform.TransformPoint(point);
-            if (_additionalTransform.HasValue)
-                retr = _additionalTransform.Value * ToHomo(retr);
+            if (_additionalTransform!=null)
+                retr = _additionalTransform.GetMatrix() * ToHomo(retr);
             return retr;
         }
     }
-
+    public class DynamicMatrix4x4
+    {
+        private IPositionProvider centerPosition;
+        public DynamicMatrix4x4(IPositionProvider centerPosition)
+        {
+            this.centerPosition = centerPosition;
+        }
+        public Matrix4x4 GetMatrix()
+        {
+            return Matrix4x4.Translate(centerPosition.Position);
+        }
+    }
 }

@@ -13,15 +13,17 @@ namespace Assets.NewUI
         public PositionCurveComposite positionCurve;
         public PointAlongCurveComposite centerPoint;
         private Curve3D _curve;
+        private TransformBlob transformBlob;
         public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve,BezierCurveDistanceValue secondaryBezierCurve) : base (parent)
         {
             var curveInfoAtCenterPoint = curve.positionCurve.GetPointAtDistance(secondaryBezierCurve.GetDistance(curve.positionCurve));
-            Matrix4x4 tangentSpaceToLocalSpace = Matrix4x4.Rotate(Quaternion.LookRotation(curveInfoAtCenterPoint.tangent,curveInfoAtCenterPoint.reference));//.inverse
+            //Matrix4x4 tangentSpaceToLocalSpace = Matrix4x4.Rotate(Quaternion.LookRotation(curveInfoAtCenterPoint.tangent,curveInfoAtCenterPoint.reference));//.inverse
             //tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position)*tangentSpaceToLocalSpace;
-            tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position);
-            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,PositionCurveSplitCommandFactory.Instance,new TransformBlob(curve.transform,tangentSpaceToLocalSpace));
+            //tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position);
             this._curve = curve;
             centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, curve, UnityEngine.Color.green, null);//tangentSpaceToLocalSpace);
+            transformBlob = new TransformBlob(curve.transform,new DynamicMatrix4x4(centerPoint));
+            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,PositionCurveSplitCommandFactory.Instance,transformBlob);
         }
         public override IEnumerable<IComposite> GetChildren()
         {
@@ -30,7 +32,7 @@ namespace Assets.NewUI
         }
         public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
         {
-            UICurve.GetCurveDraw(drawList,positionCurve.positionCurve,_curve.transform,this);
+            UICurve.GetCurveDraw(drawList,positionCurve.positionCurve,transformBlob,this);
             base.Draw(drawList, clickedElement);
         }
     }

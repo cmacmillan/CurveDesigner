@@ -12,15 +12,16 @@ namespace Assets.NewUI
         public List<PositionPointGroupComposite> pointGroups = null;
         private SplitterPointComposite _splitterPoint = null;
         public BezierCurve positionCurve;
+        private TransformBlob transformBlob;
         public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve,ISplitCommandFactory splitCommand, TransformBlob transformBlob) : base(parent)
         {
+            this.transformBlob = transformBlob; 
             this.positionCurve = positionCurve;
             _splitterPoint = new SplitterPointComposite(this,curve,PointTextureType.circle,splitCommand,Curve3DSettings.Green);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in positionCurve.PointGroups)
                 pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve));
         }
-
         public override IEnumerable<IComposite> GetChildren()
         {
             yield return _splitterPoint;

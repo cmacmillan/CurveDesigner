@@ -56,7 +56,7 @@ namespace Assets.NewUI
             base.Click(mousePosition, clickHits);
         }
 
-        public static void GetCurveDraw(List<IDraw> drawList,BezierCurve curve, Transform transform, IComposite owner)
+        public static void GetCurveDraw(List<IDraw> drawList,BezierCurve curve, TransformBlob transform, IComposite owner)
         {
             for (int i = 0; i < curve.NumSegments; i++)
             {
@@ -85,7 +85,7 @@ namespace Assets.NewUI
                     drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));
                 }
             }
-            GetCurveDraw(drawList,_curve.positionCurve,_curve.transform,this);
+            GetCurveDraw(drawList,_curve.positionCurve,new TransformBlob(_curve.transform,null),this);
             base.Draw(drawList,clickedElement);
         }
 
