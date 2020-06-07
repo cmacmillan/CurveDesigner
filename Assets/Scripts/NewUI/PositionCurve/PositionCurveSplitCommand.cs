@@ -37,22 +37,41 @@ namespace Assets.NewUI
     }
     public class BackingCurveModificationTracker<T> where T : CurveTrackingDistance
     {
+        private struct BackingCurveItem
+        {
+            public BackingCurveItem(float distance, bool isTracked)
+            {
+                this.distance = distance;
+                this.isTracked = isTracked;
+            }
+            public float distance;
+            public bool isTracked;
+        }
         private BezierCurve backingCurve;
         private List<T> points;
-        List<float> backingCurveModificationDistances;
+        List<BackingCurveItem> backingCurveModifications;
         public BackingCurveModificationTracker(BezierCurve backingCurve,List<T> points)
         {
             this.points = points;
             this.backingCurve = backingCurve;
-            backingCurveModificationDistances = new List<float>();
+            backingCurveModifications = new List<BackingCurveItem>();
             foreach (var i in points)
-                backingCurveModificationDistances.Add(i.GetDistance(backingCurve));
+            {
+                if (i.SegmentIndex < this.backingCurve.NumSegments)
+                    backingCurveModifications.Add(new BackingCurveItem(i.GetDistance(backingCurve),true));
+                else
+                    backingCurveModifications.Add(new BackingCurveItem(-1,false));
+            }
         }
         public void FinishInsertToBackingCurve()
         {
             for (int i = 0; i < points.Count; i++)
-                points[i].SetDistance(backingCurveModificationDistances[i],backingCurve,false);
-            backingCurveModificationDistances = null;
+            {
+                var curr = backingCurveModifications[i];
+                if (curr.isTracked)
+                    points[i].SetDistance(curr.distance,backingCurve,false);
+            }
+            backingCurveModifications = null;
         }
     }
     public class SecondaryPositionCurveSplitCommand : IClickCommand
