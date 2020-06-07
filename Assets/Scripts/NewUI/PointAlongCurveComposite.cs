@@ -9,14 +9,14 @@ namespace Assets.NewUI
 {
     public class PointAlongCurveComposite : IComposite, IPositionProvider
     {
-        public ILinePoint value;
+        public IPointOnCurve value;
         public PointComposite point;
         private BezierCurve _positionCurve;
 
-        public PointAlongCurveComposite(IComposite parent,ILinePoint value,PositionCurveComposite positionCurve,Color color) : base(parent)
+        public PointAlongCurveComposite(IComposite parent,IPointOnCurve value,PositionCurveComposite positionCurve,Color color) : base(parent)
         {
             this.value = value;
-            point = new PointComposite(this, this, PointTextureType.square, new LinePointPositionClickCommand(value, positionCurve),color);
+            point = new PointComposite(this, this, PointTextureType.square, new PointOnCurveClickCommand(value, positionCurve),color);
             _positionCurve = positionCurve.positionCurve;
         }
 

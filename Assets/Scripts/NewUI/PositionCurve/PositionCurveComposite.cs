@@ -42,15 +42,5 @@ namespace Assets.NewUI
             foreach (var i in pointGroups)
                 yield return i;
         }
-        public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
-        {
-            FindPointClosestToCursor();
-            base.Draw(drawList, clickedElement);
-        }
-        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
-        {
-            FindPointClosestToCursor();
-            base.Click(mousePosition, clickHits);
-        }
     }
 }

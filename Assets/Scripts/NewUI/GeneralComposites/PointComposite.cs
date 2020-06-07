@@ -29,7 +29,7 @@ namespace Assets.NewUI
             clickHits.Add(new ClickHitData(this,distance,screenDepth,guiPosition-mousePosition));
         }
 
-        public override void Draw(List<IDraw> drawList,ClickHitData clicked)
+        public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
         {
             drawList.Add(new PointDraw(this,_position.Position, _pointTexture,_color));
         }

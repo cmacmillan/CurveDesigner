@@ -30,10 +30,10 @@ namespace Assets.NewUI
             yield return positionCurve;
             yield return centerPoint;
         }
-        public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
+        public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
             UICurve.GetCurveDraw(drawList,positionCurve.positionCurve,transformBlob,this);
-            base.Draw(drawList, clickedElement);
+            base.Draw(drawList, closestElementToCursor);
         }
     }
 }

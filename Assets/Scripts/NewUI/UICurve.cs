@@ -37,7 +37,7 @@ namespace Assets.NewUI
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
-            _curve.positionCurve.Recalculate();
+            FindClosestPoints();
             base.Click(mousePosition, clickHits);
         }
 
@@ -53,9 +53,16 @@ namespace Assets.NewUI
             }
         }
 
-        public override void Draw(List<IDraw> drawList,ClickHitData clickedElement)
+        void FindClosestPoints()
         {
             _curve.positionCurve.Recalculate();
+            positionCurve.FindPointClosestToCursor();
+            doubleBezierCurve.FindClosestPointsToCursor();
+        }
+
+        public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
+        {
+            FindClosestPoints();
             if (_curve.drawNormals)
             {
                 float sampleDist = _curve.GetNormalDensityDistance();
@@ -70,7 +77,7 @@ namespace Assets.NewUI
                 }
             }
             GetCurveDraw(drawList,_curve.positionCurve,new TransformBlob(_curve.transform,null),this);
-            base.Draw(drawList,clickedElement);
+            base.Draw(drawList,closestElementToCursor);
         }
 
         public override IEnumerable<IComposite> GetChildren()

@@ -17,10 +17,10 @@ namespace Assets.NewUI
             _parent = parent;
         }
         protected IComposite _parent=null;
-        public virtual void Draw(List<IDraw> drawList,ClickHitData clickedElement)
+        public virtual void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
         {
             foreach (var i in GetChildren())
-                i.Draw(drawList,clickedElement);
+                i.Draw(drawList,closestElementToCursor);
         }
         public virtual IEnumerable<IComposite> GetChildren()
         {

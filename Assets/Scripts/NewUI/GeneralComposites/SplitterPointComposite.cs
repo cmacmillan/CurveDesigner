@@ -19,10 +19,10 @@ namespace Assets.NewUI
             _transformBlob = transformBlob;
             _point = new PointComposite(this,this,textureType,clickCommand,color);
         }
-        public override void Draw(List<IDraw> drawlist,ClickHitData clickedElement)
+        public override void Draw(List<IDraw> drawlist,ClickHitData closestElementToCursor)
         {
-            if (clickedElement != null && clickedElement.owner != null && clickedElement.owner.GetParent() == this && clickedElement.distanceFromClick < _maxSplitClickDistance)
-                base.Draw(drawlist,clickedElement);
+            if (closestElementToCursor != null && closestElementToCursor.owner != null && closestElementToCursor.owner.GetParent() == this && closestElementToCursor.distanceFromClick < _maxSplitClickDistance)
+                base.Draw(drawlist,closestElementToCursor);
         }
         public override IEnumerable<IComposite> GetChildren()
         {

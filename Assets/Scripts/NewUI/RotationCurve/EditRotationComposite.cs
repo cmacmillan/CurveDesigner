@@ -22,12 +22,12 @@ namespace Assets.NewUI
             _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color);
         }
 
-        public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
+        public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
             centerPoint.GetPositionForwardAndReference(out Vector3 circlePosition, out Vector3 circleForward,out Vector3 circleReference);
             drawList.Add(new CircleDraw(this,Color.white, _curve.transform.TransformPoint(circlePosition),_curve.transform.TransformDirection(circleForward),_curve.averageSize));
             drawList.Add(new LineDraw(this,centerPoint.Position,Position));
-            base.Draw(drawList, clickedElement);
+            base.Draw(drawList, closestElementToCursor);
         }
 
         public override IEnumerable<IComposite> GetChildren()

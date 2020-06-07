@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class LinePointPositionClickCommand : IClickCommand
+    public class PointOnCurveClickCommand : IClickCommand
     {
-        private ILinePoint _point;
+        private IPointOnCurve _point;
         private PositionCurveComposite _positionCurve;
-        public LinePointPositionClickCommand(ILinePoint point,PositionCurveComposite positionCurve)
+        public PointOnCurveClickCommand(IPointOnCurve point,PositionCurveComposite positionCurve)
         {
             _point = point;
             _positionCurve = positionCurve;
@@ -36,7 +36,7 @@ namespace Assets.NewUI
         {
         }
     }
-    public interface ILinePoint
+    public interface IPointOnCurve
     {
         void SetDistance(float distance, BezierCurve curve, bool shouldSort = true);
         float GetDistance(BezierCurve curve);

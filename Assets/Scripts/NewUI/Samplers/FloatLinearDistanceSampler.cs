@@ -9,7 +9,7 @@ namespace Assets.NewUI
 {
     //When inheriting from this class make sure that you override SortPoints
     [System.Serializable]
-    public class CurveTrackingDistance : ILinePoint
+    public class CurveTrackingDistance : IPointOnCurve
     {
         public CurveTrackingDistance(float distance, BezierCurve curve)
         {

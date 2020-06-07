@@ -18,7 +18,7 @@ namespace Assets.NewUI
             this._end = end;
         }
 
-        public override void Draw(List<IDraw> drawList,ClickHitData clicked)
+        public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
         {
             drawList.Add(new LineDraw(this,_start.Position,_end.Position));
         }

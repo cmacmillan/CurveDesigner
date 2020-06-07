@@ -32,11 +32,11 @@ namespace Assets.NewUI
             }
         }
 
-        public override void Draw(List<IDraw> drawList, ClickHitData clickedElement)
+        public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
             linePoint.GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
             drawList.Add(new CircleDraw(this,Color.white,_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),value.value+_curve.curveRadius));
-            base.Draw(drawList, clickedElement);
+            base.Draw(drawList, closestElementToCursor);
         }
 
         public override IEnumerable<IComposite> GetChildren()
