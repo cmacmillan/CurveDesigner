@@ -16,8 +16,7 @@ namespace Assets.NewUI
         public PointOnCurve PointClosestToCursor { get; private set; }
         public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve,IClickCommand clickCommand, TransformBlob transformBlob) : base(parent)
         {
-            curve.UICurve.positionCurve = this;//jank to set the reference before construction is done
-            this.transformBlob = transformBlob; 
+            this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
             _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,clickCommand,Curve3DSettings.Green,this);
             pointGroups = new List<PositionPointGroupComposite>();

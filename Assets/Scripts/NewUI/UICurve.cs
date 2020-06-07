@@ -20,17 +20,15 @@ namespace Assets.NewUI
         {
             Undo.undoRedoPerformed -= Initialize;
             Undo.undoRedoPerformed += Initialize;
-            this._curve = curve;
-            curve.UICurve = this;
-            Initialize();
+            _curve = curve;
         }
 
         public void Initialize()
         {
             positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null));
-            sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve);
-            rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve);
-            doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve);
+            sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve,positionCurve);
+            rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve,positionCurve);
+            doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
             _curve.lastMeshUpdateStartTime = DateTime.Now;
             _curve.positionCurve.Recalculate();
             positionCurve.FindPointClosestToCursor();

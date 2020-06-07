@@ -14,11 +14,11 @@ namespace Assets.NewUI
         private PointComposite _rotationHandlePoint;
         public Curve3D _curve;
 
-        public EditRotationComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,FloatLinearDistanceSampler sampler,Color color): base(parent)
+        public EditRotationComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,FloatLinearDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
             _point = value;
             _curve = curve;
-            centerPoint = new PointAlongCurveComposite(this,value,curve.UICurve.positionCurve,color);
+            centerPoint = new PointAlongCurveComposite(this,value,positionCurveComposite,color);
             _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color);
         }
 

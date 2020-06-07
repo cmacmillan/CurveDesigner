@@ -12,11 +12,11 @@ namespace Assets.NewUI
         private DoubleBezierSampler _doubleBezierSampler;
         private List<SecondaryPositionCurveComposite> _secondaryCurves;
         private SplitterPointComposite _splitterPoint;
-        public DoubleBezierCurveComposite(IComposite parent,DoubleBezierSampler doubleBezierSampler,Curve3D curve) : base(parent)
+        public DoubleBezierCurveComposite(IComposite parent,DoubleBezierSampler doubleBezierSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _doubleBezierSampler = doubleBezierSampler;
             _secondaryCurves = new List<SecondaryPositionCurveComposite>();
-            _splitterPoint = new SplitterPointComposite(this,new TransformBlob(curve.transform,null), PointTextureType.circle, new DoubleBezierCurveSplitCommand(curve,_doubleBezierSampler), Color.green,curve.UICurve.positionCurve);
+            _splitterPoint = new SplitterPointComposite(this,new TransformBlob(curve.transform,null), PointTextureType.circle, new DoubleBezierCurveSplitCommand(curve,_doubleBezierSampler,positionCurveComposite), Color.green,positionCurveComposite);
             foreach (var i in doubleBezierSampler.GetPoints(curve))
                 _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i));
         }

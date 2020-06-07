@@ -12,13 +12,13 @@ namespace Assets.NewUI
         private FloatLinearDistanceSampler _distanceSampler;
         private List<EditRotationComposite> _points = new List<EditRotationComposite>();
         private SplitterPointComposite _splitterPoint = null;
-        public RotationCurveComposite(IComposite parent,FloatLinearDistanceSampler distanceSampler,Curve3D curve) : base(parent)
+        public RotationCurveComposite(IComposite parent,FloatLinearDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _distanceSampler = distanceSampler;
             var blueColor = new Color(0,.8f,1.0f);
-            _splitterPoint = new SplitterPointComposite(this, new TransformBlob(curve.transform,null), PointTextureType.circle, new ValueAlongCurveSplitCommand(curve,_distanceSampler,this), blueColor,curve.UICurve.positionCurve);
+            _splitterPoint = new SplitterPointComposite(this, new TransformBlob(curve.transform,null), PointTextureType.circle, new ValueAlongCurveSplitCommand(curve,_distanceSampler,this), blueColor,positionCurveComposite);
             foreach (var i in distanceSampler.GetPoints(curve))
-                _points.Add(new EditRotationComposite(this,i,curve,distanceSampler,blueColor));
+                _points.Add(new EditRotationComposite(this,i,curve,distanceSampler,blueColor,positionCurveComposite));
         }
         public override IEnumerable<IComposite> GetChildren()
         {

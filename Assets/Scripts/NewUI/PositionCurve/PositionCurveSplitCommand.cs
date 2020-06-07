@@ -22,14 +22,16 @@ namespace Assets.NewUI
     {
         private DoubleBezierSampler sampler;
         private Curve3D _curve;
-        public DoubleBezierCurveSplitCommand(Curve3D curve, DoubleBezierSampler sampler) : base(curve)
+        private PositionCurveComposite _positionCurveComposite;
+        public DoubleBezierCurveSplitCommand(Curve3D curve, DoubleBezierSampler sampler,PositionCurveComposite positionCurveComposite) : base(curve)
         {
+            _positionCurveComposite = positionCurveComposite;
             _curve = curve;
             this.sampler = sampler; 
         }
         public override void ClickDown(Vector2 mousePos)
         {
-            int index = sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
+            int index = sampler.InsertPointAtDistance(_positionCurveComposite.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             _curve.UICurve.Initialize();
             var selected = _curve.UICurve.doubleBezierCurve.GetPointAtIndex(index);
             _curve.elementClickedDown.owner = selected;

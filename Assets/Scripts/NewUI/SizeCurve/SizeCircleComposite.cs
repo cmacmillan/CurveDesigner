@@ -17,11 +17,11 @@ namespace Assets.NewUI
 
         public const int ringPointCount=4;
 
-        public SizeCircleComposite(IComposite parent,FloatDistanceValue value,BezierCurve positionCurve,Curve3D curve) : base(parent)
+        public SizeCircleComposite(IComposite parent,FloatDistanceValue value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             this.value = value;
             var purpleColor = new Color(.6f, .6f, .9f);
-            linePoint = new PointAlongCurveComposite(this, value, curve.UICurve.positionCurve,purpleColor);
+            linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor);
             this._positionCurve = positionCurve;
             this._curve = curve;
             for (int i = 0; i < ringPointCount; i++)
