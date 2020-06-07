@@ -10,12 +10,14 @@ namespace Assets.NewUI
     public class SplitterPointComposite : IComposite, IPositionProvider
     {
         private PointComposite _point;
-        private Curve3D _curve;
+        private TransformBlob _transformBlob;
         private const float _maxSplitClickDistance = 10;
-        public SplitterPointComposite(IComposite parent,Curve3D _curve,PointTextureType textureType,IClickCommand clickCommand,Color color) : base (parent)
+        private PositionCurveComposite _positionCurveComposite;
+        public SplitterPointComposite(IComposite parent,TransformBlob transformBlob,PointTextureType textureType,IClickCommand clickCommand,Color color,PositionCurveComposite positionCurveComposite) : base (parent)
         {
-            this._curve = _curve;
-            this._point = new PointComposite(this,this,textureType,clickCommand,color);
+            _positionCurveComposite = positionCurveComposite;
+            _transformBlob = transformBlob;
+            _point = new PointComposite(this,this,textureType,clickCommand,color);
         }
         public override void Draw(List<IDraw> drawlist,ClickHitData clickedElement)
         {
@@ -36,6 +38,6 @@ namespace Assets.NewUI
             clickHits.AddRange(pointHits);
         }
 
-        public Vector3 Position { get { return _curve.transform.TransformPoint(_curve.UICurve.pointClosestToCursor.position); } }
+        public Vector3 Position { get { return _transformBlob.TransformPoint(_positionCurveComposite.PointClosestToCursor.position); } }
     }
 }

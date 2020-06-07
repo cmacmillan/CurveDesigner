@@ -10,16 +10,16 @@ namespace Assets.NewUI
     public class LinePointPositionClickCommand : IClickCommand
     {
         private ILinePoint _point;
-        private Curve3D _curve;
-        public LinePointPositionClickCommand(ILinePoint point,Curve3D curve)
+        private PositionCurveComposite _positionCurve;
+        public LinePointPositionClickCommand(ILinePoint point,PositionCurveComposite positionCurve)
         {
             _point = point;
-            _curve = curve;
+            _positionCurve = positionCurve;
         }
 
         void SetPosition()
         {
-            _point.SetDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.positionCurve);
+            _point.SetDistance(_positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_positionCurve.positionCurve);
         }
 
         public void ClickDown(Vector2 mousePos)

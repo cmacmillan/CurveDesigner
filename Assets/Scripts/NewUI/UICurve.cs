@@ -15,44 +15,31 @@ namespace Assets.NewUI
         public RotationCurveComposite rotationCurve;
         public DoubleBezierCurveComposite doubleBezierCurve;
         private Curve3D _curve;
-        public PointOnCurve pointClosestToCursor;
 
         public UICurve(IComposite parent,Curve3D curve) : base(parent)
         {
             Undo.undoRedoPerformed -= Initialize;
             Undo.undoRedoPerformed += Initialize;
             this._curve = curve;
+            curve.UICurve = this;
             Initialize();
         }
 
         public void Initialize()
         {
-            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new PositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null));
+            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null));
             sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve);
             rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve);
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve);
             _curve.lastMeshUpdateStartTime = DateTime.Now;
             _curve.positionCurve.Recalculate();
-        }
-
-        public void FindPointClosestToCursor()
-        {
-            var samples = _curve.positionCurve.GetSamplePoints();
-            foreach (var i in samples)
-                i.position = _curve.transform.TransformPoint(i.position);
-            int segmentIndex;
-            float time;
-            UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
-            foreach (var i in samples)
-                i.position = _curve.transform.InverseTransformPoint(i.position);
-            float distance = _curve.positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);
-            pointClosestToCursor = _curve.positionCurve.GetPointAtDistance(distance);
+            positionCurve.FindPointClosestToCursor();
+            doubleBezierCurve.FindClosestPointsToCursor();
         }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
             _curve.positionCurve.Recalculate();
-            FindPointClosestToCursor();
             base.Click(mousePosition, clickHits);
         }
 
@@ -71,7 +58,6 @@ namespace Assets.NewUI
         public override void Draw(List<IDraw> drawList,ClickHitData clickedElement)
         {
             _curve.positionCurve.Recalculate();
-            FindPointClosestToCursor();
             if (_curve.drawNormals)
             {
                 float sampleDist = _curve.GetNormalDensityDistance();

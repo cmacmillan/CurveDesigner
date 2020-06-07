@@ -21,9 +21,9 @@ namespace Assets.NewUI
             //tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position)*tangentSpaceToLocalSpace;
             //tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position);
             this._curve = curve; 
-            centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, curve, UnityEngine.Color.green, null);//tangentSpaceToLocalSpace);
+            centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, positionCurve, UnityEngine.Color.green);
             transformBlob = new TransformBlob(curve.transform,new DynamicMatrix4x4(centerPoint));
-            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,new PositionCurveSplitCommand(curve),transformBlob);
+            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,new SecondaryPositionCurveSplitCommand(secondaryBezierCurve.secondaryCurve,curve),transformBlob);
         }
         public override IEnumerable<IComposite> GetChildren()
         {

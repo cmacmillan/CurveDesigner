@@ -16,9 +16,14 @@ namespace Assets.NewUI
         {
             _doubleBezierSampler = doubleBezierSampler;
             _secondaryCurves = new List<SecondaryPositionCurveComposite>();
-            _splitterPoint = new SplitterPointComposite(this,curve, PointTextureType.circle, new DoubleBezierCurveSplitCommand(curve,_doubleBezierSampler), Color.green);
+            _splitterPoint = new SplitterPointComposite(this,new TransformBlob(curve.transform,null), PointTextureType.circle, new DoubleBezierCurveSplitCommand(curve,_doubleBezierSampler), Color.green,curve.UICurve.positionCurve);
             foreach (var i in doubleBezierSampler.GetPoints(curve))
                 _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i));
+        }
+        public void FindClosestPointsToCursor()
+        {
+            foreach (var i in _secondaryCurves)
+                i.positionCurve.FindPointClosestToCursor();
         }
         public IClickable GetPointAtIndex(int index)
         {

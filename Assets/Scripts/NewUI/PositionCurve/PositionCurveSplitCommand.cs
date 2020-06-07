@@ -29,7 +29,7 @@ namespace Assets.NewUI
         }
         public override void ClickDown(Vector2 mousePos)
         {
-            int index = sampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
+            int index = sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             _curve.UICurve.Initialize();
             var selected = _curve.UICurve.doubleBezierCurve.GetPointAtIndex(index);
             _curve.elementClickedDown.owner = selected;
@@ -55,9 +55,28 @@ namespace Assets.NewUI
             backingCurveModificationDistances = null;
         }
     }
-    public class PositionCurveSplitCommand : SplitCommand
+    public class SecondaryPositionCurveSplitCommand : IClickCommand
     {
-        public PositionCurveSplitCommand(Curve3D curve) : base(curve) { }
+        private Curve3D curve;
+        private BezierCurve secondaryPositionCurve;
+        public SecondaryPositionCurveSplitCommand(BezierCurve secondaryPositionCurve,Curve3D curve)
+        {
+            this.secondaryPositionCurve = secondaryPositionCurve;
+            this.curve = curve;
+        }
+        public void ClickDown(Vector2 mousePos)
+        {
+            curve.UICurve.Initialize();
+            Debug.Log("not implemented");
+        }
+
+        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked) { }
+
+        public void ClickUp(Vector2 mousePos) { }
+    }
+    public class MainPositionCurveSplitCommand : SplitCommand
+    {
+        public MainPositionCurveSplitCommand(Curve3D curve) : base(curve) { }
         public override void ClickDown(Vector2 mousePos)
         {
             List<BackingCurveModificationTracker<FloatDistanceValue>> distanceSamplerModificationTrackers = new List<BackingCurveModificationTracker<FloatDistanceValue>>();
@@ -65,12 +84,12 @@ namespace Assets.NewUI
                 distanceSamplerModificationTrackers.Add(new BackingCurveModificationTracker<FloatDistanceValue>(_curve.positionCurve,i._points));
             var doubleBezier = _curve.doubleBezierSampler;
             var doubleBezierModificationTracker = new BackingCurveModificationTracker<BezierCurveDistanceValue>(_curve.positionCurve,doubleBezier.secondaryCurves);
-            _curve.positionCurve.InsertSegmentAfterIndex(_curve.UICurve.pointClosestToCursor,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
+            _curve.positionCurve.InsertSegmentAfterIndex(_curve.UICurve.positionCurve.PointClosestToCursor,_curve.positionCurve.placeLockedPoints,_curve.positionCurve.splitInsertionBehaviour);
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
             foreach (var i in distanceSamplerModificationTrackers)
                 i.FinishInsertToBackingCurve();
             doubleBezierModificationTracker.FinishInsertToBackingCurve();
-            var selected = _curve.UICurve.positionCurve.pointGroups[_curve.UICurve.pointClosestToCursor.segmentIndex+1].centerPoint;
+            var selected = _curve.UICurve.positionCurve.pointGroups[_curve.UICurve.positionCurve.PointClosestToCursor.segmentIndex+1].centerPoint;
             _curve.elementClickedDown.owner = selected;
         }
     }
@@ -88,7 +107,7 @@ namespace Assets.NewUI
         }
         public override void ClickDown(Vector2 mousePos)
         {
-            int index = _sampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
+            int index = _sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             _curve.UICurve.Initialize();//See above
             var selected = _pointsProvider.GetPointAtIndex(index);
             _curve.elementClickedDown.owner = selected;

@@ -26,6 +26,13 @@ namespace Assets.NewUI
                 retr = _additionalTransform.GetMatrix() * ToHomo(retr);
             return retr;
         }
+        public Vector3 InverseTransformPoint(Vector3 point)
+        {
+            Vector3 retr = point;
+            if (_additionalTransform != null)
+                retr = _additionalTransform.GetMatrix().inverse * ToHomo(retr);
+            return _baseTransform.InverseTransformPoint(retr);
+        }
     }
     public class DynamicMatrix4x4
     {

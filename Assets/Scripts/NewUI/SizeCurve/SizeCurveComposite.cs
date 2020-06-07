@@ -14,7 +14,7 @@ namespace Assets.NewUI
         private List<SizeCircleComposite> points = new List<SizeCircleComposite>();
         public SizeCurveComposite(IComposite parent,FloatLinearDistanceSampler distanceSampler,Curve3D curve) : base(parent)
         {
-            _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle,new ValueAlongCurveSplitCommand(curve,distanceSampler,this), Curve3DSettings.Green);
+            _splitterPoint = new SplitterPointComposite(this, new TransformBlob(curve.transform,null), PointTextureType.circle,new ValueAlongCurveSplitCommand(curve,distanceSampler,this), Curve3DSettings.Green,curve.UICurve.positionCurve);
             _distanceSampler = distanceSampler;
             curve.positionCurve.Recalculate();
             foreach (var i in distanceSampler.GetPoints(curve))

@@ -21,7 +21,7 @@ namespace Assets.NewUI
         {
             this.value = value;
             var purpleColor = new Color(.6f, .6f, .9f);
-            linePoint = new PointAlongCurveComposite(this, value, curve,purpleColor,null);
+            linePoint = new PointAlongCurveComposite(this, value, curve.UICurve.positionCurve,purpleColor);
             this._positionCurve = positionCurve;
             this._curve = curve;
             for (int i = 0; i < ringPointCount; i++)
