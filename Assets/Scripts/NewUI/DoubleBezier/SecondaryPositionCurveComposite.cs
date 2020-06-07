@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace Assets.NewUI
 {
@@ -14,9 +15,13 @@ namespace Assets.NewUI
         private Curve3D _curve;
         public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve,BezierCurveDistanceValue secondaryBezierCurve) : base (parent)
         {
-            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve);
+            var curveInfoAtCenterPoint = curve.positionCurve.GetPointAtDistance(secondaryBezierCurve.GetDistance(curve.positionCurve));
+            Matrix4x4 tangentSpaceToLocalSpace = Matrix4x4.Rotate(Quaternion.LookRotation(curveInfoAtCenterPoint.tangent,curveInfoAtCenterPoint.reference));//.inverse
+            //tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position)*tangentSpaceToLocalSpace;
+            tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position);
+            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,PositionCurveSplitCommandFactory.Instance,new TransformBlob(curve.transform,tangentSpaceToLocalSpace));
             this._curve = curve;
-            centerPoint = new PointAlongCurveComposite(this,secondaryBezierCurve,curve,UnityEngine.Color.green);
+            centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, curve, UnityEngine.Color.green, null);//tangentSpaceToLocalSpace);
         }
         public override IEnumerable<IComposite> GetChildren()
         {

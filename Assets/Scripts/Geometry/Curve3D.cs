@@ -168,6 +168,12 @@ public class Curve3D : MonoBehaviour
     {
         positionCurve.Initialize();
     }
+    [ContextMenu("Clear double")]
+    public void ClearDouble()
+    {
+        doubleBezierSampler = new DoubleBezierSampler();
+        this.UICurve.Initialize();
+    }
     public void TryInitialize()
     {
         if (!isInitialized)

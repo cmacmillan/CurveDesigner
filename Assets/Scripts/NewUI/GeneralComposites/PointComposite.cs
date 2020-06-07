@@ -31,7 +31,7 @@ namespace Assets.NewUI
 
         public override void Draw(List<IDraw> drawList,ClickHitData clicked)
         {
-            drawList.Add(new PointDraw(this, _position.Position, _pointTexture,_color));
+            drawList.Add(new PointDraw(this,_position.Position, _pointTexture,_color));
         }
 
         public override IClickCommand GetClickCommand()

@@ -12,7 +12,7 @@ namespace Assets.NewUI
         private PointGroup _group;
         private PGIndex _index;
         private BezierCurve positionCurve;
-        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve)/*,Quaternion? toTangentSpaceRotation=null)*/
+        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve)
         {
             this._group = group;
             this._index = indexType;
@@ -26,7 +26,8 @@ namespace Assets.NewUI
         {
             var dimensionLockMode = positionCurve.dimensionLockMode;
             var oldPointPosition = _group.GetWorldPositionByIndex(_index,dimensionLockMode);
-            Vector3 worldPos;
+            Vector3 worldPos = Vector3.zero;
+            bool shouldSet = true;
             if (dimensionLockMode== DimensionLockMode.none)
                 worldPos = GUITools.GUIToWorldSpace(mousePos, data.distanceFromCamera);
             else
@@ -46,12 +47,18 @@ namespace Assets.NewUI
                 }
                 var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
                 Ray r = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
-                Plane p = new Plane(planeNormal,oldPointPosition);
-                p.Raycast(r, out float enter);
-                worldPos = r.GetPoint(enter);
+                Vector3 localPos = oldPointPosition;
+                Plane p = new Plane(planeNormal,curve.transform.TransformPoint(localPos));
+                if (p.Raycast(r, out float enter))
+                    worldPos = r.GetPoint(enter);
+                else
+                    shouldSet = false;    
             }
-            var newPointPosition = curve.transform.InverseTransformPoint(worldPos);
-            _group.SetWorldPositionByIndex(_index,newPointPosition,dimensionLockMode);
+            if (shouldSet)
+            {
+                var newPointPosition = curve.transform.InverseTransformPoint(worldPos);
+                _group.SetWorldPositionByIndex(_index, newPointPosition, dimensionLockMode);
+            }
         }
 
         public void ClickUp(Vector2 mousePos)

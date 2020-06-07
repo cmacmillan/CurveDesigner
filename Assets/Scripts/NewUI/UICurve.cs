@@ -27,7 +27,7 @@ namespace Assets.NewUI
 
         public void Initialize()
         {
-            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve);
+            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,PositionCurveSplitCommandFactory.Instance,new TransformBlob(_curve.transform,null));
             sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve);
             rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve);
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve);

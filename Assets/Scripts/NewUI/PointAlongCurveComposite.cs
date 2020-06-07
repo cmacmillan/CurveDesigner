@@ -13,7 +13,7 @@ namespace Assets.NewUI
         public PointComposite point;
         private BezierCurve _positionCurve;
 
-        public PointAlongCurveComposite(IComposite parent,ILinePoint value,Curve3D curve,Color color) : base(parent)
+        public PointAlongCurveComposite(IComposite parent,ILinePoint value,Curve3D curve,Color color,Matrix4x4? tangentSpaceToLocal) : base(parent)
         {
             this.value = value;
             point = new PointComposite(this, this, PointTextureType.square, new LinePointPositionClickCommand(value, curve),color);

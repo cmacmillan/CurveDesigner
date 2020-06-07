@@ -15,17 +15,19 @@ namespace Assets.NewUI
     {
         private PointGroup _group;
         private PGIndex _type;
-        private Transform baseCurveTransform;
+        private TransformBlob transformBlob;
         private BezierCurve _positionCurve;
-        public PointGroupPointPositionProvider(PointGroup group,PGIndex type, Transform baseCurveTransform, BezierCurve positionCurve)
+        public PointGroupPointPositionProvider(PointGroup group,PGIndex type, TransformBlob transformBlob, BezierCurve positionCurve)
         {
-            this.baseCurveTransform = baseCurveTransform;
+            this.transformBlob = transformBlob;
             _group = group;
             _type = type;
             _positionCurve = positionCurve;
         }
         public Vector3 Position {
-            get { return baseCurveTransform.TransformPoint(_group.GetWorldPositionByIndex(_type,_positionCurve.dimensionLockMode)); }
+            get {
+                return transformBlob.TransformPoint(_group.GetWorldPositionByIndex(_type,_positionCurve.dimensionLockMode));
+            }
         }
     }
 }
