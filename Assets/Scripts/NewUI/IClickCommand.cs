@@ -15,10 +15,6 @@ namespace Assets.NewUI
         void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData clicked);
         void ClickUp(Vector2 mousePos);
     }
-    public interface ISplitCommandFactory
-    {
-        IClickCommand Create(SplitterPointComposite owner,Curve3D curve);
-    }
     public abstract class IClickable : IComposite
     {
         public IClickable(IComposite parent) : base(parent){}

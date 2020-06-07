@@ -16,7 +16,7 @@ namespace Assets.NewUI
         {
             _doubleBezierSampler = doubleBezierSampler;
             _secondaryCurves = new List<SecondaryPositionCurveComposite>();
-            _splitterPoint = new SplitterPointComposite(this,curve, PointTextureType.circle, DoubleBezierCurveSplitCommandFactory.Instance, Color.green);
+            _splitterPoint = new SplitterPointComposite(this,curve, PointTextureType.circle, new DoubleBezierCurveSplitCommand(curve,_doubleBezierSampler), Color.green);
             foreach (var i in doubleBezierSampler.GetPoints(curve))
                 _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i));
         }

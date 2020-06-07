@@ -10,11 +10,9 @@ namespace Assets.NewUI
     public abstract class SplitCommand : IClickCommand
     {
         protected Curve3D _curve;
-        protected SplitterPointComposite _splitter;
-        public SplitCommand(Curve3D curve,SplitterPointComposite splitter)
+        public SplitCommand(Curve3D curve)
         {
             this._curve = curve;
-            this._splitter = splitter;
         }
         public virtual void ClickDown(Vector2 mousePos) { }
         public virtual void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked) { }
@@ -24,7 +22,7 @@ namespace Assets.NewUI
     {
         private DoubleBezierSampler sampler;
         private Curve3D _curve;
-        public DoubleBezierCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter,DoubleBezierSampler sampler) : base(curve, splitter)
+        public DoubleBezierCurveSplitCommand(Curve3D curve, DoubleBezierSampler sampler) : base(curve)
         {
             _curve = curve;
             this.sampler = sampler; 
@@ -59,7 +57,7 @@ namespace Assets.NewUI
     }
     public class PositionCurveSplitCommand : SplitCommand
     {
-        public PositionCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter) : base(curve, splitter) { }
+        public PositionCurveSplitCommand(Curve3D curve) : base(curve) { }
         public override void ClickDown(Vector2 mousePos)
         {
             List<BackingCurveModificationTracker<FloatDistanceValue>> distanceSamplerModificationTrackers = new List<BackingCurveModificationTracker<FloatDistanceValue>>();
@@ -83,8 +81,8 @@ namespace Assets.NewUI
     public class ValueAlongCurveSplitCommand: SplitCommand
     {
         private FloatLinearDistanceSampler _sampler;
-        private Func<Curve3D,IValueAlongCurvePointProvider> _pointsProvider;
-        public ValueAlongCurveSplitCommand(Curve3D curve, SplitterPointComposite splitter,FloatLinearDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve, splitter) {
+        private IValueAlongCurvePointProvider _pointsProvider;
+        public ValueAlongCurveSplitCommand(Curve3D curve, FloatLinearDistanceSampler sampler,IValueAlongCurvePointProvider pointsProvider) : base(curve) {
             _pointsProvider = pointsProvider;
             _sampler = sampler;
         }
@@ -92,57 +90,8 @@ namespace Assets.NewUI
         {
             int index = _sampler.InsertPointAtDistance(_curve.UICurve.pointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             _curve.UICurve.Initialize();//See above
-            var selected = _pointsProvider(_curve).GetPointAtIndex(index);
+            var selected = _pointsProvider.GetPointAtIndex(index);
             _curve.elementClickedDown.owner = selected;
-        }
-    }
-    public abstract class Singleton<T> where T : class, new()
-    {
-        private static T _instance = null;
-        public static T Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new T();
-                return _instance;
-            }
-        }
-    }
-    public class PositionCurveSplitCommandFactory : Singleton<PositionCurveSplitCommandFactory>, ISplitCommandFactory
-    {
-        public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
-        {
-            return new PositionCurveSplitCommand(curve,owner);
-        }
-    }
-    public class SizeCurveSplitCommandFactory : Singleton<SizeCurveSplitCommandFactory>, ISplitCommandFactory
-    {
-        private IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve)
-        {
-            return curve.UICurve.sizeCurve;
-        }
-        public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
-        {
-            return new ValueAlongCurveSplitCommand(curve, owner,curve.sizeDistanceSampler,GetSizeCurve);
-        }
-    }
-    public class RotationCurveSplitCommandFactory: Singleton<RotationCurveSplitCommandFactory>, ISplitCommandFactory
-    {
-        private IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve)
-        {
-            return curve.UICurve.rotationCurve;
-        }
-        public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
-        {
-            return new ValueAlongCurveSplitCommand(curve, owner,curve.rotationDistanceSampler,GetRotationCurve);
-        }
-    }
-    public class DoubleBezierCurveSplitCommandFactory : Singleton<DoubleBezierCurveSplitCommandFactory>, ISplitCommandFactory
-    {
-        public IClickCommand Create(SplitterPointComposite owner, Curve3D curve)
-        {
-            return new DoubleBezierCurveSplitCommand(curve, owner, curve.doubleBezierSampler);
         }
     }
 }

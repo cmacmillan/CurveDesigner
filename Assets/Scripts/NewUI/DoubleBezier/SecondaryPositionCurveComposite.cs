@@ -20,10 +20,10 @@ namespace Assets.NewUI
             //Matrix4x4 tangentSpaceToLocalSpace = Matrix4x4.Rotate(Quaternion.LookRotation(curveInfoAtCenterPoint.tangent,curveInfoAtCenterPoint.reference));//.inverse
             //tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position)*tangentSpaceToLocalSpace;
             //tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position);
-            this._curve = curve;
+            this._curve = curve; 
             centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, curve, UnityEngine.Color.green, null);//tangentSpaceToLocalSpace);
             transformBlob = new TransformBlob(curve.transform,new DynamicMatrix4x4(centerPoint));
-            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,PositionCurveSplitCommandFactory.Instance,transformBlob);
+            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,new PositionCurveSplitCommand(curve),transformBlob);
         }
         public override IEnumerable<IComposite> GetChildren()
         {

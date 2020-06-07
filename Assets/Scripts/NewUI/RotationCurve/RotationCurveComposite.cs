@@ -16,7 +16,7 @@ namespace Assets.NewUI
         {
             _distanceSampler = distanceSampler;
             var blueColor = new Color(0,.8f,1.0f);
-            _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle, RotationCurveSplitCommandFactory.Instance, blueColor);
+            _splitterPoint = new SplitterPointComposite(this, curve, PointTextureType.circle, new ValueAlongCurveSplitCommand(curve,_distanceSampler,this), blueColor);
             foreach (var i in distanceSampler.GetPoints(curve))
                 _points.Add(new EditRotationComposite(this,i,curve,distanceSampler,blueColor));
         }
