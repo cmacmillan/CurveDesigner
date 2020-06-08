@@ -10,7 +10,7 @@ namespace Assets.NewUI
     public class TransformBlob
     {
         private Transform _baseTransform;
-        private DynamicMatrix4x4 _additionalTransform;
+        public DynamicMatrix4x4 _additionalTransform;
         public TransformBlob(Transform baseTransform, DynamicMatrix4x4 additionalTransform = null) {
             _baseTransform = baseTransform;
             _additionalTransform = additionalTransform;

@@ -12,7 +12,7 @@ namespace Assets.NewUI
         public List<PositionPointGroupComposite> pointGroups = null;
         private SplitterPointComposite _splitterPoint = null;
         public BezierCurve positionCurve;
-        private TransformBlob transformBlob;
+        public TransformBlob transformBlob;
         public PointOnCurve PointClosestToCursor { get; private set; }
         public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve,IClickCommand clickCommand, TransformBlob transformBlob) : base(parent)
         {
