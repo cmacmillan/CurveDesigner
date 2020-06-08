@@ -122,16 +122,21 @@ namespace Assets.NewUI
     public class ValueAlongCurveSplitCommand: SplitCommand
     {
         private FloatLinearDistanceSampler _sampler;
-        private IValueAlongCurvePointProvider _pointsProvider;
-        public ValueAlongCurveSplitCommand(Curve3D curve, FloatLinearDistanceSampler sampler,IValueAlongCurvePointProvider pointsProvider) : base(curve) {
+        private Func<Curve3D,IValueAlongCurvePointProvider> _pointsProvider;
+        private Curve3D _curve;
+        public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
+        public static IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve) { return curve.UICurve.sizeCurve; }
+        public static IValueAlongCurvePointProvider GetDoubleBezierCurve(Curve3D curve) { return curve.UICurve.doubleBezierCurve; }
+        public ValueAlongCurveSplitCommand(Curve3D curve, FloatLinearDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {
             _pointsProvider = pointsProvider;
             _sampler = sampler;
+            _curve = curve;
         }
         public override void ClickDown(Vector2 mousePos)
         {
             int index = _sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             _curve.UICurve.Initialize();//See above
-            var selected = _pointsProvider.GetPointAtIndex(index);
+            var selected = _pointsProvider(_curve).GetPointAtIndex(index);
             _curve.elementClickedDown.owner = selected;
         }
     }

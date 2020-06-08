@@ -197,7 +197,7 @@ namespace Assets.NewUI
         {
             openCurvePoints = new List<FloatDistanceValue>();
             foreach (var i in _points)
-                if (i.SegmentIndex<curve.NumSegments)
+                if (i.SegmentIndex>=0 && i.SegmentIndex<curve.NumSegments)
                     openCurvePoints.Add(i);
         }
         private List<FloatDistanceValue> GetPointsByCurveOpenClosedStatus(BezierCurve curve, bool recalculate=true)//recalculate=false is much faster, but requires having cached earlier
