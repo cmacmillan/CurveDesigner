@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
+using static BezierCurve;
 
 public class Curve3D : MonoBehaviour
 {
@@ -16,6 +17,9 @@ public class Curve3D : MonoBehaviour
             yield return rotationDistanceSampler;
         }
     }
+
+    public bool placeLockedPoints = true;
+    public SplitInsertionNeighborModification splitInsertionBehaviour = SplitInsertionNeighborModification.DoNotModifyNeighbors;
 
     [HideInInspector]
     public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler();

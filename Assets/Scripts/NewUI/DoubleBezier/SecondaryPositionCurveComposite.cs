@@ -22,7 +22,7 @@ namespace Assets.NewUI
             //tangentSpaceToLocalSpace = Matrix4x4.Translate(curveInfoAtCenterPoint.position);
             this._curve = curve; 
             transformBlob = new TransformBlob(curve.transform,null);
-            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,new SecondaryPositionCurveSplitCommand(secondaryBezierCurve.secondaryCurve,curve),transformBlob);
+            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.secondaryCurve,new SecondaryPositionCurveSplitCommand(secondaryBezierCurve.secondaryCurve,curve,this),transformBlob);
             centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, curve.UICurve.positionCurve, UnityEngine.Color.green);
             transformBlob._additionalTransform = new DynamicMatrix4x4(centerPoint);//works because transform blob is immutable
         }

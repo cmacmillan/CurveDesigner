@@ -11,9 +11,7 @@ public partial class BezierCurve
     public List<PointGroup> PointGroups;
     public int NumControlPoints { get { return isClosedLoop?PointGroups.Count*3:PointGroups.Count*3-2; } }
     public int NumSegments { get { return isClosedLoop?PointGroups.Count:PointGroups.Count-1; } }
-    public bool placeLockedPoints = true;
     public bool isCurveOutOfDate = true;
-    public SplitInsertionNeighborModification splitInsertionBehaviour;
     public DimensionLockMode dimensionLockMode = DimensionLockMode.none;
     public Curve3D owner;
     public bool isClosedLoop;
@@ -38,9 +36,7 @@ public partial class BezierCurve
         this.segments = new List<Segment>(curveToClone.segments.Count);
         foreach (var i in curveToClone.segments)
             segments.Add(new Segment(i));
-        this.placeLockedPoints = curveToClone.placeLockedPoints;
         this.isCurveOutOfDate = curveToClone.isCurveOutOfDate;
-        this.splitInsertionBehaviour = curveToClone.splitInsertionBehaviour;
         this.dimensionLockMode = curveToClone.dimensionLockMode;
     }
 
@@ -54,12 +50,12 @@ public partial class BezierCurve
     public void Initialize()
     {
         PointGroups = new List<PointGroup>();
-        var pointA = new PointGroup(placeLockedPoints);
+        var pointA = new PointGroup(owner.placeLockedPoints);
         pointA.SetWorldPositionByIndex(PGIndex.Position, Vector3.zero,dimensionLockMode);
         pointA.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,100,0),dimensionLockMode);
         pointA.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(100,0,0),dimensionLockMode);
         PointGroups.Add(pointA);
-        var pointB = new PointGroup(placeLockedPoints);
+        var pointB = new PointGroup(owner.placeLockedPoints); 
         pointB.SetWorldPositionByIndex(PGIndex.Position, new Vector3(100,100,0),dimensionLockMode);
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,100,0),dimensionLockMode);
         pointB.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(100,0,0),dimensionLockMode);
@@ -120,7 +116,7 @@ public partial class BezierCurve
         var finalPointGroup = PointGroups[PointGroups.Count - 1];
         var finalPointPos = finalPointGroup.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode);
         finalPointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,finalPointPos+new Vector3(1,0,0),dimensionLockMode);
-        var pointB = new PointGroup(placeLockedPoints);
+        var pointB = new PointGroup(owner.placeLockedPoints);
         pointB.SetWorldPositionByIndex(PGIndex.Position,finalPointPos+new Vector3(1,1,0),dimensionLockMode);
         pointB.SetWorldPositionByIndex(PGIndex.LeftTangent,finalPointPos+new Vector3(0,1,0),dimensionLockMode);
         PointGroups.Add(pointB);

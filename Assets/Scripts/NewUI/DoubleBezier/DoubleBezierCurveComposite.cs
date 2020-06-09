@@ -28,6 +28,13 @@ namespace Assets.NewUI
                 i.positionCurve.FindPointClosestToCursor();
             }
         }
+        public SecondaryPositionCurveComposite GetSecondaryCompositeByBackingCurve(BezierCurve backingCurve)
+        {
+            foreach (var i in _secondaryCurves)
+                if (i.positionCurve.positionCurve == backingCurve)
+                    return i;
+            throw new KeyNotFoundException();
+        }
         public IClickable GetPointAtIndex(int index)
         {
             return _secondaryCurves[index].centerPoint.point;
