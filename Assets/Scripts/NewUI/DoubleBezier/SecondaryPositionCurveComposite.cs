@@ -27,8 +27,6 @@ namespace Assets.NewUI
             transformBlob._additionalTransform = new DynamicMatrix4x4(centerPoint);//works because transform blob is immutable
         }
         public override IEnumerable<IComposite> GetChildren()
-
-
         {
             yield return positionCurve;
             yield return centerPoint;

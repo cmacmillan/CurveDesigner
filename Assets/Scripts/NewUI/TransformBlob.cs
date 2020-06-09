@@ -34,16 +34,21 @@ namespace Assets.NewUI
             return _baseTransform.InverseTransformPoint(retr);
         }
     }
+    public interface IPointOnCurveProvider
+    {
+        PointOnCurve PointOnCurve { get; }
+    }
     public class DynamicMatrix4x4
     {
-        private IPositionProvider centerPosition;
-        public DynamicMatrix4x4(IPositionProvider centerPosition)
+        private IPointOnCurveProvider point;
+        public DynamicMatrix4x4(IPointOnCurveProvider point)
         {
-            this.centerPosition = centerPosition;
+            this.point = point;
         }
         public Matrix4x4 GetMatrix()
         {
-            return Matrix4x4.Translate(centerPosition.Position);
+            var pointOnCurve = point.PointOnCurve;
+            return Matrix4x4.Translate(pointOnCurve.position)*Matrix4x4.Rotate(Quaternion.LookRotation(pointOnCurve.tangent,pointOnCurve.reference));
         }
     }
 }

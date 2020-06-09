@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class PointAlongCurveComposite : IComposite, IPositionProvider
+    public class PointAlongCurveComposite : IComposite, IPositionProvider, IPointOnCurveProvider
     {
         public IPointOnCurve value;
         public PointComposite point;
@@ -27,6 +27,8 @@ namespace Assets.NewUI
                 return _positionCurve.owner.transform.TransformPoint(position);
             }
         }
+
+        public PointOnCurve PointOnCurve { get { return _positionCurve.GetPointAtDistance(value.GetDistance(_positionCurve)); } }
 
         public void GetPositionForwardAndReference(out Vector3 position, out Vector3 forward, out Vector3 reference)
         {

@@ -12,11 +12,13 @@ namespace Assets.NewUI
         private PointGroup _group;
         private PGIndex _index;
         private BezierCurve positionCurve;
-        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve)
+        private TransformBlob _transformBlob;
+        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve,TransformBlob transformBlob)
         {
             this._group = group;
             this._index = indexType;
             this.positionCurve = curve;
+            this._transformBlob = transformBlob;
         }
         public void ClickDown(Vector2 mousePos)
         {
@@ -48,7 +50,7 @@ namespace Assets.NewUI
                 var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
                 Ray r = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
                 Vector3 localPos = oldPointPosition;
-                Plane p = new Plane(planeNormal,curve.transform.TransformPoint(localPos));
+                Plane p = new Plane(planeNormal,_transformBlob.TransformPoint(localPos));//curve.transform.TransformPoint(localPos));
                 if (p.Raycast(r, out float enter))
                     worldPos = r.GetPoint(enter);
                 else
@@ -56,7 +58,7 @@ namespace Assets.NewUI
             }
             if (shouldSet)
             {
-                var newPointPosition = curve.transform.InverseTransformPoint(worldPos);
+                var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);//curve.transform.InverseTransformPoint(worldPos);
                 _group.SetWorldPositionByIndex(_index, newPointPosition, dimensionLockMode);
             }
         }
