@@ -452,6 +452,7 @@ public static class MeshGenerator
                     InitLists();
                     var primaryCurveSamples = curve.GetPointsWithSpacing(VertexSampleDistance);
                     List<Vector3> posBuffer = new List<Vector3>();
+                    doubleBezierSampler.CacheOpenCurvePoints(curve);
                     foreach (var primaryCurvePoint in primaryCurveSamples)
                     {
                         for (float c = 0; c <= doubleBezierSampleCount; c++)

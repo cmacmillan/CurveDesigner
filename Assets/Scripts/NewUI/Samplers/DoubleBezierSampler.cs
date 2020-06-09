@@ -80,25 +80,26 @@ namespace Assets.NewUI
         ///Secondary curve distance is a value between 0 and 1
         public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference)
         {
-            if (secondaryCurves.Count == 0)
+            var availableCurves = GetPointsByCurveOpenClosedStatus(primaryCurve,false);
+            if (availableCurves.Count == 0)
             {
                 var point = primaryCurve.GetPointAtDistance(primaryCurveDistance);
                 reference = point.reference;
                 return point.position;
             }
-        Vector3 SamplePosition(BezierCurveDistanceValue value, out Vector3 myRef)
+            Vector3 SamplePosition(BezierCurveDistanceValue value, out Vector3 myRef)
             {
                 var samp = value.secondaryCurve.GetPointAtDistance(secondaryCurveDistance * value.secondaryCurve.GetLength());
                 myRef = samp.reference;
                 return samp.position;
             }
-            float previousDistance = secondaryCurves[0].GetDistance(primaryCurve);
+            float previousDistance = availableCurves[0].GetDistance(primaryCurve);
             if (previousDistance > primaryCurveDistance)
-                return SamplePosition(secondaryCurves[0],out reference);
-            BezierCurveDistanceValue lowerCurve = secondaryCurves[0];
-            for (int i = 1; i < secondaryCurves.Count; i++)
+                return SamplePosition(availableCurves[0], out reference);
+            BezierCurveDistanceValue lowerCurve = availableCurves[0];
+            for (int i = 1; i < availableCurves.Count; i++)
             {
-                var curr = secondaryCurves[i];
+                var curr = availableCurves[i];
                 float currentDistance = curr.GetDistance(primaryCurve);
                 if (currentDistance > primaryCurveDistance)
                 {
@@ -112,7 +113,7 @@ namespace Assets.NewUI
                 previousDistance = currentDistance;
                 lowerCurve = curr;
             }
-            return SamplePosition(secondaryCurves[secondaryCurves.Count-1],out reference);
+            return SamplePosition(availableCurves[availableCurves.Count-1],out reference);
         }
     }
 }
