@@ -458,11 +458,11 @@ public static class MeshGenerator
                         {
                             float progress = c / (float)doubleBezierSampleCount;
                             var relativePos = doubleBezierSampler.SampleAt(primaryCurvePoint.distanceFromStartOfCurve, progress, curve,out Vector3 reference);
-                            //Lets say x is forward
+                            //Lets say z is forward
                             var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference);
                             Vector3 TransformVector3(Vector3 vect)
                             {
-                                return primaryCurvePoint.tangent * vect.x + primaryCurvePoint.reference * vect.y + cross * vect.z;
+                                return cross * vect.x + primaryCurvePoint.reference * vect.y +primaryCurvePoint.tangent * vect.z;
                             }
                             var absolutePos = primaryCurvePoint.position +TransformVector3(relativePos);
                             vertices.Add(absolutePos+TransformVector3(reference)*Thickness/2);

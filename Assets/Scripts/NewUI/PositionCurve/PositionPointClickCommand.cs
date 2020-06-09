@@ -50,7 +50,7 @@ namespace Assets.NewUI
                 var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
                 Ray r = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
                 Vector3 localPos = oldPointPosition;
-                Plane p = new Plane(planeNormal,_transformBlob.TransformPoint(localPos));//curve.transform.TransformPoint(localPos));
+                Plane p = new Plane(planeNormal,_transformBlob.TransformPoint(localPos));
                 if (p.Raycast(r, out float enter))
                     worldPos = r.GetPoint(enter);
                 else
@@ -58,7 +58,7 @@ namespace Assets.NewUI
             }
             if (shouldSet)
             {
-                var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);//curve.transform.InverseTransformPoint(worldPos);
+                var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);
                 _group.SetWorldPositionByIndex(_index, newPointPosition, dimensionLockMode);
             }
         }

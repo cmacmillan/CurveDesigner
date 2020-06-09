@@ -14,7 +14,7 @@ namespace Assets.NewUI
             _owner = owner;
             _owner.SortPoints(curve);
             secondaryCurve = new BezierCurve();
-            secondaryCurve.dimensionLockMode = DimensionLockMode.x;
+            secondaryCurve.dimensionLockMode = DimensionLockMode.z;
             secondaryCurve.owner = curve.owner;
             secondaryCurve.Initialize();
             secondaryCurve.Recalculate();
