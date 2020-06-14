@@ -206,7 +206,7 @@ public static class MeshGenerator
                 InitOrClear(ref uvs);
             hasUVs = provideUvs;
         }
-        void ConnectTubeInteriorAndExterior()
+        void ConnectMeshInteriorAndExteriorLayers()
         {
             int additionalRing = IsClosedLoop ? 1 : 0;
             int numVertsInALayer = (numRings+1) * ActualRingPointCount;
@@ -229,7 +229,7 @@ public static class MeshGenerator
                     );
             }
         }
-        void ConnectTubeInteriorExteriorEnds()
+        void CreateMeshInteriorExteriorEndPlates()
         {
             int interiorBase = numVerts / 2;
             //Then we gotta connect the ends as well
@@ -428,9 +428,9 @@ public static class MeshGenerator
                     TrianglifyLayer(true, ActualRingPointCount);
                     TrianglifyLayer(false, ActualRingPointCount);
                     if (!is360degree)
-                        ConnectTubeInteriorAndExterior();
+                        ConnectMeshInteriorAndExteriorLayers();
                     if (!IsClosedLoop)
-                        ConnectTubeInteriorExteriorEnds();
+                        CreateMeshInteriorExteriorEndPlates();
                     return true;
                 }
             #endregion
@@ -482,8 +482,12 @@ public static class MeshGenerator
                     numVerts = vertices.Count;
                     shouldDrawConnectingFace = false;
                     numRings =  primaryCurveSamples.Count - 1;//Minus 1?
-                    TrianglifyLayer(true, doubleBezierSampleCount+1);
-                    TrianglifyLayer(false, doubleBezierSampleCount+1);
+                    ActualRingPointCount = doubleBezierSampleCount+1;
+                    TrianglifyLayer(true, ActualRingPointCount);
+                    TrianglifyLayer(false, ActualRingPointCount);
+                    ConnectMeshInteriorAndExteriorLayers();
+                    if (!IsClosedLoop)
+                        CreateMeshInteriorExteriorEndPlates();
                     return true;
                 }
             case CurveType.Mesh:

@@ -19,11 +19,22 @@ namespace Assets.NewUI
         {
             return new Vector4(vect.x,vect.y,vect.z,1);
         }
+        Vector4 ToHomoDirection(Vector3 vect)
+        {
+            return new Vector4(vect.x,vect.y,vect.z,0);
+        }
         public Vector3 TransformPoint(Vector3 point)
         {
             var retr = _baseTransform.TransformPoint(point);
             if (_additionalTransform!=null)
                 retr = _additionalTransform.GetMatrix() * ToHomo(retr);
+            return retr;
+        }
+        public Vector3 TransformDirection(Vector3 direction)
+        {
+            var retr = _baseTransform.TransformDirection(direction);
+            if (_additionalTransform!=null)
+                retr = _additionalTransform.GetMatrix() * ToHomoDirection(retr);
             return retr;
         }
         public Vector3 InverseTransformPoint(Vector3 point)

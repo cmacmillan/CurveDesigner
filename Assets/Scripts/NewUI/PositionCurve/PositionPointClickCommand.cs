@@ -29,6 +29,9 @@ namespace Assets.NewUI
             var dimensionLockMode = positionCurve.dimensionLockMode;
             var oldPointPosition = _group.GetWorldPositionByIndex(_index,dimensionLockMode);
             Vector3 worldPos = Vector3.zero;
+            Ray r;
+            Vector3 localPos;
+            Plane p;
             bool shouldSet = true;
             if (dimensionLockMode== DimensionLockMode.none)
                 worldPos = GUITools.GUIToWorldSpace(mousePos, data.distanceFromCamera);
@@ -48,9 +51,9 @@ namespace Assets.NewUI
                         break;
                 }
                 var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
-                Ray r = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
-                Vector3 localPos = oldPointPosition;
-                Plane p = new Plane(planeNormal,_transformBlob.TransformPoint(localPos));
+                r = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
+                localPos = oldPointPosition;
+                p = new Plane(_transformBlob.TransformDirection(planeNormal),_transformBlob.TransformPoint(localPos));
                 if (p.Raycast(r, out float enter))
                     worldPos = r.GetPoint(enter);
                 else
@@ -59,6 +62,8 @@ namespace Assets.NewUI
             if (shouldSet)
             {
                 var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);
+                if (newPointPosition.magnitude > 1000)
+                    Debug.Log("asd");
                 _group.SetWorldPositionByIndex(_index, newPointPosition, dimensionLockMode);
             }
         }
