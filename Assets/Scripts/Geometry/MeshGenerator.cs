@@ -454,19 +454,19 @@ public static class MeshGenerator
                     List<Vector3> backSideBuffer = new List<Vector3>();
                     doubleBezierSampler.CacheOpenCurvePoints(curve);
                     int triangleIndex = 0;
-                    doubleBezierSampler.SampleAt(0, 0, curve, out Vector3 prev);
                     foreach (var primaryCurvePoint in primaryCurveSamples)
                     {
-                        int flip;
-                        {
-                            doubleBezierSampler.SampleAt(primaryCurvePoint.distanceFromStartOfCurve, 0, curve, out Vector3 reference);
-                            flip = Vector3.Dot(reference, Vector3.right) < 0 ? -1 : 1 ;
-                            prev = reference;
-                        }
+                        bool isFirst = true;
+                        int flip = 0;
                         for (float c = 0; c <= doubleBezierSampleCount; c++)
                         {
                             float progress = c / (float)doubleBezierSampleCount;
                             var relativePos = doubleBezierSampler.SampleAt(primaryCurvePoint.distanceFromStartOfCurve, progress, curve,out Vector3 reference);
+                            if (isFirst)//first time we gotta determine if we need to flip
+                            {
+                                flip = Vector3.Dot(reference, Vector3.right) < 0 ? -1 : 1;
+                                isFirst = false;
+                            }
                             //Lets say z is forward
                             var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference);
                             Vector3 TransformVector3(Vector3 vect)
