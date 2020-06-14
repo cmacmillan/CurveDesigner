@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 using UnityObject = UnityEngine.Object;
 
@@ -17,6 +18,30 @@ public class Curve3DInspector : Editor
     {
         var curve3d = (target as Curve3D);
         ///
+        curve3d.positionCurve.Recalculate();
+        foreach (var i in curve3d.doubleBezierSampler.secondaryCurves)
+        {
+            i.secondaryCurve.owner = curve3d;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
+            i.secondaryCurve.Recalculate();
+        }
+        curve3d.CacheAverageSize();
+        ////
+        var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;//Consider replacing with Camera.current?
+        if (curve3d.commandBuffer == null)
+        {
+            curve3d.commandBuffer = new CommandBuffer();
+            sceneCam.AddCommandBuffer(CameraEvent.AfterForwardOpaque, curve3d.commandBuffer);
+        }
+        var commandBuffer = curve3d.commandBuffer;
+        commandBuffer.Clear();
+        if (curve3d.testMesh != null && curve3d.testMat != null)
+        {
+            var second = curve3d.doubleBezierSampler.secondaryCurves[0];
+            var dist = second.GetDistance(curve3d.positionCurve);
+            var point = curve3d.positionCurve.GetPointAtDistance(dist);
+            commandBuffer.DrawMesh(curve3d.testMesh, Matrix4x4.Translate(point.position)*Matrix4x4.Rotate(Quaternion.LookRotation(point.tangent,point.reference))*Matrix4x4.Scale(Vector3.one*1000), curve3d.testMat);
+        }
+
         /*
         Handles.BeginGUI();
         GUILayout.BeginArea(new Rect(20, 20, 210, 60));

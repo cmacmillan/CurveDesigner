@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 using static BezierCurve;
 
@@ -17,6 +18,10 @@ public class Curve3D : MonoBehaviour
             yield return rotationDistanceSampler;
         }
     }
+
+    public Mesh testMesh;
+    public Material testMat;
+    public CommandBuffer commandBuffer;
 
     public bool placeLockedPoints = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour = SplitInsertionNeighborModification.DoNotModifyNeighbors;
