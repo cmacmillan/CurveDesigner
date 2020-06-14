@@ -85,42 +85,59 @@ namespace Assets.NewUI
         ///Secondary curve distance is a value between 0 and 1
         public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference)
         {
-            var availableCurves = GetPointsByCurveOpenClosedStatus(primaryCurve,false);
-            if (availableCurves.Count == 0)
-            {
-                var point = primaryCurve.GetPointAtDistance(primaryCurveDistance);
-                //here we assume closed secondary curves
-                reference = point.reference;
-                return point.position;
-            }
             Vector3 SamplePosition(BezierCurveDistanceValue value, out Vector3 myRef)
             {
                 var samp = value.secondaryCurve.GetPointAtDistance(secondaryCurveDistance * value.secondaryCurve.GetLength());
                 myRef = samp.reference;
                 return samp.position;
             }
+            Vector3 InterpolateSamples(BezierCurveDistanceValue lowerCurve,BezierCurveDistanceValue upperCurve,float lowerDistance,float upperDistance,out Vector3 interpolatedReference)
+            {
+                float distanceBetweenSegments = upperDistance- lowerDistance;
+                float lerpVal = (primaryCurveDistance - lowerDistance) / distanceBetweenSegments;
+                Vector3 lowerPosition = SamplePosition(lowerCurve, out Vector3 lowerRef);
+                Vector3 upperPosition = SamplePosition(upperCurve, out Vector3 upperRef);
+                interpolatedReference = Vector3.Lerp(lowerRef, upperRef, lerpVal);
+                return Vector3.Lerp(lowerPosition, upperPosition, lerpVal);
+            }
+            var availableCurves = GetPointsByCurveOpenClosedStatus(primaryCurve,false);
+            if (availableCurves.Count == 0)
+            {
+                var point = primaryCurve.GetPointAtDistance(primaryCurveDistance);
+                reference = point.reference;
+                return point.position;
+            }
             float previousDistance = availableCurves[0].GetDistance(primaryCurve);
-            if (previousDistance > primaryCurveDistance)
+            if (availableCurves.Count==1 || (previousDistance > primaryCurveDistance && !primaryCurve.isClosedLoop))
                 return SamplePosition(availableCurves[0], out reference);
-            BezierCurveDistanceValue lowerCurve = availableCurves[0];
+            if (previousDistance > primaryCurveDistance && primaryCurve.isClosedLoop)
+            {
+                var lower = availableCurves[availableCurves.Count - 1];
+                var upper = availableCurves[0];
+                var lowerDistance = lower.GetDistance(primaryCurve)-primaryCurve.GetLength();
+                var upperDistance = upper.GetDistance(primaryCurve);
+                return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference);
+            }
+            BezierCurveDistanceValue previousCurve = availableCurves[0];
             for (int i = 1; i < availableCurves.Count; i++)
             {
-                var curr = availableCurves[i];
-                float currentDistance = curr.GetDistance(primaryCurve);
+                var currCurve = availableCurves[i];
+                float currentDistance = currCurve.GetDistance(primaryCurve);
                 if (currentDistance > primaryCurveDistance)
-                {
-                    float distanceBetweenSegments = currentDistance - previousDistance;
-                    float lerpVal = (primaryCurveDistance - previousDistance) / distanceBetweenSegments;
-                    Vector3 lowerPosition = SamplePosition(lowerCurve,out Vector3 lowerRef);
-                    Vector3 upperPosition = SamplePosition(curr,out Vector3 upperRef);
-                    reference = Vector3.Lerp(lowerRef, upperRef, lerpVal);
-                    return Vector3.Lerp(lowerPosition,upperPosition,lerpVal);
-                }
+                    return InterpolateSamples(previousCurve,currCurve,previousDistance,currentDistance,out reference);
                 previousDistance = currentDistance;
-                lowerCurve = curr;
+                previousCurve = currCurve;
             }
-            //here we assume closed secondary curves
-            return SamplePosition(availableCurves[availableCurves.Count - 1], out reference);
+            if (!primaryCurve.isClosedLoop)
+                return SamplePosition(availableCurves[availableCurves.Count - 1], out reference);
+            else
+            {
+                var lower = availableCurves[availableCurves.Count - 1];
+                var upper = availableCurves[0];
+                var lowerDistance = lower.GetDistance(primaryCurve);
+                var upperDistance = upper.GetDistance(primaryCurve)+primaryCurve.GetLength();
+                return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference);
+            }
         }
 
         public void OnBeforeSerialize()
