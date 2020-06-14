@@ -451,10 +451,18 @@ public static class MeshGenerator
                 {
                     InitLists();
                     var primaryCurveSamples = curve.GetPointsWithSpacing(VertexSampleDistance);
-                    List<Vector3> posBuffer = new List<Vector3>();
+                    List<Vector3> backSideBuffer = new List<Vector3>();
                     doubleBezierSampler.CacheOpenCurvePoints(curve);
+                    int triangleIndex = 0;
+                    doubleBezierSampler.SampleAt(0, 0, curve, out Vector3 prev);
                     foreach (var primaryCurvePoint in primaryCurveSamples)
                     {
+                        int flip;
+                        {
+                            doubleBezierSampler.SampleAt(primaryCurvePoint.distanceFromStartOfCurve, 0, curve, out Vector3 reference);
+                            flip = Vector3.Dot(reference, Vector3.right) < 0 ? -1 : 1 ;
+                            prev = reference;
+                        }
                         for (float c = 0; c <= doubleBezierSampleCount; c++)
                         {
                             float progress = c / (float)doubleBezierSampleCount;
@@ -463,17 +471,19 @@ public static class MeshGenerator
                             var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference);
                             Vector3 TransformVector3(Vector3 vect)
                             {
-                                return cross * vect.x + primaryCurvePoint.reference * vect.y +primaryCurvePoint.tangent * vect.z;
+                                return -cross * vect.x + primaryCurvePoint.reference * vect.y +primaryCurvePoint.tangent * vect.z;
                             }
                             var absolutePos = primaryCurvePoint.position +TransformVector3(relativePos);
-                            vertices.Add(absolutePos+TransformVector3(reference)*Thickness/2);
-                            posBuffer.Add(absolutePos-TransformVector3(reference)*Thickness/2);
+                            vertices.Add(absolutePos+flip*TransformVector3(reference)*Thickness/2);
+                            backSideBuffer.Add(absolutePos-flip*TransformVector3(reference)*Thickness/2);
                         }
-                        vertices.AddRange(posBuffer);
                     }
+                    vertices.AddRange(backSideBuffer);
                     numVerts = vertices.Count;
                     shouldDrawConnectingFace = false;
-                    TrianglifyLayer(true, doubleBezierSampleCount);
+                    numRings =  primaryCurveSamples.Count - 1;//Minus 1?
+                    TrianglifyLayer(true, doubleBezierSampleCount+1);
+                    TrianglifyLayer(false, doubleBezierSampleCount+1);
                     return true;
                 }
             case CurveType.Mesh:

@@ -21,6 +21,32 @@ public class Curve3D : MonoBehaviour
     public bool placeLockedPoints = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour = SplitInsertionNeighborModification.DoNotModifyNeighbors;
 
+    [ContextMenu("ExportToObj")]
+    public void ExportToObj()
+    {
+        ObjMeshExporter.DoExport(gameObject, false);
+    }
+    private void OnDrawGizmos()
+    {
+        doubleBezierSampler.CacheOpenCurvePoints(positionCurve);
+        var primaryCurvePoint = positionCurve.GetPointAtDistance(primaryDistance);
+        var sample = doubleBezierSampler.SampleAt(primaryDistance, secondaryDistance, positionCurve, out Vector3 reference);
+        var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference).normalized;
+        Vector3 TransformVector3(Vector3 vect)
+        {
+            return -cross * vect.x + primaryCurvePoint.reference * vect.y + primaryCurvePoint.tangent * vect.z;
+        }
+        //Gizmos.DrawRay(TransformVector3(sample) + primaryCurvePoint.position, TransformVector3(reference)*30);
+        foreach (var i in doubleBezierSampler.secondaryCurves)
+        {
+            var point = i.secondaryCurve.GetPointAtDistance(0);
+            Gizmos.DrawRay(TransformVector3(point.position)+primaryCurvePoint.position,TransformVector3(point.reference)*30);
+        }
+    }
+    public float primaryDistance;
+    [Range(0,1)]
+    public float secondaryDistance;
+
     [HideInInspector]
     public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler();
     [HideInInspector]

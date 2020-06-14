@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -7,7 +8,8 @@ namespace Assets.NewUI
     [System.Serializable]
     public class BezierCurveDistanceValue : CurveTrackingDistance
     {
-        protected DoubleBezierSampler _owner;
+        [NonSerialized]
+        public DoubleBezierSampler _owner;
         public BezierCurve secondaryCurve;
         public BezierCurveDistanceValue(DoubleBezierSampler owner,float distance,BezierCurve curve) : base(distance, curve)
         {
@@ -32,7 +34,7 @@ namespace Assets.NewUI
         }
     }
     [System.Serializable]
-    public class DoubleBezierSampler
+    public class DoubleBezierSampler : ISerializationCallbackReceiver
     {
         private List<BezierCurveDistanceValue> openCurveSecondaryCurves;
         public List<BezierCurveDistanceValue> secondaryCurves = new List<BezierCurveDistanceValue>();
@@ -44,6 +46,9 @@ namespace Assets.NewUI
         {
             foreach (var i in objToClone.secondaryCurves)
                 secondaryCurves.Add(new BezierCurveDistanceValue(i,this));
+            openCurveSecondaryCurves = new List<BezierCurveDistanceValue>();
+            foreach (var i in objToClone.openCurveSecondaryCurves)
+                openCurveSecondaryCurves.Add(new BezierCurveDistanceValue(i,this));
         }
         public List<BezierCurveDistanceValue> GetPoints(Curve3D curve)
         {
@@ -84,6 +89,7 @@ namespace Assets.NewUI
             if (availableCurves.Count == 0)
             {
                 var point = primaryCurve.GetPointAtDistance(primaryCurveDistance);
+                //here we assume closed secondary curves
                 reference = point.reference;
                 return point.position;
             }
@@ -113,7 +119,19 @@ namespace Assets.NewUI
                 previousDistance = currentDistance;
                 lowerCurve = curr;
             }
-            return SamplePosition(availableCurves[availableCurves.Count-1],out reference);
+            //here we assume closed secondary curves
+            return SamplePosition(availableCurves[availableCurves.Count - 1], out reference);
+        }
+
+        public void OnBeforeSerialize()
+        {
+            //Do nothing
+        }
+
+        public void OnAfterDeserialize()
+        {
+            foreach (var i in secondaryCurves)
+                i._owner = this;
         }
     }
 }
