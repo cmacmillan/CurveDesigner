@@ -37,9 +37,21 @@ public class Curve3DInspector : Editor
         if (curve3d.testMesh != null && curve3d.testMat != null)
         {
             var second = curve3d.doubleBezierSampler.secondaryCurves[0];
+            float farthestPoint = 0;
+            foreach (var i in second.secondaryCurve.PointGroups)
+            {
+                void doit(PGIndex index){
+                    float d = i.GetWorldPositionByIndex(index, DimensionLockMode.z).magnitude;
+                    farthestPoint = Mathf.Max(farthestPoint, d);
+                }
+                doit(PGIndex.LeftTangent);
+                doit(PGIndex.Position);
+                doit(PGIndex.RightTangent);
+            }
+            curve3d.testMat.SetFloat("_Scale",farthestPoint);
             var dist = second.GetDistance(curve3d.positionCurve);
             var point = curve3d.positionCurve.GetPointAtDistance(dist);
-            commandBuffer.DrawMesh(curve3d.testMesh, Matrix4x4.Translate(point.position)*Matrix4x4.Rotate(Quaternion.LookRotation(point.tangent,point.reference))*Matrix4x4.Scale(Vector3.one*1000), curve3d.testMat);
+            commandBuffer.DrawMesh(curve3d.testMesh, Matrix4x4.Translate(point.position)*Matrix4x4.Rotate(Quaternion.LookRotation(point.tangent,point.reference))*Matrix4x4.Scale(Vector3.one*farthestPoint*2), curve3d.testMat);
         }
 
         /*

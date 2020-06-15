@@ -3,8 +3,9 @@
     Properties
     {
 		_Scale("_Scale",float) = 1.0
-		_GridSize("_GridSize",int)=1
-		_LineThickness("_LineThickness",Range(0,1)) = .1
+		_LineThickness("_LineThickness",Range(0,.07)) = .1
+		_BaseScale("_BaseScale",float) =1.0
+		_Mask("_Mask",2D) = "white" {}
     }
     SubShader
     {
@@ -12,6 +13,7 @@
 		Blend SrcAlpha OneMinusSrcAlpha
 		Cull Off
 		ZWrite Off
+		ZTest Always
         LOD 100
 
         Pass
@@ -25,23 +27,25 @@
             struct appdata
             {
                 float4 vertex : POSITION;
+				float2 uv : TEXCOORD0;
             };
 
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-				float2 modelXZ: TEXCOORD0;
+				float2 uv : TEXCOORD0;
             };
 
 			float _Scale;
 			float _LineThickness;
-			int _GridSize;
+			float _BaseScale;
+			sampler2D _Mask;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
-				o.modelXZ = v.vertex.xz;
+				o.uv = (v.uv-.5f)*2;
                 return o;
             }
 
@@ -54,20 +58,21 @@
 				return log(x) / log(10);
 			}
 
-			#define c 3.6f
-			float sigmoid(float x) {
-				return 1 / (1 + pow(e, -c*x + c));
+			float sigmoid(float x,float base,float offset) {
+				return 1 / (1 + pow(e, -base*x + offset));
 			}
 
-			float fadeInOut(float x) {
-				float sig = sigmoid(x);
+			float fadeInOut(float x,float base, float offset) {
+				float sig = sigmoid(x,base,offset);
 				return saturate(5 * (sig * (1.0 - sig) - .03f));
 			}
 
+#define fadeInBaseOffsetConstant 2.8
 			float doLines(float2 xz,float gridSize,float fade) {
-				float2 modded = mod(xz*_Scale,gridSize)<_LineThickness*gridSize;
-				float val = modded.x || modded.y;
-				return val*fadeInOut(fade);
+				float2 modded = mod(xz*_BaseScale*_Scale, gridSize) / (gridSize);
+				float m = 1/_LineThickness;
+				float val = max(fadeInOut(modded.x, m, m / 2.0), fadeInOut(modded.y,m,m/2.0));
+				return val*fadeInOut(fade,fadeInBaseOffsetConstant,fadeInBaseOffsetConstant);
 			}
 
 			float stepped(float x,float offset) {
@@ -84,8 +89,8 @@
 					x -= 1;
 				else
 					y -= 1;
-				float val = doLines(i.modelXZ,pow(10,x),mod(fade+1,2))+doLines(i.modelXZ,pow(10,y),fade);
-                return fixed4(val,val,val,1);
+				float val = max(doLines(i.uv, pow(10, x), mod(fade + 1, 2)), doLines(i.uv, pow(10, y), fade));
+				return fixed4(val, val, val, val*tex2D(_Mask, i.uv/2+.5).r);
             }
             ENDCG
         }
