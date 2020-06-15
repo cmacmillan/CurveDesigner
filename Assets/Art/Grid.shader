@@ -6,6 +6,7 @@
 		_LineThickness("_LineThickness",Range(0,.07)) = .1
 		_BaseScale("_BaseScale",float) =1.0
 		_Mask("_Mask",2D) = "white" {}
+		_AlphaMul("_AlphaMul",Range(0,1))=1.0
     }
     SubShader
     {
@@ -40,6 +41,7 @@
 			float _LineThickness;
 			float _BaseScale;
 			sampler2D _Mask;
+			float _AlphaMul;
 
             v2f vert (appdata v)
             {
@@ -64,15 +66,17 @@
 
 			float fadeInOut(float x,float base, float offset) {
 				float sig = sigmoid(x,base,offset);
-				return saturate(5 * (sig * (1.0 - sig) - .03f));
+				return saturate(10 * (sig * (1.0 - sig) - .03f));
 			}
 
-#define fadeInBaseOffsetConstant 2.8
+#define fadeInBaseOffsetConstant 3
 			float doLines(float2 xz,float gridSize,float fade) {
-				float2 modded = mod(xz*_BaseScale*_Scale, gridSize) / (gridSize);
-				float m = 1/_LineThickness;
+				float thickness = -.1 + 1.1*(fade);
+				float2 modded = mod(xz*_BaseScale*_Scale+gridSize/2, gridSize) / (gridSize);
+				float m = 1/(_LineThickness*thickness);
 				float val = max(fadeInOut(modded.x, m, m / 2.0), fadeInOut(modded.y,m,m/2.0));
-				return val*fadeInOut(fade,fadeInBaseOffsetConstant,fadeInBaseOffsetConstant);
+				float fadeFactor = fadeInOut(fade, fadeInBaseOffsetConstant, fadeInBaseOffsetConstant);
+				return val*fadeFactor;
 			}
 
 			float stepped(float x,float offset) {
@@ -90,7 +94,7 @@
 				else
 					y -= 1;
 				float val = max(doLines(i.uv, pow(10, x), mod(fade + 1, 2)), doLines(i.uv, pow(10, y), fade));
-				return fixed4(val, val, val, val*tex2D(_Mask, i.uv/2+.5).r);
+				return fixed4(val, val, val, _AlphaMul*val*tex2D(_Mask, i.uv/2+.5).r);
             }
             ENDCG
         }
