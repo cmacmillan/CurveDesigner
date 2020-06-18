@@ -24,7 +24,9 @@ public partial class BezierCurve
         return (this[index + 1] - this[index]);//.normalized;
     }
     
-    public BezierCurve() { }
+    public BezierCurve() {
+        PointGroups = new List<PointGroup>();
+    }
     public BezierCurve(BezierCurve curveToClone)
     {
         PointGroups = new List<PointGroup>();
@@ -49,7 +51,6 @@ public partial class BezierCurve
     #region curve manipulation
     public void Initialize()
     {
-        PointGroups = new List<PointGroup>();
         var pointA = new PointGroup(owner.placeLockedPoints);
         pointA.SetWorldPositionByIndex(PGIndex.Position, Vector3.zero,dimensionLockMode);
         pointA.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,100,0),dimensionLockMode);

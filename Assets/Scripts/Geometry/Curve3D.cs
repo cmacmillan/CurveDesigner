@@ -31,34 +31,6 @@ public class Curve3D : MonoBehaviour
     {
         ObjMeshExporter.DoExport(gameObject, false);
     }
-    private void OnDrawGizmos()
-    {
-        doubleBezierSampler.CacheOpenCurvePoints(positionCurve);
-        void DoFor(float distance,float secondaryDistance)
-        {
-            var primaryCurvePoint = positionCurve.GetPointAtDistance(distance);
-            var sample = doubleBezierSampler.SampleAt(distance, secondaryDistance, positionCurve, out Vector3 reference);
-            var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference).normalized;
-            Vector3 TransformVector3(Vector3 vect)
-            {
-                return (Quaternion.LookRotation(primaryCurvePoint.tangent,primaryCurvePoint.reference)*vect);
-            }
-            Gizmos.DrawRay(primaryCurvePoint.position+TransformVector3(sample),TransformVector3(reference)*300);
-            //Gizmos.DrawRay(primaryCurvePoint.position+TransformVector3(sample),TransformVector3(Vector3.right)*300);  
-        }
-        DoFor(primaryDistance*positionCurve.GetLength(),secondaryDistance);
-        //Gizmos.DrawRay(TransformVector3(sample) + primaryCurvePoint.position, TransformVector3(reference)*30);
-
-       //Gizmos.DrawRay(primaryCurvePoint.position,TransformVector3(Vector3.right)*300);  
-        foreach (var i in doubleBezierSampler.secondaryCurves)
-        {
-            DoFor(i.GetDistance(positionCurve),secondaryDistance);
-        }
-    }
-    [Range(0,1)]
-    public float primaryDistance;
-    [Range(0,1)]
-    public float secondaryDistance;
 
     [HideInInspector]
     public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler();

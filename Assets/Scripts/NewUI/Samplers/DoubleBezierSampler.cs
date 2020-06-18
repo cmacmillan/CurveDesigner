@@ -11,14 +11,21 @@ namespace Assets.NewUI
         [NonSerialized]
         public DoubleBezierSampler _owner;
         public BezierCurve secondaryCurve;
-        public BezierCurveDistanceValue(DoubleBezierSampler owner,float distance,BezierCurve curve) : base(distance, curve)
+        public BezierCurveDistanceValue(DoubleBezierSampler owner,float distance,BezierCurve curve,BezierCurve curveToCopy) : base(distance, curve)
         {
             _owner = owner;
             _owner.SortPoints(curve);
-            secondaryCurve = new BezierCurve();
-            secondaryCurve.dimensionLockMode = DimensionLockMode.z;
+            if (curveToCopy == null)
+            {
+                secondaryCurve = new BezierCurve();
+                secondaryCurve.Initialize();
+            }
+            else
+            {
+                secondaryCurve = new BezierCurve(curveToCopy);
+            }
             secondaryCurve.owner = curve.owner;
-            secondaryCurve.Initialize();
+            secondaryCurve.dimensionLockMode = DimensionLockMode.z;
             secondaryCurve.Recalculate();
         }
         public BezierCurveDistanceValue(BezierCurveDistanceValue objToClone,DoubleBezierSampler newOwner) : base (objToClone)
@@ -75,9 +82,29 @@ namespace Assets.NewUI
             secondaryCurves = secondaryCurves.OrderBy((a => a.TimeAlongSegment)).OrderBy(a => a.SegmentIndex).ToList();
             CacheOpenCurvePoints(curve);
         }
+        private float WrappedDistanceBetween(float distance1, float distance2,float length, bool isClosed)
+        {
+            float simpleDistance = Mathf.Abs(distance1 - distance2);
+            if (isClosed)
+            {
+                float wrappedUpper = Mathf.Abs((distance2-length)-distance1);
+                float wrappedLower = Mathf.Abs((distance1-length)-distance2);
+                return Mathf.Min(simpleDistance,wrappedLower,wrappedUpper);
+            } else
+            {
+                return simpleDistance;
+            }
+        }
         public int InsertPointAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve)
         {
-            var newPoint = new BezierCurveDistanceValue(this, distance,curve);
+            BezierCurve curveToCopy=null;
+            var openPoints = GetPointsByCurveOpenClosedStatus(curve);
+            if (openPoints.Count > 0)
+            {
+                float len = curve.GetLength();
+                curveToCopy = openPoints.OrderBy(a => WrappedDistanceBetween(distance, a.GetDistance(curve),len,isClosedLoop)).First().secondaryCurve;
+            }
+            var newPoint = new BezierCurveDistanceValue(this, distance,curve,curveToCopy);
             secondaryCurves.Add(newPoint);
             SortPoints(curve);
             return secondaryCurves.IndexOf(newPoint);
