@@ -85,6 +85,7 @@ namespace Assets.NewUI
         ///Secondary curve distance is a value between 0 and 1
         public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference)
         {
+            //This needs to interpolate references smoothly
             Vector3 SamplePosition(BezierCurveDistanceValue value, out Vector3 myRef)
             {
                 var samp = value.secondaryCurve.GetPointAtDistance(secondaryCurveDistance * value.secondaryCurve.GetLength());

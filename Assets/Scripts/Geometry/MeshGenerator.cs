@@ -456,26 +456,19 @@ public static class MeshGenerator
                     int triangleIndex = 0;
                     foreach (var primaryCurvePoint in primaryCurveSamples)
                     {
-                        bool isFirst = true;
-                        int flip = 0;
                         for (float c = 0; c <= doubleBezierSampleCount; c++)
                         {
                             float progress = c / (float)doubleBezierSampleCount;
                             var relativePos = doubleBezierSampler.SampleAt(primaryCurvePoint.distanceFromStartOfCurve, progress, curve,out Vector3 reference);
-                            if (isFirst)//first time we gotta determine if we need to flip
-                            {
-                                flip = Vector3.Dot(reference, Vector3.right) < 0 ? -1 : 1;
-                                isFirst = false;
-                            }
                             //Lets say z is forward
-                            var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference);
+                            var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference).normalized;
                             Vector3 TransformVector3(Vector3 vect)
                             {
-                                return -cross * vect.x + primaryCurvePoint.reference * vect.y +primaryCurvePoint.tangent * vect.z;
+                                return (Quaternion.LookRotation(primaryCurvePoint.tangent,primaryCurvePoint.reference)*vect);
                             }
                             var absolutePos = primaryCurvePoint.position +TransformVector3(relativePos);
-                            vertices.Add(absolutePos+flip*TransformVector3(reference)*Thickness/2);
-                            backSideBuffer.Add(absolutePos-flip*TransformVector3(reference)*Thickness/2);
+                            vertices.Add(absolutePos+TransformVector3(reference)*Thickness/2);
+                            backSideBuffer.Add(absolutePos-TransformVector3(reference)*Thickness/2);
                         }
                     }
                     vertices.AddRange(backSideBuffer);

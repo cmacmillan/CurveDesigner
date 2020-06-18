@@ -233,14 +233,27 @@ public partial class BezierCurve
     {
         return segments[NumSegments - 1].cummulativeLength;
     }
-    public static Vector3 GetDefaultReferenceVector(Vector3 tangent)
+    public Vector3 GetDefaultReferenceVector(Vector3 tangent)
     {
-        return NormalTangent(tangent, Vector3.up);
+        Vector3 reference = Vector3.up;
+        switch (dimensionLockMode)
+        {
+            case DimensionLockMode.x:
+                reference = Vector3.forward;
+                break;
+            case DimensionLockMode.y:
+                reference = Vector3.right;
+                break;
+            case DimensionLockMode.z:
+                reference = Vector3.up;
+                break;
+        }
+        return NormalTangent(tangent, reference);
     }
     /// <summary>
     /// must call after modifying points
     /// </summary>
-    public void Recalculate()
+    public PointOnCurve Recalculate(PointOnCurve referenceHint = null)
     {
         if (segments == null)
             segments = new List<Segment>();
@@ -253,6 +266,15 @@ public partial class BezierCurve
         List<PointOnCurve> points = GetSamplePoints();
         {
             Vector3 referenceVector = GetDefaultReferenceVector(points[0].tangent);
+            if (referenceHint!=null)
+            {
+                var rotation = Quaternion.FromToRotation(referenceHint.tangent,points[0].tangent);
+                if (Vector3.Dot(rotation * referenceHint.reference,referenceVector) < 0)
+                    referenceVector = -referenceVector;
+            }
+                //if (Vector3.Dot(referenceVector, referenceHint.Value)<0)
+                    //referenceVector = -referenceVector;
+                //referenceVector = NormalTangent(points[0].tangent,referenceHint.Value);
             referenceVector = referenceVector.normalized;
             points[0].reference = referenceVector;
             for (int i = 1; i < points.Count; i++)
@@ -274,6 +296,7 @@ public partial class BezierCurve
             for (int i = 1; i < points.Count; i++)
                 points[i].reference = Quaternion.AngleAxis((i/(float)(points.Count-1))*angleDifference,points[i].tangent) *points[i].reference;
         }
+        return points[0];
     }
     public List<PointOnCurve> GetPointsWithSpacing(float spacing)
     {

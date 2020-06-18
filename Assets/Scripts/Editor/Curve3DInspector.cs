@@ -17,7 +17,8 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
-        ///
+        //draw graph stuff below
+        /*
         curve3d.positionCurve.Recalculate();
         foreach (var i in curve3d.doubleBezierSampler.secondaryCurves)
         {
@@ -25,7 +26,6 @@ public class Curve3DInspector : Editor
             i.secondaryCurve.Recalculate();
         }
         curve3d.CacheAverageSize();
-        ////
         var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;//Consider replacing with Camera.current?
         if (curve3d.commandBuffer == null)
         {
@@ -53,6 +53,7 @@ public class Curve3DInspector : Editor
             var point = curve3d.positionCurve.GetPointAtDistance(dist);
             commandBuffer.DrawMesh(curve3d.testMesh, Matrix4x4.Translate(point.position)*Matrix4x4.Rotate(Quaternion.LookRotation(point.tangent,point.reference))*Matrix4x4.Scale(Vector3.one*farthestPoint*2), curve3d.testMat);
         }
+        */
 
         /*
         Handles.BeginGUI();
@@ -104,10 +105,14 @@ public class Curve3DInspector : Editor
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
         curve3d.positionCurve.dimensionLockMode = curve3d.lockToPositionZero;
         curve3d.positionCurve.Recalculate();
-        foreach (var i in curve3d.doubleBezierSampler.secondaryCurves)
+        var secondaryCurves = curve3d.doubleBezierSampler.secondaryCurves;
+        if (secondaryCurves.Count > 0)
         {
-            i.secondaryCurve.owner = curve3d;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
-            i.secondaryCurve.Recalculate();
+            foreach (var curr in secondaryCurves)
+                curr.secondaryCurve.owner = curve3d;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
+            var referenceHint = secondaryCurves[0].secondaryCurve.Recalculate();
+            for (int i = 1; i < secondaryCurves.Count; i++)
+                referenceHint = secondaryCurves[i].secondaryCurve.Recalculate(referenceHint);
         }
         curve3d.CacheAverageSize();
         var rotationPoints = curve3d.rotationDistanceSampler.GetPoints(curve3d);

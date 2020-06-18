@@ -34,20 +34,28 @@ public class Curve3D : MonoBehaviour
     private void OnDrawGizmos()
     {
         doubleBezierSampler.CacheOpenCurvePoints(positionCurve);
-        var primaryCurvePoint = positionCurve.GetPointAtDistance(primaryDistance);
-        var sample = doubleBezierSampler.SampleAt(primaryDistance, secondaryDistance, positionCurve, out Vector3 reference);
-        var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference).normalized;
-        Vector3 TransformVector3(Vector3 vect)
+        void DoFor(float distance,float secondaryDistance)
         {
-            return -cross * vect.x + primaryCurvePoint.reference * vect.y + primaryCurvePoint.tangent * vect.z;
+            var primaryCurvePoint = positionCurve.GetPointAtDistance(distance);
+            var sample = doubleBezierSampler.SampleAt(distance, secondaryDistance, positionCurve, out Vector3 reference);
+            var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference).normalized;
+            Vector3 TransformVector3(Vector3 vect)
+            {
+                return (Quaternion.LookRotation(primaryCurvePoint.tangent,primaryCurvePoint.reference)*vect);
+            }
+            Gizmos.DrawRay(primaryCurvePoint.position+TransformVector3(sample),TransformVector3(reference)*300);
+            //Gizmos.DrawRay(primaryCurvePoint.position+TransformVector3(sample),TransformVector3(Vector3.right)*300);  
         }
+        DoFor(primaryDistance*positionCurve.GetLength(),secondaryDistance);
         //Gizmos.DrawRay(TransformVector3(sample) + primaryCurvePoint.position, TransformVector3(reference)*30);
+
+       //Gizmos.DrawRay(primaryCurvePoint.position,TransformVector3(Vector3.right)*300);  
         foreach (var i in doubleBezierSampler.secondaryCurves)
         {
-            var point = i.secondaryCurve.GetPointAtDistance(0);
-            Gizmos.DrawRay(TransformVector3(point.position)+primaryCurvePoint.position,TransformVector3(point.reference)*30);
+            DoFor(i.GetDistance(positionCurve),secondaryDistance);
         }
     }
+    [Range(0,1)]
     public float primaryDistance;
     [Range(0,1)]
     public float secondaryDistance;
