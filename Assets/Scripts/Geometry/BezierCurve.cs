@@ -234,6 +234,10 @@ public partial class BezierCurve
     {
         return segments[NumSegments - 1].cummulativeLength;
     }
+    private static Vector3 NormalTangent(Vector3 forwardVector, Vector3 previous)
+    {
+        return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
+    }
     public Vector3 GetDefaultReferenceVector(Vector3 tangent)
     {
         Vector3 reference = Vector3.up;

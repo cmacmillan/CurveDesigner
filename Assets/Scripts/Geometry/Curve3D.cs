@@ -19,6 +19,7 @@ public class Curve3D : MonoBehaviour
         }
     }
 
+
     public Mesh testMesh;
     public Material testMat;
     public CommandBuffer commandBuffer;
@@ -67,6 +68,14 @@ public class Curve3D : MonoBehaviour
     private bool isInitialized = false;
 
     /// Start of properties that redraw the curve
+
+    [System.Serializable]
+    public class TextureLayerItem
+    {
+        public Texture albedoTexture;
+        public float scale;
+    }
+    public TextureLayerItem outerFaceTexture;
 
     public DimensionLockMode lockToPositionZero;
     [SerializeField]
