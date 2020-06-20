@@ -258,15 +258,15 @@ public static class MeshGenerator
                 DoTris();
             }
         }
-        void CreateRingPointsAlongCurve(BezierCurve curve, List<PointOnCurve> points, IDistanceSampler<float> sizeSampler, float TubeArc, float TubeThickness, int RingPointCount, IDistanceSampler<float> rotationSampler, bool isExterior, bool isClosedLoop, float DefaultSize, float DefaultRotation)
+        void CreateRingPointsAlongCurve(List<PointOnCurve> points, int RingPointCount, bool isExterior)
         {
             float distanceFromFull = 360.0f - TubeArc;
             for (int i = 0; i < points.Count; i++)
             {
                 PointOnCurve currentPoint = points[i];
-                float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
-                var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, curve) + offset + DefaultSize);
-                var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, curve) + DefaultRotation;
+                float offset = (isExterior ? .5f : -.5f) * (Thickness);
+                var size = Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + offset + Radius);
+                var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
                 for (int j = 0; j < RingPointCount; j++)
                 {
                     float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + rotation;
@@ -420,7 +420,7 @@ public static class MeshGenerator
                     numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                     shouldDrawConnectingFace = true;
                     InitLists();
-                    CreateRingPointsAlongCurve(curve,sampled, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation);
+                    CreateRingPointsAlongCurve(sampled, ActualRingPointCount, true);
                     TrianglifyLayer(true, ActualRingPointCount);
                     if (!IsClosedLoop)
                         CreateTubeEndPlates();
@@ -438,8 +438,8 @@ public static class MeshGenerator
                     else
                         shouldDrawConnectingFace = false;
                     InitLists();
-                    CreateRingPointsAlongCurve(curve,sampled, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation);
-                    CreateRingPointsAlongCurve(curve,sampled, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, false, IsClosedLoop, Radius, Rotation);
+                    CreateRingPointsAlongCurve(sampled, ActualRingPointCount, true);
+                    CreateRingPointsAlongCurve(sampled, ActualRingPointCount, false);
                     TrianglifyLayer(true, ActualRingPointCount);
                     TrianglifyLayer(false, ActualRingPointCount);
                     if (!is360degree)
