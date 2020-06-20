@@ -36,9 +36,9 @@ public static class MeshGenerator
     public static bool didMeshGenerationSucceed;
     public static List<Vector3> vertices;
     public static List<int> triangles;
+    public static List<Vector2> uvs;
 
     public static bool hasUVs;
-    public static List<Vector2> uvs;
 
     public static bool IsBuzy = false;
 
@@ -57,6 +57,7 @@ public static class MeshGenerator
     public static float TubeArc = 360.0f;
     public static bool IsTubeArcConstant { get { return true; } }
     public static float Rotation = 0.0f;
+
     public static float Thickness = 0.0f;
     public static bool IsClosedLoop = false;
     public static CurveType CurveType;
@@ -126,44 +127,13 @@ public static class MeshGenerator
             IsBuzy = false;
         }
     }
-    public static void CreateRingPointsAlongCurve(BezierCurve curve,List<PointOnCurve> points, List<Vector3> listToAppend, IDistanceSampler<float> sizeSampler, float TubeArc, float TubeThickness, int RingPointCount, IDistanceSampler<float> rotationSampler, bool isExterior, bool isClosedLoop,float DefaultSize, float DefaultRotation, float curveLength)
+    private struct EdgePointInfo
     {
-        float distanceFromFull = 360.0f - TubeArc;
-        for (int i = 0; i < points.Count; i++)
-        {
-            PointOnCurve currentPoint = points[i];
-            float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
-            var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,curve) + offset+DefaultSize);
-            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength,curve)+DefaultRotation;
-            for (int j = 0; j < RingPointCount; j++)
-            {
-                float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + rotation;
-                Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
-                listToAppend.Add(currentPoint.GetRingPoint(theta,size));
-            }
-        }
-    }
-    public static void CreateRectanglePointsAlongCurve(BezierCurve curve, List<PointOnCurve> points, List<Vector3> listToAppend,List<Vector2> uvs, IDistanceSampler<float> rotationSampler, bool isClosedLoop, float thickness, IDistanceSampler<float> distanceSampler,float DefaultSize,float DefaultRotation, float curveLength)
-    {
-        for (int i = 0; i < points.Count; i++)
-        {
-            PointOnCurve currentPoint = points[i];
-            float uvx = currentPoint.distanceFromStartOfCurve / curveLength;
-            var center = currentPoint.position;
-            var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength,curve)+DefaultRotation;
-            var up = Quaternion.AngleAxis(rotation,currentPoint.tangent)*currentPoint.reference.normalized;
-            var right = Vector3.Cross(up, currentPoint.tangent).normalized;
-            var scaledUp = up * thickness / 2.0f;
-            var scaledRight = right*Mathf.Max(0,distanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve,isClosedLoop,curveLength,curve)+DefaultSize);
-            listToAppend.Add(center+scaledUp+scaledRight);
-            listToAppend.Add(center+scaledUp-scaledRight);
-            listToAppend.Add(center-scaledUp-scaledRight);
-            listToAppend.Add(center-scaledUp+scaledRight);
-            uvs.Add(new Vector2(uvx,0));
-            uvs.Add(new Vector2(uvx,1));
-            uvs.Add(new Vector2(uvx,1));
-            uvs.Add(new Vector2(uvx,0));
-        }
+        public float distanceAlongCurve;
+        public Vector3 side1Point1;
+        public Vector3 side1Point2;
+        public Vector3 side2Point1;
+        public Vector3 side2Point2;
     }
     private static bool GenerateMesh()
     {
@@ -174,6 +144,7 @@ public static class MeshGenerator
         var sampled = curve.GetPointsWithSpacing(VertexSampleDistance);
         int numRings = sampled.Count - 1;
         int ActualRingPointCount = RingPointCount - (TubeArc == 360.0 ? 1 : 0);
+        float curveLength = curve.GetLength();
         void DrawQuad(int side1Point1, int side1Point2, int side2Point1, int side2Point2)
         {
             //Tri1
@@ -192,7 +163,7 @@ public static class MeshGenerator
             triangles.Add(point3);
         }
         //var rand = new System.Random();
-        void TrianglifyLayer(bool isExterior,int numPointsPerRing)
+        void TrianglifyLayer(bool isExterior, int numPointsPerRing)
         {//generate tris
             int additionalRing = IsClosedLoop ? 1 : 0;
             int numVertsInALayer = (numRings+1) * numPointsPerRing;
@@ -221,6 +192,130 @@ public static class MeshGenerator
                 }
             }
         }
+        void CreateEdgeVertsTrisAndUvs(List<EdgePointInfo> edgePointInfos)
+        {
+            int firsts1p1=-1;
+            int firsts1p2=-1;
+            int firsts2p1=-1;
+            int firsts2p2=-1;
+
+            int prevs1p1=-1;
+            int prevs1p2=-1;
+            int prevs2p1=-1;
+            int prevs2p2=-1;
+
+            int s1p1 = -1;
+            int s1p2 = -1;
+            int s2p1 = -1;
+            int s2p2 = -1;
+            void DoTris()
+            {
+                DrawQuad(s1p1, s1p2,prevs1p1, prevs1p2);
+                DrawQuad(prevs2p1, prevs2p2, s2p1, s2p2);
+            }
+
+            for (int i=0;i<edgePointInfos.Count;i++)
+            {
+                var curr = edgePointInfos[i];
+                vertices.Add(curr.side1Point1);
+                vertices.Add(curr.side1Point2);
+                vertices.Add(curr.side2Point1);
+                vertices.Add(curr.side2Point2);
+
+                var uvX = curr.distanceAlongCurve / curveLength;
+
+                uvs.Add(new Vector2(uvX,0.0f));
+                uvs.Add(new Vector2(uvX,1.0f));
+                uvs.Add(new Vector2(uvX,0.0f));
+                uvs.Add(new Vector2(uvX,1.0f));
+
+                s1p1 = vertices.Count - 4;
+                s1p2 = vertices.Count - 3;
+                s2p1 = vertices.Count - 2;
+                s2p2 = vertices.Count - 1;
+                if (i > 0)
+                {
+                    DoTris();
+                }
+                else
+                {
+                    firsts1p1 = s1p1;
+                    firsts1p2 = s1p2;
+                    firsts2p1 = s2p1;
+                    firsts2p2 = s2p2;
+                }
+                prevs1p1 = s1p1;
+                prevs1p2 = s1p2;
+                prevs2p1 = s2p1;
+                prevs2p2 = s2p2;
+            }
+            if (IsClosedLoop)
+            {
+                s1p1 = firsts1p1;
+                s1p2 = firsts1p2;
+                s2p1 = firsts1p2;
+                s2p2 = firsts2p2;
+                DoTris();
+            }
+        }
+        void CreateRingPointsAlongCurve(BezierCurve curve, List<PointOnCurve> points, IDistanceSampler<float> sizeSampler, float TubeArc, float TubeThickness, int RingPointCount, IDistanceSampler<float> rotationSampler, bool isExterior, bool isClosedLoop, float DefaultSize, float DefaultRotation)
+        {
+            float distanceFromFull = 360.0f - TubeArc;
+            for (int i = 0; i < points.Count; i++)
+            {
+                PointOnCurve currentPoint = points[i];
+                float offset = (isExterior ? .5f : -.5f) * (TubeThickness);
+                var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, curve) + offset + DefaultSize);
+                var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, isClosedLoop, curveLength, curve) + DefaultRotation;
+                for (int j = 0; j < RingPointCount; j++)
+                {
+                    float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + rotation;
+                    Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
+                    vertices.Add(currentPoint.GetRingPoint(theta, size));
+                }
+            }
+        }
+        void CreateRectanglePointsAlongCurve(List<PointOnCurve> points, List<EdgePointInfo> edgePointInfos)
+        {
+            List<Vector3> vertBuffer = new List<Vector3>();
+            List<Vector2> uvBuffer = new List<Vector2>();
+            for (int i = 0; i < points.Count; i++)
+            {
+                PointOnCurve currentPoint = points[i];
+                float uvx = currentPoint.distanceFromStartOfCurve / curveLength;
+                var center = currentPoint.position;
+                var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
+                var up = Quaternion.AngleAxis(rotation, currentPoint.tangent) * currentPoint.reference.normalized;
+                var right = Vector3.Cross(up, currentPoint.tangent).normalized;
+                var scaledUp = up * Thickness / 2.0f;
+                var scaledRight = right * Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Radius);
+
+                var side1point1 = center + scaledUp + scaledRight;
+                var side2point1 = center + scaledUp - scaledRight;
+                var side1point2 = center - scaledUp + scaledRight;
+                var side2point2 = center - scaledUp - scaledRight;
+
+                vertices.Add(side1point1);
+                vertices.Add(side2point1);
+                vertBuffer.Add(side1point2);
+                vertBuffer.Add(side2point2);
+
+                uvs.Add(new Vector2(uvx, 0));
+                uvs.Add(new Vector2(uvx, 1));
+                uvBuffer.Add(new Vector2(uvx, 0));
+                uvBuffer.Add(new Vector2(uvx, 1));
+
+                edgePointInfos.Add(new EdgePointInfo() {
+                    distanceAlongCurve = currentPoint.distanceFromStartOfCurve,
+                    side1Point1 = side1point1,
+                    side1Point2 = side1point2,
+                    side2Point1 = side2point1,
+                    side2Point2 = side2point2
+                });
+            }
+            vertices.AddRange(vertBuffer);
+            uvs.AddRange(uvBuffer);
+        }
         void InitLists(bool provideUvs = false)
         {
             InitOrClear(ref vertices);
@@ -232,9 +327,9 @@ public static class MeshGenerator
         void ConnectMeshInteriorAndExteriorLayers()
         {
             int additionalRing = IsClosedLoop ? 1 : 0;
-            int numVertsInALayer = (numRings+1) * ActualRingPointCount;
+            int numVertsInALayer = (numRings + 1) * ActualRingPointCount;
             int interiorBase = numVerts / 2;
-            for (int i = 0; i < numRings+additionalRing; i++)
+            for (int i = 0; i < numRings + additionalRing; i++)
             {
                 int ringIndex = (i * ActualRingPointCount)%numVertsInALayer;
                 int nextRingIndex = (ringIndex + ActualRingPointCount)%numVertsInALayer;
@@ -325,7 +420,7 @@ public static class MeshGenerator
                     numTris = ActualRingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
                     shouldDrawConnectingFace = true;
                     InitLists();
-                    CreateRingPointsAlongCurve(curve,sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
+                    CreateRingPointsAlongCurve(curve,sampled, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation);
                     TrianglifyLayer(true, ActualRingPointCount);
                     if (!IsClosedLoop)
                         CreateTubeEndPlates();
@@ -343,8 +438,8 @@ public static class MeshGenerator
                     else
                         shouldDrawConnectingFace = false;
                     InitLists();
-                    CreateRingPointsAlongCurve(curve,sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation, curve.GetLength());
-                    CreateRingPointsAlongCurve(curve,sampled, vertices, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, false, IsClosedLoop, Radius, Rotation, curve.GetLength());
+                    CreateRingPointsAlongCurve(curve,sampled, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, true, IsClosedLoop, Radius, Rotation);
+                    CreateRingPointsAlongCurve(curve,sampled, sizeDistanceSampler, TubeArc, Thickness, ActualRingPointCount, rotationDistanceSampler, false, IsClosedLoop, Radius, Rotation);
                     TrianglifyLayer(true, ActualRingPointCount);
                     TrianglifyLayer(false, ActualRingPointCount);
                     if (!is360degree)
@@ -360,10 +455,13 @@ public static class MeshGenerator
                     numVerts = 4 * sampled.Count;
                     numTris = 8 * (sampled.Count - 1) + 4;
                     InitLists(true);
-                    CreateRectanglePointsAlongCurve(curve,sampled, vertices, uvs, rotationDistanceSampler, IsClosedLoop, Thickness, sizeDistanceSampler, Radius, Rotation, curve.GetLength());
-                    shouldDrawConnectingFace = true;
-                    TrianglifyLayer(true, 4);
-                    CreateFlatEndPlates();
+                    List<EdgePointInfo> edgePointInfos = new List<EdgePointInfo>();
+                    CreateRectanglePointsAlongCurve(sampled,edgePointInfos);
+                    shouldDrawConnectingFace = false;//true;
+                    TrianglifyLayer(false, 2);
+                    TrianglifyLayer(true, 2);
+                    CreateEdgeVertsTrisAndUvs(edgePointInfos);
+                    //CreateFlatEndPlates();
                     return true;
                 }
             #endregion
@@ -462,7 +560,6 @@ public static class MeshGenerator
                         }
                         //now x is always along the mesh and normalized around the center
                     }
-                    var curveLength = curve.GetLength();
                     int vertCount = meshToTile.verts.Length;
                     bool useUvs = meshToTile.uv.Length ==meshToTile.verts.Length;
                     float GetSize(float dist)
