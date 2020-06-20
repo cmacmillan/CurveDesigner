@@ -33,6 +33,35 @@ public static class MeshGenerator
         //currently only supports uv0
     }
 
+    public class TextureUVBounds
+    {
+        public Vector2 yMinMax;
+        public float xScale;
+    }
+    public static void PopulateUVBounds(Curve3D curve)
+    {
+        exteriorLayerTextureUVBounds = null;
+        interiorLayerTextureUVBounds = null;
+        edgeTextureUVBounds = null;
+        var type = curve.type;
+        bool hasEdge = type != CurveType.Cylinder;//only cylinders don't have edges
+        bool shouldInnerOuterUseSeperateTextures = curve.useSeperateInnerAndOuterFaceTextures;
+        int numTexsToPack = 1 + (hasEdge ? 1 : 0) + (shouldInnerOuterUseSeperateTextures ? 1 : 0);
+        float textureStepSize = 1.0f / numTexsToPack;
+        float minOffset = 0;
+        if (hasEdge)
+            edgeTextureUVBounds = new TextureUVBounds() { xScale = curve.edgeTexture.scale, yMinMax = new Vector2(minOffset,minOffset+=textureStepSize ) };
+        exteriorLayerTextureUVBounds = new TextureUVBounds() { xScale = curve.outerFaceTexture.scale, yMinMax = new Vector2(minOffset,minOffset+=textureStepSize) };
+        if (shouldInnerOuterUseSeperateTextures)
+            interiorLayerTextureUVBounds = new TextureUVBounds() { xScale = curve.innerFaceTexture.scale, yMinMax = new Vector2(minOffset, minOffset += textureStepSize) };
+        else
+            interiorLayerTextureUVBounds = exteriorLayerTextureUVBounds;
+    }
+
+    public static TextureUVBounds exteriorLayerTextureUVBounds;
+    public static TextureUVBounds interiorLayerTextureUVBounds;
+    public static TextureUVBounds edgeTextureUVBounds;
+
     public static bool didMeshGenerationSucceed;
     public static List<Vector3> vertices;
     public static List<int> triangles;
@@ -73,6 +102,7 @@ public static class MeshGenerator
             BezierCurve clonedCurve = new BezierCurve(curve.positionCurve);
             lastUpdateTime = curve.lastMeshUpdateStartTime;
 
+            PopulateUVBounds(curve);
             MeshGenerator.curve = clonedCurve;
             MeshGenerator.RingPointCount = curve.ringPointCount;
             MeshGenerator.Radius = curve.curveRadius;
@@ -222,12 +252,12 @@ public static class MeshGenerator
                 vertices.Add(curr.side2Point1);
                 vertices.Add(curr.side2Point2);
 
-                var uvX = curr.distanceAlongCurve / curveLength;
+                var uvX = edgeTextureUVBounds.xScale*curr.distanceAlongCurve / curveLength;
 
-                uvs.Add(new Vector2(uvX,0.0f));
-                uvs.Add(new Vector2(uvX,1.0f));
-                uvs.Add(new Vector2(uvX,0.0f));
-                uvs.Add(new Vector2(uvX,1.0f));
+                uvs.Add(new Vector2(uvX,edgeTextureUVBounds.yMinMax.x));
+                uvs.Add(new Vector2(uvX,edgeTextureUVBounds.yMinMax.y));
+                uvs.Add(new Vector2(uvX,edgeTextureUVBounds.yMinMax.x));
+                uvs.Add(new Vector2(uvX,edgeTextureUVBounds.yMinMax.y));
 
                 s1p1 = vertices.Count - 4;
                 s1p2 = vertices.Count - 3;
@@ -282,7 +312,11 @@ public static class MeshGenerator
             for (int i = 0; i < points.Count; i++)
             {
                 PointOnCurve currentPoint = points[i];
+
                 float uvx = currentPoint.distanceFromStartOfCurve / curveLength;
+                float exteriorUvx = uvx * exteriorLayerTextureUVBounds.xScale;
+                float interiorUvx = uvx * interiorLayerTextureUVBounds.xScale;
+
                 var center = currentPoint.position;
                 var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
                 var up = Quaternion.AngleAxis(rotation, currentPoint.tangent) * currentPoint.reference.normalized;
@@ -300,10 +334,10 @@ public static class MeshGenerator
                 vertBuffer.Add(side1point2);
                 vertBuffer.Add(side2point2);
 
-                uvs.Add(new Vector2(uvx, 0));
-                uvs.Add(new Vector2(uvx, 1));
-                uvBuffer.Add(new Vector2(uvx, 0));
-                uvBuffer.Add(new Vector2(uvx, 1));
+                uvs.Add(new Vector2(exteriorUvx, exteriorLayerTextureUVBounds.yMinMax.x));
+                uvs.Add(new Vector2(exteriorUvx, exteriorLayerTextureUVBounds.yMinMax.y));
+                uvBuffer.Add(new Vector2(interiorUvx, interiorLayerTextureUVBounds.yMinMax.x));
+                uvBuffer.Add(new Vector2(interiorUvx, interiorLayerTextureUVBounds.yMinMax.y));
 
                 edgePointInfos.Add(new EdgePointInfo() {
                     distanceAlongCurve = currentPoint.distanceFromStartOfCurve,
@@ -486,6 +520,8 @@ public static class MeshGenerator
                             }
                             var absolutePos = primaryCurvePoint.position +TransformVector3(relativePos);
                             vertices.Add(absolutePos+TransformVector3(reference)*Thickness/2);
+
+
                             backSideBuffer.Add(absolutePos-TransformVector3(reference)*Thickness/2);
                         }
                     }

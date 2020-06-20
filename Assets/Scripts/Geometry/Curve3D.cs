@@ -70,85 +70,111 @@ public class Curve3D : MonoBehaviour
     /// Start of properties that redraw the curve
 
     [System.Serializable]
-    public class TextureLayerItem
+    public struct TextureLayerItem
     {
         public Texture albedoTexture;
         public float scale;
+        public override bool Equals(object obj)
+        {
+            if (!(obj is TextureLayerItem))
+                return base.Equals(obj);
+            var otherLayerItem =(TextureLayerItem)obj;
+            return otherLayerItem.albedoTexture == albedoTexture &&
+                   otherLayerItem.scale == scale;
+        }
     }
+
+    public bool useSeperateInnerAndOuterFaceTextures;
+    [SerializeField]
+    [HideInInspector]
+    private bool old_useSeperateInnerAndOuterFaceTextures;
+
     public TextureLayerItem outerFaceTexture;
+    [SerializeField]
+    [HideInInspector]
+    private TextureLayerItem old_outerFaceTexture;
+
+    public TextureLayerItem innerFaceTexture;
+    [SerializeField]
+    [HideInInspector]
+    private TextureLayerItem old_innerFaceTexture;
+
+    public TextureLayerItem edgeTexture;
+    [SerializeField]
+    [HideInInspector]
+    private TextureLayerItem old_edgeTexture;
 
     public DimensionLockMode lockToPositionZero;
     [SerializeField]
     [HideInInspector]
-    private DimensionLockMode oldLockToPositionZero;
+    private DimensionLockMode old_lockToPositionZero;
 
     [Min(0)]
     public float vertexDensity = 1.0f;
     [SerializeField]
     [HideInInspector]
-    private float oldVertexDensity = -1;
+    private float old_vertexDensity = -1;
 
     [Min(0)]
     public int doubleBezierSampleCount = 1;
     [SerializeField]
     [HideInInspector]
-    private int oldDoubleBezierVertexDensity = -1;
+    private int old_doubleBezierVertexDensity = -1;
 
     [Min(0)]
     public float curveRadius =3.0f;
     [SerializeField]
     [HideInInspector]
-    private float oldCurveRadius=-1;
+    private float old_curveRadius=-1;
 
     [Min(3)]
     public int ringPointCount = 8;
     [SerializeField]
     [HideInInspector]
-    private int oldRingPointCount=-1;
+    private int old_ringPointCount=-1;
 
     [Range(0, 360)]
     public float arcOfTube = 360;
     [SerializeField]
     [HideInInspector]
-    private float oldArcOfTube = -1;
+    private float old_arcOfTube = -1;
 
     [Range(0, 360)]
-
     public float curveRotation = 360;
     [SerializeField]
     [HideInInspector]
-    private float oldCurveRotation= -1;
+    private float old_curveRotation= -1;
 
     [Min(0)]
     public float thickness = .1f;
     [HideInInspector]
     [SerializeField]
-    private float oldTubeThickness = -1;
+    private float old_thickness = -1;
 
     public CurveType type = CurveType.HollowTube;
     [HideInInspector]
     [SerializeField]
-    private CurveType oldType;
+    private CurveType old_type;
 
     public float closeTilableMeshGap;
     [HideInInspector]
     [SerializeField]
-    private float oldCloseTilableMeshGap = -1;
+    private float old_closeTilableMeshGap = -1;
 
     public Mesh meshToTile;
     [HideInInspector]
     [SerializeField]
-    private Mesh oldMeshToTile=null;
+    private Mesh old_meshToTile=null;
 
     public bool isClosedLoop = false;
     [SerializeField]
     [HideInInspector]
-    private bool oldIsClosedLoop;
+    private bool old_isClosedLoop;
 
     public MeshPrimaryAxis meshPrimaryAxis = MeshPrimaryAxis.auto;
     [SerializeField]
     [HideInInspector]
-    private MeshPrimaryAxis oldMeshPrimaryAxis;
+    private MeshPrimaryAxis old_meshPrimaryAxis;
 
     public bool HaveCurveSettingsChanged()
     {
@@ -164,20 +190,24 @@ public class Curve3D : MonoBehaviour
 
         bool retr = false;
 
-        retr|=CheckField(ringPointCount, ref oldRingPointCount);
-        retr|=CheckField(vertexDensity, ref oldVertexDensity);
-        retr|=CheckField(curveRadius, ref oldCurveRadius);
-        retr|=CheckField(arcOfTube, ref oldArcOfTube);
-        retr|=CheckField(curveRotation, ref oldCurveRotation);
-        retr|=CheckField(thickness, ref oldTubeThickness);
-        retr|=CheckField(type, ref oldType);
-        retr|=CheckField(closeTilableMeshGap, ref oldCloseTilableMeshGap);
-        retr|=CheckField(meshToTile, ref oldMeshToTile);
-        retr|=CheckField(meshPrimaryAxis,ref oldMeshPrimaryAxis);
-        retr|=CheckField(doubleBezierSampleCount, ref oldDoubleBezierVertexDensity);
-        retr|=CheckField(lockToPositionZero, ref oldLockToPositionZero);
+        retr|=CheckField(ringPointCount, ref old_ringPointCount);
+        retr|=CheckField(vertexDensity, ref old_vertexDensity);
+        retr|=CheckField(curveRadius, ref old_curveRadius);
+        retr|=CheckField(arcOfTube, ref old_arcOfTube);
+        retr|=CheckField(curveRotation, ref old_curveRotation);
+        retr|=CheckField(thickness, ref old_thickness);
+        retr|=CheckField(type, ref old_type);
+        retr|=CheckField(closeTilableMeshGap, ref old_closeTilableMeshGap);
+        retr|=CheckField(meshToTile, ref old_meshToTile);
+        retr|=CheckField(meshPrimaryAxis,ref old_meshPrimaryAxis);
+        retr|=CheckField(doubleBezierSampleCount, ref old_doubleBezierVertexDensity);
+        retr|=CheckField(lockToPositionZero, ref old_lockToPositionZero);
+        retr|=CheckField(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
+        retr|=CheckField(edgeTexture, ref old_edgeTexture);
+        retr|=CheckField(innerFaceTexture, ref old_innerFaceTexture);
+        retr|=CheckField(outerFaceTexture, ref old_outerFaceTexture);
 
-        if (CheckField(isClosedLoop, ref oldIsClosedLoop))
+        if (CheckField(isClosedLoop, ref old_isClosedLoop))
         {
             retr = true;
             positionCurve.Recalculate();
