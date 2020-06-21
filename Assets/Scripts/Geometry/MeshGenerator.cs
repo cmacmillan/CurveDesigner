@@ -33,31 +33,6 @@ public static class MeshGenerator
         //currently only supports uv0
     }
 
-    public class TextureUVBounds
-    {
-        public Vector2 yMinMax;
-        public float xScale;
-    }
-    public static void PopulateUVBounds(Curve3D curve)
-    {
-        exteriorLayerTextureUVBounds = null;
-        interiorLayerTextureUVBounds = null;
-        edgeTextureUVBounds = null;
-        var type = curve.type;
-        bool hasEdge = type != CurveType.Cylinder;//only cylinders don't have edges
-        bool shouldInnerOuterUseSeperateTextures = curve.useSeperateInnerAndOuterFaceTextures;
-        int numTexsToPack = 1 + (hasEdge ? 1 : 0) + (shouldInnerOuterUseSeperateTextures ? 1 : 0);
-        float textureStepSize = 1.0f / numTexsToPack;
-        float minOffset = 0;
-        if (hasEdge)
-            edgeTextureUVBounds = new TextureUVBounds() { xScale = curve.edgeTexture.scale, yMinMax = new Vector2(minOffset,minOffset+=textureStepSize ) };
-        exteriorLayerTextureUVBounds = new TextureUVBounds() { xScale = curve.outerFaceTexture.scale, yMinMax = new Vector2(minOffset,minOffset+=textureStepSize) };
-        if (shouldInnerOuterUseSeperateTextures)
-            interiorLayerTextureUVBounds = new TextureUVBounds() { xScale = curve.innerFaceTexture.scale, yMinMax = new Vector2(minOffset, minOffset += textureStepSize) };
-        else
-            interiorLayerTextureUVBounds = exteriorLayerTextureUVBounds;
-    }
-
     public static TextureUVBounds exteriorLayerTextureUVBounds;
     public static TextureUVBounds interiorLayerTextureUVBounds;
     public static TextureUVBounds edgeTextureUVBounds;
@@ -102,7 +77,7 @@ public static class MeshGenerator
             BezierCurve clonedCurve = new BezierCurve(curve.positionCurve);
             lastUpdateTime = curve.lastMeshUpdateStartTime;
 
-            PopulateUVBounds(curve);
+            TextureUVBounds.PopulateUVBounds(curve, out interiorLayerTextureUVBounds, out exteriorLayerTextureUVBounds, out edgeTextureUVBounds);
             MeshGenerator.curve = clonedCurve;
             MeshGenerator.RingPointCount = curve.ringPointCount;
             MeshGenerator.Radius = curve.curveRadius;

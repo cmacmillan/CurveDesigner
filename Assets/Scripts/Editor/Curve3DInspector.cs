@@ -119,7 +119,6 @@ public class Curve3DInspector : Editor
         if (curve3d.previousRotations.Count != rotationPoints.Count)
             curve3d.CopyRotations();
         Undo.RecordObject(curve3d, "curve");
-        UpdateMesh(curve3d);
         ClickHitData elementClickedDown = curve3d.elementClickedDown;
         Curve3DSettings.circleTexture = curve3d.settings.circleIcon;
         Curve3DSettings.squareTexture = curve3d.settings.squareIcon;
@@ -130,6 +129,7 @@ public class Curve3DInspector : Editor
             curve3d.UICurve=new UICurve(null,curve3d);//prob shouldn't do this every frame
             curve3d.UICurve.Initialize();
         }
+        UpdateMesh(curve3d);
         var curveEditor = curve3d.UICurve;
         var MousePos = Event.current.mousePosition;
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
@@ -233,7 +233,13 @@ public class Curve3DInspector : Editor
                 MeshGenerator.StartGenerating(curve);
             }
         }
-        if (curve.HaveCurveSettingsChanged())
+        bool didTextureSettingsChange = curve.HaveTextureSettingsChanged();
+        bool didCurveSettingsChange = curve.HaveCurveSettingsChanged();
+        if (curve.forceRebuild) //didTextureSettingsChange || curve.forceRebuild)
+        {
+            curve.RebuildTextures();
+        }
+        if (didCurveSettingsChange || didTextureSettingsChange)
         {
             curve.lastMeshUpdateStartTime = DateTime.Now;
         }
