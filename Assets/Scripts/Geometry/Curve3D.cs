@@ -69,65 +69,10 @@ public class Curve3D : MonoBehaviour
 
     /// Start of properties that redraw the curve
 
-    [System.Serializable]
-    public class TextureLayer
-    {
-        public void UpdatePixels()
-        {
-            albedoTexturePixels = albedoTexture.GetPixels();
-        }
-        [System.NonSerialized]
-        public TextureUVBounds bounds;
-        [System.NonSerialized]
-        public Color[] albedoTexturePixels;
-        public Texture2D albedoTexture;
-        public override bool Equals(object obj)
-        {
-            if (!(obj is TextureLayer))
-                return base.Equals(obj);
-            var otherLayerItem =(TextureLayer)obj;
-            return otherLayerItem.albedoTexture == albedoTexture;
-        }
-        public TextureLayer(TextureLayer layerToClone)
-        {
-            this.albedoTexture = layerToClone.albedoTexture;
-        }
-    }
-
     public bool useSeperateInnerAndOuterFaceTextures;
     [SerializeField]
     [HideInInspector]
     private bool old_useSeperateInnerAndOuterFaceTextures;
-
-    public TextureLayer outerFaceTexture;
-    [SerializeField]
-    [HideInInspector]
-    private TextureLayer old_outerFaceTexture;
-
-    public float outerFaceTextureScale;
-    [SerializeField]
-    [HideInInspector]
-    private float old_outerFaceTextureScale;
-
-    public TextureLayer innerFaceTexture;
-    [SerializeField]
-    [HideInInspector]
-    private TextureLayer old_innerFaceTexture;
-
-    public float innerFaceTextureScale;
-    [SerializeField]
-    [HideInInspector]
-    private float old_innerFaceTextureScale;
-
-    public TextureLayer edgeTexture;
-    [SerializeField]
-    [HideInInspector]
-    private TextureLayer old_edgeTexture;
-
-    public float edgeTextureScale;
-    [SerializeField]
-    [HideInInspector]
-    public float old_edgeTextureScale;
 
     public DimensionLockMode lockToPositionZero;
     [SerializeField]
@@ -227,9 +172,7 @@ public class Curve3D : MonoBehaviour
         retr|=CheckFieldChanged(meshPrimaryAxis,ref old_meshPrimaryAxis);
         retr|=CheckFieldChanged(doubleBezierSampleCount, ref old_doubleBezierVertexDensity);
         retr|=CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
-        retr|=CheckFieldChanged(outerFaceTextureScale, ref old_outerFaceTextureScale);
-        retr|=CheckFieldChanged(innerFaceTextureScale, ref old_innerFaceTextureScale);
-        retr|=CheckFieldChanged(edgeTextureScale, ref old_edgeTextureScale);
+        retr|=CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
 
         if (CheckFieldChanged(isClosedLoop, ref old_isClosedLoop))
         {
@@ -238,126 +181,6 @@ public class Curve3D : MonoBehaviour
             UICurve.Initialize();
         }
         return retr;
-    }
-
-    //Only settings that actually force a texture rebuild should go in here
-    //All others should go into HaveCurveSettingsChanged
-    public bool HaveTextureSettingsChanged()
-    {
-        bool retr = false;
-        bool DidTextureLayerChange(TextureLayer curr, ref TextureLayer old)
-        {
-            if (!curr.Equals(old))
-            {
-                old = new TextureLayer(curr);
-                return true;
-            }
-            return false;
-        }
-        retr|=CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
-        retr|=DidTextureLayerChange(edgeTexture, ref old_edgeTexture);
-        retr|=DidTextureLayerChange(innerFaceTexture, ref old_innerFaceTexture);
-        retr|=DidTextureLayerChange(outerFaceTexture, ref old_outerFaceTexture);
-        retr|=curveAlbedo == null;
-        return retr;
-    }
-
-    public bool forceRebuild = false;
-    public Texture2D curveAlbedo = null;
-    [ContextMenu("Clearalbedo")]
-    public void ClearCurveAlbedo()
-    {
-        if (curveAlbedo == null)
-            return;
-        DestroyImmediate(curveAlbedo);
-        curveAlbedo = null;
-    }
-    public void RebuildTextures()
-    {
-        Debug.Log("Rebuilding!");
-        forceRebuild = false;
-        if (innerFaceTexture.albedoTexture == null && useSeperateInnerAndOuterFaceTextures)
-            return;
-        if (outerFaceTexture.albedoTexture == null)
-            return;
-        if (edgeTexture.albedoTexture == null)
-            return;
-        int textureSize = settings.textureSize;
-        if (curveAlbedo == null)
-            curveAlbedo = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false);
-        TextureUVBounds.PopulateUVBounds(this, out TextureUVBounds interior, out TextureUVBounds exterior, out TextureUVBounds edge);
-        List<TextureLayer> textures = new List<TextureLayer>();
-        edgeTexture.bounds = edge;
-        innerFaceTexture.bounds = interior;
-        outerFaceTexture.bounds = exterior;
-        textures.Add(edgeTexture);
-        textures.Add(outerFaceTexture);
-        float pixelSize = 1.0f / textureSize;
-        if (useSeperateInnerAndOuterFaceTextures)
-            textures.Add(innerFaceTexture);
-        foreach (var i in textures)
-            i.UpdatePixels();
-        var z = textures[0];
-        textures.Sort((a, b) => (int)Mathf.Sign(a.bounds.yMinMax.x - b.bounds.yMinMax.x));
-        z = textures[0];
-        void SetPixel(Color32[] arr, int x, int y, Color32 val)
-        {
-            arr[textureSize * y + x] = val;
-        }
-        Color GetPixel(Color[] arr, int x, int y,int width)
-        {
-            return arr[width * y + x];
-        }
-        Color32[] albedoColors = new Color32[textureSize * textureSize];
-        TextureLayer GetLayerByY(float y)
-        {
-            foreach (var i in textures)
-            {
-                var bounds = i.bounds.yMinMax;
-                if (y >= bounds.x && y <= bounds.y)
-                    return i;
-            }
-            throw new KeyNotFoundException();
-        }
-        Color SampleTexture(TextureLayer texture, Vector2 uv){
-            int width = texture.albedoTexture.width;
-            int height = texture.albedoTexture.height;
-            int xFloor = Mathf.FloorToInt(uv.x * width);
-            xFloor = Mathf.Min(xFloor,width-2);
-            int xCeil = xFloor + 1;
-            int yFloor = Mathf.FloorToInt(uv.y * height);
-            yFloor = Mathf.Min(yFloor,height-2);
-            int yCeil = yFloor + 1;
-            float xGap = 1.0f / width;
-            float yGap = 1.0f / height;
-            float xLerp = (uv.x - xFloor * xGap) / xGap;
-            float yLerp = (uv.y - yFloor * yGap) / yGap;
-            var tex = texture.albedoTexturePixels;
-            Color topLeftColor = GetPixel(tex,xFloor,yFloor,width);
-            Color topRightColor = GetPixel(tex,xCeil,yFloor,width);
-            Color bottomLeftColor = GetPixel(tex,xFloor,yCeil,width);
-            Color bottomRightColor = GetPixel(tex,xCeil,yCeil,width);
-            Color topLerp = Color.Lerp(topLeftColor,topRightColor,xLerp);
-            Color bottomLerp = Color.Lerp(bottomLeftColor,bottomRightColor,xLerp);
-            Color finalColor = Color.Lerp(topLerp,bottomLerp,yLerp);
-            return finalColor;
-        }
-        for (int y = 0; y < textureSize; y++)
-        {
-            var currLayer = GetLayerByY(y * pixelSize);
-            for (int x = 0; x < textureSize; x++)
-            {
-                var minMax = currLayer.bounds.yMinMax;
-                float heightFactor = minMax.y - minMax.x;
-                float yProgress = y * pixelSize;
-                yProgress = (yProgress - minMax.x) / (minMax.y - minMax.x);
-                Color32 colorToSet = SampleTexture(currLayer, new Vector2(x*pixelSize,yProgress));
-                SetPixel(albedoColors, x, y, colorToSet);
-            }
-        }
-        curveAlbedo.SetPixels32(albedoColors);
-        curveAlbedo.Apply();
-        this.GetComponent<MeshRenderer>().sharedMaterial.SetTexture("_MainTex",curveAlbedo);
     }
 
     [ContextMenu("Reset curve")]

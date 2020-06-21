@@ -33,10 +33,6 @@ public static class MeshGenerator
         //currently only supports uv0
     }
 
-    public static TextureUVBounds exteriorLayerTextureUVBounds;
-    public static TextureUVBounds interiorLayerTextureUVBounds;
-    public static TextureUVBounds edgeTextureUVBounds;
-
     public static bool didMeshGenerationSucceed;
     public static List<Vector3> vertices;
     public static List<int> triangles;
@@ -77,7 +73,6 @@ public static class MeshGenerator
             BezierCurve clonedCurve = new BezierCurve(curve.positionCurve);
             lastUpdateTime = curve.lastMeshUpdateStartTime;
 
-            TextureUVBounds.PopulateUVBounds(curve, out interiorLayerTextureUVBounds, out exteriorLayerTextureUVBounds, out edgeTextureUVBounds);
             MeshGenerator.curve = clonedCurve;
             MeshGenerator.RingPointCount = curve.ringPointCount;
             MeshGenerator.Radius = curve.curveRadius;
@@ -146,10 +141,18 @@ public static class MeshGenerator
         int numVerts;
         int numTris;
         bool shouldDrawConnectingFace;
+        float curveLength = curve.GetLength();
         var sampled = curve.GetPointsWithSpacing(VertexSampleDistance);
+        if (IsClosedLoop)
+        {
+            var lastPoint = new PointOnCurve(sampled[0]);
+            lastPoint.distanceFromStartOfCurve = curveLength;
+            lastPoint.time = 1.0f;
+            lastPoint.segmentIndex = curve.NumSegments - 1;
+            sampled.Add(lastPoint);
+        }
         int numRings = sampled.Count - 1;
         int ActualRingPointCount = RingPointCount - (TubeArc == 360.0 ? 1 : 0);
-        float curveLength = curve.GetLength();
         void DrawQuad(int side1Point1, int side1Point2, int side2Point1, int side2Point2)
         {
             //Tri1
@@ -170,10 +173,9 @@ public static class MeshGenerator
         //var rand = new System.Random();
         void TrianglifyLayer(bool isExterior, int numPointsPerRing)
         {//generate tris
-            int additionalRing = IsClosedLoop ? 1 : 0;
             int numVertsInALayer = (numRings+1) * numPointsPerRing;
             int basePoint = isExterior ? 0 :numVerts/2;
-            for (int i = 0; i < numRings+additionalRing; i++)
+            for (int i = 0; i < numRings; i++)
             {
                 int ringIndex = (i * numPointsPerRing)%numVertsInALayer;
                 int nextRingIndex = (ringIndex + numPointsPerRing)%numVertsInALayer;
@@ -199,11 +201,6 @@ public static class MeshGenerator
         }
         void CreateEdgeVertsTrisAndUvs(List<EdgePointInfo> edgePointInfos)
         {
-            int firsts1p1=-1;
-            int firsts1p2=-1;
-            int firsts2p1=-1;
-            int firsts2p2=-1;
-
             int prevs1p1=-1;
             int prevs1p2=-1;
             int prevs2p1=-1;
@@ -213,11 +210,6 @@ public static class MeshGenerator
             int s1p2 = -1;
             int s2p1 = -1;
             int s2p2 = -1;
-            void DoTris()
-            {
-                DrawQuad(s1p1, s1p2,prevs1p1, prevs1p2);
-                DrawQuad(prevs2p1, prevs2p2, s2p1, s2p2);
-            }
 
             for (int i=0;i<edgePointInfos.Count;i++)
             {
@@ -227,12 +219,12 @@ public static class MeshGenerator
                 vertices.Add(curr.side2Point1);
                 vertices.Add(curr.side2Point2);
 
-                var uvX = edgeTextureUVBounds.xScale*curr.distanceAlongCurve / curveLength;
+                var uvX = curr.distanceAlongCurve/Thickness;
 
-                uvs.Add(new Vector2(uvX,edgeTextureUVBounds.yMinMax.x));
-                uvs.Add(new Vector2(uvX,edgeTextureUVBounds.yMinMax.y));
-                uvs.Add(new Vector2(uvX,edgeTextureUVBounds.yMinMax.x));
-                uvs.Add(new Vector2(uvX,edgeTextureUVBounds.yMinMax.y));
+                uvs.Add(new Vector2(uvX,0));
+                uvs.Add(new Vector2(uvX,1));
+                uvs.Add(new Vector2(uvX,0));
+                uvs.Add(new Vector2(uvX,1));
 
                 s1p1 = vertices.Count - 4;
                 s1p2 = vertices.Count - 3;
@@ -240,27 +232,13 @@ public static class MeshGenerator
                 s2p2 = vertices.Count - 1;
                 if (i > 0)
                 {
-                    DoTris();
-                }
-                else
-                {
-                    firsts1p1 = s1p1;
-                    firsts1p2 = s1p2;
-                    firsts2p1 = s2p1;
-                    firsts2p2 = s2p2;
+                    DrawQuad(s1p1, s1p2, prevs1p1, prevs1p2);
+                    DrawQuad(prevs2p1, prevs2p2, s2p1, s2p2);
                 }
                 prevs1p1 = s1p1;
                 prevs1p2 = s1p2;
                 prevs2p1 = s2p1;
                 prevs2p2 = s2p2;
-            }
-            if (IsClosedLoop)
-            {
-                s1p1 = firsts1p1;
-                s1p2 = firsts1p2;
-                s2p1 = firsts1p2;
-                s2p2 = firsts2p2;
-                DoTris();
             }
         }
         void CreateRingPointsAlongCurve(List<PointOnCurve> points, int RingPointCount, bool isExterior)
@@ -289,8 +267,6 @@ public static class MeshGenerator
                 PointOnCurve currentPoint = points[i];
 
                 float uvx = currentPoint.distanceFromStartOfCurve / curveLength;
-                float exteriorUvx = uvx * exteriorLayerTextureUVBounds.xScale;
-                float interiorUvx = uvx * interiorLayerTextureUVBounds.xScale;
 
                 var center = currentPoint.position;
                 var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
@@ -309,10 +285,10 @@ public static class MeshGenerator
                 vertBuffer.Add(side1point2);
                 vertBuffer.Add(side2point2);
 
-                uvs.Add(new Vector2(exteriorUvx, exteriorLayerTextureUVBounds.yMinMax.x));
-                uvs.Add(new Vector2(exteriorUvx, exteriorLayerTextureUVBounds.yMinMax.y));
-                uvBuffer.Add(new Vector2(interiorUvx, interiorLayerTextureUVBounds.yMinMax.x));
-                uvBuffer.Add(new Vector2(interiorUvx, interiorLayerTextureUVBounds.yMinMax.y));
+                uvs.Add(new Vector2(uvx, 0));
+                uvs.Add(new Vector2(uvx, 1));
+                uvBuffer.Add(new Vector2(uvx, 0));
+                uvBuffer.Add(new Vector2(uvx, 1));
 
                 edgePointInfos.Add(new EdgePointInfo() {
                     distanceAlongCurve = currentPoint.distanceFromStartOfCurve,

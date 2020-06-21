@@ -233,13 +233,7 @@ public class Curve3DInspector : Editor
                 MeshGenerator.StartGenerating(curve);
             }
         }
-        bool didTextureSettingsChange = curve.HaveTextureSettingsChanged();
-        bool didCurveSettingsChange = curve.HaveCurveSettingsChanged();
-        if (curve.forceRebuild) //didTextureSettingsChange || curve.forceRebuild)
-        {
-            curve.RebuildTextures();
-        }
-        if (didCurveSettingsChange || didTextureSettingsChange)
+        if (curve.HaveCurveSettingsChanged())
         {
             curve.lastMeshUpdateStartTime = DateTime.Now;
         }
