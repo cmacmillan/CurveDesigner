@@ -170,6 +170,10 @@ public static class MeshGenerator
             triangles.Add(point2);
             triangles.Add(point3);
         }
+        float GetDistanceByArea(float area)
+        {
+            return sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve, Radius);
+        }
         //var rand = new System.Random();
         void TrianglifyLayer(bool isExterior, int numPointsPerRing)
         {//generate tris
@@ -280,28 +284,39 @@ public static class MeshGenerator
                     float theta = (TubeArc * j / (RingPointCount - (TubeArc == 360.0 ? 0 : 1))) + distanceFromFull / 2 + rotation;
                     Vector3 rotatedVect = Quaternion.AngleAxis(theta, currentPoint.tangent) * currentPoint.reference;
                     vertices.Add(currentPoint.GetRingPoint(theta, size));
-                    uvs.Add(new Vector2(uvx,j/(RingPointCount-1)));
+                    uvs.Add(new Vector2(uvx,j/(float)(RingPointCount-1)));
                 }
             }
         }
         void CreateRectanglePointsAlongCurve(List<PointOnCurve> points, bool isExterior)
         {
             float exteriorFactor = isExterior ? 1 : -1;
+            float uvx = 0;
+            float previousSize = -1;
             for (int i = 0; i < points.Count; i++)
             {
                 PointOnCurve currentPoint = points[i];
-
-                float uvx = currentPoint.distanceFromStartOfCurve / curveLength;
 
                 var center = currentPoint.position;
                 var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
                 var up = Quaternion.AngleAxis(rotation, currentPoint.tangent) * currentPoint.reference.normalized;
                 var right = Vector3.Cross(up, currentPoint.tangent).normalized;
                 var scaledUp = exteriorFactor*up * Thickness / 2.0f;
-                var scaledRight = right * Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Radius);
+                float currentSize = Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Radius);
+                var scaledRight = right * currentSize;
 
                 vertices.Add(center + scaledUp+ scaledRight);
                 vertices.Add(center + scaledUp- scaledRight);
+
+                if (i > 0)
+                {
+                    float previousDistanceAlongCurve = points[i - 1].distanceFromStartOfCurve;
+                    float currentDistanceAlongCurve = currentPoint.distanceFromStartOfCurve;
+                    float averageSize = (currentSize + previousSize) / 2.0f;
+                    uvx += (currentDistanceAlongCurve-previousDistanceAlongCurve)/ averageSize;
+                }
+
+                previousSize = currentSize;
 
                 uvs.Add(new Vector2(uvx, 0));
                 uvs.Add(new Vector2(uvx, 1));
@@ -315,31 +330,6 @@ public static class MeshGenerator
                 InitOrClear(ref uvs);
             hasUVs = provideUvs;
         }
-        /*
-        void ConnectMeshInteriorAndExteriorLayers()
-        {
-            int additionalRing = IsClosedLoop ? 1 : 0;
-            int numVertsInALayer = (numRings + 1) * ActualRingPointCount;
-            int interiorBase = numVerts / 2;
-            for (int i = 0; i < numRings + additionalRing; i++)
-            {
-                int ringIndex = (i * ActualRingPointCount)%numVertsInALayer;
-                int nextRingIndex = (ringIndex + ActualRingPointCount)%numVertsInALayer;
-                DrawQuad(
-                        ringIndex,
-                        nextRingIndex,
-                        interiorBase+ringIndex,
-                        interiorBase+nextRingIndex
-                    );
-                DrawQuad(
-                        nextRingIndex+ActualRingPointCount-1,
-                        ringIndex+ActualRingPointCount-1,
-                        interiorBase+nextRingIndex+ActualRingPointCount-1,
-                        interiorBase+ringIndex+ActualRingPointCount-1
-                    );
-            }
-        }
-        */
         void CreateMeshInteriorExteriorEndPlates()
         {
             int interiorBase = numVerts / 2;
@@ -559,10 +549,6 @@ public static class MeshGenerator
                     float GetSize(float dist)
                     {
                         return sizeDistanceSampler.GetValueAtDistance(dist, IsClosedLoop, curveLength, curve) + Radius;
-                    }
-                    float GetDistanceByArea(float area)
-                    {
-                        return sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve,Radius);
                     }
                     int c = 0;
                     int vertexBaseOffset = 0;
