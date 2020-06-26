@@ -331,37 +331,29 @@ public static class MeshGenerator
                 InitOrClear(ref uvs);
             hasUVs = provideUvs;
         }
-        /*
-        void CreateMeshInteriorExteriorEndPlates()
+        void CreateMeshInteriorExteriorEndPlates(int vertsPerRing)
         {
             int interiorBase = numVerts / 2;
             //Then we gotta connect the ends as well
-            int lastRingIndex = numRings * ActualRingPointCount;
+            int lastRingIndex = numRings * vertsPerRing;
             int firstRingIndex = 0;
-            for (int j = 0; j < ActualRingPointCount; j++)
+            for (int j = 0; j < vertsPerRing; j++)
             {
-                if (!shouldDrawConnectingFace && (j + 1) >= ActualRingPointCount)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
+                if ((j + 1) >= vertsPerRing)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
                     continue;
                 DrawQuad(
-                        firstRingIndex + ((j + 1) % ActualRingPointCount),
+                        firstRingIndex + ((j + 1) % vertsPerRing),
                         firstRingIndex+ j,
-                        firstRingIndex + ((j + 1) % ActualRingPointCount) + interiorBase,
+                        firstRingIndex + ((j + 1) % vertsPerRing) + interiorBase,
                         firstRingIndex + j + interiorBase
                     );
                 DrawQuad(
                         lastRingIndex+ j,
-                        lastRingIndex + ((j + 1) % ActualRingPointCount),
+                        lastRingIndex + ((j + 1) % vertsPerRing),
                         lastRingIndex + j + interiorBase,
-                        lastRingIndex + ((j + 1) % ActualRingPointCount) + interiorBase
+                        lastRingIndex + ((j + 1) % vertsPerRing) + interiorBase
                     );
             }
-        }
-        */
-        void CreateFlatEndPlates()
-        {
-            DrawQuad(1,0,2,3);
-            var end = numVerts - 4;
-            DrawQuad(end, end+1, end + 3, end + 2);
         }
         /*
         void CreateTubeEndPlates()
@@ -429,10 +421,8 @@ public static class MeshGenerator
                     TrianglifyLayer(true, RingPointCount,0);
                     TrianglifyLayer(false, RingPointCount,numVerts/2);
                     CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount));
-                    /*
                     if (!IsClosedLoop)
-                        CreateMeshInteriorExteriorEndPlates();
-                        */
+                        CreateMeshInteriorExteriorEndPlates(RingPointCount);
                     return true;
                 }
             #endregion
@@ -443,12 +433,13 @@ public static class MeshGenerator
                     numVerts = 2*pointsPerFace * sampled.Count;
                     numTris = 8 * (sampled.Count - 1) + 2*pointsPerFace;
                     InitLists(true);
-                    CreatePointsAlongCurve(RectanglePointCreator, sampled, .5f*Thickness, pointsPerFace,false);
-                    CreatePointsAlongCurve(RectanglePointCreator, sampled, -.5f*Thickness, pointsPerFace,false);
+                    CreatePointsAlongCurve(RectanglePointCreator, sampled, .25f*Thickness, pointsPerFace,false);
+                    CreatePointsAlongCurve(RectanglePointCreator, sampled, -.25f*Thickness, pointsPerFace,false);
                     TrianglifyLayer(true, pointsPerFace,0);
                     TrianglifyLayer(false, pointsPerFace,numVerts/2);
                     CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointsPerFace));
-                    //CreateFlatEndPlates();
+                    if (!IsClosedLoop)
+                        CreateMeshInteriorExteriorEndPlates(pointsPerFace);
                     return true;
                 }
             #endregion
@@ -473,8 +464,6 @@ public static class MeshGenerator
                             }
                             var absolutePos = primaryCurvePoint.position +TransformVector3(relativePos);
                             vertices.Add(absolutePos+TransformVector3(reference)*Thickness/2);
-
-
                             backSideBuffer.Add(absolutePos-TransformVector3(reference)*Thickness/2);
                         }
                     }
