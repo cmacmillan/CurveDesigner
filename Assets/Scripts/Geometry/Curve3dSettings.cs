@@ -12,5 +12,6 @@ public class Curve3dSettings : ScriptableObject
     public Texture2D squareIcon;
     public Texture2D diamondIcon;
     public Texture2D plusButton;
+    public Texture2D uiIcon;
     public int textureSize = 2048;
 }

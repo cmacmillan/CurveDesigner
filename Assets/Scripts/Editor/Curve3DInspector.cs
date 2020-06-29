@@ -27,7 +27,8 @@ public class Curve3DInspector : Editor
         GUIStyle effectBgStyle = "ShurikenEffectBg";
         GUIStyle shurikenModuleBg = "ShurikenModuleBg";
         GUIStyle mixedToggleStyle = "ShurikenToggleMixed";
-        GUIStyle headerStyle = "ShurikenModuleTitle";
+        GUIStyle initialHeaderStyle = "ShurikenEmitterTitle";
+        GUIStyle nonInitialHeaderStyle = "ShurikenModuleTitle";
         bool isDisabled = false;
 
         GUILayout.BeginVertical(effectBgStyle);
@@ -36,7 +37,21 @@ public class Curve3DInspector : Editor
             {
                 string categoryPropName = Curve3D.collapsableCategoryNames[i];
                 DrawCollapsableCategory categoryDrawFunction = Curve3D.collapsableCategoryDrawFunctions[i];
-                Rect headerRect = GUILayoutUtility.GetRect(width, 15);
+                bool isInitial = i == 0;
+                GUIStyle headerStyle;
+                int headerHeight;
+                if (isInitial)
+                {
+                    headerHeight = 25;
+                    headerStyle = initialHeaderStyle;
+                } else
+                {
+                    headerHeight = 15;
+                    headerStyle = nonInitialHeaderStyle;
+                }
+                Rect headerRect = GUILayoutUtility.GetRect(width, headerHeight);
+                int iconSize = 21;
+                Rect iconRect = new Rect(headerRect.x + 4, headerRect.y + 2, iconSize, iconSize);
                 SerializedObject obj = new SerializedObject(curve3d);
                 SerializedProperty prop = obj.FindProperty($"{categoryPropName}IsExpanded");
                 if (prop.boolValue)
@@ -55,12 +70,21 @@ public class Curve3DInspector : Editor
                         EditorGUILayout.EndVertical();
                     }
                 }
-                GUIContent label = null;
-                label = EditorGUI.BeginProperty(headerRect, label, prop);
-                prop.boolValue = GUI.Toggle(headerRect, prop.boolValue, label, headerStyle);
+                if (isInitial && curve3d.settings.uiIcon!=null)
+                {
+                    GUI.DrawTexture(iconRect, curve3d.settings.uiIcon, ScaleMode.StretchToFill, true);
+                }
+                GUIContent headerLabel = new GUIContent();
+                headerLabel.text = "Bloop";
+                headerLabel.tooltip = "change me!";
+                headerLabel = EditorGUI.BeginProperty(headerRect, headerLabel, prop);
+                //GUILayout.FlexibleSpace();
+                prop.boolValue = GUI.Toggle(headerRect, prop.boolValue, headerLabel, headerStyle);
                 obj.ApplyModifiedProperties();
                 EditorGUI.EndProperty();
+                GUILayout.Space(1);
             }
+            GUILayout.Space(-1);
         }
         EditorGUILayout.EndVertical();
         GUILayout.FlexibleSpace();

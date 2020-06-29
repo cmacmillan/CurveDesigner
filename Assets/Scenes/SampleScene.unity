@@ -291,7 +291,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCategoryIsExpanded: 0
-  secondaryCategoryIsExpanded: 1
+  secondaryCategoryIsExpanded: 0
   testMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   testMat: {fileID: 2100000, guid: d4351c15493164446b76d4dbc3c9c0b5, type: 2}
   placeLockedPoints: 1
