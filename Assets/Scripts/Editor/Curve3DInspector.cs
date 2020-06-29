@@ -17,12 +17,14 @@ public class Curve3DInspector : Editor
 
     public override void OnInspectorGUI()
     {
+        var curve3d = (target as Curve3D);
+
         float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
         EditorGUIUtility.labelWidth = 0;
         EditorGUIUtility.labelWidth = EditorGUIUtility.labelWidth - 4;
 
         EditorGUILayout.BeginVertical();
-        GUIStyle effectBgStyle = "ShurikenEffectBg";//this is the rounded style
+        GUIStyle effectBgStyle = "ShurikenEffectBg";
         GUIStyle shurikenModuleBg = "ShurikenModuleBg";
         GUIStyle mixedToggleStyle = "ShurikenToggleMixed";
         GUIStyle headerStyle = "ShurikenModuleTitle";
@@ -30,29 +32,35 @@ public class Curve3DInspector : Editor
 
         GUILayout.BeginVertical(effectBgStyle);
         {
-            Rect headerRect = GUILayoutUtility.GetRect(width,15);
-            using (new EditorGUI.DisabledScope(isDisabled))
+            for (int i = 0; i < Curve3D.collapsableCategoryNames.Length; i++)
             {
-                GUIStyle m_ModulePadding = new GUIStyle();
-                m_ModulePadding.padding = new RectOffset(3, 3, 4, 2);
-                Rect moduleSize = EditorGUILayout.BeginVertical(m_ModulePadding);
+                string categoryPropName = Curve3D.collapsableCategoryNames[i];
+                DrawCollapsableCategory categoryDrawFunction = Curve3D.collapsableCategoryDrawFunctions[i];
+                Rect headerRect = GUILayoutUtility.GetRect(width, 15);
+                SerializedObject obj = new SerializedObject(curve3d);
+                SerializedProperty prop = obj.FindProperty($"{categoryPropName}IsExpanded");
+                if (prop.boolValue)
                 {
-                    moduleSize.y -= 4; // pull background 'up' behind title to fill rounded corners.
-                    moduleSize.height += 4;
-                    GUI.Label(moduleSize, GUIContent.none, shurikenModuleBg);
-
-                    GUILayout.Label("we in there (yeet)");
+                    using (new EditorGUI.DisabledScope(isDisabled))
+                    {
+                        GUIStyle m_ModulePadding = new GUIStyle();
+                        m_ModulePadding.padding = new RectOffset(3, 3, 4, 2);
+                        Rect moduleSize = EditorGUILayout.BeginVertical(m_ModulePadding);
+                        {
+                            moduleSize.y -= 4;
+                            moduleSize.height += 4;
+                            GUI.Label(moduleSize, GUIContent.none, shurikenModuleBg);
+                            categoryDrawFunction(curve3d);
+                        }
+                        EditorGUILayout.EndVertical();
+                    }
                 }
-                EditorGUILayout.EndVertical();
+                GUIContent label = null;
+                label = EditorGUI.BeginProperty(headerRect, label, prop);
+                prop.boolValue = GUI.Toggle(headerRect, prop.boolValue, label, headerStyle);
+                obj.ApplyModifiedProperties();
+                EditorGUI.EndProperty();
             }
-            GUIContent label = null;
-            SerializedObject obj = new SerializedObject((target as Curve3D));
-            SerializedProperty prop = obj.FindProperty("drawNormals");
-            label = EditorGUI.BeginProperty(headerRect, label, prop);//m_Enabled);
-                                                                     //bool isFoldout = true;
-            var toggleState = GUI.Toggle(headerRect, prop.boolValue, label, headerStyle);
-            prop.boolValue = toggleState;
-            EditorGUI.EndProperty();
         }
         EditorGUILayout.EndVertical();
         GUILayout.FlexibleSpace();

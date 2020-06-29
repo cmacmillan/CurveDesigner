@@ -19,6 +19,20 @@ public class Curve3D : MonoBehaviour
         }
     }
 
+    public static readonly DrawCollapsableCategory[] collapsableCategoryDrawFunctions = 
+    {
+        DrawCollapsableCategoryFunctions.DrawMainCategory,
+        DrawCollapsableCategoryFunctions.DrawMainCategory,
+    };
+
+    public static readonly string[] collapsableCategoryNames =
+    {
+        "mainCategory",
+        "secondaryCategory",
+    };
+
+    public bool mainCategoryIsExpanded;
+    public bool secondaryCategoryIsExpanded;
 
     public Mesh testMesh;
     public Material testMat;

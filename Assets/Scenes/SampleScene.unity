@@ -290,6 +290,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85850b8b95539404a8db8795f4a6083e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCategoryIsExpanded: 0
+  secondaryCategoryIsExpanded: 1
   testMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   testMat: {fileID: 2100000, guid: d4351c15493164446b76d4dbc3c9c0b5, type: 2}
   placeLockedPoints: 1
