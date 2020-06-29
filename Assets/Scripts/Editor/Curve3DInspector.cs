@@ -14,6 +14,55 @@ using UnityObject = UnityEngine.Object;
 public class Curve3DInspector : Editor
 {
     private static readonly int _CurveHint = "NewGUI.CURVE".GetHashCode();
+
+    public override void OnInspectorGUI()
+    {
+        float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
+        EditorGUIUtility.labelWidth = 0;
+        EditorGUIUtility.labelWidth = EditorGUIUtility.labelWidth - 4;
+
+        EditorGUILayout.BeginVertical();
+        GUIStyle effectBgStyle = "ShurikenEffectBg";//this is the rounded style
+        GUIStyle shurikenModuleBg = "ShurikenModuleBg";
+        GUIStyle mixedToggleStyle = "ShurikenToggleMixed";
+        GUIStyle headerStyle = "ShurikenModuleTitle";
+        bool isDisabled = false;
+
+        GUILayout.BeginVertical(effectBgStyle);
+        {
+            Rect headerRect = GUILayoutUtility.GetRect(width,15);
+            using (new EditorGUI.DisabledScope(isDisabled))
+            {
+                GUIStyle m_ModulePadding = new GUIStyle();
+                m_ModulePadding.padding = new RectOffset(3, 3, 4, 2);
+                Rect moduleSize = EditorGUILayout.BeginVertical(m_ModulePadding);
+                {
+                    moduleSize.y -= 4; // pull background 'up' behind title to fill rounded corners.
+                    moduleSize.height += 4;
+                    GUI.Label(moduleSize, GUIContent.none, shurikenModuleBg);
+
+                    GUILayout.Label("we in there (yeet)");
+                }
+                EditorGUILayout.EndVertical();
+            }
+            GUIContent label = null;
+            SerializedObject obj = new SerializedObject((target as Curve3D));
+            SerializedProperty prop = obj.FindProperty("drawNormals");
+            label = EditorGUI.BeginProperty(headerRect, label, prop);//m_Enabled);
+                                                                     //bool isFoldout = true;
+            var toggleState = GUI.Toggle(headerRect, prop.boolValue, label, headerStyle);
+            prop.boolValue = toggleState;
+            EditorGUI.EndProperty();
+        }
+        EditorGUILayout.EndVertical();
+        GUILayout.FlexibleSpace();
+        EditorGUILayout.EndVertical();
+
+
+        //GUILayout.Label("asdf"); 
+        //base.OnInspectorGUI();
+    }
+
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
