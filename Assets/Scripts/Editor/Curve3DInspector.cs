@@ -33,10 +33,9 @@ public class Curve3DInspector : Editor
 
         GUILayout.BeginVertical(effectBgStyle);
         {
-            for (int i = 0; i < Curve3D.collapsableCategoryNames.Length; i++)
+            for (int i = 0; i < curve3d.collapsableCategories.Length; i++)
             {
-                string categoryPropName = Curve3D.collapsableCategoryNames[i];
-                DrawCollapsableCategory categoryDrawFunction = Curve3D.collapsableCategoryDrawFunctions[i];
+                var curr = curve3d.collapsableCategories[i];
                 bool isInitial = i == 0;
                 GUIStyle headerStyle;
                 int headerHeight;
@@ -52,9 +51,7 @@ public class Curve3DInspector : Editor
                 Rect headerRect = GUILayoutUtility.GetRect(width, headerHeight);
                 int iconSize = 21;
                 Rect iconRect = new Rect(headerRect.x + 4, headerRect.y + 2, iconSize, iconSize);
-                SerializedObject obj = new SerializedObject(curve3d);
-                SerializedProperty prop = obj.FindProperty($"{categoryPropName}IsExpanded");
-                if (prop.boolValue)
+                if (curr.isExpanded)
                 {
                     using (new EditorGUI.DisabledScope(isDisabled))
                     {
@@ -65,7 +62,7 @@ public class Curve3DInspector : Editor
                             moduleSize.y -= 4;
                             moduleSize.height += 4;
                             GUI.Label(moduleSize, GUIContent.none, shurikenModuleBg);
-                            categoryDrawFunction(curve3d);
+                            curr.Draw(curve3d);
                         }
                         EditorGUILayout.EndVertical();
                     }
@@ -75,13 +72,8 @@ public class Curve3DInspector : Editor
                     GUI.DrawTexture(iconRect, curve3d.settings.uiIcon, ScaleMode.StretchToFill, true);
                 }
                 GUIContent headerLabel = new GUIContent();
-                headerLabel.text = "Bloop";
-                headerLabel.tooltip = "change me!";
-                headerLabel = EditorGUI.BeginProperty(headerRect, headerLabel, prop);
-                //GUILayout.FlexibleSpace();
-                prop.boolValue = GUI.Toggle(headerRect, prop.boolValue, headerLabel, headerStyle);
-                obj.ApplyModifiedProperties();
-                EditorGUI.EndProperty();
+                headerLabel.text = curr.name;
+                curr.isExpanded = GUI.Toggle(headerRect, curr.isExpanded, headerLabel, headerStyle);
                 GUILayout.Space(1);
             }
             GUILayout.Space(-1);
