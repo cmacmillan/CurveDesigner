@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.NewUI
@@ -8,25 +9,30 @@ namespace Assets.NewUI
     public abstract class CollapsableCategory
     {
         public bool isExpanded;
-        public abstract string name { get; }
+        public abstract string GetName(Curve3D curve);
         public abstract void Draw(Curve3D curve);
     }
     public class MainCollapsableCategory : CollapsableCategory
     {
-        public override string name => "Main Category";
+        public override string GetName(Curve3D curve) { return curve.name; }
 
         public override void Draw(Curve3D curve)
         {
-            GUILayout.Label("we in there (yeet)");
+            var obj = new SerializedObject(curve);
+            EditorGUILayout.PropertyField(obj.FindProperty("type"));
+            obj.ApplyModifiedProperties();
         }
     }
     public class TexturesCollapsableCategory : CollapsableCategory
     {
-        public override string name => "Textures";
+        public override string GetName(Curve3D curve) { return "Textures"; }
 
         public override void Draw(Curve3D curve)
         {
-            GUILayout.Label("textures");
+            var obj = new SerializedObject(curve);
+            //GUILayout.Label("textures");
+            EditorGUILayout.PropertyField(obj.FindProperty("vertexDensity"));
+            obj.ApplyModifiedProperties();
         }
     }
 }

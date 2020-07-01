@@ -72,7 +72,7 @@ public class Curve3DInspector : Editor
                     GUI.DrawTexture(iconRect, curve3d.settings.uiIcon, ScaleMode.StretchToFill, true);
                 }
                 GUIContent headerLabel = new GUIContent();
-                headerLabel.text = curr.name;
+                headerLabel.text = curr.GetName(curve3d);
                 curr.isExpanded = GUI.Toggle(headerRect, curr.isExpanded, headerLabel, headerStyle);
                 GUILayout.Space(1);
             }
