@@ -21,7 +21,6 @@ namespace Assets.NewUI
     public class DoubleBezierCurveSplitCommand : SplitCommand
     {
         private DoubleBezierSampler sampler;
-        private Curve3D _curve;
         private PositionCurveComposite _positionCurveComposite;
         public DoubleBezierCurveSplitCommand(Curve3D curve, DoubleBezierSampler sampler,PositionCurveComposite positionCurveComposite) : base(curve)
         {
@@ -129,7 +128,6 @@ namespace Assets.NewUI
     {
         private FloatLinearDistanceSampler _sampler;
         private Func<Curve3D,IValueAlongCurvePointProvider> _pointsProvider;
-        private Curve3D _curve;
         public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
         public static IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve) { return curve.UICurve.sizeCurve; }
         public static IValueAlongCurvePointProvider GetDoubleBezierCurve(Curve3D curve) { return curve.UICurve.doubleBezierCurve; }
