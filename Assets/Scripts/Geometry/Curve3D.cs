@@ -30,6 +30,8 @@ public class Curve3D : MonoBehaviour
     //public Material testMat;
     public CommandBuffer commandBuffer;
 
+    public MyGuiStyle tabStyle;
+
     public bool placeLockedPoints = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour = SplitInsertionNeighborModification.DoNotModifyNeighbors;
 

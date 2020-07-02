@@ -11,6 +11,11 @@ namespace Assets.NewUI
         public bool isExpanded;
         public abstract string GetName(Curve3D curve);
         public abstract void Draw(Curve3D curve);
+        protected SerializedObject obj;
+        protected void Field(string name)
+        {
+            EditorGUILayout.PropertyField(obj.FindProperty(name));
+        }
     }
     public class MainCollapsableCategory : CollapsableCategory
     {
@@ -36,12 +41,18 @@ namespace Assets.NewUI
 
         public override void Draw(Curve3D curve)
         {
+            obj= new SerializedObject(curve);
             //if (GUILayout.Button(isPlaying ? s_Texts.pause : playText, "ButtonLeft"))
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
+            //Field("tabStyle");
             //GUILayout.BeginHorizontal(GUILayout.Width(width-50));
+            //if (curve.tab)
+            //GUILayout.Button("asdf", curve.tabStyle.style);
+            //curve.tabStyle.asdf = "ButtonRight";
             GUILayout.BeginHorizontal();
-            GUILayout.Label("asdf");
+            //GUILayout.Label("asdf");
             GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal(curve.tabStyle.style);
             int skipCount = 0;
             if (curve.type != CurveType.DoubleBezier)
                 skipCount++;
@@ -61,21 +72,21 @@ namespace Assets.NewUI
                 if (GUILayout.Toggle(curve.editMode == currMode,EditorGUIUtility.TrTextContent(currName), style))
                     curve.editMode = currMode;
             }
+            GUILayout.EndHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            var obj = new SerializedObject(curve);
-            EditorGUILayout.PropertyField(obj.FindProperty("type"));
-            EditorGUILayout.PropertyField(obj.FindProperty("isClosedLoop"));
+            Field("type");
+            Field("isClosedLoop");
             if (curve.type!= CurveType.NoMesh)
             {
                 if (curve.type == CurveType.Cylinder || curve.type == CurveType.HollowTube)
-                    EditorGUILayout.PropertyField(obj.FindProperty("arcOfTube"));
-                EditorGUILayout.PropertyField(obj.FindProperty("size"));
-                EditorGUILayout.PropertyField(obj.FindProperty("rotation"));
+                    Field("arcOfTube");
+                Field("size");
+                Field("rotation");
                 if (curve.type != CurveType.Mesh)
-                    EditorGUILayout.PropertyField(obj.FindProperty("thickness"));
+                    Field("thickness");
                 if (curve.type != CurveType.Mesh)
-                    EditorGUILayout.PropertyField(obj.FindProperty("vertexDensity"));
+                    Field("vertexDensity");
             }
             obj.ApplyModifiedProperties();
         }
@@ -86,12 +97,12 @@ namespace Assets.NewUI
 
         public override void Draw(Curve3D curve)
         {
-            var obj = new SerializedObject(curve);
+            obj = new SerializedObject(curve);
             //GUILayout.Label("textures");
-            EditorGUILayout.PropertyField(obj.FindProperty("meshPrimaryAxis"));
-            EditorGUILayout.PropertyField(obj.FindProperty("useSeperateInnerAndOuterFaceTextures"));
-            EditorGUILayout.PropertyField(obj.FindProperty("meshToTile"));
-            EditorGUILayout.PropertyField(obj.FindProperty("closeTilableMeshGap"));
+            Field("meshPrimaryAxis");
+            Field("useSeperateInnerAndOuterFaceTextures");
+            Field("meshToTile");
+            Field("closeTilableMeshGap");
             obj.ApplyModifiedProperties();
         }
     }
@@ -101,11 +112,11 @@ namespace Assets.NewUI
 
         public override void Draw(Curve3D curve)
         {
-            var obj = new SerializedObject(curve);
-            EditorGUILayout.PropertyField(obj.FindProperty("showNormals"));
-            EditorGUILayout.PropertyField(obj.FindProperty("lockToPositionZero"));
-            EditorGUILayout.PropertyField(obj.FindProperty("placeLockedPoints"));
-            EditorGUILayout.PropertyField(obj.FindProperty("settings"));
+            obj = new SerializedObject(curve);
+            Field("showNormals");
+            Field("lockToPositionZero");
+            Field("placeLockedPoints");
+            Field("settings");
             obj.ApplyModifiedProperties();
         }
     }
