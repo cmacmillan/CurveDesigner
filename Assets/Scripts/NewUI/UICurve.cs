@@ -63,7 +63,7 @@ namespace Assets.NewUI
         public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
         {
             FindClosestPoints();
-            if (_curve.drawNormals)
+            if (_curve.showNormals)
             {
                 float sampleDist = _curve.GetNormalDensityDistance();
                 List<PointOnCurve> points = _curve.positionCurve.GetPointsWithSpacing(sampleDist);
@@ -71,7 +71,7 @@ namespace Assets.NewUI
                 var curveLength = _curve.positionCurve.GetLength();
                 foreach (var i in points)
                 {
-                    var rotation = _curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve)+_curve.curveRotation;
+                    var rotation = _curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve)+_curve.rotation;
                     var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
                     drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));
                 }

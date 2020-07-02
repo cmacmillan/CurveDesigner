@@ -35,7 +35,7 @@ namespace Assets.NewUI
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
             linePoint.GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
-            drawList.Add(new CircleDraw(this,Color.white,_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),value.value+_curve.curveRadius));
+            drawList.Add(new CircleDraw(this,Color.white,_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),value.value+_curve.size));
             base.Draw(drawList, closestElementToCursor);
         }
 
@@ -100,7 +100,7 @@ namespace Assets.NewUI
             Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
             var screenRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(Event.current.mousePosition));
             Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
-            _ring.value = Vector3.Distance(pos,centerPoint)-curve.curveRadius;
+            _ring.value = Vector3.Distance(pos,centerPoint)-curve.size;
         }
         public void ClickDown(Vector2 mousePos)
         {
@@ -131,7 +131,7 @@ namespace Assets.NewUI
 
         public Vector3 Position {
             get {
-                return curve.transform.TransformPoint(curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve)).GetRingPoint(360.0f * _ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value + curve.curveRadius));
+                return curve.transform.TransformPoint(curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve)).GetRingPoint(360.0f * _ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value + curve.size));
             }
         }
     }

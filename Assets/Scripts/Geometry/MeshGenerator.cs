@@ -74,10 +74,10 @@ public static class MeshGenerator
 
             MeshGenerator.curve = clonedCurve;
             MeshGenerator.RingPointCount = curve.ringPointCount;
-            MeshGenerator.Radius = curve.curveRadius;
+            MeshGenerator.Radius = curve.size;
             MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
             MeshGenerator.TubeArc = curve.arcOfTube;
-            MeshGenerator.Rotation = curve.curveRotation;
+            MeshGenerator.Rotation = curve.rotation;
             MeshGenerator.sizeDistanceSampler = new FloatLinearDistanceSampler(curve.sizeDistanceSampler,clonedCurve);
             MeshGenerator.rotationDistanceSampler = new FloatLinearDistanceSampler(curve.rotationDistanceSampler,clonedCurve);
             MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);

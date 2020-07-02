@@ -23,10 +23,11 @@ public class Curve3D : MonoBehaviour
     {
         new MainCollapsableCategory(),
         new TexturesCollapsableCategory(),
+        new PreferencesCollapsableCategory(),
     };
 
-    public Mesh testMesh;
-    public Material testMat;
+    //public Mesh testMesh;
+    //public Material testMat;
     public CommandBuffer commandBuffer;
 
     public bool placeLockedPoints = true;
@@ -61,7 +62,7 @@ public class Curve3D : MonoBehaviour
     [NonSerialized]
     public UICurve UICurve=null;
 
-    public bool drawNormals = true;
+    public bool showNormals = true;
 
     public EditMode editMode=EditMode.PositionCurve;
 
@@ -97,10 +98,10 @@ public class Curve3D : MonoBehaviour
     private int old_doubleBezierVertexDensity = -1;
 
     [Min(0)]
-    public float curveRadius =3.0f;
+    public float size = 3.0f;
     [SerializeField]
     [HideInInspector]
-    private float old_curveRadius=-1;
+    private float old_size =-1;
 
     [Min(3)]
     public int ringPointCount = 8;
@@ -115,10 +116,10 @@ public class Curve3D : MonoBehaviour
     private float old_arcOfTube = -1;
 
     [Range(0, 360)]
-    public float curveRotation = 360;
+    public float rotation = 360;
     [SerializeField]
     [HideInInspector]
-    private float old_curveRotation= -1;
+    private float old_rotation= -1;
 
     [Min(0)]
     public float thickness = .1f;
@@ -167,9 +168,9 @@ public class Curve3D : MonoBehaviour
 
         retr|=CheckFieldChanged(ringPointCount, ref old_ringPointCount);
         retr|=CheckFieldChanged(vertexDensity, ref old_vertexDensity);
-        retr|=CheckFieldChanged(curveRadius, ref old_curveRadius);
+        retr|=CheckFieldChanged(size, ref old_size);
         retr|=CheckFieldChanged(arcOfTube, ref old_arcOfTube);
-        retr|=CheckFieldChanged(curveRotation, ref old_curveRotation);
+        retr|=CheckFieldChanged(rotation, ref old_rotation);
         retr|=CheckFieldChanged(thickness, ref old_thickness);
         retr|=CheckFieldChanged(type, ref old_type);
         retr|=CheckFieldChanged(closeTilableMeshGap, ref old_closeTilableMeshGap);
@@ -224,7 +225,7 @@ public class Curve3D : MonoBehaviour
                 avg += i.value;
             averageSize = avg / points.Count;
         }
-        averageSize += curveRadius;
+        averageSize += size;
     }
     private const float _densityToDistanceDistanceMax = 100.0f;
     private float DensityToDistance(float density)
