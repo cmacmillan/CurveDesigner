@@ -19,14 +19,24 @@ namespace Assets.NewUI
     }
     public class MainCollapsableCategory : CollapsableCategory
     {
-        Dictionary<EditMode, string> editmodeNameMap = new Dictionary<EditMode, string>()
+        public Dictionary<EditMode, string> editmodeNameMap = new Dictionary<EditMode, string>()
         {
             {EditMode.PositionCurve, "Position"},
             {EditMode.Size, "Size"},
             {EditMode.Rotation, "Rotation"},
             {EditMode.DoubleBezier, "Double Bezier"},
         };
-        EditMode[] editModes;
+        public EditMode[] editModes;
+        public GUIStyle _centeredStyle;
+        private GUIStyle CenteredStyle { get
+            {
+                if (_centeredStyle == null) {
+                    _centeredStyle = GUI.skin.GetStyle("Label");
+                    _centeredStyle.alignment = TextAnchor.UpperCenter;
+                }
+                return _centeredStyle;
+            }
+        }
         public MainCollapsableCategory()
         {
             isExpanded = true;
@@ -53,6 +63,7 @@ namespace Assets.NewUI
             //GUILayout.Label("asdf");
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal(curve.tabStyle.style);
+            //GUILayout.BeginHorizontal(curve.tabStyle.style2);
             int skipCount = 0;
             if (curve.type != CurveType.DoubleBezier)
                 skipCount++;
@@ -75,14 +86,21 @@ namespace Assets.NewUI
             GUILayout.EndHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+
+            GUILayout.BeginVertical(curve.tabStyle.style2);
+            GUILayout.Label($"Click on the curve in the scene view to place a {editmodeNameMap[curve.editMode].ToLower()} control point",CenteredStyle);
+            if (curve.editMode == EditMode.Size)
+                Field("size");
+            if (curve.editMode == EditMode.Rotation)
+                Field("rotation");
+            GUILayout.EndVertical();
+
             Field("type");
             Field("isClosedLoop");
             if (curve.type!= CurveType.NoMesh)
             {
                 if (curve.type == CurveType.Cylinder || curve.type == CurveType.HollowTube)
                     Field("arcOfTube");
-                Field("size");
-                Field("rotation");
                 if (curve.type != CurveType.Mesh)
                     Field("thickness");
                 if (curve.type != CurveType.Mesh)

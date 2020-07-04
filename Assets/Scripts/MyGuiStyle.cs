@@ -6,4 +6,5 @@ using UnityEngine;
 public class MyGuiStyle : MonoBehaviour
 {
     public GUIStyle style;
+    public GUIStyle style2;
 }

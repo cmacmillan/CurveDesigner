@@ -26,6 +26,9 @@ public class Curve3D : MonoBehaviour
         new PreferencesCollapsableCategory(),
     };
 
+    [NonSerialized]
+    public EditModeCategories editModeCategories = new EditModeCategories();
+
     //public Mesh testMesh;
     //public Material testMat;
     public CommandBuffer commandBuffer;
@@ -244,6 +247,38 @@ public class Curve3D : MonoBehaviour
         return averageSize/normalValueLengthDivisor;
     }
     public float GetNormalDensityDistance() { return VisualNormalsLength()*normalGapSizeMultiplier; }
+}
+public class EditModeCategories
+{
+    public Dictionary<EditMode, string> editmodeNameMap = new Dictionary<EditMode, string>()
+        {
+            {EditMode.PositionCurve, "Position"},
+            {EditMode.Size, "Size"},
+            {EditMode.Rotation, "Rotation"},
+            {EditMode.DoubleBezier, "Double Bezier"},
+        };
+    public EditMode[] editModes;
+    public GUIStyle _centeredStyle;
+    private GUIStyle CenteredStyle
+    {
+        get
+        {
+            if (_centeredStyle == null)
+            {
+                _centeredStyle = GUI.skin.GetStyle("Label");
+                _centeredStyle.alignment = TextAnchor.UpperCenter;
+            }
+            return _centeredStyle;
+        }
+    }
+    public EditModeCategories()
+    {
+        var baseEditModes = System.Enum.GetValues(typeof(EditMode));
+        var baseEditModeNames = System.Enum.GetNames(typeof(EditMode));
+        editModes = new EditMode[baseEditModes.Length];
+        for (int i = 0; i < editModes.Length; i++)
+            editModes[i] = (EditMode)baseEditModes.GetValue(i);
+    }
 }
 public enum EditMode
 {

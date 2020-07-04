@@ -87,10 +87,48 @@ public class Curve3DInspector : Editor
         //base.OnInspectorGUI();
     }
 
+    private void WindowFunc(int id)
+    {
+        var curve = (target as Curve3D);
+        var editModes = curve.editModeCategories;
+        GUILayout.BeginVertical();
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        int skipCount = 0;
+        if (curve.type != CurveType.DoubleBezier)
+            skipCount++;
+        for (int i = 0; i < editModes.editModes.Length; i++)
+        {
+            EditMode currMode = editModes.editModes[i];
+            if (curve.type != CurveType.DoubleBezier && currMode == EditMode.DoubleBezier)
+                continue;
+            string currName = editModes.editmodeNameMap[currMode];
+            string style;
+            if (i == 0)
+                style = "ButtonLeft";
+            else if (i == editModes.editModes.Length - 1 - skipCount)
+                style = "ButtonRight";
+            else
+                style = "ButtonMid";
+            if (GUILayout.Toggle(curve.editMode == currMode, EditorGUIUtility.TrTextContent(currName), style))
+                curve.editMode = currMode;
+        }
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+        GUILayout.Label("asdf");
+        GUILayout.Label("asdf");
+        GUILayout.Label("asdf");
+        if (GUILayout.Button("Clear"))
+        {
+            Debug.Log("cleared");
+        }
+        GUILayout.EndVertical();
+    }
+
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
-        //draw graph stuff below
+        GUILayout.Window(61732234,new Rect(20, 20, 0, 0),WindowFunc,$"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}");
         /*
         curve3d.positionCurve.Recalculate();
         foreach (var i in curve3d.doubleBezierSampler.secondaryCurves)
@@ -199,7 +237,7 @@ public class Curve3DInspector : Editor
         Curve3DSettings.defaultLineTexture = curve3d.settings.lineTex;
         if (curve3d.UICurve == null)
         {
-            curve3d.UICurve=new UICurve(null,curve3d);//prob shouldn't do this every frame
+            curve3d.UICurve=new UICurve(null,curve3d);
             curve3d.UICurve.Initialize();
         }
         UpdateMesh(curve3d);
