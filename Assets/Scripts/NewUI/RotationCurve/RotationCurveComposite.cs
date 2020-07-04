@@ -22,16 +22,10 @@ namespace Assets.NewUI
                 _points.Add(new EditRotationComposite(this,i,curve,distanceSampler,blueColor,positionCurveComposite));
         }
 
-        public void DrawWindow(int[] selectedPoints, Curve3D curve)
+        //pass it a FloatLinearDistanceSampler, name for the float field
+        public void DrawWindow(Curve3D curve)
         {
-            if (selectedPoints.Length == 0)
-                return;
-            var primaryPointIndex = selectedPoints[selectedPoints.Length - 1];
-            curve.rotationDistanceSampler.CacheOpenCurvePoints(curve.positionCurve);
-            var points = curve.rotationDistanceSampler.GetPoints(curve);
-            var primaryPoint = points[selectedPoints[selectedPoints.Length - 1]];
-            primaryPoint.value = EditorGUILayout.FloatField("Rotation (degrees)",primaryPoint.value);
-            primaryPoint.SetDistance(EditorGUILayout.FloatField("Distance along curve", primaryPoint.GetDistance(curve.positionCurve)), curve.positionCurve);
+            WindowDrawer.Draw(curve.rotationDistanceSampler, "Rotation (degrees)", curve);
         }
 
         public override IEnumerable<IComposite> GetChildren()

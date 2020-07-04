@@ -8,10 +8,6 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public interface IWindowDrawer
-    {
-        void DrawWindow(int[] selectedPoints, Curve3D curve);
-    }
     public class UICurve : IComposite
     {
         public PositionCurveComposite positionCurve;
@@ -51,7 +47,7 @@ namespace Assets.NewUI
             sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve,positionCurve);
             rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve,positionCurve);
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
-            _curve.lastMeshUpdateStartTime = DateTime.Now;
+            _curve.RequestMeshUpdate();
             _curve.positionCurve.Recalculate();
             positionCurve.FindPointClosestToCursor();
             doubleBezierCurve.FindClosestPointsToCursor();

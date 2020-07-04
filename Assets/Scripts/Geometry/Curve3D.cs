@@ -53,6 +53,11 @@ public class Curve3D : MonoBehaviour
     [HideInInspector]
     public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
 
+    public void RequestMeshUpdate()
+    {
+        lastMeshUpdateStartTime = DateTime.Now;
+    }
+
     [HideInInspector]
     public float averageSize;
     [HideInInspector]

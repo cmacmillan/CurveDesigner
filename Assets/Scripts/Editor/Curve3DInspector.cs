@@ -125,8 +125,10 @@ public class Curve3DInspector : Editor
         GUILayout.EndVertical();
         if (curve.UICurve != null)
         {
+            if (curve.selectedPoints.Count == 0)
+                curve.selectedPoints.Add(0);
             var drawer = curve.UICurve.GetWindowDrawer();
-            drawer.DrawWindow(new int[1] { 0}, curve);
+            drawer.DrawWindow(curve);
         }
     }
 
@@ -290,7 +292,7 @@ public class Curve3DInspector : Editor
                         var commandToExecute = clicked.owner.GetClickCommand();
                         commandToExecute.ClickDown(clickPos);
                         commandToExecute.ClickDrag(clickPos, curve3d, clicked);
-                        curve3d.lastMeshUpdateStartTime= DateTime.Now;
+                        curve3d.RequestMeshUpdate();
                         Event.current.Use();
                     }
                 }
@@ -302,7 +304,7 @@ public class Curve3DInspector : Editor
                     var commandToExecute = elementClickedDown.owner.GetClickCommand();
                     commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown);
                     Event.current.Use();
-                    curve3d.lastMeshUpdateStartTime= DateTime.Now;
+                    curve3d.RequestMeshUpdate();
                 }
                 break;
             case EventType.MouseUp:
@@ -313,7 +315,7 @@ public class Curve3DInspector : Editor
                         GUIUtility.hotControl = 0;
                         var commandToExecute = elementClickedDown.owner.GetClickCommand();
                         commandToExecute.ClickUp(MousePos);
-                        curve3d.lastMeshUpdateStartTime= DateTime.Now;
+                        curve3d.RequestMeshUpdate();
                         curve3d.elementClickedDown = null;
                         Event.current.Use();
                     }
@@ -357,7 +359,7 @@ public class Curve3DInspector : Editor
         }
         if (curve.HaveCurveSettingsChanged())
         {
-            curve.lastMeshUpdateStartTime = DateTime.Now;
+            curve.RequestMeshUpdate();
         }
     }
     private const float SmallClickRadius = 5;

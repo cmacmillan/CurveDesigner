@@ -21,9 +21,9 @@ namespace Assets.NewUI
                 points.Add(new SizeCircleComposite(this,i,curve.positionCurve,curve,positionCurveComposite));
         }
 
-        public void DrawWindow(int[] selectedPoints, Curve3D curve)
+        public void DrawWindow(Curve3D curve)
         {
-            ///
+            WindowDrawer.Draw(curve.sizeDistanceSampler,"Size",curve);
         }
 
         public override IEnumerable<IComposite> GetChildren()

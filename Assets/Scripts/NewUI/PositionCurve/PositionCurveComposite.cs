@@ -43,7 +43,7 @@ namespace Assets.NewUI
                 yield return i;
         }
 
-        public void DrawWindow(int[] selectedPoints, Curve3D curve)
+        public void DrawWindow(Curve3D curve)
         {
             //throw new NotImplementedException();
         }
