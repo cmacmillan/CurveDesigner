@@ -26,7 +26,22 @@ public class Curve3D : MonoBehaviour
         new PreferencesCollapsableCategory(),
     };
 
+    //sorted from most recent to oldest
     public List<int> selectedPoints = new List<int>();
+
+    public void DeselectAllPoints() {
+        selectedPoints.Clear();
+    }
+    public void SelectOnlyPoint(int point)
+    {
+        DeselectAllPoints();
+        SelectAdditionalPoint(point);
+    }
+    public void SelectAdditionalPoint(int point)
+    {
+        if (!selectedPoints.Contains(point))
+            selectedPoints.Insert(0, point);
+    }
 
     [NonSerialized]
     public EditModeCategories editModeCategories = new EditModeCategories();
@@ -178,19 +193,19 @@ public class Curve3D : MonoBehaviour
     {
         bool retr = false;
 
-        retr|=CheckFieldChanged(ringPointCount, ref old_ringPointCount);
-        retr|=CheckFieldChanged(vertexDensity, ref old_vertexDensity);
-        retr|=CheckFieldChanged(size, ref old_size);
-        retr|=CheckFieldChanged(arcOfTube, ref old_arcOfTube);
-        retr|=CheckFieldChanged(rotation, ref old_rotation);
-        retr|=CheckFieldChanged(thickness, ref old_thickness);
-        retr|=CheckFieldChanged(type, ref old_type);
-        retr|=CheckFieldChanged(closeTilableMeshGap, ref old_closeTilableMeshGap);
-        retr|=CheckFieldChanged(meshToTile, ref old_meshToTile);
-        retr|=CheckFieldChanged(meshPrimaryAxis,ref old_meshPrimaryAxis);
-        retr|=CheckFieldChanged(doubleBezierSampleCount, ref old_doubleBezierVertexDensity);
-        retr|=CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
-        retr|=CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
+        retr |= CheckFieldChanged(ringPointCount, ref old_ringPointCount);
+        retr |= CheckFieldChanged(vertexDensity, ref old_vertexDensity);
+        retr |= CheckFieldChanged(size, ref old_size);
+        retr |= CheckFieldChanged(arcOfTube, ref old_arcOfTube);
+        retr |= CheckFieldChanged(rotation, ref old_rotation);
+        retr |= CheckFieldChanged(thickness, ref old_thickness);
+        retr |= CheckFieldChanged(type, ref old_type);
+        retr |= CheckFieldChanged(closeTilableMeshGap, ref old_closeTilableMeshGap);
+        retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
+        retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
+        retr |= CheckFieldChanged(doubleBezierSampleCount, ref old_doubleBezierVertexDensity);
+        retr |= CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
+        retr |= CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
 
         if (CheckFieldChanged(isClosedLoop, ref old_isClosedLoop))
         {

@@ -260,7 +260,12 @@ public class Curve3DInspector : Editor
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.KeyDown:
-                if (Event.current.keyCode== KeyCode.Tab)
+                if (Event.current.keyCode == KeyCode.A && Event.current.control)
+                {
+                    Debug.Log("Select All!");
+                    Event.current.Use();
+                }
+                if (Event.current.keyCode == KeyCode.Tab)
                 {
                     switch (curve3d.editMode)
                     {
