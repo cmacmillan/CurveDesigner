@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class DoubleBezierCurveComposite : IComposite, IValueAlongCurvePointProvider
+    public class DoubleBezierCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
     {
         private DoubleBezierSampler _doubleBezierSampler;
         private List<SecondaryPositionCurveComposite> _secondaryCurves;
@@ -46,5 +46,9 @@ namespace Assets.NewUI
                 yield return i;
         }
 
+        public void DrawWindow(int[] selectedPoints, Curve3D curve)
+        {
+            //throw new NotImplementedException();
+        }
     }
 }

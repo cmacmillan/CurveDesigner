@@ -26,6 +26,8 @@ public class Curve3D : MonoBehaviour
         new PreferencesCollapsableCategory(),
     };
 
+    public List<int> selectedPoints = new List<int>();
+
     [NonSerialized]
     public EditModeCategories editModeCategories = new EditModeCategories();
 

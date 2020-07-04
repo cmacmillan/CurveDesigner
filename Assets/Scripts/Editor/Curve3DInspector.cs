@@ -123,6 +123,17 @@ public class Curve3DInspector : Editor
             Debug.Log("cleared");
         }
         GUILayout.EndVertical();
+        if (curve.UICurve != null)
+        {
+            var drawer = curve.UICurve.GetWindowDrawer();
+            drawer.DrawWindow(new int[1] { 0}, curve);
+        }
+    }
+
+    private void DrawSelectedUI()
+    {
+        //so basically we need to handle editing an individual point, and groups of points
+        //each UI curve should describe how to handle it, when passed an array of ints 
     }
 
     private void OnSceneGUI()

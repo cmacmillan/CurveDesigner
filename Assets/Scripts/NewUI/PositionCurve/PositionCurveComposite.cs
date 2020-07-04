@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class PositionCurveComposite : IComposite
+    public class PositionCurveComposite : IComposite, IWindowDrawer
     {
         public List<PositionPointGroupComposite> pointGroups = null;
         private SplitterPointComposite _splitterPoint = null;
@@ -41,6 +41,11 @@ namespace Assets.NewUI
             yield return _splitterPoint;
             foreach (var i in pointGroups)
                 yield return i;
+        }
+
+        public void DrawWindow(int[] selectedPoints, Curve3D curve)
+        {
+            //throw new NotImplementedException();
         }
     }
 }

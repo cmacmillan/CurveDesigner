@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    //Abstract classes can't be serialized
+    //Abstract classes can't be serialized, but we could make this serializable by adding a concrete root class, saving that, and casting back to the abstract class when we wanna serialize it
     public abstract class CollapsableCategory
     {
         public bool isExpanded;

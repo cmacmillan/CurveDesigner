@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class SizeCurveComposite : IComposite, IValueAlongCurvePointProvider
+    public class SizeCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
     {
         private FloatLinearDistanceSampler _distanceSampler;
         private SplitterPointComposite _splitterPoint = null;
@@ -19,6 +19,11 @@ namespace Assets.NewUI
             curve.positionCurve.Recalculate();
             foreach (var i in distanceSampler.GetPoints(curve))
                 points.Add(new SizeCircleComposite(this,i,curve.positionCurve,curve,positionCurveComposite));
+        }
+
+        public void DrawWindow(int[] selectedPoints, Curve3D curve)
+        {
+            ///
         }
 
         public override IEnumerable<IComposite> GetChildren()

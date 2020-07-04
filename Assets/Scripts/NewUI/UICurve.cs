@@ -8,12 +8,34 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
+    public interface IWindowDrawer
+    {
+        void DrawWindow(int[] selectedPoints, Curve3D curve);
+    }
     public class UICurve : IComposite
     {
         public PositionCurveComposite positionCurve;
         public SizeCurveComposite sizeCurve;
         public RotationCurveComposite rotationCurve;
         public DoubleBezierCurveComposite doubleBezierCurve;
+
+        public IWindowDrawer GetWindowDrawer()
+        {
+            switch (_curve.editMode)
+            {
+                case EditMode.DoubleBezier:
+                    return doubleBezierCurve;
+                case EditMode.PositionCurve:
+                    return positionCurve;
+                case EditMode.Rotation:
+                    return rotationCurve;
+                case EditMode.Size:
+                    return sizeCurve;
+                default:
+                    throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");
+            }
+        }
+
         private Curve3D _curve;
 
         public UICurve(IComposite parent,Curve3D curve) : base(parent)
@@ -96,6 +118,8 @@ namespace Assets.NewUI
                 case EditMode.DoubleBezier:
                     yield return doubleBezierCurve;
                     break;
+                default:
+                    throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");
             }
         }
     }
