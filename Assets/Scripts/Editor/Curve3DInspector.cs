@@ -120,6 +120,15 @@ public class Curve3DInspector : Editor
         GUILayout.Label("asdf");
         if (GUILayout.Button("Clear"))
         {
+            curve.positionCurve = new BezierCurve();
+            curve.positionCurve.owner = curve;
+            curve.positionCurve.Initialize();
+            curve.positionCurve.isCurveOutOfDate = true;
+            curve.sizeDistanceSampler = new FloatLinearDistanceSampler();
+            curve.rotationDistanceSampler = new FloatLinearDistanceSampler();
+            curve.doubleBezierSampler = new DoubleBezierSampler();
+            curve.UICurve = new UICurve(null, curve);
+            curve.UICurve.Initialize();
             Debug.Log("cleared");
         }
         GUILayout.EndVertical();

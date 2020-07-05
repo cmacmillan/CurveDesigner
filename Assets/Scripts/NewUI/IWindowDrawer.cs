@@ -22,7 +22,9 @@ namespace Assets.NewUI
             var primaryPointIndex = selectedPoints.First();
             sampler.CacheOpenCurvePoints(curve.positionCurve);
             var points = sampler.GetPoints(curve);
-            var primaryPoint = points.Where(a=>a.guid==selectedPoints[0]).First();
+            var primaryPoint = points.Where(a=>a.guid==selectedPoints[0]).FirstOrDefault();
+            if (primaryPoint == null)
+                return;
             EditorGUI.BeginChangeCheck();
             primaryPoint.value = EditorGUILayout.FloatField(fieldName, primaryPoint.value);
             primaryPoint.SetDistance(EditorGUILayout.FloatField("Distance along curve", primaryPoint.GetDistance(curve.positionCurve)), curve.positionCurve);
