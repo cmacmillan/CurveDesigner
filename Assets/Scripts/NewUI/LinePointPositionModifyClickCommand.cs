@@ -9,9 +9,9 @@ namespace Assets.NewUI
 {
     public class PointOnCurveClickCommand : IClickCommand
     {
-        private IPointOnCurve _point;
+        private CurveTrackingValue _point;
         private PositionCurveComposite _positionCurve;
-        public PointOnCurveClickCommand(IPointOnCurve point,PositionCurveComposite positionCurve)
+        public PointOnCurveClickCommand(CurveTrackingValue point,PositionCurveComposite positionCurve)
         {
             _point = point;
             _positionCurve = positionCurve;
@@ -35,10 +35,5 @@ namespace Assets.NewUI
         public void ClickUp(Vector2 mousePos)
         {
         }
-    }
-    public interface IPointOnCurve
-    {
-        void SetDistance(float distance, BezierCurve curve, bool shouldSort = true);
-        float GetDistance(BezierCurve curve);
     }
 }

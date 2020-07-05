@@ -17,7 +17,7 @@ namespace Assets.NewUI
         {
             _positionCurveComposite = positionCurveComposite;
             _transformBlob = transformBlob;
-            _point = new PointComposite(this,this,textureType,clickCommand,color);
+            _point = new PointComposite(this,this,textureType,clickCommand,color,SelectableGUID.Null);
         }
         public override void Draw(List<IDraw> drawlist,ClickHitData closestElementToCursor)
         {

@@ -125,8 +125,6 @@ public class Curve3DInspector : Editor
         GUILayout.EndVertical();
         if (curve.UICurve != null)
         {
-            if (curve.selectedPoints.Count == 0)
-                curve.selectedPoints.Add(0);
             var drawer = curve.UICurve.GetWindowDrawer();
             drawer.DrawWindow(curve);
         }
@@ -296,6 +294,7 @@ public class Curve3DInspector : Editor
                         var clickPos = MousePos + clicked.offset;
                         var commandToExecute = clicked.owner.GetClickCommand();
                         commandToExecute.ClickDown(clickPos);
+                        curve3d.SelectOnlyPoint(clicked.owner.Guid);
                         commandToExecute.ClickDrag(clickPos, curve3d, clicked);
                         curve3d.RequestMeshUpdate();
                         Event.current.Use();

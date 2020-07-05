@@ -18,8 +18,8 @@ namespace Assets.NewUI
         {
             _point = value;
             _curve = curve;
-            centerPoint = new PointAlongCurveComposite(this,value,positionCurveComposite,color);
-            _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color);
+            centerPoint = new PointAlongCurveComposite(this,value,positionCurveComposite,color,_point.guid);
+            _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color,_point.guid);
         }
 
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
@@ -65,6 +65,7 @@ namespace Assets.NewUI
                 throw new KeyNotFoundException();
             }
         }
+
         public EditRotationClickCommand(EditRotationComposite owner,FloatDistanceValue value,FloatLinearDistanceSampler sampler,Curve3D curve)
         {
             _owner = owner;

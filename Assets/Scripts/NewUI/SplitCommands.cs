@@ -14,6 +14,7 @@ namespace Assets.NewUI
         {
             this._curve = curve;
         }
+
         public virtual void ClickDown(Vector2 mousePos) { }
         public virtual void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked) { }
         public virtual void ClickUp(Vector2 mousePos) { }
@@ -36,7 +37,7 @@ namespace Assets.NewUI
             _curve.elementClickedDown.owner = selected;
         }
     }
-    public class BackingCurveModificationTracker<T> where T : CurveTrackingDistance
+    public class BackingCurveModificationTracker<T> where T : CurveTrackingValue
     {
         private struct BackingCurveItem
         {
@@ -86,6 +87,7 @@ namespace Assets.NewUI
             this.secondaryPositionCurve = secondaryPositionCurve;
             this.curve = curve;
         }
+
         public void ClickDown(Vector2 mousePos)
         {
             var closestPoint = secondaryPositionCurveComposite.positionCurve.PointClosestToCursor;
@@ -103,6 +105,7 @@ namespace Assets.NewUI
     public class MainPositionCurveSplitCommand : SplitCommand
     {
         public MainPositionCurveSplitCommand(Curve3D curve) : base(curve) { }
+
         public override void ClickDown(Vector2 mousePos)
         {
             List<BackingCurveModificationTracker<FloatDistanceValue>> distanceSamplerModificationTrackers = new List<BackingCurveModificationTracker<FloatDistanceValue>>();
@@ -128,6 +131,7 @@ namespace Assets.NewUI
     {
         private FloatLinearDistanceSampler _sampler;
         private Func<Curve3D,IValueAlongCurvePointProvider> _pointsProvider;
+
         public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
         public static IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve) { return curve.UICurve.sizeCurve; }
         public static IValueAlongCurvePointProvider GetDoubleBezierCurve(Curve3D curve) { return curve.UICurve.doubleBezierCurve; }

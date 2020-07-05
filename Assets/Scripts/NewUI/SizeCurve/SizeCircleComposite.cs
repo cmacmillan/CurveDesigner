@@ -21,14 +21,14 @@ namespace Assets.NewUI
         {
             this.value = value;
             var purpleColor = new Color(.6f, .6f, .9f);
-            linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor);
+            linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor,value.guid);
             this._positionCurve = positionCurve;
             this._curve = curve;
             for (int i = 0; i < ringPointCount; i++)
             {
                 var edgePointProvider = new SizeCircleEdgePointPositionProvider(value,i,curve);
                 var clickCommmand = new SizeCurveEdgeClickCommand(value,edgePointProvider,this,curve);
-                ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor));
+                ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor,value.guid));
             }
         }
 
@@ -102,6 +102,7 @@ namespace Assets.NewUI
             Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
             _ring.value = Vector3.Distance(pos,centerPoint)-curve.size;
         }
+
         public void ClickDown(Vector2 mousePos)
         {
             Set();

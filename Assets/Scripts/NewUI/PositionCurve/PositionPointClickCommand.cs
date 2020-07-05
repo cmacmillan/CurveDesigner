@@ -20,6 +20,7 @@ namespace Assets.NewUI
             this.positionCurve = curve;
             this._transformBlob = transformBlob;
         }
+
         public void ClickDown(Vector2 mousePos)
         {
         }

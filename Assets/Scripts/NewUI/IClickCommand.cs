@@ -19,6 +19,10 @@ namespace Assets.NewUI
     {
         public IClickable(IComposite parent) : base(parent){}
 
-        public abstract IClickCommand GetClickCommand();
+        public abstract IClickCommand GetClickCommand();    
+
+        public bool IsSelectable { get { return Guid == SelectableGUID.Null; } }
+
+        public abstract SelectableGUID Guid { get; }
     }
 }

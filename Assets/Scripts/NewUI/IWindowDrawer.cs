@@ -16,13 +16,13 @@ namespace Assets.NewUI
     {
         public static void Draw(FloatLinearDistanceSampler sampler,string fieldName, Curve3D curve)
         {
-            List<int> selectedPoints = curve.selectedPoints;
+            List<SelectableGUID> selectedPoints = curve.selectedPoints;
             if (selectedPoints.Count == 0)
                 return;
-            var primaryPointIndex = selectedPoints.Last();
+            var primaryPointIndex = selectedPoints.First();
             sampler.CacheOpenCurvePoints(curve.positionCurve);
             var points = sampler.GetPoints(curve);
-            var primaryPoint = points[selectedPoints.Last()];
+            var primaryPoint = points.Where(a=>a.guid==selectedPoints[0]).First();
             EditorGUI.BeginChangeCheck();
             primaryPoint.value = EditorGUILayout.FloatField(fieldName, primaryPoint.value);
             primaryPoint.SetDistance(EditorGUILayout.FloatField("Distance along curve", primaryPoint.GetDistance(curve.positionCurve)), curve.positionCurve);

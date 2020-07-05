@@ -8,14 +8,15 @@ using UnityEngine;
 namespace Assets.NewUI
 {
     //When inheriting from this class make sure that you override SortPoints
-    [System.Serializable]
-    public class CurveTrackingDistance : IPointOnCurve
+    [Serializable]
+    public class CurveTrackingValue
     {
-        public CurveTrackingDistance(float distance, BezierCurve curve)
+        public CurveTrackingValue(float distance, BezierCurve curve)
         {
+            guid = curve.owner.guidFactory.GetGUID();
             this.SetDistance(distance,curve,false);
         }
-        public CurveTrackingDistance(CurveTrackingDistance objToClone)
+        public CurveTrackingValue(CurveTrackingValue objToClone)
         {
             this._timeAlongSegment = objToClone._timeAlongSegment;
             this._segmentIndex = objToClone._segmentIndex;
@@ -31,6 +32,8 @@ namespace Assets.NewUI
             return curve.GetDistanceAtSegmentIndexAndTime(_segmentIndex, _timeAlongSegment);
         }
         [SerializeField]
+        public SelectableGUID guid;
+        [SerializeField]
         protected float _timeAlongSegment=0;
         [SerializeField]
         protected int _segmentIndex=0;
@@ -38,7 +41,7 @@ namespace Assets.NewUI
         public float TimeAlongSegment { get { return _timeAlongSegment; } }
     }
     [System.Serializable]
-    public class FloatDistanceValue : CurveTrackingDistance
+    public class FloatDistanceValue : CurveTrackingValue
     {
         public float value;
         [NonSerialized]

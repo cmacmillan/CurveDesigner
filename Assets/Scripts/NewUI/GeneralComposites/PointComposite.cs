@@ -13,14 +13,18 @@ namespace Assets.NewUI
         private PointTextureType _pointTexture;
         private IClickCommand _clickAction;
         private Color _color;
+        private SelectableGUID guid;
 
-        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color) : base(parent)
+        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color,SelectableGUID guid) : base(parent)
         {
             this._position = positionProvider;
             this._pointTexture = textureType;
             this._clickAction = clickAction;
             this._color = color;
+            this.guid = guid;
         }
+
+        public override SelectableGUID Guid => guid;
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {

@@ -27,20 +27,31 @@ public class Curve3D : MonoBehaviour
     };
 
     //sorted from most recent to oldest
-    public List<int> selectedPoints = new List<int>();
+    public List<SelectableGUID> selectedPoints = new List<SelectableGUID>();
 
     public void DeselectAllPoints() {
         selectedPoints.Clear();
     }
-    public void SelectOnlyPoint(int point)
+    public void SelectOnlyPoint(SelectableGUID point)
     {
         DeselectAllPoints();
         SelectAdditionalPoint(point);
     }
-    public void SelectAdditionalPoint(int point)
+    public void SelectAdditionalPoint(SelectableGUID point)
     {
         if (!selectedPoints.Contains(point))
             selectedPoints.Insert(0, point);
+    }
+    public void DeselectPoint(SelectableGUID point)
+    {
+        selectedPoints.Remove(point);
+    }
+    public void ToggleSelectPoint(SelectableGUID point)
+    {
+        if (selectedPoints.Contains(point))
+            DeselectPoint(point);
+        else
+            SelectAdditionalPoint(point);
     }
 
     [NonSerialized]
@@ -54,6 +65,8 @@ public class Curve3D : MonoBehaviour
 
     public bool placeLockedPoints = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour = SplitInsertionNeighborModification.DoNotModifyNeighbors;
+
+    public SelectableGUIDFactory guidFactory = new SelectableGUIDFactory();
 
     [ContextMenu("ExportToObj")]
     public void ExportToObj()
