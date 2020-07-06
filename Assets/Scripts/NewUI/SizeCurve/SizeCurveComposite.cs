@@ -23,7 +23,8 @@ namespace Assets.NewUI
 
         public void DrawWindow(Curve3D curve)
         {
-            WindowDrawer.Draw(curve.sizeDistanceSampler,"Size",curve);
+            var points = curve.sizeDistanceSampler.GetPoints(curve);
+            WindowDrawer.GenericDraw(points,curve);
         }
 
         public override IEnumerable<IComposite> GetChildren()

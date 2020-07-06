@@ -14,15 +14,38 @@ namespace Assets.NewUI
     }
     public static class WindowDrawer
     {
+        public static void GenericDraw(IEnumerable<ISelectable> selectables,Curve3D curve)
+        {
+            List<SelectableGUID> selectedPoints = curve.selectedPoints;
+            if (selectedPoints.Count == 0)
+                return;
+            var primaryPointIndex = selectedPoints.First();
+            ////
+            //sampler.CacheOpenCurvePoints(curve.positionCurve);
+            //var points = sampler.GetPoints(curve);
+            /////
+            var primaryPoint = selectables.Where(a=>a.GUID==selectedPoints[0]).FirstOrDefault();
+            if (primaryPoint == null)
+                return;
+            EditorGUI.BeginChangeCheck();
+            primaryPoint.SelectEdit(curve);
+            if (EditorGUI.EndChangeCheck())
+            {
+                curve.RequestMeshUpdate();
+            }           
+        }
+        /*
         public static void Draw(FloatLinearDistanceSampler sampler,string fieldName, Curve3D curve)
         {
             List<SelectableGUID> selectedPoints = curve.selectedPoints;
             if (selectedPoints.Count == 0)
                 return;
             var primaryPointIndex = selectedPoints.First();
+            ////
             sampler.CacheOpenCurvePoints(curve.positionCurve);
             var points = sampler.GetPoints(curve);
-            var primaryPoint = points.Where(a=>a.guid==selectedPoints[0]).FirstOrDefault();
+            /////
+            var primaryPoint = points.Where(a=>a.GUID==selectedPoints[0]).FirstOrDefault();
             if (primaryPoint == null)
                 return;
             EditorGUI.BeginChangeCheck();
@@ -33,5 +56,26 @@ namespace Assets.NewUI
                 curve.RequestMeshUpdate();
             }
         }
+        public static void Draw(BezierCurve positionCurve, Curve3D curve)
+        {
+            List<SelectableGUID> selectedPoints = curve.selectedPoints;
+            if (selectedPoints.Count == 0)
+                return;           
+            var primaryPointIndex = selectedPoints.First();
+            ///
+            var points = positionCurve.PointGroups;
+            var primaryPoint = points.Where(a=>a.GUID==selectedPoints[0]).FirstOrDefault();
+            ///
+            if (primaryPoint == null)
+                return;
+            EditorGUI.BeginChangeCheck();
+            var dimensionLockMode = curve.lockToPositionZero;
+            primaryPoint.SetWorldPositionByIndex(PGIndex.Position,EditorGUILayout.Vector3Field("Position", primaryPoint.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode)),dimensionLockMode);
+            if (EditorGUI.EndChangeCheck())
+            {
+                curve.RequestMeshUpdate();
+            }
+        }
+        */
     }
 }

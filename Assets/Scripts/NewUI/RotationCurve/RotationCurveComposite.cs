@@ -25,7 +25,7 @@ namespace Assets.NewUI
         //pass it a FloatLinearDistanceSampler, name for the float field
         public void DrawWindow(Curve3D curve)
         {
-            WindowDrawer.Draw(curve.rotationDistanceSampler, "Rotation (degrees)", curve);
+            WindowDrawer.GenericDraw(curve.rotationDistanceSampler.GetPoints(curve), curve);
         }
 
         public override IEnumerable<IComposite> GetChildren()

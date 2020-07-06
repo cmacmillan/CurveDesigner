@@ -21,7 +21,7 @@ namespace Assets.NewUI
             _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,clickCommand,Curve3DSettings.Green,this);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in positionCurve.PointGroups)
-                pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve));
+                pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve,group.GUID));
         }
         public void FindPointClosestToCursor()
         {
@@ -45,7 +45,7 @@ namespace Assets.NewUI
 
         public void DrawWindow(Curve3D curve)
         {
-            //throw new NotImplementedException();
+            WindowDrawer.GenericDraw(curve.positionCurve.PointGroups, curve);
         }
     }
 }

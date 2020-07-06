@@ -44,3 +44,8 @@ public struct SelectableGUID
         return obj.Equals(id);
     }
 }
+public interface ISelectable
+{
+    SelectableGUID GUID { get; }
+    void SelectEdit(Curve3D curve);
+}

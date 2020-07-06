@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.NewUI
 {
-    //When inheriting from this class make sure that you override SortPoints
+    //When inheriting from this class make sure that you override SortPoints and SelectEdit
     [Serializable]
-    public class CurveTrackingValue
+    public class CurveTrackingValue : ISelectable
     {
         public CurveTrackingValue(float distance, BezierCurve curve)
         {
@@ -31,14 +32,18 @@ namespace Assets.NewUI
         {
             return curve.GetDistanceAtSegmentIndexAndTime(_segmentIndex, _timeAlongSegment);
         }
+
+        public virtual void SelectEdit(Curve3D curve) { }
+
         [SerializeField]
-        public SelectableGUID guid;
+        private SelectableGUID guid;
         [SerializeField]
         protected float _timeAlongSegment=0;
         [SerializeField]
         protected int _segmentIndex=0;
         public int SegmentIndex { get { return _segmentIndex; } }
         public float TimeAlongSegment { get { return _timeAlongSegment; } }
+        public SelectableGUID GUID => guid;
     }
     [System.Serializable]
     public class FloatDistanceValue : CurveTrackingValue
@@ -57,6 +62,11 @@ namespace Assets.NewUI
             this.value = objToClone.value;
             _owner = newOwner;
         }
+        public override void SelectEdit(Curve3D curve)
+        {
+            value = EditorGUILayout.FloatField(_owner.pointFieldName, value);
+            SetDistance(EditorGUILayout.FloatField("Distance along curve", GetDistance(curve.positionCurve)), curve.positionCurve);
+        }
         public override void SetDistance(float distance, BezierCurve curve, bool shouldSort = true)
         {
             base.SetDistance(distance, curve, shouldSort);
@@ -69,12 +79,15 @@ namespace Assets.NewUI
     {
         [SerializeField]
         public List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
-        public FloatLinearDistanceSampler() {
+        public string pointFieldName="";
+        public FloatLinearDistanceSampler(string fieldName) {
+            pointFieldName = fieldName;
         }
         public FloatLinearDistanceSampler(FloatLinearDistanceSampler objToClone, BezierCurve curve)
         {
             foreach (var i in objToClone._points)
                 _points.Add(new FloatDistanceValue(i,this,curve));
+            pointFieldName = objToClone.pointFieldName;
             CacheOpenCurvePoints(curve);
         }
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)

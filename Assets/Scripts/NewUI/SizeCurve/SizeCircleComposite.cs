@@ -21,14 +21,14 @@ namespace Assets.NewUI
         {
             this.value = value;
             var purpleColor = new Color(.6f, .6f, .9f);
-            linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor,value.guid);
+            linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor,value.GUID);
             this._positionCurve = positionCurve;
             this._curve = curve;
             for (int i = 0; i < ringPointCount; i++)
             {
                 var edgePointProvider = new SizeCircleEdgePointPositionProvider(value,i,curve);
                 var clickCommmand = new SizeCurveEdgeClickCommand(value,edgePointProvider,this,curve);
-                ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor,value.guid));
+                ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor,value.GUID));
             }
         }
 

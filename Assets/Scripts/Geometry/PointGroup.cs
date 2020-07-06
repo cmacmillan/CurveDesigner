@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEditor;
 using UnityEngine;
 
 public class CurveSplitPointInfo : ISegmentTime
@@ -34,7 +35,7 @@ public enum DimensionLockMode
 /// A point group groups 3 control points together, left tangent, right tangent and the point itself
 /// </summary>
 [System.Serializable]
-public class PointGroup
+public class PointGroup : ISelectable
 {
     #region fields
     [HideInInspector]
@@ -55,15 +56,23 @@ public class PointGroup
     [HideInInspector]
     [SerializeField]
     private Vector3 position;
-    #endregion
+    [HideInInspector]
+    private SelectableGUID guid;
 
-    public PointGroup() { }
+    public SelectableGUID GUID => guid;
+    #endregion
+    public PointGroup(bool lockState,Curve3D curve)
+    {
+        SetPointLocked(lockState);
+        guid = curve.guidFactory.GetGUID();
+    }
     public PointGroup(PointGroup clone)
     {
         this.isPointLocked = clone.isPointLocked;
         this.leftTangent = clone.leftTangent;
         this.rightTangent = clone.rightTangent;
         this.position = clone.position;
+        this.guid = clone.guid;
     }
 
     public bool DoesEditAffectBothSegments(PGIndex index)
@@ -140,10 +149,10 @@ public class PointGroup
                 throw new System.ArgumentException();
         }
     }
-    #endregion
 
-    public PointGroup(bool lockState)
+    public void SelectEdit(Curve3D curve)
     {
-        SetPointLocked(lockState);
+        SetWorldPositionByIndex(PGIndex.Position,EditorGUILayout.Vector3Field("Position", GetWorldPositionByIndex(PGIndex.Position,curve.lockToPositionZero)),curve.lockToPositionZero);
     }
+    #endregion
 }

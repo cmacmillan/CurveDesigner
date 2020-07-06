@@ -124,8 +124,8 @@ public class Curve3DInspector : Editor
             curve.positionCurve.owner = curve;
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;
-            curve.sizeDistanceSampler = new FloatLinearDistanceSampler();
-            curve.rotationDistanceSampler = new FloatLinearDistanceSampler();
+            curve.sizeDistanceSampler = new FloatLinearDistanceSampler("Size");
+            curve.rotationDistanceSampler = new FloatLinearDistanceSampler("Rotation (degrees)");
             curve.doubleBezierSampler = new DoubleBezierSampler();
             curve.UICurve = new UICurve(null, curve);
             curve.UICurve.Initialize();

@@ -75,9 +75,9 @@ public class Curve3D : MonoBehaviour
     }
 
     [HideInInspector]
-    public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler();
+    public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler("Size");
     [HideInInspector]
-    public FloatLinearDistanceSampler rotationDistanceSampler = new FloatLinearDistanceSampler();
+    public FloatLinearDistanceSampler rotationDistanceSampler = new FloatLinearDistanceSampler("Rotation (degrees)");
     [HideInInspector]
     public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
 
