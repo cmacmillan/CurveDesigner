@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.NewUI;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEditor;
@@ -150,9 +151,27 @@ public class PointGroup : ISelectable
         }
     }
 
-    public void SelectEdit(Curve3D curve)
+    public bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod)
     {
-        SetWorldPositionByIndex(PGIndex.Position,EditorGUILayout.Vector3Field("Position", GetWorldPositionByIndex(PGIndex.Position,curve.lockToPositionZero)),curve.lockToPositionZero);
+        var initialLocked = isPointLocked;
+        var isLocked = EditorGUILayout.Toggle("Tangents Locked", initialLocked);
+
+        var initialLeft = GetWorldPositionByIndex(PGIndex.LeftTangent, curve.lockToPositionZero);
+        var leftTangent = EditorGUILayout.Vector3Field("Left Tangent", initialLeft)-initialLeft;
+
+        var initialPos = GetWorldPositionByIndex(PGIndex.Position, curve.lockToPositionZero);
+        var worldPos = EditorGUILayout.Vector3Field("Position", initialPos)-initialPos;
+
+        var initialRight = GetWorldPositionByIndex(PGIndex.RightTangent, curve.lockToPositionZero);
+        var rightTangent = EditorGUILayout.Vector3Field("Right Tangent", initialRight)-initialRight;
+
+        if (isLocked==initialLocked && initialLeft==leftTangent && initialPos==worldPos && initialRight == rightTangent)
+        {
+            offsetMod = null;
+            return false;
+        }
+        offsetMod = new PointGroupOffsetModification(isLocked, worldPos, leftTangent, rightTangent);
+        return true;
     }
     #endregion
 }

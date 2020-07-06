@@ -100,7 +100,10 @@ namespace Assets.NewUI
             if (curve.type!= CurveType.NoMesh)
             {
                 if (curve.type == CurveType.Cylinder || curve.type == CurveType.HollowTube)
+                {
                     Field("arcOfTube");
+                    Field("ringPointCount");
+                }
                 if (curve.type != CurveType.Mesh)
                     Field("thickness");
                 if (curve.type != CurveType.Mesh)

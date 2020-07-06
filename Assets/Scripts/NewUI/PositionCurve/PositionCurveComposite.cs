@@ -45,7 +45,7 @@ namespace Assets.NewUI
 
         public void DrawWindow(Curve3D curve)
         {
-            WindowDrawer.GenericDraw(curve.positionCurve.PointGroups, curve);
+            WindowDrawer.Draw(curve.positionCurve.PointGroups, curve);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.NewUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,5 +48,5 @@ public struct SelectableGUID
 public interface ISelectable
 {
     SelectableGUID GUID { get; }
-    void SelectEdit(Curve3D curve);
+    bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod);
 }
