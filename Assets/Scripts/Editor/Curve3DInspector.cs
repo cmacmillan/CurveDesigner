@@ -303,7 +303,15 @@ public class Curve3DInspector : Editor
                         var clickPos = MousePos + clicked.offset;
                         var commandToExecute = clicked.owner.GetClickCommand();
                         commandToExecute.ClickDown(clickPos);
-                        curve3d.SelectOnlyPoint(clicked.owner.Guid);
+                        if (Event.current.control)
+                        {
+                            curve3d.ToggleSelectPoint(clicked.owner.Guid);
+                        }
+                        else
+                        {
+                            curve3d.DeselectAllPoints();
+                            curve3d.ToggleSelectPoint(clicked.owner.Guid);
+                        }
                         commandToExecute.ClickDrag(clickPos, curve3d, clicked);
                         curve3d.RequestMeshUpdate();
                         Event.current.Use();

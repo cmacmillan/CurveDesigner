@@ -68,7 +68,7 @@ namespace Assets.NewUI
             float valueOffset = EditorGUILayout.FloatField(_owner.pointFieldName, originalValue)-originalValue;
             float originalDistance = GetDistance(curve.positionCurve);
             float distanceOffset = EditorGUILayout.FloatField("Distance along curve", originalDistance)-originalDistance;
-            if (originalValue==value && distanceOffset == 0)
+            if (valueOffset==0 && distanceOffset == 0)
             {
                 offsetMod = null;
                 return false;
