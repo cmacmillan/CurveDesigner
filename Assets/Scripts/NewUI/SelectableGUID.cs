@@ -44,16 +44,18 @@ public struct SelectableGUID
     {
         return obj.Equals(id);
     }
-    public static bool Delete<T>(ref List<T> selectables, List<SelectableGUID> guids, Curve3D curve) where T : ISelectable
+    public static bool Delete<T>(ref List<T> selectables, List<SelectableGUID> guids, Curve3D curve,int minCount=-1) where T : ISelectable
     {
         var newPoints = new List<T>();
         bool foundAPointToDelete = false;
-        foreach (var i in selectables)
+        for (int i=0;i<selectables.Count;i++)
         {
-            if (guids.Contains(i.GUID))
+            int remaining = selectables.Count - i;
+            var curr = selectables[i];
+            if (guids.Contains(curr.GUID) && (minCount==-1 || newPoints.Count+remaining>minCount))
                 foundAPointToDelete = true;
             else
-                newPoints.Add(i);
+                newPoints.Add(curr);
         }
         selectables = newPoints;
         return foundAPointToDelete;

@@ -26,7 +26,7 @@ public partial class BezierCurve : IDeleteable
 
     public bool Delete(List<SelectableGUID> guids, Curve3D curve)
     {
-        bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve);
+        bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve,2);
         if (didChange)
             Recalculate();
         return didChange;
