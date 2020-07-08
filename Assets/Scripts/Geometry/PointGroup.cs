@@ -58,6 +58,7 @@ public class PointGroup : ISelectable
     [SerializeField]
     private Vector3 position;
     [HideInInspector]
+    [SerializeField]
     private SelectableGUID guid;
 
     public SelectableGUID GUID => guid;
@@ -67,13 +68,13 @@ public class PointGroup : ISelectable
         SetPointLocked(lockState);
         guid = curve.guidFactory.GetGUID();
     }
-    public PointGroup(PointGroup clone)
+    public PointGroup(PointGroup clone,Curve3D curve)
     {
         this.isPointLocked = clone.isPointLocked;
         this.leftTangent = clone.leftTangent;
         this.rightTangent = clone.rightTangent;
         this.position = clone.position;
-        this.guid = clone.guid;
+        //TODO:  //this.guid = curve.guidFactory.GetGUID();//commenting this for now, but it just means guids will be broken when position curves get cloned
     }
 
     public bool DoesEditAffectBothSegments(PGIndex index)

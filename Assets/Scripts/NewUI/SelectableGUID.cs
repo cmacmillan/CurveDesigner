@@ -44,9 +44,27 @@ public struct SelectableGUID
     {
         return obj.Equals(id);
     }
+    public static bool Delete<T>(ref List<T> selectables, List<SelectableGUID> guids, Curve3D curve) where T : ISelectable
+    {
+        var newPoints = new List<T>();
+        bool foundAPointToDelete = false;
+        foreach (var i in selectables)
+        {
+            if (guids.Contains(i.GUID))
+                foundAPointToDelete = true;
+            else
+                newPoints.Add(i);
+        }
+        selectables = newPoints;
+        return foundAPointToDelete;
+    }
 }
 public interface ISelectable
 {
     SelectableGUID GUID { get; }
     bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod);
+}
+public interface IDeleteable
+{
+    bool Delete(List<SelectableGUID> guids,Curve3D curve);
 }

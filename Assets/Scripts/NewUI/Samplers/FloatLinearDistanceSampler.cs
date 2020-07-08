@@ -84,7 +84,7 @@ namespace Assets.NewUI
         }
     }
     [System.Serializable]
-    public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver
+    public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver, IDeleteable
     {
         [SerializeField]
         public List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
@@ -98,6 +98,10 @@ namespace Assets.NewUI
                 _points.Add(new FloatDistanceValue(i,this,curve));
             pointFieldName = objToClone.pointFieldName;
             CacheOpenCurvePoints(curve);
+        }
+        public bool Delete(List<SelectableGUID> guids,Curve3D curve)
+        {
+            return SelectableGUID.Delete(ref _points, guids, curve);
         }
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
         {

@@ -269,7 +269,14 @@ public class Curve3DInspector : Editor
             case EventType.KeyDown:
                 if (Event.current.keyCode == KeyCode.Delete || Event.current.keyCode == KeyCode.Backspace)
                 {
-                    Debug.Log("Delete!");
+                    bool didDelete = false;
+                    foreach (var i in curve3d.Deleteables)
+                        didDelete |= i.Delete(curve3d.selectedPoints,curve3d);
+                    if (didDelete)
+                    {
+                        curve3d.RequestMeshUpdate();
+                        curve3d.UICurve.Initialize();
+                    }
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.A && Event.current.control)
@@ -439,7 +446,7 @@ public class Curve3DInspector : Editor
         {
             SelectionState selectionState = SelectionState.unselected;
             var guid = draw.Creator().GUID;
-            if (guid==selected[0])
+            if (selected.Count>0 && guid==selected[0])
                 selectionState = SelectionState.primarySelected;
             else if (selected.Contains(guid))
                 selectionState = SelectionState.secondarySelected;

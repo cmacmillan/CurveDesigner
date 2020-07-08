@@ -18,6 +18,15 @@ public class Curve3D : MonoBehaviour
             yield return rotationDistanceSampler;
         }
     }
+    public IEnumerable<IDeleteable> Deleteables
+    {
+        get
+        {
+            yield return sizeDistanceSampler;
+            yield return rotationDistanceSampler;
+            yield return positionCurve;
+        }
+    }
 
     public CollapsableCategory[] collapsableCategories =
     {
