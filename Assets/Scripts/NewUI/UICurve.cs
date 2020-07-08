@@ -34,6 +34,8 @@ namespace Assets.NewUI
 
         private Curve3D _curve;
 
+        public override SelectableGUID GUID => SelectableGUID.Null;
+
         public UICurve(IComposite parent,Curve3D curve) : base(parent)
         {
             Undo.undoRedoPerformed -= Initialize;

@@ -26,6 +26,7 @@ namespace Assets.NewUI
         {
             return Enumerable.Empty<IComposite>();
         }
+        public virtual SelectableGUID GUID { get { return _parent.GUID; } }
         public IComposite GetParent()
         {
             return _parent;

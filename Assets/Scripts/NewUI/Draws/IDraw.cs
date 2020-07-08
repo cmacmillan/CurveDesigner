@@ -13,19 +13,40 @@ namespace Assets.NewUI
         hovered=2,
         clicked=3,
     }
+    public enum SelectionState
+    {
+        unselected=0,
+        primarySelected=1,
+        secondarySelected=2,
+    }
     public static class DrawModeExtensionMethods
     {
-        public static Color Tint(this DrawMode mode,Color c)
+        private static readonly Color primarySelectedColor = new Color(1,.9f,.32f);//yellowish
+        private static readonly Color secondarySelectedColor = new Color(1,.78f,.32f);//orangeish
+        public static Color Tint(this DrawMode mode,SelectionState selectionState,Color c)
         {
+            Color selectionColor;
+            switch (selectionState)
+            {
+                case SelectionState.primarySelected:
+                    selectionColor = primarySelectedColor;
+                    break;
+                case SelectionState.secondarySelected:
+                    selectionColor = secondarySelectedColor;
+                    break;
+                default:
+                    selectionColor = c;
+                    break;
+            }
             switch (mode)
             {
                 case DrawMode.clicked:
-                    return DarkenColor(c,.2f);
+                    return DarkenColor(selectionColor,.2f);
                 case DrawMode.hovered:
-                    return DesaturateColor(c,.8f);
+                    return DesaturateColor(selectionColor,.8f);
                 case DrawMode.normal:
                 default:
-                    return c;
+                    return selectionColor;
             }
         }
         private static Color DesaturateColor(Color color, float amount)
@@ -46,7 +67,7 @@ namespace Assets.NewUI
     }
     public interface IDraw
     {
-        void Draw(DrawMode mode);
+        void Draw(DrawMode mode,SelectionState selectionState);
         float DistFromCamera();
         IComposite Creator();
     } 

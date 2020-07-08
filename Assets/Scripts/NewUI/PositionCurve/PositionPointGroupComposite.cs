@@ -22,6 +22,8 @@ namespace Assets.NewUI
 
         private TransformBlob _transformBlob;
 
+        public override SelectableGUID GUID => _pointGroup.GUID;
+
         public IClickCommand GetCenterPointClickCommand()
         {
             return new PositionPointClickCommand(_pointGroup, PGIndex.Position,_positionCurve,_transformBlob);

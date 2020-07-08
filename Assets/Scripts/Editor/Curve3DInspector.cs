@@ -267,6 +267,11 @@ public class Curve3DInspector : Editor
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.KeyDown:
+                if (Event.current.keyCode == KeyCode.Delete || Event.current.keyCode == KeyCode.Backspace)
+                {
+                    Debug.Log("Delete!");
+                    Event.current.Use();
+                }
                 if (Event.current.keyCode == KeyCode.A && Event.current.control)
                 {
                     Debug.Log("Select All!");
@@ -286,11 +291,11 @@ public class Curve3DInspector : Editor
                             curve3d.editMode = EditMode.PositionCurve;
                             break;
                     }
-                    
+                    Event.current.Use();
                 }
                 break;
             case EventType.Repaint:
-                Draw(curveEditor, MousePos, elementClickedDown);
+                Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints);
                 break;
             case EventType.MouseDown:
                 if (Event.current.button == 0)
@@ -422,7 +427,7 @@ public class Curve3DInspector : Editor
         return null;
     }
 
-    void Draw(IComposite root,Vector2 mousePos,ClickHitData currentlyHeldDown)
+    void Draw(IComposite root,Vector2 mousePos,ClickHitData currentlyHeldDown,List<SelectableGUID> selected)
     {
         ClickHitData closestElementToCursor = null;
         if (currentlyHeldDown==null)
@@ -431,15 +436,23 @@ public class Curve3DInspector : Editor
         root.Draw(draws,closestElementToCursor);
         draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
         foreach (var draw in draws)
+        {
+            SelectionState selectionState = SelectionState.unselected;
+            var guid = draw.Creator().GUID;
+            if (guid==selected[0])
+                selectionState = SelectionState.primarySelected;
+            else if (selected.Contains(guid))
+                selectionState = SelectionState.secondarySelected;
             if (draw.DistFromCamera() > 0)
             {
                 if (closestElementToCursor != null && draw.Creator() == closestElementToCursor.owner)
-                    draw.Draw(DrawMode.hovered);
+                    draw.Draw(DrawMode.hovered,selectionState);
                 else if (currentlyHeldDown != null && draw.Creator() == currentlyHeldDown.owner)
-                    draw.Draw(DrawMode.clicked);
+                    draw.Draw(DrawMode.clicked,selectionState);
                 else
-                    draw.Draw(DrawMode.normal);
+                    draw.Draw(DrawMode.normal,selectionState);
             }
+        }
     }
 }
 /*

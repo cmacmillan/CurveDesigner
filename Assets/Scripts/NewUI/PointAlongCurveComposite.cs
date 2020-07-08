@@ -30,6 +30,8 @@ namespace Assets.NewUI
 
         public PointOnCurve PointOnCurve { get { return _positionCurve.GetPointAtDistance(value.GetDistance(_positionCurve)); } }
 
+        public override SelectableGUID GUID => value.GUID;
+
         public void GetPositionForwardAndReference(out Vector3 position, out Vector3 forward, out Vector3 reference)
         {
             var point = _positionCurve.GetPointAtDistance(value.GetDistance(_positionCurve));

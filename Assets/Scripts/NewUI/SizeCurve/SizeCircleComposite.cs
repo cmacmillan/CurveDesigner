@@ -17,6 +17,8 @@ namespace Assets.NewUI
 
         public const int ringPointCount=4;
 
+        public override SelectableGUID GUID => value.GUID;
+
         public SizeCircleComposite(IComposite parent,FloatDistanceValue value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             this.value = value;

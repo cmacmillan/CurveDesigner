@@ -35,7 +35,7 @@ namespace Assets.NewUI
             return _distanceToPoint + (int)IDrawSortLayers.Circles;
         }
 
-        public void Draw(DrawMode mode)
+        public void Draw(DrawMode mode,SelectionState selectionState)
         {
             Color beforeColor = Handles.color;
             Handles.color = _color;

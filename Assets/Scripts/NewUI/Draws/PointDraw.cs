@@ -28,10 +28,10 @@ namespace Assets.NewUI
         {
             return _distFromCamera+(int)IDrawSortLayers.Points;
         }
-        public void Draw(DrawMode mode)
+        public void Draw(DrawMode mode,SelectionState selectionState)
         {
             var rect = GUITools.GetRectCenteredAtPosition(_guiPos, _size, _size);
-            DrawPoint(rect, mode.Tint(_color),GetPointTexture(type));
+            DrawPoint(rect, mode.Tint(selectionState,_color),GetPointTexture(type));
         }
         private static void DrawPoint(Rect position, Color color, Texture2D tex)
         {

@@ -13,6 +13,7 @@ namespace Assets.NewUI
         public PointAlongCurveComposite centerPoint;
         private PointComposite _rotationHandlePoint;
         public Curve3D _curve;
+        public override SelectableGUID GUID => _point.GUID;
 
         public EditRotationComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,FloatLinearDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
@@ -48,6 +49,7 @@ namespace Assets.NewUI
                 return _curve.transform.TransformPoint(GetVectorByAngle(_point.value, out PointOnCurve point) * _curve.averageSize + point.position);
             }
         }
+
     }
     public class EditRotationClickCommand : IClickCommand
     {

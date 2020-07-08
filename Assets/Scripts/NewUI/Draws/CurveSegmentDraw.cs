@@ -41,7 +41,7 @@ namespace Assets.NewUI
             return _distanceToPoint + (int)IDrawSortLayers.Curves;
         }
 
-        public void Draw(DrawMode mode)
+        public void Draw(DrawMode mode,SelectionState selectionState)
         {
             Handles.DrawBezier(_startPoint,_endPoint,_startTangent,_endTangent,_color,GetLineTextureByType(_textureType),_width);
         }
