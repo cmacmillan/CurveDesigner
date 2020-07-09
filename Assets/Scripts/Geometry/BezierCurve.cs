@@ -11,6 +11,7 @@ public partial class BezierCurve : IActiveElement
     public List<PointGroup> PointGroups;
     public int NumControlPoints { get { return isClosedLoop?PointGroups.Count*3:PointGroups.Count*3-2; } }
     public int NumSegments { get { return isClosedLoop?PointGroups.Count:PointGroups.Count-1; } }
+
     public bool isCurveOutOfDate = true;
     public DimensionLockMode dimensionLockMode = DimensionLockMode.none;
     public Curve3D owner;
@@ -22,6 +23,13 @@ public partial class BezierCurve : IActiveElement
     private Vector3 GetTangent(int index)
     {
         return (this[index + 1] - this[index]);//.normalized;
+    }
+
+    public int NumSelectables(Curve3D curve) { return PointGroups.Count; }
+
+    public ISelectable GetSelectable(int index,Curve3D curve)
+    {
+        return PointGroups[index];
     }
 
     public List<SelectableGUID> SelectAll(Curve3D curve)

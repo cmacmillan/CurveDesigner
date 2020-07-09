@@ -99,6 +99,11 @@ namespace Assets.NewUI
             pointFieldName = objToClone.pointFieldName;
             CacheOpenCurvePoints(curve);
         }
+        public int NumSelectables(Curve3D curve) { return GetPoints(curve).Count; }
+        public ISelectable GetSelectable(int index,Curve3D curve)
+        {
+            return GetPoints(curve)[index];
+        }
         public List<SelectableGUID> SelectAll(Curve3D curve)
         {
             List<SelectableGUID> retr = new List<SelectableGUID>();
@@ -110,6 +115,10 @@ namespace Assets.NewUI
         public bool Delete(List<SelectableGUID> guids,Curve3D curve)
         {
             return SelectableGUID.Delete(ref _points, guids, curve);
+        }
+        public List<SelectableGUID> SelectBetween(SelectableGUID previous, SelectableGUID next, Curve3D curve)
+        {
+            throw new NotImplementedException();
         }
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
         {
@@ -230,6 +239,7 @@ namespace Assets.NewUI
             return GetPointsByCurveOpenClosedStatus(curve.positionCurve);
         }
         private List<FloatDistanceValue> openCurvePoints;
+
         public void CacheOpenCurvePoints(BezierCurve curve)
         {
             openCurvePoints = new List<FloatDistanceValue>();

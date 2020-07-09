@@ -313,9 +313,16 @@ public class Curve3DInspector : Editor
                         var clickPos = MousePos + clicked.offset;
                         var commandToExecute = clicked.owner.GetClickCommand();
                         commandToExecute.ClickDown(clickPos);
-                        if (Event.current.control)
+                        if (Event.current.control)  /////CONTROL CLICK
                         {
                             curve3d.ToggleSelectPoint(clicked.owner.Guid);
+                        }
+                        else if (Event.current.shift) /////SHIFT CLICK
+                        {
+                            SelectableGUID previous = SelectableGUID.Null;
+                            if (curve3d.selectedPoints.Count > 0)
+                                previous = curve3d.selectedPoints[0];
+                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, clicked.owner.Guid,curve3d);
                         }
                         else
                         {
