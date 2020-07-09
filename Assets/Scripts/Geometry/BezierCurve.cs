@@ -4,7 +4,7 @@ using UnityEngine;
 
 //A class which defines a chain of 3rd order bezier curves (4 control points per segment)
 [System.Serializable]
-public partial class BezierCurve : IDeleteable
+public partial class BezierCurve : IActiveElement
 {
     [SerializeField]
     [HideInInspector]
@@ -24,6 +24,13 @@ public partial class BezierCurve : IDeleteable
         return (this[index + 1] - this[index]);//.normalized;
     }
 
+    public List<SelectableGUID> SelectAll(Curve3D curve)
+    {
+        List<SelectableGUID> retr = new List<SelectableGUID>();
+        foreach (var i in PointGroups)
+            retr.Add(i.GUID);
+        return retr;
+    }
     public bool Delete(List<SelectableGUID> guids, Curve3D curve)
     {
         bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve,2);

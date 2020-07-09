@@ -84,7 +84,7 @@ namespace Assets.NewUI
         }
     }
     [System.Serializable]
-    public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver, IDeleteable
+    public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver, IActiveElement
     {
         [SerializeField]
         public List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
@@ -98,6 +98,14 @@ namespace Assets.NewUI
                 _points.Add(new FloatDistanceValue(i,this,curve));
             pointFieldName = objToClone.pointFieldName;
             CacheOpenCurvePoints(curve);
+        }
+        public List<SelectableGUID> SelectAll(Curve3D curve)
+        {
+            List<SelectableGUID> retr = new List<SelectableGUID>();
+            var points = GetPoints(curve);
+            foreach (var i in points)
+                retr.Add(i.GUID);
+            return retr;
         }
         public bool Delete(List<SelectableGUID> guids,Curve3D curve)
         {

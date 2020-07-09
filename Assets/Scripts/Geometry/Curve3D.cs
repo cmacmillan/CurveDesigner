@@ -18,13 +18,22 @@ public class Curve3D : MonoBehaviour
             yield return rotationDistanceSampler;
         }
     }
-    public IEnumerable<IDeleteable> Deleteables
+    public IActiveElement ActiveElement
     {
         get
         {
-            yield return sizeDistanceSampler;
-            yield return rotationDistanceSampler;
-            yield return positionCurve;
+            switch (editMode)
+            {
+                case EditMode.PositionCurve:
+                    return positionCurve;
+                case EditMode.Rotation:
+                    return rotationDistanceSampler;
+                case EditMode.Size:
+                    return sizeDistanceSampler;
+                case EditMode.DoubleBezier:
+                default:
+                    throw new NotImplementedException();
+            }
         }
     }
 

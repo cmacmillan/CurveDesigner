@@ -66,7 +66,9 @@ public interface ISelectable
     SelectableGUID GUID { get; }
     bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod);
 }
-public interface IDeleteable
+//Active elements can have stuff deleted from them and have all their elements selected
+public interface IActiveElement
 {
     bool Delete(List<SelectableGUID> guids,Curve3D curve);
+    List<SelectableGUID> SelectAll(Curve3D curve);
 }

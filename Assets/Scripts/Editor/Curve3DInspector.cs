@@ -269,9 +269,7 @@ public class Curve3DInspector : Editor
             case EventType.KeyDown:
                 if (Event.current.keyCode == KeyCode.Delete || Event.current.keyCode == KeyCode.Backspace)
                 {
-                    bool didDelete = false;
-                    foreach (var i in curve3d.Deleteables)
-                        didDelete |= i.Delete(curve3d.selectedPoints,curve3d);
+                    bool didDelete = curve3d.ActiveElement.Delete(curve3d.selectedPoints,curve3d);
                     if (didDelete)
                     {
                         curve3d.RequestMeshUpdate();
@@ -281,7 +279,7 @@ public class Curve3DInspector : Editor
                 }
                 if (Event.current.keyCode == KeyCode.A && Event.current.control)
                 {
-                    Debug.Log("Select All!");
+                    curve3d.selectedPoints = curve3d.ActiveElement.SelectAll(curve3d);
                     Event.current.Use();
                 }
                 if (Event.current.keyCode == KeyCode.Tab)
