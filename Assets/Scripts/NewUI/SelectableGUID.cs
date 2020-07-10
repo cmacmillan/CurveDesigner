@@ -60,55 +60,61 @@ public struct SelectableGUID
         selectables = newPoints;
         return foundAPointToDelete;
     }
-    public static List<SelectableGUID> SelectBetween(IActiveElement activeElement,SelectableGUID previous,SelectableGUID next,Curve3D curve)
+    public static List<SelectableGUID> SelectBetween(IActiveElement activeElement,SelectableGUID start,SelectableGUID end,Curve3D curve, BezierCurve curveConnectingPoints)
     {
         List<SelectableGUID> retr = new List<SelectableGUID>();
-        if (previous == next)//good ol' deselect
+        if (start == end)//good ol' deselect
             return retr;
-        int firstIndex = -1;
-        int lastIndex = -1;
-
-        SelectableGUID Get(int index)
+        int startIndex = -1;
+        int endIndex = -1;
+        ISelectable startSelectable=null;
+        ISelectable endSelectable=null;
+        ISelectable Get(int index)
         {
-            return activeElement.GetSelectable(index, curve).GUID;
+            return activeElement.GetSelectable(index, curve);
         }
         int count = activeElement.NumSelectables(curve);
-
         for (int i=0;i<count;i++)
         {
             var curr = Get(i);
-            if (curr== previous)
-                firstIndex = i;
-            else if (curr== next)
-                lastIndex = i;
+            if (curr.GUID == start)
+            {
+                startIndex = i;
+                startSelectable = curr;
+            }
+            else if (curr.GUID == end)
+            {
+                endIndex = i;
+                endSelectable = curr;
+            }
         }
-        if (firstIndex==-1)
-        {
-            retr.Add(next);
-            return retr;
-        }
-        List<SelectableGUID> left = new List<SelectableGUID>();
-        List<SelectableGUID> right = new List<SelectableGUID>();
-        for (int i = firstIndex; i != lastIndex; i = mod(i - 1, count))
-            left.Add(Get(i));
-        left.Add(next);
-        for (int i = firstIndex; i != lastIndex; i = mod(i + 1, count))
-            right.Add(Get(i));
-        right.Add(next);
-        if (left.Count < right.Count)
-            return left;
-        return right;
+        float startDistance = startSelectable.DistanceAlongCurve(curveConnectingPoints);
+        float endDistance = endSelectable.DistanceAlongCurve(curveConnectingPoints);
+        int sign = startDistance < endDistance ? 1 : -1;
+        float directlyTowardsDistance = (endDistance - startDistance) * sign;
+        float awayFromDistance = 0;
+        if (sign == 1)
+            awayFromDistance = (curveConnectingPoints.GetLength() - endDistance) + startDistance;
+        else
+            awayFromDistance = (curveConnectingPoints.GetLength() - startDistance) + endDistance;
+        if (curveConnectingPoints.isClosedLoop && awayFromDistance < directlyTowardsDistance)
+            sign *= -1;
+        for (int i = startIndex; i != endIndex; i = mod(i+sign,count))
+            retr.Add(Get(i).GUID);
+        retr.Add(Get(endIndex).GUID);
+        return retr;
     }
     static int mod(int x, int m)
     {
         return (x % m + m) % m;
     }
 }
+//where need to more properly handle when we change contexts
 public interface ISelectable
 {
     SelectableGUID GUID { get; }
     bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod);
-    float distanceAlongCurve(Curve3D curve);
+    float DistanceAlongCurve(BezierCurve positionCurve);
 }
 //Active elements can have stuff deleted from them and have all their elements selected
 public interface IActiveElement

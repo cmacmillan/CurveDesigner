@@ -159,6 +159,8 @@ public partial class BezierCurve : IActiveElement
 
     public float GetDistanceAtSegmentIndexAndTime(int segmentIndex, float time)
     {
+        if (segmentIndex==segments.Count && time==0.0f)
+            return segments[segments.Count-1].GetDistanceAtTime(1.0f);
         var segmentLen = segments[segmentIndex].GetDistanceAtTime(time);
         if (segmentIndex > 0)
             return segments[segmentIndex - 1].cummulativeLength + segmentLen;

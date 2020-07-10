@@ -31,9 +31,14 @@ namespace Assets.NewUI
         public virtual float GetDistance(BezierCurve curve)
         {
             return curve.GetDistanceAtSegmentIndexAndTime(_segmentIndex, _timeAlongSegment);
-        }
+          }
 
         public virtual bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod) { throw new NotImplementedException(); }
+
+        public float DistanceAlongCurve(BezierCurve positionCurve)
+        {
+            return GetDistance(positionCurve);
+        }
 
         [SerializeField]
         private SelectableGUID guid;

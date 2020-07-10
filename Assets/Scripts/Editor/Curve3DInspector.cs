@@ -322,7 +322,7 @@ public class Curve3DInspector : Editor
                             SelectableGUID previous = SelectableGUID.Null;
                             if (curve3d.selectedPoints.Count > 0)
                                 previous = curve3d.selectedPoints[0];
-                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, clicked.owner.Guid,curve3d);
+                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, clicked.owner.Guid,curve3d,curve3d.positionCurve);//for a double bezier selection should use that curve instead of main
                         }
                         else
                         {

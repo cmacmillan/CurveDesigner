@@ -152,6 +152,11 @@ public class PointGroup : ISelectable
         }
     }
 
+    public float DistanceAlongCurve(BezierCurve positionCurve)
+    {
+        return positionCurve.GetDistanceAtSegmentIndexAndTime(positionCurve.PointGroups.IndexOf(this), 0);
+    }
+
     public bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod)
     {
         var initialLocked = isPointLocked;
