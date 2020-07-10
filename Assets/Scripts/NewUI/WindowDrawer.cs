@@ -14,7 +14,7 @@ namespace Assets.NewUI
     }
     public static class WindowDrawer
     {
-        public static void Draw(IEnumerable<ISelectable> selectables,Curve3D curve)
+        public static void Draw<T>(IEnumerable<T> selectables,Curve3D curve) where T : ISelectable<T>
         {
             List<SelectableGUID> selectedPoints = curve.selectedPoints;
             if (selectedPoints.Count == 0)
@@ -24,7 +24,7 @@ namespace Assets.NewUI
             if (primaryPoint == null)
                 return;
             EditorGUI.BeginChangeCheck();
-            if (primaryPoint.SelectEdit(curve,out IMultiEditOffsetModification offsetMod))
+            if (primaryPoint.SelectEdit(curve,out IMultiEditOffsetModification<T> offsetMod))
             {
                 foreach (var i in selectedPoints)
                     foreach (var j in selectables)

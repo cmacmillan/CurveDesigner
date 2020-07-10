@@ -113,8 +113,11 @@ public struct SelectableGUID
 public interface ISelectable
 {
     SelectableGUID GUID { get; }
-    bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod);
     float DistanceAlongCurve(BezierCurve positionCurve);
+}
+public interface ISelectable<T> : ISelectable
+{
+    bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification<T> offsetMod);
 }
 //Active elements can have stuff deleted from them and have all their elements selected
 public interface IActiveElement

@@ -31,9 +31,10 @@ namespace Assets.NewUI
         public virtual float GetDistance(BezierCurve curve)
         {
             return curve.GetDistanceAtSegmentIndexAndTime(_segmentIndex, _timeAlongSegment);
-          }
+        }
 
-        public virtual bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod) { throw new NotImplementedException(); }
+        //public virtual bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod) { throw new NotImplementedException(); }
+        public virtual bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification<CurveTrackingValue> offsetMod) { throw new NotImplementedException(); }
 
         public float DistanceAlongCurve(BezierCurve positionCurve)
         {
@@ -51,7 +52,7 @@ namespace Assets.NewUI
         public SelectableGUID GUID => guid;
     }
     [System.Serializable]
-    public class FloatDistanceValue : CurveTrackingValue
+    public class FloatDistanceValue : CurveTrackingValue, ISelectable<FloatDistanceValue>
     {
         public float value;
         [NonSerialized]
@@ -67,7 +68,7 @@ namespace Assets.NewUI
             this.value = objToClone.value;
             _owner = newOwner;
         }
-        public override bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod)
+        public bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification<FloatDistanceValue> offsetMod)
         {
             float originalValue = value;
             float valueOffset = EditorGUILayout.FloatField(_owner.pointFieldName, originalValue)-originalValue;

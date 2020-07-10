@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public interface IMultiEditOffsetModification
+    public interface IMultiEditOffsetModification<T>
     {
-        void Apply(ISelectable target,Curve3D curve);
+        void Apply(T target,Curve3D curve);
     }
-    public class PointGroupOffsetModification : IMultiEditOffsetModification
+    public class PointGroupOffsetModification : IMultiEditOffsetModification<PointGroup>
     {
         private bool? isLocked=null;
         private Vector3 positionOffset;
@@ -24,9 +24,8 @@ namespace Assets.NewUI
             this.rightTangentOffset = rightTangentOffset;
             this.leftTangentOffset = leftTangentOffset;
         }
-        public void Apply(ISelectable targetArg,Curve3D curve)
+        public void Apply(PointGroup target,Curve3D curve)
         {
-            var target = targetArg as PointGroup;
             if (isLocked.HasValue)
                 target.SetPointLocked(isLocked.Value);
             target.SetWorldPositionByIndex(PGIndex.Position,target.GetWorldPositionByIndex(PGIndex.Position,curve.lockToPositionZero)+positionOffset,curve.lockToPositionZero);
@@ -34,7 +33,7 @@ namespace Assets.NewUI
             target.SetWorldPositionByIndex(PGIndex.RightTangent,target.GetWorldPositionByIndex(PGIndex.RightTangent,curve.lockToPositionZero)+rightTangentOffset,curve.lockToPositionZero);
         }
     }
-    public class FloatDistanceSamplerOffsetModification : IMultiEditOffsetModification
+    public class FloatDistanceSamplerOffsetModification : IMultiEditOffsetModification<FloatDistanceValue>
     {
         private float distanceAlongCurveOffset;
         private float valueOffset;
@@ -43,9 +42,8 @@ namespace Assets.NewUI
             this.distanceAlongCurveOffset = distanceAlongCurveOffset;
             this.valueOffset = valueOffset;
         }
-        public void Apply(ISelectable targetArg, Curve3D curve)
+        public void Apply(FloatDistanceValue target, Curve3D curve)
         {
-            var target = targetArg as FloatDistanceValue;
             target.value += valueOffset;
             var ogDistance = target.GetDistance(curve.positionCurve);
             target.SetDistance(ogDistance+distanceAlongCurveOffset,curve.positionCurve);

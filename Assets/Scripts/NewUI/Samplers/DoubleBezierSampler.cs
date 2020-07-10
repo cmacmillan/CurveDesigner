@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Assets.NewUI
 {
     [System.Serializable]
-    public class BezierCurveDistanceValue : CurveTrackingValue
+    public class BezierCurveDistanceValue : CurveTrackingValue, ISelectable<BezierCurveDistanceValue>
     {
         [NonSerialized]
         public DoubleBezierSampler _owner;
@@ -38,6 +38,11 @@ namespace Assets.NewUI
             base.SetDistance(distance, curve, shouldSort);
             if (shouldSort)
                 _owner.SortPoints(curve);
+        }
+
+        public bool SelectEdit(Curve3D curve, out IMultiEditOffsetModification<BezierCurveDistanceValue> offsetMod)
+        {
+            throw new NotImplementedException();
         }
     }
     [System.Serializable]

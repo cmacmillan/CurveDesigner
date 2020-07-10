@@ -36,7 +36,7 @@ public enum DimensionLockMode
 /// A point group groups 3 control points together, left tangent, right tangent and the point itself
 /// </summary>
 [System.Serializable]
-public class PointGroup : ISelectable
+public class PointGroup : ISelectable<PointGroup>
 {
     #region fields
     [HideInInspector]
@@ -157,7 +157,7 @@ public class PointGroup : ISelectable
         return positionCurve.GetDistanceAtSegmentIndexAndTime(positionCurve.PointGroups.IndexOf(this), 0);
     }
 
-    public bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod)
+    public bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification<PointGroup> offsetMod)
     {
         var initialLocked = isPointLocked;
         bool? isLocked = null;
