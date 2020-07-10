@@ -13,11 +13,11 @@ namespace Assets.NewUI
     }
     public class PointGroupOffsetModification : IMultiEditOffsetModification
     {
-        private bool isLocked;
+        private bool? isLocked=null;
         private Vector3 positionOffset;
         private Vector3 leftTangentOffset;
         private Vector3 rightTangentOffset;
-        public PointGroupOffsetModification(bool isLocked,Vector3 positionOffset,Vector3 leftTangentOffset,Vector3 rightTangentOffset)
+        public PointGroupOffsetModification(bool? isLocked,Vector3 positionOffset,Vector3 leftTangentOffset,Vector3 rightTangentOffset)
         {
             this.isLocked = isLocked;
             this.positionOffset = positionOffset;
@@ -27,7 +27,8 @@ namespace Assets.NewUI
         public void Apply(ISelectable targetArg,Curve3D curve)
         {
             var target = targetArg as PointGroup;
-            target.SetPointLocked(isLocked);
+            if (isLocked.HasValue)
+                target.SetPointLocked(isLocked.Value);
             target.SetWorldPositionByIndex(PGIndex.Position,target.GetWorldPositionByIndex(PGIndex.Position,curve.lockToPositionZero)+positionOffset,curve.lockToPositionZero);
             target.SetWorldPositionByIndex(PGIndex.LeftTangent,target.GetWorldPositionByIndex(PGIndex.LeftTangent,curve.lockToPositionZero)+leftTangentOffset,curve.lockToPositionZero);
             target.SetWorldPositionByIndex(PGIndex.RightTangent,target.GetWorldPositionByIndex(PGIndex.RightTangent,curve.lockToPositionZero)+rightTangentOffset,curve.lockToPositionZero);

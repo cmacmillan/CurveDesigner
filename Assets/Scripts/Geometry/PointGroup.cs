@@ -160,7 +160,10 @@ public class PointGroup : ISelectable
     public bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod)
     {
         var initialLocked = isPointLocked;
-        var isLocked = EditorGUILayout.Toggle("Tangents Locked", initialLocked);
+        bool? isLocked = null;
+        bool currentLockState = EditorGUILayout.Toggle("Tangents Locked", initialLocked);//, "ToggleMixed");
+        if (initialLocked != currentLockState)
+            isLocked = currentLockState;
 
         var initialLeft = GetWorldPositionByIndex(PGIndex.LeftTangent, curve.lockToPositionZero);
         var leftTangent = EditorGUILayout.Vector3Field("Left Tangent", initialLeft)-initialLeft;
