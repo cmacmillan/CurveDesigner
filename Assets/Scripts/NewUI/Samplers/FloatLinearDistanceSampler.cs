@@ -75,10 +75,14 @@ namespace Assets.NewUI
             float distanceOffset = EditorGUILayout.FloatField("Distance along curve", originalDistance)-originalDistance;
             if (valueOffset==0 && distanceOffset == 0)
             {
-                offsetMod = null;
                 return false;
             }
-            offsetMod = new FloatDistanceSamplerOffsetModification(distanceOffset, valueOffset);
+            foreach (var target in selectedPoints)
+            {
+                target.value += valueOffset;
+                var ogDistance = target.GetDistance(curve.positionCurve);
+                target.SetDistance(ogDistance + distanceOffset, curve.positionCurve);
+            }
             return true;
         }
         public override void SetDistance(float distance, BezierCurve curve, bool shouldSort = true)

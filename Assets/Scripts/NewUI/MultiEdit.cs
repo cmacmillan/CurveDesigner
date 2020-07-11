@@ -20,14 +20,6 @@ namespace Assets.NewUI
             this.rightTangentOffset = rightTangentOffset;
             this.leftTangentOffset = leftTangentOffset;
         }
-        public void Apply(PointGroup target,Curve3D curve)
-        {
-            if (isLocked.HasValue)
-                target.SetPointLocked(isLocked.Value);
-            target.SetWorldPositionByIndex(PGIndex.Position,target.GetWorldPositionByIndex(PGIndex.Position,curve.lockToPositionZero)+positionOffset,curve.lockToPositionZero);
-            target.SetWorldPositionByIndex(PGIndex.LeftTangent,target.GetWorldPositionByIndex(PGIndex.LeftTangent,curve.lockToPositionZero)+leftTangentOffset,curve.lockToPositionZero);
-            target.SetWorldPositionByIndex(PGIndex.RightTangent,target.GetWorldPositionByIndex(PGIndex.RightTangent,curve.lockToPositionZero)+rightTangentOffset,curve.lockToPositionZero);
-        }
     }
     public class FloatDistanceSamplerOffsetModification
     {
@@ -37,12 +29,6 @@ namespace Assets.NewUI
         {
             this.distanceAlongCurveOffset = distanceAlongCurveOffset;
             this.valueOffset = valueOffset;
-        }
-        public void Apply(FloatDistanceValue target, Curve3D curve)
-        {
-            target.value += valueOffset;
-            var ogDistance = target.GetDistance(curve.positionCurve);
-            target.SetDistance(ogDistance+distanceAlongCurveOffset,curve.positionCurve);
         }
     }
 }

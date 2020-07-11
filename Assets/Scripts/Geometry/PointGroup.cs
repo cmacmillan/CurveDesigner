@@ -166,20 +166,25 @@ public class PointGroup : ISelectable<PointGroup>
             isLocked = currentLockState;
 
         var initialLeft = GetWorldPositionByIndex(PGIndex.LeftTangent, curve.lockToPositionZero);
-        var leftTangent = EditorGUILayout.Vector3Field("Left Tangent", initialLeft)-initialLeft;
+        var leftTangentOffset = EditorGUILayout.Vector3Field("Left Tangent", initialLeft)-initialLeft;
 
         var initialPos = GetWorldPositionByIndex(PGIndex.Position, curve.lockToPositionZero);
-        var worldPos = EditorGUILayout.Vector3Field("Position", initialPos)-initialPos;
+        var positionOffset = EditorGUILayout.Vector3Field("Position", initialPos)-initialPos;
 
         var initialRight = GetWorldPositionByIndex(PGIndex.RightTangent, curve.lockToPositionZero);
-        var rightTangent = EditorGUILayout.Vector3Field("Right Tangent", initialRight)-initialRight;
+        var rightTangentOffset = EditorGUILayout.Vector3Field("Right Tangent", initialRight)-initialRight;
 
-        if (isLocked==initialLocked && initialLeft==leftTangent && initialPos==worldPos && initialRight == rightTangent)
-        {
-            offsetMod = null;
+        if (isLocked==initialLocked && initialLeft==leftTangentOffset && initialPos==positionOffset && initialRight == rightTangentOffset)
             return false;
+
+        foreach (var target in selectedPoints)
+        {
+            if (isLocked.HasValue)
+                target.SetPointLocked(isLocked.Value);
+            target.SetWorldPositionByIndex(PGIndex.Position,target.GetWorldPositionByIndex(PGIndex.Position,curve.lockToPositionZero)+positionOffset,curve.lockToPositionZero);
+            target.SetWorldPositionByIndex(PGIndex.LeftTangent,target.GetWorldPositionByIndex(PGIndex.LeftTangent,curve.lockToPositionZero)+leftTangentOffset,curve.lockToPositionZero);
+            target.SetWorldPositionByIndex(PGIndex.RightTangent,target.GetWorldPositionByIndex(PGIndex.RightTangent,curve.lockToPositionZero)+rightTangentOffset,curve.lockToPositionZero);
         }
-        offsetMod = new PointGroupOffsetModification(isLocked, worldPos, leftTangent, rightTangent);
         return true;
     }
     #endregion
