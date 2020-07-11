@@ -338,10 +338,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selectedPoints:
-  - id: 25
-  - id: 22
-  - id: 27
-  - id: 24
+  - id: 51
+  - id: 50
+  - id: 54
+  - id: 56
+  - id: 53
   tabStyle: {fileID: 1523249756}
   placeLockedPoints: 1
   splitInsertionBehaviour: 0
@@ -359,28 +360,28 @@ MonoBehaviour:
       value: 0
     - guid:
         id: 53
-      _timeAlongSegment: 0.43974695
-      _segmentIndex: 1
+      _timeAlongSegment: 0.06910531
+      _segmentIndex: 2
       value: 0
     - guid:
         id: 56
-      _timeAlongSegment: 0.10295709
+      _timeAlongSegment: 0.65069425
       _segmentIndex: 2
       value: 0
     - guid:
         id: 54
-      _timeAlongSegment: 0.40235487
+      _timeAlongSegment: 0.9935151
       _segmentIndex: 2
       value: 0
     - guid:
         id: 50
-      _timeAlongSegment: 0.35942653
+      _timeAlongSegment: 0.7577443
       _segmentIndex: 3
       value: 0
     - guid:
         id: 51
-      _timeAlongSegment: 0.6540752
-      _segmentIndex: 5
+      _timeAlongSegment: 0.15441677
+      _segmentIndex: 6
       value: 0
     - guid:
         id: 52
@@ -454,7 +455,7 @@ MonoBehaviour:
     owner: {fileID: 388121352}
     isClosedLoop: 1
   showNormals: 1
-  editMode: 0
+  editMode: 1
   settings: {fileID: 11400000, guid: 8871c79c537415748bb7ba49f5fcb187, type: 2}
   filter: {fileID: 388121351}
   displayMesh: {fileID: 615118916}
