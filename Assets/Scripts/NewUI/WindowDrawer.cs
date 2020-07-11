@@ -24,20 +24,15 @@ namespace Assets.NewUI
             if (primaryPoint == null)
                 return;
             EditorGUI.BeginChangeCheck();
-            if (primaryPoint.SelectEdit(curve,out IMultiEditOffsetModification<T> offsetMod))
-            {
-                foreach (var i in selectedPoints)
-                    foreach (var j in selectables)
-                        if (i == j.GUID)
-                        {
-                            offsetMod.Apply(j, curve);
-                            break;
-                        }
-            }
+            List<T> selected = new List<T>();
+            foreach (var j in selectables)
+                if (selectedPoints.Contains(j.GUID))
+                    selected.Add(j);
+            primaryPoint.SelectEdit(curve, selected);
             if (EditorGUI.EndChangeCheck())
             {
                 curve.RequestMeshUpdate();
-            }           
+            }
         }
     }
 }

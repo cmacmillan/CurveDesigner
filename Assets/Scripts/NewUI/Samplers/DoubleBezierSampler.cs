@@ -40,7 +40,7 @@ namespace Assets.NewUI
                 _owner.SortPoints(curve);
         }
 
-        public bool SelectEdit(Curve3D curve, out IMultiEditOffsetModification<BezierCurveDistanceValue> offsetMod)
+        public bool SelectEdit(Curve3D curve, List<BezierCurveDistanceValue> selectedPoints)
         {
             throw new NotImplementedException();
         }

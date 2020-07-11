@@ -117,7 +117,7 @@ public interface ISelectable
 }
 public interface ISelectable<T> : ISelectable
 {
-    bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification<T> offsetMod);
+    bool SelectEdit(Curve3D curve,List<T> selectedPoints);
 }
 //Active elements can have stuff deleted from them and have all their elements selected
 public interface IActiveElement

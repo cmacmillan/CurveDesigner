@@ -157,7 +157,7 @@ public class PointGroup : ISelectable<PointGroup>
         return positionCurve.GetDistanceAtSegmentIndexAndTime(positionCurve.PointGroups.IndexOf(this), 0);
     }
 
-    public bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification<PointGroup> offsetMod)
+    public bool SelectEdit(Curve3D curve,List<PointGroup> selectedPoints)
     {
         var initialLocked = isPointLocked;
         bool? isLocked = null;

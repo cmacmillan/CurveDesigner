@@ -33,8 +33,7 @@ namespace Assets.NewUI
             return curve.GetDistanceAtSegmentIndexAndTime(_segmentIndex, _timeAlongSegment);
         }
 
-        //public virtual bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification offsetMod) { throw new NotImplementedException(); }
-        public virtual bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification<CurveTrackingValue> offsetMod) { throw new NotImplementedException(); }
+        public virtual bool SelectEdit(Curve3D curve,List<CurveTrackingValue> selectedPoints) { throw new NotImplementedException(); }
 
         public float DistanceAlongCurve(BezierCurve positionCurve)
         {
@@ -68,7 +67,7 @@ namespace Assets.NewUI
             this.value = objToClone.value;
             _owner = newOwner;
         }
-        public bool SelectEdit(Curve3D curve,out IMultiEditOffsetModification<FloatDistanceValue> offsetMod)
+        public bool SelectEdit(Curve3D curve,List<FloatDistanceValue> selectedPoints)
         {
             float originalValue = value;
             float valueOffset = EditorGUILayout.FloatField(_owner.pointFieldName, originalValue)-originalValue;

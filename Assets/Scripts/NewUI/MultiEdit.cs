@@ -7,11 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public interface IMultiEditOffsetModification<T>
-    {
-        void Apply(T target,Curve3D curve);
-    }
-    public class PointGroupOffsetModification : IMultiEditOffsetModification<PointGroup>
+    public class PointGroupOffsetModification
     {
         private bool? isLocked=null;
         private Vector3 positionOffset;
@@ -33,7 +29,7 @@ namespace Assets.NewUI
             target.SetWorldPositionByIndex(PGIndex.RightTangent,target.GetWorldPositionByIndex(PGIndex.RightTangent,curve.lockToPositionZero)+rightTangentOffset,curve.lockToPositionZero);
         }
     }
-    public class FloatDistanceSamplerOffsetModification : IMultiEditOffsetModification<FloatDistanceValue>
+    public class FloatDistanceSamplerOffsetModification
     {
         private float distanceAlongCurveOffset;
         private float valueOffset;
