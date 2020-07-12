@@ -104,7 +104,7 @@ namespace Assets.NewUI
             Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
             var screenRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(Event.current.mousePosition));
             Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
-            var sizeChange = Vector3.Distance(pos, centerPoint) - curve.size;
+            var sizeChange = (Vector3.Distance(pos, centerPoint) - curve.size)-_ring.value;
             var selectedSizePoints = selectedPoints.GetSelected(_owner._sampler.GetPoints(curve));
             foreach (var i in selectedSizePoints)
                 i.value += sizeChange;

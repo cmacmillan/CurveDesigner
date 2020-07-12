@@ -13,6 +13,7 @@ namespace Assets.NewUI
         public bool isLowPriority;
         public IClickable owner;
         public Vector2 offset;
+        public bool hasBeenDragged=false;
         public ClickHitData(IClickable owner,float distanceFromClick, float distanceFromCamera, Vector2 offset, bool isLowPriority=false)
         {
             this.isLowPriority = isLowPriority;

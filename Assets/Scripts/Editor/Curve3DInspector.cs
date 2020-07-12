@@ -261,6 +261,10 @@ public class Curve3DInspector : Editor
         var curveEditor = curve3d.UICurve;
         var MousePos = Event.current.mousePosition;
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
+        bool IsActiveElementSelected()
+        {
+            return curve3d.selectedPoints.Where(a => a == curve3d.elementClickedDown.owner.GUID).Count() > 0;
+        }
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.KeyDown:
@@ -309,13 +313,15 @@ public class Curve3DInspector : Editor
                         curve3d.elementClickedDown = clicked;
                         var clickPos = MousePos + clicked.offset;
                         var commandToExecute = clicked.owner.GetClickCommand();
-                        commandToExecute.ClickDown(clickPos,curve3d,curve3d.selectedPoints);
                         if (Event.current.control)  /////CONTROL CLICK
                         {
+                            curve3d.shiftControlState = Curve3D.ClickShiftControlState.control;
                             curve3d.ToggleSelectPoint(clicked.owner.Guid);
+                            //curve3d.SelectAdditionalPoint(clicked.owner.Guid);
                         }
                         else if (Event.current.shift) /////SHIFT CLICK
                         {
+                            curve3d.shiftControlState = Curve3D.ClickShiftControlState.shift;
                             SelectableGUID previous = SelectableGUID.Null;
                             if (curve3d.selectedPoints.Count > 0)
                                 previous = curve3d.selectedPoints[0];
@@ -323,10 +329,17 @@ public class Curve3DInspector : Editor
                         }
                         else
                         {
-                            curve3d.DeselectAllPoints();
-                            curve3d.ToggleSelectPoint(clicked.owner.Guid);
+                            curve3d.shiftControlState = Curve3D.ClickShiftControlState.none;
+                            if (curve3d.selectedPoints.Contains(clicked.owner.Guid))
+                                curve3d.SelectAdditionalPoint(clicked.owner.Guid);
+                            else 
+                                curve3d.SelectOnlyPoint(clicked.owner.Guid);
                         }
-                        commandToExecute.ClickDrag(clickPos, curve3d, clicked,curve3d.selectedPoints);
+                        if (IsActiveElementSelected())
+                        {
+                            commandToExecute.ClickDown(clickPos,curve3d,curve3d.selectedPoints);
+                            commandToExecute.ClickDrag(clickPos, curve3d, clicked,curve3d.selectedPoints);
+                        }
                         curve3d.RequestMeshUpdate();
                         Event.current.Use();
                     }
@@ -336,8 +349,10 @@ public class Curve3DInspector : Editor
                 if (elementClickedDown != null)
                 {
                     var clickPos = MousePos + elementClickedDown.offset;
+                    elementClickedDown.hasBeenDragged = true;
                     var commandToExecute = elementClickedDown.owner.GetClickCommand();
-                    commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown,curve3d.selectedPoints);
+                    if (IsActiveElementSelected())
+                        commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown,curve3d.selectedPoints);
                     Event.current.Use();
                     curve3d.RequestMeshUpdate();
                 }
@@ -349,9 +364,14 @@ public class Curve3DInspector : Editor
                     {
                         GUIUtility.hotControl = 0;
                         var commandToExecute = elementClickedDown.owner.GetClickCommand();
-                        commandToExecute.ClickUp(MousePos,curve3d,curve3d.selectedPoints);
+                        if (IsActiveElementSelected())
+                            commandToExecute.ClickUp(MousePos,curve3d,curve3d.selectedPoints);
                         curve3d.RequestMeshUpdate();
-                        curve3d.elementClickedDown = null;
+                        if (!curve3d.elementClickedDown.hasBeenDragged && curve3d.shiftControlState==Curve3D.ClickShiftControlState.none)
+                        {
+                            curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.Guid);
+                        }
+                        curve3d.elementClickedDown = null; 
                         Event.current.Use();
                     }
                 }

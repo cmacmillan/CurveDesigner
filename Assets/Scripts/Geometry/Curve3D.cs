@@ -46,6 +46,14 @@ public class Curve3D : MonoBehaviour
 
     //sorted from most recent to oldest
     public List<SelectableGUID> selectedPoints = new List<SelectableGUID>();
+    public ClickShiftControlState shiftControlState = ClickShiftControlState.none;
+
+    public enum ClickShiftControlState
+    {
+        none=0,
+        control=1,
+        shift=2,
+    }
 
     public void DeselectAllPoints() {
         selectedPoints.Clear();
