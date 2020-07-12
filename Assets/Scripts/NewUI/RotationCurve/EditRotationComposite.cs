@@ -19,7 +19,7 @@ namespace Assets.NewUI
         {
             _point = value;
             _curve = curve;
-            centerPoint = new PointAlongCurveComposite(this,value,positionCurveComposite,color,_point.GUID);
+            centerPoint = new PointAlongCurveComposite(this,value,positionCurveComposite,color,_point.GUID,sampler.GetPoints(curve));
             _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color,_point.GUID);
         }
 

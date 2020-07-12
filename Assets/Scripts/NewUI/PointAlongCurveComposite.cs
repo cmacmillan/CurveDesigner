@@ -13,10 +13,10 @@ namespace Assets.NewUI
         public PointComposite point;
         private BezierCurve _positionCurve;
 
-        public PointAlongCurveComposite(IComposite parent,CurveTrackingValue value,PositionCurveComposite positionCurve,Color color,SelectableGUID guid) : base(parent)
+        public PointAlongCurveComposite(IComposite parent,CurveTrackingValue value,PositionCurveComposite positionCurve,Color color,SelectableGUID guid,IEnumerable<CurveTrackingValue> sampler) : base(parent)
         {
             this.value = value;
-            point = new PointComposite(this, this, PointTextureType.square, new PointOnCurveClickCommand(value, positionCurve),color,guid);
+            point = new PointComposite(this, this, PointTextureType.square, new PointOnCurveClickCommand(value, positionCurve,sampler),color,guid);
             _positionCurve = positionCurve.positionCurve;
         }
 

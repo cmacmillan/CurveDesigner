@@ -11,25 +11,35 @@ namespace Assets.NewUI
     {
         private CurveTrackingValue _point;
         private PositionCurveComposite _positionCurve;
-        public PointOnCurveClickCommand(CurveTrackingValue point,PositionCurveComposite positionCurve)
+        private IEnumerable<CurveTrackingValue> sampler;
+        public PointOnCurveClickCommand(CurveTrackingValue point,PositionCurveComposite positionCurve,IEnumerable<CurveTrackingValue> sampler)
         {
+            this.sampler = sampler;
             _point = point;
             _positionCurve = positionCurve;
         }
 
-        void SetPosition()
+        void SetPosition(Curve3D curve,List<SelectableGUID> selected)
         {
-            _point.SetDistance(_positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_positionCurve.positionCurve);
+            var oldDistance = _point.GetDistance(_positionCurve.positionCurve);
+            var currentDistance = _positionCurve.PointClosestToCursor.distanceFromStartOfCurve;
+            float change = currentDistance - oldDistance;
+            var points = selected.GetSelected(sampler);
+            foreach (var i in points)
+            {
+                var startingDistance = i.GetDistance(_positionCurve.positionCurve);
+                i.SetDistance(startingDistance+change,_positionCurve.positionCurve);
+            }
         }
 
         public void ClickDown(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected)
         {
-            SetPosition();
+            SetPosition(curve,selected);
         }
 
         public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked,List<SelectableGUID> selected)
         {
-            SetPosition();
+            SetPosition(curve,selected);
         }
 
         public void ClickUp(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected)

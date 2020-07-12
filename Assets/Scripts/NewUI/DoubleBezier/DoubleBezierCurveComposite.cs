@@ -18,7 +18,7 @@ namespace Assets.NewUI
             _secondaryCurves = new List<SecondaryPositionCurveComposite>();
             _splitterPoint = new SplitterPointComposite(this,new TransformBlob(curve.transform,null), PointTextureType.circle, new DoubleBezierCurveSplitCommand(curve,_doubleBezierSampler,positionCurveComposite), Color.green,positionCurveComposite);
             foreach (var i in doubleBezierSampler.GetPoints(curve))
-                _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i));
+                _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i,doubleBezierSampler.GetPoints(curve)));
         }
         public void FindClosestPointsToCursor()
         {

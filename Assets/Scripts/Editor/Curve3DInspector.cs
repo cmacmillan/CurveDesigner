@@ -485,7 +485,7 @@ public class Curve3DInspector : Editor
     }
 }
 /*
-//we could dick around trying to draw our own lines/icons so that we can sort using the depth buffer, but I say we do that laterS
+//we could dick around trying to draw our own lines/icons so that we can sort using the depth buffer, but I say we do that later
 GL.PushMatrix();
 curve3d.testmat.SetPass(0);
 GL.LoadOrtho();
