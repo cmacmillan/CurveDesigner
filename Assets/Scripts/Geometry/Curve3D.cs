@@ -121,6 +121,7 @@ public class Curve3D : MonoBehaviour
     public UICurve UICurve=null;
 
     public bool showNormals = true;
+    public bool showTangents = true;
 
     public EditMode editMode=EditMode.PositionCurve;
 

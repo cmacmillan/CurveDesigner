@@ -75,27 +75,30 @@ namespace Assets.NewUI
             _sampler = sampler;
             _curve = curve;
         }
-        private void Set()
+        private void Set(List<SelectableGUID> selected,Curve3D curve)
         {
             if (CirclePlaneTools.GetCursorPointOnPlane(_owner.centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference,_curve))
             {
                 var previousVector = _owner.GetVectorByAngle(_owner._curve.previousRotations[Index],out PointOnCurve point);
-                _owner._point.value += Vector3.SignedAngle(_curve.transform.TransformDirection(previousVector),cursorHitPosition-centerPoint,centerForward);
+                float amountToRotate = Vector3.SignedAngle(_curve.transform.TransformDirection(previousVector),cursorHitPosition-centerPoint,centerForward);
+                var selectedEditRotations = selected.GetSelected(_sampler.GetPoints(curve));
+                foreach (var i in selectedEditRotations)
+                    i.value += amountToRotate;
             }
         }
-        public void ClickDown(Vector2 mousePos)
+        public void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
-            Set();
+            Set(selectedPoints,curve);
         }
 
-        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked)
+        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selectedPoints)
         {
-            Set();
+            Set(selectedPoints,curve);
         }
 
-        public void ClickUp(Vector2 mousePos)
+        public void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
-            Set();
+            Set(selectedPoints,curve);
         }
     }
 }

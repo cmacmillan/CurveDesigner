@@ -109,6 +109,22 @@ public struct SelectableGUID
         return (x % m + m) % m;
     }
 }
+public static class ListSelectableGUIDExtension
+{
+    public static List<T> GetSelected<T>(this List<SelectableGUID> selectionPoints,IEnumerable<T> points) where T : ISelectable
+    {
+        List<T> retr = new List<T>();
+        foreach (var i in points)
+            foreach (var j in selectionPoints)
+                if (i.GUID == j)
+                {
+                    retr.Add(i);
+                    break;
+                }
+        return retr;
+    }
+}
+
 //where need to more properly handle when we change contexts
 public interface ISelectable
 {

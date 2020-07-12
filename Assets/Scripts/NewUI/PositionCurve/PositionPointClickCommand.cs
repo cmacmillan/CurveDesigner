@@ -21,11 +21,11 @@ namespace Assets.NewUI
             this._transformBlob = transformBlob;
         }
 
-        public void ClickDown(Vector2 mousePos)
+        public void ClickDown(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected)
         {
         }
 
-        public void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData data)
+        public void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData data,List<SelectableGUID> selected)
         {
             var dimensionLockMode = positionCurve.dimensionLockMode;
             var oldPointPosition = _group.GetWorldPositionByIndex(_index,dimensionLockMode);
@@ -60,11 +60,15 @@ namespace Assets.NewUI
             if (shouldSet)
             {
                 var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);
-                _group.SetWorldPositionByIndex(_index, newPointPosition, dimensionLockMode);
+                Vector3 pointOffset = newPointPosition - oldPointPosition;
+                var selectedPointGroups = selected.GetSelected(positionCurve.PointGroups);
+                foreach (var i in selectedPointGroups)
+                    i.SetWorldPositionByIndex(_index, newPointPosition, dimensionLockMode);
+
             }
         }
 
-        public void ClickUp(Vector2 mousePos)
+        public void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
         }
     }

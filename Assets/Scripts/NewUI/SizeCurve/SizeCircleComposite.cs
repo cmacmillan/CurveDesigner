@@ -14,13 +14,15 @@ namespace Assets.NewUI
         private Curve3D _curve;
         public PointAlongCurveComposite linePoint;
         public FloatDistanceValue value;
+        public FloatLinearDistanceSampler _sampler;
 
         public const int ringPointCount=4;
 
         public override SelectableGUID GUID => value.GUID;
 
-        public SizeCircleComposite(IComposite parent,FloatDistanceValue value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public SizeCircleComposite(IComposite parent,FloatDistanceValue value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatLinearDistanceSampler _sampler) : base(parent)
         {
+            this._sampler = _sampler;
             this.value = value;
             var purpleColor = new Color(.6f, .6f, .9f);
             linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor,value.GUID);
@@ -95,29 +97,32 @@ namespace Assets.NewUI
             this.curve = curve;
         }
 
-        void Set()
+        void Set(List<SelectableGUID> selectedPoints,Curve3D curve)
         {
             _owner.linePoint.GetPositionForwardAndReference(out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference);
             centerPoint = curve.transform.TransformPoint(centerPoint);
             Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
             var screenRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(Event.current.mousePosition));
             Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
-            _ring.value = Vector3.Distance(pos,centerPoint)-curve.size;
+            var sizeChange = Vector3.Distance(pos, centerPoint) - curve.size;
+            var selectedSizePoints = selectedPoints.GetSelected(_owner._sampler.GetPoints(curve));
+            foreach (var i in selectedSizePoints)
+                i.value += sizeChange;
         }
 
-        public void ClickDown(Vector2 mousePos)
+        public void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
-            Set();
+            Set(selectedPoints,curve);
         }
 
-        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked)
+        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selectedPoints)
         {
-            Set();
+            Set(selectedPoints,curve);
         }
 
-        public void ClickUp(Vector2 mousePos)
+        public void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
-            Set();
+            Set(selectedPoints,curve);
         }
     }
     public class SizeCircleEdgePointPositionProvider : IPositionProvider

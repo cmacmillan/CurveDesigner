@@ -15,9 +15,9 @@ namespace Assets.NewUI
             this._curve = curve;
         }
 
-        public virtual void ClickDown(Vector2 mousePos) { }
-        public virtual void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked) { }
-        public virtual void ClickUp(Vector2 mousePos) { }
+        public virtual void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints) { }
+        public virtual void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked,List<SelectableGUID> selectedPoints) { }
+        public virtual void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints) { }
     }
     public class DoubleBezierCurveSplitCommand : SplitCommand
     {
@@ -29,7 +29,7 @@ namespace Assets.NewUI
             _curve = curve;
             this.sampler = sampler; 
         }
-        public override void ClickDown(Vector2 mousePos)
+        public override void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
             int index = sampler.InsertPointAtDistance(_positionCurveComposite.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             _curve.UICurve.Initialize();
@@ -88,7 +88,7 @@ namespace Assets.NewUI
             this.curve = curve;
         }
 
-        public void ClickDown(Vector2 mousePos)
+        public void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
             var closestPoint = secondaryPositionCurveComposite.positionCurve.PointClosestToCursor;
             secondaryPositionCurve.InsertSegmentAfterIndex(closestPoint,curve.placeLockedPoints,curve.splitInsertionBehaviour);
@@ -98,15 +98,15 @@ namespace Assets.NewUI
             curve.elementClickedDown.owner = selected;
         }
 
-        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked) { }
+        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selectedPoints) { }
 
-        public void ClickUp(Vector2 mousePos) { }
+        public void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints) { }
     }
     public class MainPositionCurveSplitCommand : SplitCommand
     {
         public MainPositionCurveSplitCommand(Curve3D curve) : base(curve) { }
 
-        public override void ClickDown(Vector2 mousePos)
+        public override void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
             List<BackingCurveModificationTracker<FloatDistanceValue>> distanceSamplerModificationTrackers = new List<BackingCurveModificationTracker<FloatDistanceValue>>();
             foreach (var i in _curve.DistanceSamplers)
@@ -141,7 +141,7 @@ namespace Assets.NewUI
             _sampler = sampler;
             _curve = curve;
         }
-        public override void ClickDown(Vector2 mousePos)
+        public override void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
             int index = _sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             _curve.UICurve.Initialize();//See above

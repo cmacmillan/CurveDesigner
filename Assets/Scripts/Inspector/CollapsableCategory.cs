@@ -135,6 +135,7 @@ namespace Assets.NewUI
         {
             obj = new SerializedObject(curve);
             Field("showNormals");
+            Field("showTangents");
             Field("lockToPositionZero");
             Field("placeLockedPoints");
             Field("settings");

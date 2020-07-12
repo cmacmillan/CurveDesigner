@@ -53,6 +53,8 @@ public class PointOnCurve : ISegmentTime
             return rL - (2.0f / c2) * Vector3.Dot(v2, rL) * v2;
         }
         reference=DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, previousReference);
+        reference = Vector3.ProjectOnPlane(reference,this.tangent.normalized);
+        //reference = Vector3.ProjectOnPlane(Vector3.up,this.tangent.normalized).normalized;//TODO: this aligns with up, which has some desirable qualities. Need to revisit
     }
 
     public Vector3 position;

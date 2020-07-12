@@ -11,9 +11,9 @@ namespace Assets.NewUI
     /// </summary>
     public interface IClickCommand
     {
-        void ClickDown(Vector2 mousePos);
-        void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData clicked);
-        void ClickUp(Vector2 mousePos);
+        void ClickDown(Vector2 mousePos, Curve3D curve,List<SelectableGUID> selected);
+        void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData clicked,List<SelectableGUID> selected);
+        void ClickUp(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected);
     }
     public abstract class IClickable : IComposite
     {

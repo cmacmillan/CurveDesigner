@@ -302,9 +302,9 @@ public partial class BezierCurve : IActiveElement
                 if (Vector3.Dot(rotation * referenceHint.reference,referenceVector) < 0)
                     referenceVector = -referenceVector;
             }
-                //if (Vector3.Dot(referenceVector, referenceHint.Value)<0)
-                    //referenceVector = -referenceVector;
-                //referenceVector = NormalTangent(points[0].tangent,referenceHint.Value);
+            //if (Vector3.Dot(referenceVector, referenceHint.Value)<0)
+            //referenceVector = -referenceVector;
+            //referenceVector = NormalTangent(points[0].tangent,referenceHint.Value);
             referenceVector = referenceVector.normalized;
             points[0].reference = referenceVector;
             for (int i = 1; i < points.Count; i++)

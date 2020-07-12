@@ -115,9 +115,6 @@ public class Curve3DInspector : Editor
         }
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
-        GUILayout.Label("asdf");
-        GUILayout.Label("asdf");
-        GUILayout.Label("asdf");
         if (GUILayout.Button("Clear"))
         {
             curve.positionCurve = new BezierCurve();
@@ -312,7 +309,7 @@ public class Curve3DInspector : Editor
                         curve3d.elementClickedDown = clicked;
                         var clickPos = MousePos + clicked.offset;
                         var commandToExecute = clicked.owner.GetClickCommand();
-                        commandToExecute.ClickDown(clickPos);
+                        commandToExecute.ClickDown(clickPos,curve3d,curve3d.selectedPoints);
                         if (Event.current.control)  /////CONTROL CLICK
                         {
                             curve3d.ToggleSelectPoint(clicked.owner.Guid);
@@ -329,7 +326,7 @@ public class Curve3DInspector : Editor
                             curve3d.DeselectAllPoints();
                             curve3d.ToggleSelectPoint(clicked.owner.Guid);
                         }
-                        commandToExecute.ClickDrag(clickPos, curve3d, clicked);
+                        commandToExecute.ClickDrag(clickPos, curve3d, clicked,curve3d.selectedPoints);
                         curve3d.RequestMeshUpdate();
                         Event.current.Use();
                     }
@@ -340,7 +337,7 @@ public class Curve3DInspector : Editor
                 {
                     var clickPos = MousePos + elementClickedDown.offset;
                     var commandToExecute = elementClickedDown.owner.GetClickCommand();
-                    commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown);
+                    commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown,curve3d.selectedPoints);
                     Event.current.Use();
                     curve3d.RequestMeshUpdate();
                 }
@@ -352,7 +349,7 @@ public class Curve3DInspector : Editor
                     {
                         GUIUtility.hotControl = 0;
                         var commandToExecute = elementClickedDown.owner.GetClickCommand();
-                        commandToExecute.ClickUp(MousePos);
+                        commandToExecute.ClickUp(MousePos,curve3d,curve3d.selectedPoints);
                         curve3d.RequestMeshUpdate();
                         curve3d.elementClickedDown = null;
                         Event.current.Use();

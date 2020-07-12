@@ -22,17 +22,17 @@ namespace Assets.NewUI
             _point.SetDistance(_positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_positionCurve.positionCurve);
         }
 
-        public void ClickDown(Vector2 mousePos)
+        public void ClickDown(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected)
         {
             SetPosition();
         }
 
-        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked)
+        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked,List<SelectableGUID> selected)
         {
             SetPosition();
         }
 
-        public void ClickUp(Vector2 mousePos)
+        public void ClickUp(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected)
         {
         }
     }

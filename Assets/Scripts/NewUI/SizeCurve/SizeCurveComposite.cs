@@ -18,7 +18,7 @@ namespace Assets.NewUI
             _distanceSampler = distanceSampler;
             curve.positionCurve.Recalculate();
             foreach (var i in distanceSampler.GetPoints(curve))
-                points.Add(new SizeCircleComposite(this,i,curve.positionCurve,curve,positionCurveComposite));
+                points.Add(new SizeCircleComposite(this,i,curve.positionCurve,curve,positionCurveComposite,_distanceSampler));
         }
 
         public void DrawWindow(Curve3D curve)
