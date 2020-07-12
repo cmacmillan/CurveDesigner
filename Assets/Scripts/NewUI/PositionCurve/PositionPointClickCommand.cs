@@ -63,7 +63,7 @@ namespace Assets.NewUI
                 Vector3 pointOffset = newPointPosition - oldPointPosition;
                 var selectedPointGroups = selected.GetSelected(positionCurve.PointGroups);
                 foreach (var i in selectedPointGroups)
-                    i.SetWorldPositionByIndex(_index, newPointPosition, dimensionLockMode);
+                    i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index,dimensionLockMode)+pointOffset, dimensionLockMode);
 
             }
         }
