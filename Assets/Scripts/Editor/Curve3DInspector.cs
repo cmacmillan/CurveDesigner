@@ -19,6 +19,8 @@ public class Curve3DInspector : Editor
     {
         var curve3d = (target as Curve3D);
 
+        Undo.RecordObject(curve3d, "curve");
+
         float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
         EditorGUIUtility.labelWidth = 0;
         EditorGUIUtility.labelWidth = EditorGUIUtility.labelWidth - 4;
@@ -82,6 +84,14 @@ public class Curve3DInspector : Editor
         GUILayout.FlexibleSpace();
         EditorGUILayout.EndVertical();
 
+        int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
+        switch (Event.current.GetTypeForControl(controlID))
+        {
+            case EventType.KeyDown:
+                HandleKeys(curve3d);
+                break;
+        }
+
 
         //GUILayout.Label("asdf"); 
         //base.OnInspectorGUI();
@@ -142,93 +152,47 @@ public class Curve3DInspector : Editor
         //each UI curve should describe how to handle it, when passed an array of ints 
     }
 
+    void HandleKeys(Curve3D curve3d)
+    {
+        if (Event.current.keyCode == KeyCode.Delete || Event.current.keyCode == KeyCode.Backspace)
+        {
+            bool didDelete = curve3d.ActiveElement.Delete(curve3d.selectedPoints, curve3d);
+            if (didDelete)
+            {
+                curve3d.RequestMeshUpdate();
+                curve3d.UICurve.Initialize();
+            }
+            Event.current.Use();
+        }
+        if (Event.current.keyCode == KeyCode.A && Event.current.control)
+        {
+            curve3d.selectedPoints = curve3d.ActiveElement.SelectAll(curve3d);
+            Event.current.Use();
+        }
+        if (Event.current.keyCode == KeyCode.Tab)
+        {
+            switch (curve3d.editMode)
+            {
+                case EditMode.PositionCurve:
+                    curve3d.editMode = EditMode.Rotation;
+                    break;
+                case EditMode.Rotation:
+                    curve3d.editMode = EditMode.Size;
+                    break;
+                case EditMode.Size:
+                    curve3d.editMode = EditMode.PositionCurve;
+                    break;
+            }
+            Event.current.Use();
+        }
+        SceneView.RepaintAll();
+    }
+
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
         GUILayout.Window(61732234,new Rect(20, 20, 0, 0),WindowFunc,$"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}");
-        /*
-        curve3d.positionCurve.Recalculate();
-        foreach (var i in curve3d.doubleBezierSampler.secondaryCurves)
-        {
-            i.secondaryCurve.owner = curve3d;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
-            i.secondaryCurve.Recalculate();
-        }
-        curve3d.CacheAverageSize();
-        var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;//Consider replacing with Camera.current?
-        if (curve3d.commandBuffer == null)
-        {
-            curve3d.commandBuffer = new CommandBuffer();
-            sceneCam.AddCommandBuffer(CameraEvent.AfterForwardOpaque, curve3d.commandBuffer);
-        }
-        var commandBuffer = curve3d.commandBuffer;
-        commandBuffer.Clear();
-        if (curve3d.testMesh != null && curve3d.testMat != null)
-        {
-            var second = curve3d.doubleBezierSampler.secondaryCurves[0];
-            float farthestPoint = 0;
-            foreach (var i in second.secondaryCurve.PointGroups)
-            {
-                void doit(PGIndex index){
-                    float d = i.GetWorldPositionByIndex(index, DimensionLockMode.z).magnitude;
-                    farthestPoint = Mathf.Max(farthestPoint, d);
-                }
-                doit(PGIndex.LeftTangent);
-                doit(PGIndex.Position);
-                doit(PGIndex.RightTangent);
-            }
-            curve3d.testMat.SetFloat("_Scale",farthestPoint);
-            var dist = second.GetDistance(curve3d.positionCurve);
-            var point = curve3d.positionCurve.GetPointAtDistance(dist);
-            commandBuffer.DrawMesh(curve3d.testMesh, Matrix4x4.Translate(point.position)*Matrix4x4.Rotate(Quaternion.LookRotation(point.tangent,point.reference))*Matrix4x4.Scale(Vector3.one*farthestPoint*2), curve3d.testMat);
-        }
-        */
 
-        /*
-        Handles.BeginGUI();
-        GUILayout.BeginArea(new Rect(20, 20, 210, 60));
-        var rect = EditorGUILayout.BeginVertical();
-        GUI.color = Color.yellow;
-        GUI.Box(rect, GUIContent.none);
-
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.Label("Edit Curve");
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-
-        GUILayout.BeginHorizontal();
-        GUI.color = Color.red;
-        if (GUILayout.Button("Clear"))
-        {
-            Debug.Log("cleared");
-            curve3d.selectedPointsIndex.Clear();
-            curve3d.hotPointIndex = -1;
-            curve3d.positionCurve.Initialize();
-            curve3d.positionCurve.isCurveOutOfDate = true;
-            curve3d.sizeDistanceSampler = new FloatLinearDistanceSampler();
-            curve3d.rotationDistanceSampler = new FloatLinearDistanceSampler();
-            curve3d.UICurve.Initialize();
-        }
-        if (GUILayout.Button("Lock"))
-        {
-            foreach (var i in curve3d.positionCurve.PointGroups)
-            {
-                i.SetPointLocked(true);
-            }
-        }
-        if (GUILayout.Button("Export to Obj"))
-        {
-            ObjMeshExporter.DoExport(curve3d.gameObject,false);
-        }
-        //GUI.color = Color.white;
-        //EditorGUI.CurveField(new Rect(0, 0, 20, 20),curve.curveSizeAnimationCurve);
-        GUILayout.EndHorizontal();
-        GUILayout.EndArea();
-
-        Handles.EndGUI();
-        */
-
-        ///
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
         curve3d.positionCurve.dimensionLockMode = curve3d.lockToPositionZero;
@@ -260,45 +224,15 @@ public class Curve3DInspector : Editor
         UpdateMesh(curve3d);
         var curveEditor = curve3d.UICurve;
         var MousePos = Event.current.mousePosition;
-        int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
         bool IsActiveElementSelected()
         {
             return curve3d.selectedPoints.Where(a => a == curve3d.elementClickedDown.owner.GUID).Count() > 0;
         }
+        int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
         switch (Event.current.GetTypeForControl(controlID))
         {
             case EventType.KeyDown:
-                if (Event.current.keyCode == KeyCode.Delete || Event.current.keyCode == KeyCode.Backspace)
-                {
-                    bool didDelete = curve3d.ActiveElement.Delete(curve3d.selectedPoints,curve3d);
-                    if (didDelete)
-                    {
-                        curve3d.RequestMeshUpdate();
-                        curve3d.UICurve.Initialize();
-                    }
-                    Event.current.Use();
-                }
-                if (Event.current.keyCode == KeyCode.A && Event.current.control)
-                {
-                    curve3d.selectedPoints = curve3d.ActiveElement.SelectAll(curve3d);
-                    Event.current.Use();
-                }
-                if (Event.current.keyCode == KeyCode.Tab)
-                {
-                    switch (curve3d.editMode)
-                    {
-                        case EditMode.PositionCurve:
-                            curve3d.editMode = EditMode.Rotation;
-                            break;
-                        case EditMode.Rotation:
-                            curve3d.editMode = EditMode.Size;
-                            break;
-                        case EditMode.Size:
-                            curve3d.editMode = EditMode.PositionCurve;
-                            break;
-                    }
-                    Event.current.Use();
-                }
+                HandleKeys(curve3d);
                 break;
             case EventType.Repaint:
                 Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints);
