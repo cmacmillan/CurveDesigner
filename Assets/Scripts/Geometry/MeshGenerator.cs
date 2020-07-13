@@ -475,16 +475,15 @@ public static class MeshGenerator
             #endregion
             case CurveType.DoubleBezier:
                 {
-                    var primaryCurveSamples = curve.GetPointsWithSpacing(VertexSampleDistance);
                     List<Vector3> backSideBuffer = new List<Vector3>();
                     doubleBezierSampler.CacheOpenCurvePoints(curve);
                     int pointCount = RingPointCount;
-                    numVerts = 2 * pointCount*primaryCurveSamples.Count;
+                    numVerts = 2 * pointCount*sampled.Count;
                     InitLists();
                     CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, Thickness * .25f, pointCount, true);
                     CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, -Thickness * .25f, pointCount, true);
-                    TrianglifyLayer(true, pointCount,numVerts/2);
                     TrianglifyLayer(false, pointCount,0);
+                    TrianglifyLayer(true, pointCount,numVerts/2);
                     CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount),true);
                     if (!IsClosedLoop)
                         CreateMeshInteriorExteriorEndPlates(pointCount,true);
