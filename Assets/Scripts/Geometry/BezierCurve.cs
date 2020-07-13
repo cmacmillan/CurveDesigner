@@ -86,7 +86,7 @@ public partial class BezierCurve : IActiveElement
         PointGroups.Add(pointB);
     }
 
-    public int InsertSegmentAfterIndex(ISegmentTime splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
+    public SelectableGUID InsertSegmentAfterIndex(ISegmentTime splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
     {
         var prePointGroup = PointGroups[splitPoint.SegmentIndex];
         var postPointGroup = PointGroups[(splitPoint.SegmentIndex + 1)%PointGroups.Count];
@@ -132,7 +132,7 @@ public partial class BezierCurve : IActiveElement
         }
 
         PointGroups.Insert(splitPoint.SegmentIndex+1,point);
-        return (splitPoint.SegmentIndex+1);
+        return point.GUID;
     }
 
     public void AddDefaultSegment()

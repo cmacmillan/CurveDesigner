@@ -63,10 +63,10 @@ public class PointGroup : ISelectable<PointGroup>
 
     public SelectableGUID GUID => guid;
     #endregion
-    public PointGroup(bool lockState,Curve3D curve)
+    public PointGroup(bool lockState,Curve3D owner)
     {
         SetPointLocked(lockState);
-        guid = curve.guidFactory.GetGUID();
+        this.guid = owner.guidFactory.GetGUID();
     }
     public PointGroup(PointGroup clone,Curve3D curve)
     {

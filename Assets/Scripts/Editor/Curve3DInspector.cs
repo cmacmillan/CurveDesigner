@@ -146,12 +146,6 @@ public class Curve3DInspector : Editor
         }
     }
 
-    private void DrawSelectedUI()
-    {
-        //so basically we need to handle editing an individual point, and groups of points
-        //each UI curve should describe how to handle it, when passed an array of ints 
-    }
-
     void HandleKeys(Curve3D curve3d)
     {
         if (Event.current.keyCode == KeyCode.Delete || Event.current.keyCode == KeyCode.Backspace)
@@ -245,13 +239,14 @@ public class Curve3DInspector : Editor
                     {
                         GUIUtility.hotControl = controlID;
                         curve3d.elementClickedDown = clicked;
-                        var clickPos = MousePos + clicked.offset;
-                        var commandToExecute = clicked.owner.GetClickCommand();
-                        if (Event.current.control)  /////CONTROL CLICK
+                        var clickPos = MousePos + curve3d.elementClickedDown.offset;
+                        var commandToExecute = curve3d.elementClickedDown.owner.GetClickCommand();
+                        //shift will behave like control if it's a split command, also just fixed a bug when shift-clicking a split point
+                        bool isSplitAndShift = Event.current.shift && (commandToExecute is SplitCommand);
+                        if (Event.current.control || isSplitAndShift)  /////CONTROL CLICK
                         {
                             curve3d.shiftControlState = Curve3D.ClickShiftControlState.control;
-                            curve3d.ToggleSelectPoint(clicked.owner.Guid);
-                            //curve3d.SelectAdditionalPoint(clicked.owner.Guid);
+                            curve3d.ToggleSelectPoint(curve3d.elementClickedDown.owner.Guid);
                         }
                         else if (Event.current.shift) /////SHIFT CLICK
                         {
@@ -259,20 +254,20 @@ public class Curve3DInspector : Editor
                             SelectableGUID previous = SelectableGUID.Null;
                             if (curve3d.selectedPoints.Count > 0)
                                 previous = curve3d.selectedPoints[0];
-                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, clicked.owner.Guid,curve3d,curve3d.positionCurve);//for a double bezier selection should use that curve instead of main
+                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, curve3d.elementClickedDown.owner.Guid,curve3d,curve3d.positionCurve);//for a double bezier selection should use that curve instead of main
                         }
                         else
                         {
                             curve3d.shiftControlState = Curve3D.ClickShiftControlState.none;
-                            if (curve3d.selectedPoints.Contains(clicked.owner.Guid))
-                                curve3d.SelectAdditionalPoint(clicked.owner.Guid);
+                            if (curve3d.selectedPoints.Contains(curve3d.elementClickedDown.owner.Guid))
+                                curve3d.SelectAdditionalPoint(curve3d.elementClickedDown.owner.Guid);
                             else 
-                                curve3d.SelectOnlyPoint(clicked.owner.Guid);
+                                curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.Guid);
                         }
                         if (IsActiveElementSelected())
                         {
                             commandToExecute.ClickDown(clickPos,curve3d,curve3d.selectedPoints);
-                            commandToExecute.ClickDrag(clickPos, curve3d, clicked,curve3d.selectedPoints);
+                            commandToExecute.ClickDrag(clickPos, curve3d, curve3d.elementClickedDown,curve3d.selectedPoints);
                         }
                         curve3d.RequestMeshUpdate();
                         Event.current.Use();
