@@ -330,8 +330,7 @@ public class Curve3DInspector : Editor
                     }
                     curve.displayMesh.SetVertices(MeshGenerator.vertices);
                     curve.displayMesh.SetTriangles(MeshGenerator.triangles, 0);
-                    if (MeshGenerator.hasUVs)
-                        curve.displayMesh.SetUVs(0, MeshGenerator.uvs);
+                    curve.displayMesh.SetUVs(0, MeshGenerator.uvs);
                     curve.displayMesh.RecalculateNormals();
                 }
                 curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;

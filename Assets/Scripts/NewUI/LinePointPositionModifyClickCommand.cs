@@ -28,7 +28,7 @@ namespace Assets.NewUI
             var points = selected.GetSelected(sampler);
             bool isClosedLoop = _positionCurve.positionCurve.isClosedLoop;
             float length = _positionCurve.positionCurve.GetLength();
-            //START this is all just to not squash multiselected points when you reach the edge of a curve
+            //START this is all just to not squash multiselected points when you reach the edge of a curve, which is only relevant when not a closed loop
             float minDist = float.MaxValue;
             float maxDist = 0;
             if (!isClosedLoop)
@@ -42,7 +42,7 @@ namespace Assets.NewUI
                 change = Mathf.Min(length - maxDist, change);
             else
                 change = Mathf.Max(0-minDist, change);
-            //////END
+            //END
             foreach (var i in points)
             {
                 var startingDistance = i.GetDistance(_positionCurve.positionCurve);

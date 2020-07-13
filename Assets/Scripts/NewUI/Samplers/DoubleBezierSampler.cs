@@ -18,13 +18,14 @@ namespace Assets.NewUI
             if (curveToCopy == null)
             {
                 secondaryCurve = new BezierCurve();
+                secondaryCurve.owner = curve.owner;
                 secondaryCurve.Initialize();
             }
             else
             {
                 secondaryCurve = new BezierCurve(curveToCopy);
+                secondaryCurve.owner = curve.owner;
             }
-            secondaryCurve.owner = curve.owner;
             secondaryCurve.dimensionLockMode = DimensionLockMode.z;
             secondaryCurve.Recalculate();
         }
@@ -46,7 +47,7 @@ namespace Assets.NewUI
         }
     }
     [System.Serializable]
-    public class DoubleBezierSampler : ISerializationCallbackReceiver
+    public class DoubleBezierSampler : ISerializationCallbackReceiver, IActiveElement
     {
         private List<BezierCurveDistanceValue> openCurveSecondaryCurves;
         public List<BezierCurveDistanceValue> secondaryCurves = new List<BezierCurveDistanceValue>();
@@ -61,6 +62,29 @@ namespace Assets.NewUI
             openCurveSecondaryCurves = new List<BezierCurveDistanceValue>();
             foreach (var i in objToClone.openCurveSecondaryCurves)
                 openCurveSecondaryCurves.Add(new BezierCurveDistanceValue(i,this));
+        }
+        public ISelectable GetSelectable(int index, Curve3D curve)
+        {
+            return GetPointsByCurveOpenClosedStatus(curve.positionCurve,true)[index];
+        }
+
+        public int NumSelectables(Curve3D curve)
+        {
+            return GetPointsByCurveOpenClosedStatus(curve.positionCurve,true).Count;
+        }
+
+        public bool Delete(List<SelectableGUID> guids, Curve3D curve)
+        {
+            return SelectableGUID.Delete(ref secondaryCurves, guids, curve);
+        }
+
+        public List<SelectableGUID> SelectAll(Curve3D curve)
+        {
+            List<SelectableGUID> retr = new List<SelectableGUID>();
+            var points = GetPoints(curve);
+            foreach (var i in points)
+                retr.Add(i.GUID);
+            return retr;
         }
         public List<BezierCurveDistanceValue> GetPoints(Curve3D curve)
         {

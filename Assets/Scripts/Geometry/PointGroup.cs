@@ -74,7 +74,7 @@ public class PointGroup : ISelectable<PointGroup>
         this.leftTangent = clone.leftTangent;
         this.rightTangent = clone.rightTangent;
         this.position = clone.position;
-        //TODO:  //this.guid = curve.guidFactory.GetGUID();//commenting this for now, but it just means guids will be broken when position curves get cloned
+        this.guid = curve.guidFactory.GetGUID();
     }
 
     public bool DoesEditAffectBothSegments(PGIndex index)

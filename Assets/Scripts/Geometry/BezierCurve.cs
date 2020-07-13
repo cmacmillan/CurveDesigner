@@ -55,7 +55,7 @@ public partial class BezierCurve : IActiveElement
         PointGroups = new List<PointGroup>();
         foreach (var i in curveToClone.PointGroups)
         {
-            PointGroups.Add(new PointGroup(i,owner));
+            PointGroups.Add(new PointGroup(i, curveToClone.owner));
         }
         this.isClosedLoop = curveToClone.isClosedLoop;
         this.segments = new List<Segment>(curveToClone.segments.Count);
@@ -63,6 +63,7 @@ public partial class BezierCurve : IActiveElement
             segments.Add(new Segment(i));
         this.isCurveOutOfDate = curveToClone.isCurveOutOfDate;
         this.dimensionLockMode = curveToClone.dimensionLockMode;
+        this.owner = curveToClone.owner;
     }
 
     public enum SplitInsertionNeighborModification

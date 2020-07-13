@@ -31,6 +31,7 @@ public class Curve3D : MonoBehaviour
                 case EditMode.Size:
                     return sizeDistanceSampler;
                 case EditMode.DoubleBezier:
+                    return doubleBezierSampler;
                 default:
                     throw new NotImplementedException();
             }
@@ -159,12 +160,6 @@ public class Curve3D : MonoBehaviour
     private float old_vertexDensity = -1;
 
     [Min(0)]
-    public int doubleBezierSampleCount = 1;
-    [SerializeField]
-    [HideInInspector]
-    private int old_doubleBezierVertexDensity = -1;
-
-    [Min(0)]
     public float size = 3.0f;
     [SerializeField]
     [HideInInspector]
@@ -243,7 +238,6 @@ public class Curve3D : MonoBehaviour
         retr |= CheckFieldChanged(closeTilableMeshGap, ref old_closeTilableMeshGap);
         retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
         retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
-        retr |= CheckFieldChanged(doubleBezierSampleCount, ref old_doubleBezierVertexDensity);
         retr |= CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
         retr |= CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
 
@@ -260,6 +254,7 @@ public class Curve3D : MonoBehaviour
     public void ResetCurve()
     {
         positionCurve.Initialize();
+        UICurve.Initialize();
     }
     [ContextMenu("Clear double")]
     public void ClearDouble()

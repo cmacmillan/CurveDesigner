@@ -38,8 +38,6 @@ public static class MeshGenerator
     public static List<int> triangles;
     public static List<Vector2> uvs;
 
-    public static bool hasUVs;
-
     public static bool IsBuzy = false;
 
     public static DateTime lastUpdateTime;
@@ -50,7 +48,6 @@ public static class MeshGenerator
     public static IDistanceSampler<float> sizeDistanceSampler;
     public static IDistanceSampler<float> rotationDistanceSampler;
 
-    public static int doubleBezierSampleCount=20;
     public static int RingPointCount = 8;
     public static float Radius=3.0f;
     public static float VertexSampleDistance = 1.0f;
@@ -81,7 +78,6 @@ public static class MeshGenerator
             MeshGenerator.sizeDistanceSampler = new FloatLinearDistanceSampler(curve.sizeDistanceSampler,clonedCurve);
             MeshGenerator.rotationDistanceSampler = new FloatLinearDistanceSampler(curve.rotationDistanceSampler,clonedCurve);
             MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);
-            MeshGenerator.doubleBezierSampleCount = curve.doubleBezierSampleCount;
             MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
@@ -139,7 +135,6 @@ public static class MeshGenerator
     {
         //Debug.Log("started thread");
         int numVerts;
-        int numTris;
         float curveLength = curve.GetLength();
         var sampled = curve.GetPointsWithSpacing(VertexSampleDistance);
         if (IsClosedLoop)
@@ -202,7 +197,7 @@ public static class MeshGenerator
                 }
             }
         }
-        void CreateEdgeVertsTrisAndUvs(List<EdgePointInfo> edgePointInfos)
+        void CreateEdgeVertsTrisAndUvs(List<EdgePointInfo> edgePointInfos, bool flip=false)
         {
             int prevs1p1=-1;
             int prevs1p2=-1;
@@ -235,8 +230,17 @@ public static class MeshGenerator
                 s2p2 = vertices.Count - 1;
                 if (i > 0)
                 {
-                    DrawQuad(s1p1, s1p2, prevs1p1, prevs1p2);
-                    DrawQuad(prevs2p1, prevs2p2, s2p1, s2p2);
+                    if (!flip)
+                    {
+                        DrawQuad(s1p1, s1p2, prevs1p1, prevs1p2);
+                        DrawQuad(prevs2p1, prevs2p2, s2p1, s2p2);
+                    }
+                    else
+                    {
+                        DrawQuad(prevs1p1, prevs1p2,s1p1, s1p2);
+                        DrawQuad(s2p1, s2p2,prevs2p1, prevs2p2);
+                    }
+
                 }
                 prevs1p1 = s1p1;
                 prevs1p2 = s1p2;
@@ -300,6 +304,19 @@ public static class MeshGenerator
             }
         }
         float tubeDistanceFromFull = 360.0f - TubeArc;
+        Vector3 DoubleBezierPointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+        {
+            float progress = currentIndex / (float)totalPointCount;
+            var relativePos = doubleBezierSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference);
+            //Lets say z is forward
+            var cross = Vector3.Cross(point.tangent, point.reference).normalized;
+            Vector3 TransformVector3(Vector3 vect)
+            {
+                return (Quaternion.LookRotation(point.tangent, point.reference) * vect);
+            }
+            var absolutePos = point.position + TransformVector3(relativePos);
+            return absolutePos + TransformVector3(reference).normalized * offset;
+        }
         Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
         {
             var center = point.position;
@@ -323,15 +340,13 @@ public static class MeshGenerator
             Vector3 lineEnd = TubePointCreator(point, totalPointCount-1, totalPointCount, size, rotation, offset);
             return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
         }
-        void InitLists(bool provideUvs = false)
+        void InitLists()
         {
             InitOrClear(ref vertices);
             InitOrClear(ref triangles);
-            if (provideUvs)
-                InitOrClear(ref uvs);
-            hasUVs = provideUvs;
+            InitOrClear(ref uvs);
         }
-        void CreateMeshInteriorExteriorEndPlates(int vertsPerRing)
+        void CreateMeshInteriorExteriorEndPlates(int vertsPerRing,bool flip=false)
         {
             int interiorBase = numVerts / 2;
             //Then we gotta connect the ends as well
@@ -341,18 +356,36 @@ public static class MeshGenerator
             {
                 if ((j + 1) >= vertsPerRing)//will introduce a bug where curve never closes, even when angle is 360 TODO: revist
                     continue;
-                DrawQuad(
-                        firstRingIndex + ((j + 1) % vertsPerRing),
-                        firstRingIndex+ j,
-                        firstRingIndex + ((j + 1) % vertsPerRing) + interiorBase,
-                        firstRingIndex + j + interiorBase
-                    );
-                DrawQuad(
-                        lastRingIndex+ j,
-                        lastRingIndex + ((j + 1) % vertsPerRing),
-                        lastRingIndex + j + interiorBase,
-                        lastRingIndex + ((j + 1) % vertsPerRing) + interiorBase
-                    );
+                if (!flip)
+                {
+                    DrawQuad(
+                            firstRingIndex + ((j + 1) % vertsPerRing),
+                            firstRingIndex + j,
+                            firstRingIndex + ((j + 1) % vertsPerRing) + interiorBase,
+                            firstRingIndex + j + interiorBase
+                        );
+                    DrawQuad(
+                            lastRingIndex + j,
+                            lastRingIndex + ((j + 1) % vertsPerRing),
+                            lastRingIndex + j + interiorBase,
+                            lastRingIndex + ((j + 1) % vertsPerRing) + interiorBase
+                        );
+                } 
+                else
+                {
+                    DrawQuad(
+                            firstRingIndex + ((j + 1) % vertsPerRing) + interiorBase,
+                            firstRingIndex + j + interiorBase,
+                            firstRingIndex + ((j + 1) % vertsPerRing),
+                            firstRingIndex + j
+                        );
+                    DrawQuad(
+                            lastRingIndex + j + interiorBase,
+                            lastRingIndex + ((j + 1) % vertsPerRing) + interiorBase,
+                            lastRingIndex + j,
+                            lastRingIndex + ((j + 1) % vertsPerRing)
+                        );
+                }
             }
         }
         /*
@@ -397,8 +430,7 @@ public static class MeshGenerator
             case CurveType.Cylinder:
                 {
                     numVerts = RingPointCount* sampled.Count;
-                    numTris = RingPointCount * numRings * 6;//each ring point except for the last ring has a quad (6) associated with it
-                    InitLists(true);
+                    InitLists();
                     CreatePointsAlongCurve(TubePointCreator,sampled,.5f*Thickness,RingPointCount,true);
                     CreatePointsAlongCurve(TubeFlatPlateCreator, sampled,.5f*Thickness, 3, true);
                     //CreateRingPointsAlongCurve(sampled, ActualRingPointCount, true);
@@ -414,8 +446,7 @@ public static class MeshGenerator
                 #region hollowtube
                 {
                     numVerts = RingPointCount * sampled.Count * 2;
-                    numTris = RingPointCount * numRings * 6 * 2;
-                    InitLists(true);
+                    InitLists();
                     CreatePointsAlongCurve(TubePointCreator,sampled,.5f*Thickness,RingPointCount,true);
                     CreatePointsAlongCurve(TubePointCreator,sampled,-.5f*Thickness,RingPointCount,false);
                     TrianglifyLayer(true, RingPointCount,0);
@@ -429,10 +460,9 @@ public static class MeshGenerator
             case CurveType.Flat:
                 #region flat
                 {
-                    int pointsPerFace = 10;
+                    int pointsPerFace = RingPointCount;
                     numVerts = 2*pointsPerFace * sampled.Count;
-                    numTris = 8 * (sampled.Count - 1) + 2*pointsPerFace;
-                    InitLists(true);
+                    InitLists();
                     CreatePointsAlongCurve(RectanglePointCreator, sampled, .25f*Thickness, pointsPerFace,false);
                     CreatePointsAlongCurve(RectanglePointCreator, sampled, -.25f*Thickness, pointsPerFace,false);
                     TrianglifyLayer(true, pointsPerFace,0);
@@ -445,44 +475,24 @@ public static class MeshGenerator
             #endregion
             case CurveType.DoubleBezier:
                 {
-                    InitLists();
                     var primaryCurveSamples = curve.GetPointsWithSpacing(VertexSampleDistance);
                     List<Vector3> backSideBuffer = new List<Vector3>();
                     doubleBezierSampler.CacheOpenCurvePoints(curve);
-                    int triangleIndex = 0;
-                    foreach (var primaryCurvePoint in primaryCurveSamples)
-                    {
-                        for (float c = 0; c <= doubleBezierSampleCount; c++)
-                        {
-                            float progress = c / (float)doubleBezierSampleCount;
-                            var relativePos = doubleBezierSampler.SampleAt(primaryCurvePoint.distanceFromStartOfCurve, progress, curve,out Vector3 reference);
-                            //Lets say z is forward
-                            var cross = Vector3.Cross(primaryCurvePoint.tangent, primaryCurvePoint.reference).normalized;
-                            Vector3 TransformVector3(Vector3 vect)
-                            {
-                                return (Quaternion.LookRotation(primaryCurvePoint.tangent,primaryCurvePoint.reference)*vect);
-                            }
-                            var absolutePos = primaryCurvePoint.position +TransformVector3(relativePos);
-                            vertices.Add(absolutePos+TransformVector3(reference)*Thickness/2);
-                            backSideBuffer.Add(absolutePos-TransformVector3(reference)*Thickness/2);
-                        }
-                    }
-                    vertices.AddRange(backSideBuffer);
-                    numVerts = vertices.Count;
-                    numRings =  primaryCurveSamples.Count - 1;//Minus 1?
-                    int pointCount = doubleBezierSampleCount + 1;
-                    TrianglifyLayer(true, pointCount,0);
-                    TrianglifyLayer(false, pointCount,numVerts/2);
-                    //ConnectMeshInteriorAndExteriorLayers();
-                    /*
+                    int pointCount = RingPointCount;
+                    numVerts = 2 * pointCount*primaryCurveSamples.Count;
+                    InitLists();
+                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, Thickness * .25f, pointCount, true);
+                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, -Thickness * .25f, pointCount, true);
+                    TrianglifyLayer(true, pointCount,numVerts/2);
+                    TrianglifyLayer(false, pointCount,0);
+                    CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount),true);
                     if (!IsClosedLoop)
-                        CreateMeshInteriorExteriorEndPlates();
-                        */
+                        CreateMeshInteriorExteriorEndPlates(pointCount,true);
                     return true;
                 }
             case CurveType.Mesh:
                 {
-                    InitLists(true);
+                    InitLists();
                     //we are gonna assume that the largest dimension of the bounding box is the correct direction, and that the mesh is axis aligned and it is perpendicular to the edge of the bounding box
                     var bounds = meshToTile.bounds;
                     //watch out for square meshes
