@@ -17,9 +17,7 @@ public class Curve3DInspector : Editor
 
     public override void OnInspectorGUI()
     {
-        var curve3d = (target as Curve3D);
-
-        Undo.RecordObject(curve3d, "curve");
+        var curve3d = (target as Curve3D); 
 
         float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
         EditorGUIUtility.labelWidth = 0;
@@ -83,6 +81,8 @@ public class Curve3DInspector : Editor
         EditorGUILayout.EndVertical();
         GUILayout.FlexibleSpace();
         EditorGUILayout.EndVertical();
+
+        Undo.RecordObject(curve3d, "curve");
 
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
         switch (Event.current.GetTypeForControl(controlID))
