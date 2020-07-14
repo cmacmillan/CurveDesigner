@@ -8,7 +8,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 using static BezierCurve;
 
-public class Curve3D : MonoBehaviour
+public class Curve3D : MonoBehaviour : ISerializationCallbackReceiver
 {
     public IEnumerable<FloatLinearDistanceSampler> DistanceSamplers
     {
@@ -100,7 +100,36 @@ public class Curve3D : MonoBehaviour
     {
         ObjMeshExporter.DoExport(gameObject, false);
     }
+    //////////////////////////////////////////////////
 
+    [NonSerialized]
+    public DistanceSampler<float> sizeSampler;
+    [SerializeField]
+    private List<float> sizeSampler_value_serializable = new List<float>();
+    [SerializeField]
+    private List<SegmentDistance> sizeSampler_distance_serializable = new List<SegmentDistance>();
+
+    public void OnBeforeSerialize()
+    {
+        void SaveOut<T>(DistanceSampler<T> sampler, List<T> valueSerializable, List<SegmentDistance> distanceSerializable)
+        {
+            valueSerializable.Clear();
+            distanceSerializable.Clear();
+            for (int i = 0; i < sampler.points.Count; i++)
+            {
+                valueSerializable.Add(sampler.points[i].value);
+                distanceSerializable.Add(sampler.points[i].segmentDistance);
+            }
+        }
+        SaveOut(sizeSampler,sizeSampler_value_serializable,sizeSampler_distance_serializable);
+    }
+
+    public void OnAfterDeserialize()
+    {
+        sizeSampler = new DistanceSampler<float>(sizeSampler_value_serializable,sizeSampler_distance_serializable);
+    }
+
+    //////////////////////////////////////////////////
     [HideInInspector]
     public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler("Size");
     [HideInInspector]

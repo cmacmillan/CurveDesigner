@@ -7,9 +7,35 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public interface IDistanceSampler<T> where T : struct
+    [System.Serializable]
+    public struct SegmentDistance
     {
-        T GetValueAtDistance(float distance,bool isClosedLoop,float curveLength,BezierCurve curve);
-        T GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve, float baseVal);
+        public int segmentIndex;
+        public float time;
+    }
+
+    //Not serializable
+    public class SamplerPoint<T>
+    {
+        public T value;
+        public SegmentDistance segmentDistance;
+        public SamplerPoint(T value, SegmentDistance segmentDistance){
+            this.value = value;
+            this.segmentDistance = segmentDistance;
+        }
+    }
+
+    //Not serializable
+    public class DistanceSampler<T>
+    {
+        public List<SamplerPoint<T>> points;
+        public DistanceSampler(List<T> items,List<SegmentDistance> distances){
+            if (items.Count != distances.Count)
+                throw new ArgumentException("Items and distances must have same Count.");
+            points = new List<SamplerPoint<T>>();
+            for (int i=0;i<items.Count;i++)
+                points.Add(new SamplerPoint<T>(items[i],distances[i]));
+        }
+        
     }
 }

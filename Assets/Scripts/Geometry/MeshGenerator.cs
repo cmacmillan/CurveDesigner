@@ -45,8 +45,8 @@ public static class MeshGenerator
     public static BezierCurve curve;
 
     public static DoubleBezierSampler doubleBezierSampler;
-    public static IDistanceSampler<float> sizeDistanceSampler;
-    public static IDistanceSampler<float> rotationDistanceSampler;
+    public static FloatLinearDistanceSampler sizeDistanceSampler;
+    public static FloatLinearDistanceSampler rotationDistanceSampler;
 
     public static int RingPointCount = 8;
     public static float Radius=3.0f;

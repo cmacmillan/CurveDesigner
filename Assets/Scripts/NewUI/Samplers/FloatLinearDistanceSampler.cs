@@ -93,7 +93,7 @@ namespace Assets.NewUI
         }
     }
     [System.Serializable]
-    public class FloatLinearDistanceSampler : IDistanceSampler<float>, ISerializationCallbackReceiver, IActiveElement
+    public class FloatLinearDistanceSampler : ISerializationCallbackReceiver, IActiveElement
     {
         [SerializeField]
         public List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
