@@ -111,7 +111,7 @@ namespace Assets.NewUI
         public int NumSelectables(Curve3D curve) { return GetPoints(curve).Count; }
         public ISelectable GetSelectable(int index,Curve3D curve)
         {
-            return GetPoints(curve)[index];
+            return GetPoints(curve)[index]; 
         }
         public List<SelectableGUID> SelectAll(Curve3D curve)
         {

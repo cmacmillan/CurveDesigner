@@ -46,7 +46,24 @@ public partial class BezierCurve : IActiveElement
             Recalculate();
         return didChange;
     }
-    
+
+    public float WrappedDistanceBetween(float distance1, float distance2)
+    {
+        float length = GetLength();
+        bool isClosed = isClosedLoop;
+        float simpleDistance = Mathf.Abs(distance1 - distance2);
+        if (isClosed)
+        {
+            float wrappedUpper = Mathf.Abs((distance2 - length) - distance1);
+            float wrappedLower = Mathf.Abs((distance1 - length) - distance2);
+            return Mathf.Min(simpleDistance, wrappedLower, wrappedUpper);
+        }
+        else
+        {
+            return simpleDistance;
+        }
+    }
+
     public BezierCurve() {
         PointGroups = new List<PointGroup>();
     }
