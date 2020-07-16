@@ -11,6 +11,8 @@ namespace Assets.NewUI
     [System.Serializable]
     public class ColorDistanceSampler : ValueDistanceSampler<Color, ColorSamplerPoint, ColorDistanceSampler>
     {
+        public ColorDistanceSampler(string fieldDisplayName): base(fieldDisplayName) { }
+
         public override Color GetDefaultVal()
         {
             return Color.white;

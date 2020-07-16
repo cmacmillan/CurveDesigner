@@ -14,12 +14,9 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     {
         get
         {
-            yield break;
-            /*
-            yield return sizeDistanceSampler;
-            yield return rotationDistanceSampler;
+            yield return sizeSampler;
+            yield return rotationSampler;
             yield return doubleBezierSampler;
-            */
         }
     }
     public IActiveElement ActiveElement
@@ -113,12 +110,9 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
     }
 
-    [HideInInspector]
-    public Old_FloatLinearDistanceSampler sizeDistanceSampler = new Old_FloatLinearDistanceSampler("Size");
-    [HideInInspector]
-    public Old_FloatLinearDistanceSampler rotationDistanceSampler = new Old_FloatLinearDistanceSampler("Rotation (degrees)");
-    [HideInInspector]
-    public Old_DoubleBezierSampler doubleBezierSampler = new Old_DoubleBezierSampler();
+    public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size");
+    public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation (degrees)");
+    public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
 
     public void RequestMeshUpdate()
     {
@@ -271,7 +265,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [ContextMenu("Clear double")]
     public void ClearDouble()
     {
-        doubleBezierSampler = new Old_DoubleBezierSampler();
+        doubleBezierSampler = new DoubleBezierSampler();
         this.UICurve.Initialize();
     }
     public void TryInitialize()
@@ -285,13 +279,13 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     public void CopyRotations()
     {
         previousRotations.Clear();
-        foreach (var i in rotationDistanceSampler.GetPoints(this))
+        foreach (var i in rotationSampler.GetPoints(this.positionCurve))
             previousRotations.Add(i.value);
     }
     public void CacheAverageSize()
     {
         float avg = 0;
-        var points = sizeDistanceSampler.GetPoints(this);
+        var points = sizeSampler.GetPoints(this.positionCurve);
         averageSize = 0;
         if (points.Count > 0)
         {

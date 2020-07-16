@@ -11,6 +11,8 @@ namespace Assets.NewUI
     [System.Serializable]
     public class FloatDistanceSampler : ValueDistanceSampler<float, FloatSamplerPoint,FloatDistanceSampler>
     {
+        public FloatDistanceSampler(string fieldDisplayName): base(fieldDisplayName) { }
+
         public override float GetDefaultVal() { return 0; }
 
         public override float Lerp(float val1, float val2, float lerp) { return Mathf.Lerp(val1,val2,lerp); }

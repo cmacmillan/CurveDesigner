@@ -75,10 +75,12 @@ namespace Assets.NewUI
 
     public abstract class ValueDistanceSampler<T,S,Q> : DistanceSampler<T, S, Q> where Q : ValueDistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
     {
-        public string fieldEditDisplayName = "";
-        public string FieldEditDisplayName => fieldEditDisplayName;
         public abstract T GetDefaultVal();
         public abstract T Lerp(T val1, T val2, float lerp);
+        public ValueDistanceSampler(string fieldDisplayName)
+        {
+            this.fieldDisplayName = fieldDisplayName;
+        }
         protected override T GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
         {
             return GetValueAtDistance(distance, curve.isClosedLoop, curve.GetLength(),curve);
