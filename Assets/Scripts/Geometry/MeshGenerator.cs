@@ -44,9 +44,9 @@ public static class MeshGenerator
 
     public static BezierCurve curve;
 
-    public static DoubleBezierSampler doubleBezierSampler;
-    public static FloatLinearDistanceSampler sizeDistanceSampler;
-    public static FloatLinearDistanceSampler rotationDistanceSampler;
+    public static Old_DoubleBezierSampler doubleBezierSampler;
+    public static Old_FloatLinearDistanceSampler sizeDistanceSampler;
+    public static Old_FloatLinearDistanceSampler rotationDistanceSampler;
 
     public static int RingPointCount = 8;
     public static float Radius=3.0f;
@@ -75,9 +75,9 @@ public static class MeshGenerator
             MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
             MeshGenerator.TubeArc = curve.arcOfTube;
             MeshGenerator.Rotation = curve.rotation;
-            MeshGenerator.sizeDistanceSampler = new FloatLinearDistanceSampler(curve.sizeDistanceSampler,clonedCurve);
-            MeshGenerator.rotationDistanceSampler = new FloatLinearDistanceSampler(curve.rotationDistanceSampler,clonedCurve);
-            MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);
+            MeshGenerator.sizeDistanceSampler = new Old_FloatLinearDistanceSampler(curve.sizeDistanceSampler,clonedCurve);
+            MeshGenerator.rotationDistanceSampler = new Old_FloatLinearDistanceSampler(curve.rotationDistanceSampler,clonedCurve);
+            MeshGenerator.doubleBezierSampler = new Old_DoubleBezierSampler(curve.doubleBezierSampler);
             MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;

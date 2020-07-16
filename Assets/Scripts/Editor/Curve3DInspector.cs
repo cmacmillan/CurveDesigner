@@ -131,9 +131,9 @@ public class Curve3DInspector : Editor
             curve.positionCurve.owner = curve;
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;
-            curve.sizeDistanceSampler = new FloatLinearDistanceSampler("Size");
-            curve.rotationDistanceSampler = new FloatLinearDistanceSampler("Rotation (degrees)");
-            curve.doubleBezierSampler = new DoubleBezierSampler();
+            curve.sizeDistanceSampler = new Old_FloatLinearDistanceSampler("Size");
+            curve.rotationDistanceSampler = new Old_FloatLinearDistanceSampler("Rotation (degrees)");
+            curve.doubleBezierSampler = new Old_DoubleBezierSampler();
             curve.UICurve = new UICurve(null, curve);
             curve.UICurve.Initialize();
             Debug.Log("cleared");

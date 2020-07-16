@@ -10,10 +10,10 @@ namespace Assets.NewUI
 {
     public class RotationCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
     {
-        private FloatLinearDistanceSampler _distanceSampler;
+        private Old_FloatLinearDistanceSampler _distanceSampler;
         private List<EditRotationComposite> _points = new List<EditRotationComposite>();
         private SplitterPointComposite _splitterPoint = null;
-        public RotationCurveComposite(IComposite parent,FloatLinearDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public RotationCurveComposite(IComposite parent,Old_FloatLinearDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _distanceSampler = distanceSampler;
             var blueColor = new Color(0,.8f,1.0f);

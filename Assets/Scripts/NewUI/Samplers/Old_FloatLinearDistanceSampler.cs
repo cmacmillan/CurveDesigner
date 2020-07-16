@@ -55,14 +55,14 @@ namespace Assets.NewUI
     {
         public float value;
         [NonSerialized]
-        public FloatLinearDistanceSampler _owner;
-        public FloatDistanceValue(float value, float distance, FloatLinearDistanceSampler owner, BezierCurve curve) : base(distance,curve)
+        public Old_FloatLinearDistanceSampler _owner;
+        public FloatDistanceValue(float value, float distance, Old_FloatLinearDistanceSampler owner, BezierCurve curve) : base(distance,curve)
         {
             this.value = value;
             this._owner = owner;
             _owner.SortPoints(curve);
         }
-        public FloatDistanceValue(FloatDistanceValue objToClone,FloatLinearDistanceSampler newOwner,BezierCurve curve) : base(objToClone)
+        public FloatDistanceValue(FloatDistanceValue objToClone,Old_FloatLinearDistanceSampler newOwner,BezierCurve curve) : base(objToClone)
         {
             this.value = objToClone.value;
             _owner = newOwner;
@@ -93,15 +93,15 @@ namespace Assets.NewUI
         }
     }
     [System.Serializable]
-    public class FloatLinearDistanceSampler : ISerializationCallbackReceiver, IActiveElement
+    public class Old_FloatLinearDistanceSampler : ISerializationCallbackReceiver, IActiveElement
     {
         [SerializeField]
         public List<FloatDistanceValue> _points = new List<FloatDistanceValue>();
         public string pointFieldName="";
-        public FloatLinearDistanceSampler(string fieldName) {
+        public Old_FloatLinearDistanceSampler(string fieldName) {
             pointFieldName = fieldName;
         }
-        public FloatLinearDistanceSampler(FloatLinearDistanceSampler objToClone, BezierCurve curve)
+        public Old_FloatLinearDistanceSampler(Old_FloatLinearDistanceSampler objToClone, BezierCurve curve)
         {
             foreach (var i in objToClone._points)
                 _points.Add(new FloatDistanceValue(i,this,curve));

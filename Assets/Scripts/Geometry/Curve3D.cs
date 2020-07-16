@@ -14,9 +14,12 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     {
         get
         {
+            yield break;
+            /*
             yield return sizeDistanceSampler;
             yield return rotationDistanceSampler;
             yield return doubleBezierSampler;
+            */
         }
     }
     public IActiveElement ActiveElement
@@ -111,11 +114,11 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     }
 
     [HideInInspector]
-    public FloatLinearDistanceSampler sizeDistanceSampler = new FloatLinearDistanceSampler("Size");
+    public Old_FloatLinearDistanceSampler sizeDistanceSampler = new Old_FloatLinearDistanceSampler("Size");
     [HideInInspector]
-    public FloatLinearDistanceSampler rotationDistanceSampler = new FloatLinearDistanceSampler("Rotation (degrees)");
+    public Old_FloatLinearDistanceSampler rotationDistanceSampler = new Old_FloatLinearDistanceSampler("Rotation (degrees)");
     [HideInInspector]
-    public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
+    public Old_DoubleBezierSampler doubleBezierSampler = new Old_DoubleBezierSampler();
 
     public void RequestMeshUpdate()
     {
@@ -268,7 +271,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [ContextMenu("Clear double")]
     public void ClearDouble()
     {
-        doubleBezierSampler = new DoubleBezierSampler();
+        doubleBezierSampler = new Old_DoubleBezierSampler();
         this.UICurve.Initialize();
     }
     public void TryInitialize()

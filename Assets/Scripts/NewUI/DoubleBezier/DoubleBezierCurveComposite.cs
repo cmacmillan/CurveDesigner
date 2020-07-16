@@ -9,10 +9,10 @@ namespace Assets.NewUI
 {
     public class DoubleBezierCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
     {
-        private DoubleBezierSampler _doubleBezierSampler;
+        private Old_DoubleBezierSampler _doubleBezierSampler;
         private List<SecondaryPositionCurveComposite> _secondaryCurves;
         private SplitterPointComposite _splitterPoint;
-        public DoubleBezierCurveComposite(IComposite parent,DoubleBezierSampler doubleBezierSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public DoubleBezierCurveComposite(IComposite parent,Old_DoubleBezierSampler doubleBezierSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _doubleBezierSampler = doubleBezierSampler;
             _secondaryCurves = new List<SecondaryPositionCurveComposite>();

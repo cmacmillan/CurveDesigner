@@ -21,9 +21,9 @@ namespace Assets.NewUI
     }
     public class DoubleBezierCurveSplitCommand : SplitCommand
     {
-        private DoubleBezierSampler sampler;
+        private Old_DoubleBezierSampler sampler;
         private PositionCurveComposite _positionCurveComposite;
-        public DoubleBezierCurveSplitCommand(Curve3D curve, DoubleBezierSampler sampler,PositionCurveComposite positionCurveComposite) : base(curve)
+        public DoubleBezierCurveSplitCommand(Curve3D curve, Old_DoubleBezierSampler sampler,PositionCurveComposite positionCurveComposite) : base(curve)
         {
             _positionCurveComposite = positionCurveComposite;
             _curve = curve;
@@ -110,7 +110,7 @@ namespace Assets.NewUI
         {
             List<BackingCurveModificationTracker<FloatDistanceValue>> distanceSamplerModificationTrackers = new List<BackingCurveModificationTracker<FloatDistanceValue>>();
             foreach (var i in _curve.DistanceSamplers)
-                distanceSamplerModificationTrackers.Add(new BackingCurveModificationTracker<FloatDistanceValue>(_curve.positionCurve,i._points));
+                distanceSamplerModificationTrackers.Add(new BackingCurveModificationTracker<FloatDistanceValue>(_curve.positionCurve,i.points));
             var doubleBezier = _curve.doubleBezierSampler;
             var doubleBezierModificationTracker = new BackingCurveModificationTracker<BezierCurveDistanceValue>(_curve.positionCurve,doubleBezier.secondaryCurves);
             var closestPoint = _curve.UICurve.positionCurve.PointClosestToCursor;
@@ -130,14 +130,14 @@ namespace Assets.NewUI
     }
     public class ValueAlongCurveSplitCommand: SplitCommand
     {
-        private FloatLinearDistanceSampler _sampler;
+        private Old_FloatLinearDistanceSampler _sampler;
         private Func<Curve3D,IValueAlongCurvePointProvider> _pointsProvider;
 
         public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
         public static IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve) { return curve.UICurve.sizeCurve; }
         public static IValueAlongCurvePointProvider GetDoubleBezierCurve(Curve3D curve) { return curve.UICurve.doubleBezierCurve; }
 
-        public ValueAlongCurveSplitCommand(Curve3D curve, FloatLinearDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {
+        public ValueAlongCurveSplitCommand(Curve3D curve, Old_FloatLinearDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {
             _pointsProvider = pointsProvider;
             _sampler = sampler;
             _curve = curve;

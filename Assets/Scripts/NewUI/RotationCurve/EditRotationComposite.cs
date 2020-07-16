@@ -15,7 +15,7 @@ namespace Assets.NewUI
         public Curve3D _curve;
         public override SelectableGUID GUID => _point.GUID;
 
-        public EditRotationComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,FloatLinearDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
+        public EditRotationComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,Old_FloatLinearDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
             _point = value;
             _curve = curve;
@@ -55,7 +55,7 @@ namespace Assets.NewUI
     {
         private EditRotationComposite _owner;
         private FloatDistanceValue _value;
-        private FloatLinearDistanceSampler _sampler;
+        private Old_FloatLinearDistanceSampler _sampler;
         private Curve3D _curve;
         private int Index {
             get
@@ -68,7 +68,7 @@ namespace Assets.NewUI
             }
         }
 
-        public EditRotationClickCommand(EditRotationComposite owner,FloatDistanceValue value,FloatLinearDistanceSampler sampler,Curve3D curve)
+        public EditRotationClickCommand(EditRotationComposite owner,FloatDistanceValue value,Old_FloatLinearDistanceSampler sampler,Curve3D curve)
         {
             _owner = owner;
             _value = value;

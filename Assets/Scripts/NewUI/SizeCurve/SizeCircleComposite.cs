@@ -14,13 +14,13 @@ namespace Assets.NewUI
         private Curve3D _curve;
         public PointAlongCurveComposite linePoint;
         public FloatDistanceValue value;
-        public FloatLinearDistanceSampler _sampler;
+        public Old_FloatLinearDistanceSampler _sampler;
 
         public const int ringPointCount=4;
 
         public override SelectableGUID GUID => value.GUID;
 
-        public SizeCircleComposite(IComposite parent,FloatDistanceValue value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatLinearDistanceSampler _sampler) : base(parent)
+        public SizeCircleComposite(IComposite parent,FloatDistanceValue value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,Old_FloatLinearDistanceSampler _sampler) : base(parent)
         {
             this._sampler = _sampler;
             this.value = value;
