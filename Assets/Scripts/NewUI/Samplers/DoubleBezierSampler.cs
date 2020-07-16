@@ -18,7 +18,7 @@ namespace Assets.NewUI
             if (openPoints.Count > 0)
             {
                 float len = curve.GetLength();
-                curveToCopy = openPoints.OrderBy(a => curve.WrappedDistanceBetween(distance, a.DistanceAlongCurve(curve))).First().value;
+                curveToCopy = openPoints.OrderBy(a => curve.WrappedDistanceBetween(distance, a.GetDistance(curve))).First().value;
             }
             return curveToCopy;
         }
@@ -49,7 +49,7 @@ namespace Assets.NewUI
                 reference = point.reference;
                 return point.position;
             }
-            float previousDistance = availableCurves[0].DistanceAlongCurve(primaryCurve);
+            float previousDistance = availableCurves[0].GetDistance(primaryCurve);
             if (availableCurves.Count==1 || (previousDistance > primaryCurveDistance && !primaryCurve.isClosedLoop))
                 return SamplePosition(availableCurves[0], out reference);
             if (previousDistance > primaryCurveDistance && primaryCurve.isClosedLoop)
@@ -57,15 +57,15 @@ namespace Assets.NewUI
             {
                 var lower = availableCurves[availableCurves.Count - 1];
                 var upper = availableCurves[0];
-                var lowerDistance = lower.DistanceAlongCurve(primaryCurve)-primaryCurve.GetLength();
-                var upperDistance = upper.DistanceAlongCurve(primaryCurve);
+                var lowerDistance = lower.GetDistance(primaryCurve)-primaryCurve.GetLength();
+                var upperDistance = upper.GetDistance(primaryCurve);
                 return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference);
             }
             DoubleBezierPoint previousCurve = availableCurves[0];
             for (int i = 1; i < availableCurves.Count; i++)
             {
                 var currCurve = availableCurves[i];
-                float currentDistance = currCurve.DistanceAlongCurve(primaryCurve);
+                float currentDistance = currCurve.GetDistance(primaryCurve);
                 if (currentDistance > primaryCurveDistance)
                     return InterpolateSamples(previousCurve,currCurve,previousDistance,currentDistance,out reference);
                 previousDistance = currentDistance;
@@ -77,8 +77,8 @@ namespace Assets.NewUI
             {
                 var lower = availableCurves[availableCurves.Count - 1];
                 var upper = availableCurves[0];
-                var lowerDistance = lower.DistanceAlongCurve(primaryCurve);
-                var upperDistance = upper.DistanceAlongCurve(primaryCurve)+primaryCurve.GetLength();
+                var lowerDistance = lower.GetDistance(primaryCurve);
+                var upperDistance = upper.GetDistance(primaryCurve)+primaryCurve.GetLength();
                 return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference);
             }
         }

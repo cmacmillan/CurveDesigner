@@ -14,7 +14,7 @@ namespace Assets.NewUI
     }
     public static class WindowDrawer
     {
-        public static void Draw<T>(IEnumerable<T> selectables,Curve3D curve) where T : ISelectable<T>
+        public static void Draw<T>(IEnumerable<T> selectables,Curve3D curve) where T : ISelectEditable<T>
         {
             List<SelectableGUID> selectedPoints = curve.selectedPoints;
             if (selectedPoints.Count == 0)

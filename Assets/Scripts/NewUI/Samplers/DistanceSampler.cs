@@ -30,7 +30,7 @@ namespace Assets.NewUI
     }
 
     [System.Serializable]
-    public class SamplerPoint<T,S,Q> : ISelectable<S> where Q : DistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
+    public class SamplerPoint<T,S,Q> : ISelectEditable<S>, ISamplerPoint where Q : DistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
     {
         public T value;
         [NonSerialized]
@@ -38,19 +38,21 @@ namespace Assets.NewUI
         public int segmentIndex;
         public float time;
 
-
         private SelectableGUID _guid;
         public SelectableGUID GUID { get { return _guid; } set { _guid = value; } }
 
+        public float Time { get => time; set => time = value; }
+        public int SegmentIndex { get => segmentIndex; set => segmentIndex = value; }
+
         public virtual bool SelectEdit(Curve3D curve, List<S> selectedPoints)
         {
-            float originalDistance = DistanceAlongCurve(curve.positionCurve);
+            float originalDistance = GetDistance(curve.positionCurve);
             float distanceOffset = EditorGUILayout.FloatField("Distance along curve", originalDistance) - originalDistance;
             if (distanceOffset == 0)
                 return false;
             foreach (var target in selectedPoints)
             {
-                var ogDistance = target.DistanceAlongCurve(curve.positionCurve);
+                var ogDistance = target.GetDistance(curve.positionCurve);
                 target.SetDistance(ogDistance + distanceOffset, curve.positionCurve);
             }
             return true;
@@ -65,7 +67,7 @@ namespace Assets.NewUI
                 owner.Sort(curve);
         }
 
-        public float DistanceAlongCurve(BezierCurve positionCurve)
+        public float GetDistance(BezierCurve positionCurve)
         {
             return positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);
         }
@@ -88,9 +90,9 @@ namespace Assets.NewUI
                 return GetDefaultVal();
             var firstPoint = pointsInsideCurve[0];
             var lastPoint = pointsInsideCurve[pointsInsideCurve.Count - 1];
-            var lastDistance = curveLength - lastPoint.DistanceAlongCurve(curve);
-            float endSegmentDistance = firstPoint.DistanceAlongCurve(curve) + lastDistance;
-            if (pointsInsideCurve[0].DistanceAlongCurve(curve) >= distance)
+            var lastDistance = curveLength - lastPoint.GetDistance(curve);
+            float endSegmentDistance = firstPoint.GetDistance(curve) + lastDistance;
+            if (pointsInsideCurve[0].GetDistance(curve) >= distance)
                 if (isClosedLoop)
                 {
                     float lerpVal = (lastDistance + distance) / endSegmentDistance;
@@ -102,20 +104,19 @@ namespace Assets.NewUI
             for (int i = 1; i < pointsInsideCurve.Count; i++)
             {
                 var current = pointsInsideCurve[i];
-                if (current.DistanceAlongCurve(curve) >= distance)
-                    return Lerp(previous.value, current.value, (distance - previous.DistanceAlongCurve(curve)) / (current.DistanceAlongCurve(curve) - previous.DistanceAlongCurve(curve)));
+                if (current.GetDistance(curve) >= distance)
+                    return Lerp(previous.value, current.value, (distance - previous.GetDistance(curve)) / (current.GetDistance(curve) - previous.GetDistance(curve)));
                 previous = current;
             }
             if (isClosedLoop)
             {
-                float lerpVal = (distance - lastPoint.DistanceAlongCurve(curve)) / endSegmentDistance;
+                float lerpVal = (distance - lastPoint.GetDistance(curve)) / endSegmentDistance;
                 return Lerp(lastPoint.value, firstPoint.value, lerpVal);
             }
             else
                 return pointsInsideCurve[pointsInsideCurve.Count - 1].value;
         }
     }
-
 
     [System.Serializable]
     public abstract class DistanceSampler<T,S,Q> : ISerializationCallbackReceiver, IDistanceSampler where Q : DistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
@@ -126,6 +127,11 @@ namespace Assets.NewUI
         private List<S> points_openCurveOnly = null;
 
         public string fieldDisplayName="";
+
+        public IEnumerable<ISamplerPoint> GetPoints()
+        {
+            return points;
+        }
 
         protected abstract T GetInterpolatedValueAtDistance(float distance, BezierCurve curve);
 
@@ -174,8 +180,15 @@ namespace Assets.NewUI
                 i.owner = this as Q;
         }
     }
+    public interface ISamplerPoint : ISelectable
+    {
+        float Time { get; set; }
+        int SegmentIndex { get; set; }
+        void SetDistance(float distance,BezierCurve curve,bool shouldSort);
+    }
     public interface IDistanceSampler
     {
+        IEnumerable<ISamplerPoint> GetPoints();
         void RecalculateOpenCurveOnlyPoints(BezierCurve curve);
         void Sort(BezierCurve curve);
         int InsertPointAtDistance(float distance,BezierCurve curve);

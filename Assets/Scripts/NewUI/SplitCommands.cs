@@ -37,11 +37,11 @@ namespace Assets.NewUI
             _curve.elementClickedDown.owner = selected;
         }
     }
-    public class BackingCurveModificationTracker<T> where T : CurveTrackingValue
+    public class ModificationTracker
     {
-        private struct BackingCurveItem
+        private struct CurveItem
         {
-            public BackingCurveItem(float distance, bool isTracked)
+            public CurveItem(float distance, bool isTracked)
             {
                 this.distance = distance;
                 this.isTracked = isTracked;
@@ -49,31 +49,29 @@ namespace Assets.NewUI
             public float distance;
             public bool isTracked;
         }
-        private BezierCurve backingCurve;
-        private List<T> points;
-        List<BackingCurveItem> backingCurveModifications;
-        public BackingCurveModificationTracker(BezierCurve backingCurve,List<T> points)
+        private List<CurveItem> modifications = new List<CurveItem>();
+        private List<ISamplerPoint> points = new List<ISamplerPoint>();
+        private BezierCurve curve;
+        public ModificationTracker(BezierCurve curve, IDistanceSampler distanceSampler)
         {
-            this.points = points;
-            this.backingCurve = backingCurve;
-            backingCurveModifications = new List<BackingCurveItem>();
-            foreach (var i in points)
+            this.curve = curve;
+            foreach (var i in distanceSampler.GetPoints())
             {
-                if (i.SegmentIndex < this.backingCurve.NumSegments)
-                    backingCurveModifications.Add(new BackingCurveItem(i.GetDistance(backingCurve),true));
+                points.Add(i);
+                if (i.SegmentIndex < curve.NumSegments)
+                    modifications.Add(new CurveItem(i.GetDistance(curve),true));
                 else
-                    backingCurveModifications.Add(new BackingCurveItem(-1,false));
+                    modifications.Add(new CurveItem(-1,false));
             }
         }
         public void FinishInsertToBackingCurve()
         {
             for (int i = 0; i < points.Count; i++)
             {
-                var curr = backingCurveModifications[i];
+                var curr = modifications[i];
                 if (curr.isTracked)
-                    points[i].SetDistance(curr.distance,backingCurve,false);
+                    points[i].SetDistance(curr.distance,curve,false);
             }
-            backingCurveModifications = null;
         }
     }
     public class SecondaryPositionCurveSplitCommand : IClickCommand
@@ -108,18 +106,22 @@ namespace Assets.NewUI
 
         public override void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
-            List<BackingCurveModificationTracker<FloatDistanceValue>> distanceSamplerModificationTrackers = new List<BackingCurveModificationTracker<FloatDistanceValue>>();
+            /////////////////
+            var modificationTrackers = new List<ModificationTracker>();
             foreach (var i in _curve.DistanceSamplers)
-                distanceSamplerModificationTrackers.Add(new BackingCurveModificationTracker<FloatDistanceValue>(_curve.positionCurve,i.points));
-            var doubleBezier = _curve.doubleBezierSampler;
-            var doubleBezierModificationTracker = new BackingCurveModificationTracker<BezierCurveDistanceValue>(_curve.positionCurve,doubleBezier.secondaryCurves);
+                modificationTrackers.Add(new ModificationTracker(curve.positionCurve, i));
+            /////////////////
+
             var closestPoint = _curve.UICurve.positionCurve.PointClosestToCursor;
             var pointGuid = _curve.positionCurve.InsertSegmentAfterIndex(closestPoint,_curve.placeLockedPoints,_curve.splitInsertionBehaviour);
             _curve.SelectAdditionalPoint(pointGuid);
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
-            foreach (var i in distanceSamplerModificationTrackers)
+
+            /////////////////
+            foreach (var i in modificationTrackers)
                 i.FinishInsertToBackingCurve();
-            doubleBezierModificationTracker.FinishInsertToBackingCurve();
+            ////////////////
+
             var selected = _curve.UICurve.positionCurve.pointGroups[closestPoint.segmentIndex+1].centerPoint;
             _curve.elementClickedDown.owner = selected;
         }

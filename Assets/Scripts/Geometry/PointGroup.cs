@@ -36,7 +36,7 @@ public enum DimensionLockMode
 /// A point group groups 3 control points together, left tangent, right tangent and the point itself
 /// </summary>
 [System.Serializable]
-public class PointGroup : ISelectable<PointGroup>
+public class PointGroup : ISelectEditable<PointGroup>
 {
     #region fields
     [HideInInspector]
@@ -152,7 +152,7 @@ public class PointGroup : ISelectable<PointGroup>
         }
     }
 
-    public float DistanceAlongCurve(BezierCurve positionCurve)
+    public float GetDistance(BezierCurve positionCurve)
     {
         return positionCurve.GetDistanceAtSegmentIndexAndTime(positionCurve.PointGroups.IndexOf(this), 0);
     }

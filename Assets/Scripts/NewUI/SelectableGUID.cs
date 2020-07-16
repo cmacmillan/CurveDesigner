@@ -88,8 +88,8 @@ public struct SelectableGUID
                 endSelectable = curr;
             }
         }
-        float startDistance = startSelectable.DistanceAlongCurve(curveConnectingPoints);
-        float endDistance = endSelectable.DistanceAlongCurve(curveConnectingPoints);
+        float startDistance = startSelectable.GetDistance(curveConnectingPoints);
+        float endDistance = endSelectable.GetDistance(curveConnectingPoints);
         int sign = startDistance < endDistance ? 1 : -1;
         float directlyTowardsDistance = (endDistance - startDistance) * sign;
         float awayFromDistance = 0;
@@ -129,9 +129,9 @@ public static class ListSelectableGUIDExtension
 public interface ISelectable
 {
     SelectableGUID GUID { get; }
-    float DistanceAlongCurve(BezierCurve positionCurve);
+    float GetDistance(BezierCurve positionCurve);
 }
-public interface ISelectable<T> : ISelectable
+public interface ISelectEditable<T> : ISelectable
 {
     bool SelectEdit(Curve3D curve,List<T> selectedPoints);
 }

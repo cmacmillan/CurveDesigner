@@ -35,11 +35,6 @@ namespace Assets.NewUI
 
         public virtual bool SelectEdit(Curve3D curve,List<CurveTrackingValue> selectedPoints) { throw new NotImplementedException(); }
 
-        public float DistanceAlongCurve(BezierCurve positionCurve)
-        {
-            return GetDistance(positionCurve);
-        }
-
         [SerializeField]
         private SelectableGUID guid;
         [SerializeField]
@@ -51,7 +46,7 @@ namespace Assets.NewUI
         public SelectableGUID GUID => guid;
     }
     [System.Serializable]
-    public class FloatDistanceValue : CurveTrackingValue, ISelectable<FloatDistanceValue>
+    public class FloatDistanceValue : CurveTrackingValue, ISelectEditable<FloatDistanceValue>
     {
         public float value;
         [NonSerialized]

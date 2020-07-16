@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Assets.NewUI
 {
     [System.Serializable]
-    public class BezierCurveDistanceValue : CurveTrackingValue, ISelectable<BezierCurveDistanceValue>
+    public class BezierCurveDistanceValue : CurveTrackingValue, ISelectEditable<BezierCurveDistanceValue>
     {
         [NonSerialized]
         public Old_DoubleBezierSampler _owner;
