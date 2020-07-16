@@ -9,26 +9,6 @@ using UnityEngine;
 namespace Assets.NewUI
 {
     [System.Serializable]
-    public class ColorSamplerPoint : SamplerPoint<Color, ColorSamplerPoint, ColorDistanceSampler>
-    {
-        public ColorSamplerPoint():base(new )
-        {
-
-        }
-        /*
-        public override Color Field(string displayName, Color originalValue)
-        {
-            return EditorGUILayout.ColorField(displayName, originalValue);
-        }
-
-        public override Color Add(Color v1, Color v2) { return v1 + v2; }
-
-        public override Color Subtract(Color v1, Color v2) { return v1 - v2; }
-
-        public override Color Zero() { return Color.black; }
-        */
-    }
-    [System.Serializable]
     public class ColorDistanceSampler : ValueDistanceSampler<Color, ColorSamplerPoint, ColorDistanceSampler>
     {
         public override Color GetDefaultVal()
@@ -39,5 +19,19 @@ namespace Assets.NewUI
         {
             return Color.Lerp(val1,val2,lerp);
         }
+    }
+    [System.Serializable]
+    public class ColorSamplerPoint : FieldEditableSamplerPoint<Color, ColorSamplerPoint, ColorDistanceSampler>
+    {
+        public override Color Field(string displayName, Color originalValue)
+        {
+            return EditorGUILayout.ColorField(displayName, originalValue);
+        }
+
+        public override Color Add(Color v1, Color v2) { return v1 + v2; }
+
+        public override Color Subtract(Color v1, Color v2) { return v1 - v2; }
+
+        public override Color Zero() { return Color.black; }
     }
 }

@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
+    //should be using dependency injection for this, but with all these generics that'd be a total nightmare because the injected objects wouldn't serialize unless wrapped in yet another class lol
     public abstract class FieldEditableSamplerPoint<T,S,Q> : SamplerPoint<T,S,Q> where Q : DistanceSampler<T,S,Q> where S : FieldEditableSamplerPoint<T, S, Q>, new()
     {
         public abstract T Field(string displayName, T originalValue);
@@ -37,7 +38,7 @@ namespace Assets.NewUI
         public int segmentIndex;
         public float time;
 
-        [SerializeField]
+
         private SelectableGUID _guid;
         public SelectableGUID GUID { get { return _guid; } set { _guid = value; } }
 
