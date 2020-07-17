@@ -120,10 +120,6 @@ namespace Assets.NewUI
         {
             return SelectableGUID.Delete(ref _points, guids, curve);
         }
-        public List<SelectableGUID> SelectBetween(SelectableGUID previous, SelectableGUID next, Curve3D curve)
-        {
-            throw new NotImplementedException();
-        }
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
         {
             var pointsInsideCurve = GetPointsByCurveOpenClosedStatus(curve);

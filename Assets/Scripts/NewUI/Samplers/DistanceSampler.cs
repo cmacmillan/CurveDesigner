@@ -9,6 +9,7 @@ using UnityEngine;
 namespace Assets.NewUI
 {
     //should be using dependency injection for this, but with all these generics that'd be a total nightmare because the injected objects wouldn't serialize unless wrapped in yet another class lol
+    [System.Serializable]
     public abstract class FieldEditableSamplerPoint<T,S,Q> : SamplerPoint<T,S,Q> where Q : DistanceSampler<T,S,Q> where S : FieldEditableSamplerPoint<T, S, Q>, new()
     {
         public abstract T Field(string displayName, T originalValue);
@@ -48,6 +49,7 @@ namespace Assets.NewUI
             time = objToClone.time;
         }
 
+        [SerializeField]
         private SelectableGUID _guid;
         public SelectableGUID GUID { get { return _guid; } set { _guid = value; } }
 
@@ -60,6 +62,7 @@ namespace Assets.NewUI
             float distanceOffset = EditorGUILayout.FloatField("Distance along curve", originalDistance) - originalDistance;
             if (distanceOffset == 0)
                 return false;
+            distanceOffset = PointOnCurveClickCommand.ClampOffset(distanceOffset, curve,selectedPoints);
             foreach (var target in selectedPoints)
             {
                 var ogDistance = target.GetDistance(curve.positionCurve);
@@ -83,6 +86,7 @@ namespace Assets.NewUI
         }
     }
 
+    [System.Serializable]
     public abstract class ValueDistanceSampler<T,S,Q> : DistanceSampler<T, S, Q> where Q : ValueDistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
     {
         public abstract T GetDefaultVal();
@@ -163,7 +167,7 @@ namespace Assets.NewUI
                 points_openCurveOnly.Add(Clone(i));
         }
 
-        public IEnumerable<ISamplerPoint> GetPoints()
+        public IEnumerable<ISamplerPoint> AllPoints()
         {
             return points;
         }
@@ -176,8 +180,8 @@ namespace Assets.NewUI
             newPoint.GUID = curve.owner.guidFactory.GetGUID();
             newPoint.value = interpolatedValue;
             newPoint.owner = this as Q;
-            newPoint.SetDistance(distance,curve);
             points.Add(newPoint);
+            newPoint.SetDistance(distance,curve);
             return points.IndexOf(newPoint);
         }
 
@@ -191,7 +195,7 @@ namespace Assets.NewUI
         }
 
         /// <summary>
-        /// Should be called whenever this sampler is sorted, when a point in this sampler is moved/inserted (which should trigger a sort), or after deserialization
+        /// Should be called whenever this sampler is sorted, when a point is deleted, when a point in this sampler is moved/inserted (which should trigger a sort), or after deserialization
         /// </summary>
         public void RecalculateOpenCurveOnlyPoints(BezierCurve curve)
         {
@@ -227,7 +231,10 @@ namespace Assets.NewUI
 
         public bool Delete(List<SelectableGUID> guids, Curve3D curve)
         {
-            return SelectableGUID.Delete(ref points, guids, curve);
+            bool retr = SelectableGUID.Delete(ref points, guids, curve);
+            if (retr)
+                RecalculateOpenCurveOnlyPoints(curve.positionCurve);
+            return retr;
         }
 
         public List<SelectableGUID> SelectAll(Curve3D curve)
@@ -247,7 +254,7 @@ namespace Assets.NewUI
     }
     public interface IDistanceSampler : IActiveElement
     {
-        IEnumerable<ISamplerPoint> GetPoints();
+        IEnumerable<ISamplerPoint> AllPoints();
         void RecalculateOpenCurveOnlyPoints(BezierCurve curve);
         void Sort(BezierCurve curve);
         int InsertPointAtDistance(float distance,BezierCurve curve);

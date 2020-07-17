@@ -20,6 +20,25 @@ namespace Assets.NewUI
             _positionCurve = positionCurve;
         }
 
+        public static float ClampOffset(float change,Curve3D curve, IEnumerable<ISamplerPoint> selectedPoints)
+        {
+            if (curve.isClosedLoop)
+                return change;
+            float minDist = float.MaxValue;
+            float maxDist = 0;
+            foreach (var i in selectedPoints)
+            {
+                var distance = i.GetDistance(curve.positionCurve);
+                minDist = Mathf.Min(minDist, distance);
+                maxDist = Mathf.Max(maxDist, distance);
+            }
+            if (change > 0)
+                change = Mathf.Min(curve.positionCurve.GetLength() - maxDist, change);
+            else
+                change = Mathf.Max(0 - minDist, change);
+            return change;
+        }
+
         void SetPosition(Curve3D curve,List<SelectableGUID> selected)
         {
             var oldDistance = _point.GetDistance(_positionCurve.positionCurve);
@@ -28,21 +47,7 @@ namespace Assets.NewUI
             var points = selected.GetSelected(sampler);
             bool isClosedLoop = _positionCurve.positionCurve.isClosedLoop;
             float length = _positionCurve.positionCurve.GetLength();
-            //START this is all just to not squash multiselected points when you reach the edge of a curve, which is only relevant when not a closed loop
-            float minDist = float.MaxValue;
-            float maxDist = 0;
-            if (!isClosedLoop)
-                foreach (var i in points)
-                {
-                    var distance = i.GetDistance(_positionCurve.positionCurve);
-                    minDist = Mathf.Min(minDist,distance);
-                    maxDist = Mathf.Min(maxDist,distance);
-                }
-            if (change > 0)
-                change = Mathf.Min(length - maxDist, change);
-            else
-                change = Mathf.Max(0-minDist, change);
-            //END
+            change = ClampOffset(change, curve,points);
             foreach (var i in points)
             {
                 var startingDistance = i.GetDistance(_positionCurve.positionCurve);

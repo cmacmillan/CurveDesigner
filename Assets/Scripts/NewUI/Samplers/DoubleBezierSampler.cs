@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
+    [System.Serializable]
     public class DoubleBezierPoint : SamplerPoint<BezierCurve, DoubleBezierPoint, DoubleBezierSampler> //Gotta make sure to handle a null value
     {
         public override BezierCurve CloneValue(BezierCurve value)

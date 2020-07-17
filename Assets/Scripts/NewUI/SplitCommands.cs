@@ -57,7 +57,7 @@ namespace Assets.NewUI
         public ModificationTracker(BezierCurve curve, IDistanceSampler distanceSampler)
         {
             this.curve = curve;
-            foreach (var i in distanceSampler.GetPoints())
+            foreach (var i in distanceSampler.AllPoints())
             {
                 points.Add(i);
                 if (i.SegmentIndex < curve.NumSegments)
