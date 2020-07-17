@@ -46,8 +46,8 @@ namespace Assets.NewUI
         public void Initialize()
         {
             positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null));
-            sizeCurve = new SizeCurveComposite(this,_curve.sizeDistanceSampler,_curve,positionCurve);
-            rotationCurve = new RotationCurveComposite(this,_curve.rotationDistanceSampler,_curve,positionCurve);
+            sizeCurve = new SizeCurveComposite(this,_curve.sizeSampler,_curve,positionCurve);
+            rotationCurve = new RotationCurveComposite(this,_curve.rotationSampler,_curve,positionCurve);
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
             _curve.RequestMeshUpdate();
             _curve.positionCurve.Recalculate();
@@ -91,7 +91,7 @@ namespace Assets.NewUI
                 var curveLength = _curve.positionCurve.GetLength();
                 foreach (var i in points)
                 {
-                    var rotation = _curve.rotationDistanceSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve)+_curve.rotation;
+                    var rotation = _curve.rotationSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve)+_curve.rotation;
                     var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
                     if (_curve.showNormals)
                         drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));

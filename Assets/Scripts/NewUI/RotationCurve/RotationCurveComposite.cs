@@ -10,22 +10,22 @@ namespace Assets.NewUI
 {
     public class RotationCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
     {
-        private Old_FloatLinearDistanceSampler _distanceSampler;
+        private FloatDistanceSampler _distanceSampler;
         private List<EditRotationComposite> _points = new List<EditRotationComposite>();
         private SplitterPointComposite _splitterPoint = null;
-        public RotationCurveComposite(IComposite parent,Old_FloatLinearDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public RotationCurveComposite(IComposite parent,FloatDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _distanceSampler = distanceSampler;
             var blueColor = new Color(0,.8f,1.0f);
             _splitterPoint = new SplitterPointComposite(this, new TransformBlob(curve.transform,null), PointTextureType.circle, new ValueAlongCurveSplitCommand(curve,_distanceSampler,ValueAlongCurveSplitCommand.GetRotationCurve), blueColor,positionCurveComposite);
-            foreach (var i in distanceSampler.GetPoints(curve))
+            foreach (var i in distanceSampler.GetPoints(curve.positionCurve))
                 _points.Add(new EditRotationComposite(this,i,curve,distanceSampler,blueColor,positionCurveComposite));
         }
 
         //pass it a FloatLinearDistanceSampler, name for the float field
         public void DrawWindow(Curve3D curve)
         {
-            WindowDrawer.Draw(curve.rotationDistanceSampler.GetPoints(curve), curve);
+            WindowDrawer.Draw(curve.rotationSampler.GetPoints(curve.positionCurve), curve);
         }
 
         public override IEnumerable<IComposite> GetChildren()

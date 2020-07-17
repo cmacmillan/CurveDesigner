@@ -131,9 +131,9 @@ public class Curve3DInspector : Editor
             curve.positionCurve.owner = curve;
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;
-            curve.sizeDistanceSampler = new Old_FloatLinearDistanceSampler("Size");
-            curve.rotationDistanceSampler = new Old_FloatLinearDistanceSampler("Rotation (degrees)");
-            curve.doubleBezierSampler = new Old_DoubleBezierSampler();
+            curve.sizeSampler = new  FloatDistanceSampler("Size");
+            curve.rotationSampler = new FloatDistanceSampler("Rotation (degrees)");
+            curve.doubleBezierSampler = new DoubleBezierSampler();
             curve.UICurve = new UICurve(null, curve);
             curve.UICurve.Initialize();
             Debug.Log("cleared");
@@ -191,17 +191,17 @@ public class Curve3DInspector : Editor
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
         curve3d.positionCurve.dimensionLockMode = curve3d.lockToPositionZero;
         curve3d.positionCurve.Recalculate();
-        var secondaryCurves = curve3d.doubleBezierSampler.secondaryCurves;
+        var secondaryCurves = curve3d.doubleBezierSampler.points;
         if (secondaryCurves.Count > 0)
         {
             foreach (var curr in secondaryCurves)
-                curr.secondaryCurve.owner = curve3d;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
-            var referenceHint = secondaryCurves[0].secondaryCurve.Recalculate();
+                curr.value.owner = curve3d;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
+            var referenceHint = secondaryCurves[0].value.Recalculate();
             for (int i = 1; i < secondaryCurves.Count; i++)
-                referenceHint = secondaryCurves[i].secondaryCurve.Recalculate(referenceHint);
+                referenceHint = secondaryCurves[i].value.Recalculate(referenceHint);
         }
         curve3d.CacheAverageSize();
-        var rotationPoints = curve3d.rotationDistanceSampler.GetPoints(curve3d);
+        var rotationPoints = curve3d.rotationSampler.GetPoints(curve3d.positionCurve);
         if (curve3d.previousRotations.Count != rotationPoints.Count)
             curve3d.CopyRotations();
         Undo.RecordObject(curve3d, "curve");

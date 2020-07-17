@@ -13,19 +13,19 @@ namespace Assets.NewUI
         private List<PointComposite> ringPoints = new List<PointComposite>();
         private Curve3D _curve;
         public PointAlongCurveComposite linePoint;
-        public FloatDistanceValue value;
-        public Old_FloatLinearDistanceSampler _sampler;
+        public FloatSamplerPoint value;
+        public FloatDistanceSampler _sampler;
 
         public const int ringPointCount=4;
 
         public override SelectableGUID GUID => value.GUID;
 
-        public SizeCircleComposite(IComposite parent,FloatDistanceValue value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,Old_FloatLinearDistanceSampler _sampler) : base(parent)
+        public SizeCircleComposite(IComposite parent,FloatSamplerPoint value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatDistanceSampler _sampler) : base(parent)
         {
             this._sampler = _sampler;
             this.value = value;
             var purpleColor = new Color(.6f, .6f, .9f);
-            linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor,value.GUID,_sampler.GetPoints(curve));
+            linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor,value.GUID,_sampler.GetPoints(curve.positionCurve));
             this._positionCurve = positionCurve;
             this._curve = curve;
             for (int i = 0; i < ringPointCount; i++)
@@ -84,12 +84,12 @@ namespace Assets.NewUI
     }
     public class SizeCurveEdgeClickCommand : IClickCommand
     {
-        private FloatDistanceValue _ring;
+        private FloatSamplerPoint _ring;
         private SizeCircleEdgePointPositionProvider _point;
         private SizeCircleComposite _owner;
         private Curve3D curve;
 
-        public SizeCurveEdgeClickCommand(FloatDistanceValue ring, SizeCircleEdgePointPositionProvider point,SizeCircleComposite owner,Curve3D curve)
+        public SizeCurveEdgeClickCommand(FloatSamplerPoint ring, SizeCircleEdgePointPositionProvider point,SizeCircleComposite owner,Curve3D curve)
         {
             this._owner = owner;
             this._ring = ring;
@@ -105,7 +105,7 @@ namespace Assets.NewUI
             var screenRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(Event.current.mousePosition));
             Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
             var sizeChange = (Vector3.Distance(pos, centerPoint) - curve.size)-_ring.value;
-            var selectedSizePoints = selectedPoints.GetSelected(_owner._sampler.GetPoints(curve));
+            var selectedSizePoints = selectedPoints.GetSelected(_owner._sampler.GetPoints(curve.positionCurve));
             foreach (var i in selectedSizePoints)
                 i.value += sizeChange;
         }
@@ -128,9 +128,9 @@ namespace Assets.NewUI
     public class SizeCircleEdgePointPositionProvider : IPositionProvider
     {
         private int _ringPointIndex;
-        private FloatDistanceValue _ring;
+        private FloatSamplerPoint _ring;
         private Curve3D curve;
-        public SizeCircleEdgePointPositionProvider(FloatDistanceValue ring, int ringPointIndex,Curve3D curve)
+        public SizeCircleEdgePointPositionProvider(FloatSamplerPoint ring, int ringPointIndex,Curve3D curve)
         {
             this._ringPointIndex = ringPointIndex;
             this._ring = ring;

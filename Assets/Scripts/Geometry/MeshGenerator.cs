@@ -44,9 +44,9 @@ public static class MeshGenerator
 
     public static BezierCurve curve;
 
-    public static Old_DoubleBezierSampler doubleBezierSampler;
-    public static Old_FloatLinearDistanceSampler sizeDistanceSampler;
-    public static Old_FloatLinearDistanceSampler rotationDistanceSampler;
+    public static DoubleBezierSampler doubleBezierSampler;
+    public static FloatDistanceSampler sizeSampler;
+    public static FloatDistanceSampler rotationSampler;
 
     public static int RingPointCount = 8;
     public static float Radius=3.0f;
@@ -75,9 +75,9 @@ public static class MeshGenerator
             MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
             MeshGenerator.TubeArc = curve.arcOfTube;
             MeshGenerator.Rotation = curve.rotation;
-            MeshGenerator.sizeDistanceSampler = new Old_FloatLinearDistanceSampler(curve.sizeDistanceSampler,clonedCurve);
-            MeshGenerator.rotationDistanceSampler = new Old_FloatLinearDistanceSampler(curve.rotationDistanceSampler,clonedCurve);
-            MeshGenerator.doubleBezierSampler = new Old_DoubleBezierSampler(curve.doubleBezierSampler);
+            MeshGenerator.sizeSampler = new FloatDistanceSampler(curve.sizeSampler);
+            MeshGenerator.rotationSampler = new FloatDistanceSampler(curve.rotationSampler);
+            MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);
             MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
@@ -165,7 +165,7 @@ public static class MeshGenerator
         }
         float GetDistanceByArea(float area)
         {
-            return sizeDistanceSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve, Radius);
+            return sizeSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve, Radius);
         }
         //var rand = new System.Random();
         void TrianglifyLayer(bool isExterior, int numPointsPerRing,int startIndex)
@@ -279,8 +279,8 @@ public static class MeshGenerator
             for (int i = 0; i < points.Count; i++)
             {
                 PointOnCurve currentPoint = points[i];
-                var size = Mathf.Max(0, sizeDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + (offsetInterior?offset:0)+ Radius);
-                var rotation = rotationDistanceSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
+                var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + (offsetInterior?offset:0)+ Radius);
+                var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
                 float currentLength = 0;
                 Vector3 previousPoint = Vector3.zero;  
                 for (int j = 0; j < pointsPerRing; j++)
@@ -476,7 +476,7 @@ public static class MeshGenerator
             case CurveType.DoubleBezier:
                 {
                     List<Vector3> backSideBuffer = new List<Vector3>();
-                    doubleBezierSampler.CacheOpenCurvePoints(curve);
+                    doubleBezierSampler.RecalculateOpenCurveOnlyPoints(curve);
                     int pointCount = RingPointCount;
                     numVerts = 2 * pointCount*sampled.Count;
                     InitLists();
@@ -552,7 +552,7 @@ public static class MeshGenerator
                     bool useUvs = meshToTile.uv.Length ==meshToTile.verts.Length;
                     float GetSize(float dist)
                     {
-                        return sizeDistanceSampler.GetValueAtDistance(dist, IsClosedLoop, curveLength, curve) + Radius;
+                        return sizeSampler.GetValueAtDistance(dist, IsClosedLoop, curveLength, curve) + Radius;
                     }
                     int c = 0;
                     int vertexBaseOffset = 0;
@@ -578,7 +578,7 @@ public static class MeshGenerator
                                 remappedVerts.Add(i-skippedVerts);
                             }
                             var point = curve.GetPointAtDistance(distance);
-                            var rotation = rotationDistanceSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;
+                            var rotation = rotationSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve) + Rotation;
                             var size = GetSize(distance);
                             var sizeScale = size / secondaryDimensionLength;
                             var reference = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;

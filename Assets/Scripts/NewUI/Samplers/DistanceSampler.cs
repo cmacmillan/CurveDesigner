@@ -30,13 +30,23 @@ namespace Assets.NewUI
     }
 
     [System.Serializable]
-    public class SamplerPoint<T,S,Q> : ISelectEditable<S>, ISamplerPoint where Q : DistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
+    public abstract class SamplerPoint<T,S,Q> : ISelectEditable<S>, ISamplerPoint where Q : DistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
     {
         public T value;
         [NonSerialized]
         public Q owner;
         public int segmentIndex;
         public float time;
+
+        public abstract T CloneValue(T value);
+
+        public void Copy(SamplerPoint<T,S,Q> objToClone, DistanceSampler<T,S,Q> newOwner)
+        {
+            value = CloneValue(objToClone.value);
+            owner = newOwner as Q;
+            segmentIndex = objToClone.segmentIndex;
+            time = objToClone.time;
+        }
 
         private SelectableGUID _guid;
         public SelectableGUID GUID { get { return _guid; } set { _guid = value; } }
@@ -81,6 +91,7 @@ namespace Assets.NewUI
         {
             this.fieldDisplayName = fieldDisplayName;
         }
+        public ValueDistanceSampler(ValueDistanceSampler<T,S,Q> objToClone) : base(objToClone) { }
         protected override T GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
         {
             return GetValueAtDistance(distance, curve.isClosedLoop, curve.GetLength(),curve);
@@ -129,6 +140,28 @@ namespace Assets.NewUI
         private List<S> points_openCurveOnly = null;
 
         public string fieldDisplayName="";
+
+        public DistanceSampler() { }
+
+        public DistanceSampler(DistanceSampler<T,S,Q> objToClone)
+        {
+            fieldDisplayName = objToClone.fieldDisplayName;
+
+            S Clone(S obj)
+            {
+                var clonedPoint = new S();
+                clonedPoint.Copy(obj, this);
+                return clonedPoint;
+            }
+
+            foreach (var i in objToClone.points)
+                points.Add(Clone(i));
+
+            points_openCurveOnly = new List<S>();
+
+            foreach (var i in objToClone.points_openCurveOnly)
+                points_openCurveOnly.Add(Clone(i));
+        }
 
         public IEnumerable<ISamplerPoint> GetPoints()
         {
@@ -181,14 +214,38 @@ namespace Assets.NewUI
             foreach (var i in points)
                 i.owner = this as Q;
         }
+
+        public ISelectable GetSelectable(int index, Curve3D curve)
+        {
+            return GetPoints(curve.positionCurve)[index];
+        }
+
+        public int NumSelectables(Curve3D curve)
+        {
+            return GetPoints(curve.positionCurve).Count;
+        }
+
+        public bool Delete(List<SelectableGUID> guids, Curve3D curve)
+        {
+            return SelectableGUID.Delete(ref points, guids, curve);
+        }
+
+        public List<SelectableGUID> SelectAll(Curve3D curve)
+        {
+            List<SelectableGUID> retr = new List<SelectableGUID>();
+            var points = GetPoints(curve.positionCurve);
+            foreach (var i in points)
+                retr.Add(i.GUID);
+            return retr;
+        }
     }
     public interface ISamplerPoint : ISelectable
     {
         float Time { get; set; }
         int SegmentIndex { get; set; }
-        void SetDistance(float distance,BezierCurve curve,bool shouldSort);
+        void SetDistance(float distance,BezierCurve curve,bool shouldSort=true);
     }
-    public interface IDistanceSampler
+    public interface IDistanceSampler : IActiveElement
     {
         IEnumerable<ISamplerPoint> GetPoints();
         void RecalculateOpenCurveOnlyPoints(BezierCurve curve);

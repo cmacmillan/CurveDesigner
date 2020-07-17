@@ -28,9 +28,9 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
                 case EditMode.PositionCurve:
                     return positionCurve;
                 case EditMode.Rotation:
-                    return rotationDistanceSampler;
+                    return rotationSampler;
                 case EditMode.Size:
-                    return sizeDistanceSampler;
+                    return sizeSampler;
                 case EditMode.DoubleBezier:
                     return doubleBezierSampler;
                 default:

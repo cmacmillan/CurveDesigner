@@ -13,6 +13,8 @@ namespace Assets.NewUI
     {
         public ColorDistanceSampler(string fieldDisplayName): base(fieldDisplayName) { }
 
+        public ColorDistanceSampler(ColorDistanceSampler objToClone) : base(objToClone) { }
+
         public override Color GetDefaultVal()
         {
             return Color.white;
@@ -35,5 +37,10 @@ namespace Assets.NewUI
         public override Color Subtract(Color v1, Color v2) { return v1 - v2; }
 
         public override Color Zero() { return Color.black; }
+
+        public override Color CloneValue(Color value)
+        {
+            return value;
+        }
     }
 }

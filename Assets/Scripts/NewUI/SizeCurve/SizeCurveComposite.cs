@@ -9,21 +9,21 @@ namespace Assets.NewUI
 {
     public class SizeCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
     {
-        private Old_FloatLinearDistanceSampler _distanceSampler;
+        private FloatDistanceSampler _distanceSampler;
         private SplitterPointComposite _splitterPoint = null;
         private List<SizeCircleComposite> points = new List<SizeCircleComposite>();
-        public SizeCurveComposite(IComposite parent,Old_FloatLinearDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public SizeCurveComposite(IComposite parent,FloatDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _splitterPoint = new SplitterPointComposite(this, new TransformBlob(curve.transform,null), PointTextureType.circle,new ValueAlongCurveSplitCommand(curve,distanceSampler,ValueAlongCurveSplitCommand.GetSizeCurve), Curve3DSettings.Green,positionCurveComposite);
             _distanceSampler = distanceSampler;
             curve.positionCurve.Recalculate();
-            foreach (var i in distanceSampler.GetPoints(curve))
+            foreach (var i in distanceSampler.GetPoints(curve.positionCurve))
                 points.Add(new SizeCircleComposite(this,i,curve.positionCurve,curve,positionCurveComposite,_distanceSampler));
         }
 
         public void DrawWindow(Curve3D curve)
         {
-            var points = curve.sizeDistanceSampler.GetPoints(curve);
+            var points = curve.sizeSampler.GetPoints(curve.positionCurve);
             WindowDrawer.Draw(points,curve);
         }
 

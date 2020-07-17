@@ -9,17 +9,17 @@ namespace Assets.NewUI
 {
     public class EditRotationComposite : IComposite, IPositionProvider
     {
-        public FloatDistanceValue _point;
+        public FloatSamplerPoint _point;
         public PointAlongCurveComposite centerPoint;
         private PointComposite _rotationHandlePoint;
         public Curve3D _curve;
         public override SelectableGUID GUID => _point.GUID;
 
-        public EditRotationComposite(IComposite parent,FloatDistanceValue value,Curve3D curve,Old_FloatLinearDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
+        public EditRotationComposite(IComposite parent,FloatSamplerPoint value,Curve3D curve,FloatDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
             _point = value;
             _curve = curve;
-            centerPoint = new PointAlongCurveComposite(this,value,positionCurveComposite,color,_point.GUID,sampler.GetPoints(curve));
+            centerPoint = new PointAlongCurveComposite(this,value,positionCurveComposite,color,_point.GUID,sampler.GetPoints(curve.positionCurve));
             _rotationHandlePoint = new PointComposite(this, this, PointTextureType.diamond,new EditRotationClickCommand(this,value,sampler,curve), color,_point.GUID);
         }
 
@@ -54,13 +54,13 @@ namespace Assets.NewUI
     public class EditRotationClickCommand : IClickCommand
     {
         private EditRotationComposite _owner;
-        private FloatDistanceValue _value;
-        private Old_FloatLinearDistanceSampler _sampler;
+        private FloatSamplerPoint _value;
+        private FloatDistanceSampler _sampler;
         private Curve3D _curve;
         private int Index {
             get
             {
-                var points = _sampler.GetPoints(_curve);
+                var points = _sampler.GetPoints(_curve.positionCurve);
                 for (int i = 0; i < points.Count; i++)
                     if (points[i] == _value)
                         return i;
@@ -68,7 +68,7 @@ namespace Assets.NewUI
             }
         }
 
-        public EditRotationClickCommand(EditRotationComposite owner,FloatDistanceValue value,Old_FloatLinearDistanceSampler sampler,Curve3D curve)
+        public EditRotationClickCommand(EditRotationComposite owner,FloatSamplerPoint value,FloatDistanceSampler sampler,Curve3D curve)
         {
             _owner = owner;
             _value = value;
@@ -81,7 +81,7 @@ namespace Assets.NewUI
             {
                 var previousVector = _owner.GetVectorByAngle(_owner._curve.previousRotations[Index],out PointOnCurve point);
                 float amountToRotate = Vector3.SignedAngle(_curve.transform.TransformDirection(previousVector),cursorHitPosition-centerPoint,centerForward);
-                var selectedEditRotations = selected.GetSelected(_sampler.GetPoints(curve));
+                var selectedEditRotations = selected.GetSelected(_sampler.GetPoints(curve.positionCurve));
                 foreach (var i in selectedEditRotations)
                     i.value += amountToRotate;
             }

@@ -9,11 +9,11 @@ namespace Assets.NewUI
 {
     public class PointOnCurveClickCommand : IClickCommand
     {
-        private CurveTrackingValue _point;
+        private ISamplerPoint _point;
         private PositionCurveComposite _positionCurve;
-        private IEnumerable<CurveTrackingValue> sampler;
+        private IEnumerable<ISamplerPoint> sampler;
 
-        public PointOnCurveClickCommand(CurveTrackingValue point,PositionCurveComposite positionCurve,IEnumerable<CurveTrackingValue> sampler)
+        public PointOnCurveClickCommand(ISamplerPoint point,PositionCurveComposite positionCurve,IEnumerable<ISamplerPoint> sampler)
         {
             this.sampler = sampler;
             _point = point;

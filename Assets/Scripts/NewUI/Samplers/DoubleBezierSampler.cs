@@ -7,10 +7,20 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class DoubleBezierPoint : SamplerPoint<BezierCurve,DoubleBezierPoint,DoubleBezierSampler> { }//Gotta make sure to handle a null value
+    public class DoubleBezierPoint : SamplerPoint<BezierCurve, DoubleBezierPoint, DoubleBezierSampler> //Gotta make sure to handle a null value
+    {
+        public override BezierCurve CloneValue(BezierCurve value)
+        {
+            return new BezierCurve(value);
+        }
+    }
     [System.Serializable]
     public class DoubleBezierSampler : DistanceSampler<BezierCurve, DoubleBezierPoint,DoubleBezierSampler>
     {
+        public DoubleBezierSampler() : base() { }
+
+        public DoubleBezierSampler(DoubleBezierSampler objToClone) : base(objToClone) { }
+
         protected override BezierCurve GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
         {
             BezierCurve curveToCopy=null;

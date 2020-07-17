@@ -19,6 +19,7 @@ namespace Assets.NewUI
         public virtual void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked,List<SelectableGUID> selectedPoints) { }
         public virtual void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints) { }
     }
+    /*
     public class DoubleBezierCurveSplitCommand : SplitCommand
     {
         private Old_DoubleBezierSampler sampler;
@@ -37,6 +38,7 @@ namespace Assets.NewUI
             _curve.elementClickedDown.owner = selected;
         }
     }
+    */
     public class ModificationTracker
     {
         private struct CurveItem
@@ -132,21 +134,21 @@ namespace Assets.NewUI
     }
     public class ValueAlongCurveSplitCommand: SplitCommand
     {
-        private Old_FloatLinearDistanceSampler _sampler;
+        private IDistanceSampler _sampler;
         private Func<Curve3D,IValueAlongCurvePointProvider> _pointsProvider;
 
         public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
         public static IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve) { return curve.UICurve.sizeCurve; }
         public static IValueAlongCurvePointProvider GetDoubleBezierCurve(Curve3D curve) { return curve.UICurve.doubleBezierCurve; }
 
-        public ValueAlongCurveSplitCommand(Curve3D curve, Old_FloatLinearDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {
+        public ValueAlongCurveSplitCommand(Curve3D curve, IDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {
             _pointsProvider = pointsProvider;
             _sampler = sampler;
             _curve = curve;
         }
         public override void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
         {
-            int index = _sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
+            int index = _sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve, _curve.positionCurve);
             _curve.UICurve.Initialize();//See above
             var selected = _pointsProvider(_curve).GetPointAtIndex(index);
             curve.SelectAdditionalPoint(selected.Guid);
