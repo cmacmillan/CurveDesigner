@@ -201,7 +201,7 @@ namespace Assets.NewUI
         {
             points_openCurveOnly = new List<S>();
             foreach (var i in points)
-                if (i.segmentIndex < curve.NumSegments)
+                if (i.segmentIndex < curve.PointGroups.Count-1)
                     points_openCurveOnly.Add(i);
         }
 

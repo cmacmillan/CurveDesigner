@@ -167,6 +167,7 @@ public static class MeshGenerator
         {
             return sizeSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve, Radius);
         }
+        sizeSampler.RecalculateOpenCurveOnlyPoints(curve);
         //var rand = new System.Random();
         void TrianglifyLayer(bool isExterior, int numPointsPerRing,int startIndex)
         {//generate tris
