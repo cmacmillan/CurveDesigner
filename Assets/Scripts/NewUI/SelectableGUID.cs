@@ -130,6 +130,7 @@ public interface ISelectable
 {
     SelectableGUID GUID { get; }
     float GetDistance(BezierCurve positionCurve);
+    bool IsInsideVisibleCurve(BezierCurve curve);
 }
 public interface ISelectEditable<T> : ISelectable
 {

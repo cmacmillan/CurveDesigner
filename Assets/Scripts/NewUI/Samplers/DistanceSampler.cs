@@ -56,6 +56,11 @@ namespace Assets.NewUI
         public float Time { get => time; set => time = value; }
         public int SegmentIndex { get => segmentIndex; set => segmentIndex = value; }
 
+        public bool IsInsideVisibleCurve(BezierCurve curve)
+        {
+            return SegmentIndex < curve.NumSegments;
+        }
+
         public virtual bool SelectEdit(Curve3D curve, List<S> selectedPoints)
         {
             float originalDistance = GetDistance(curve.positionCurve);

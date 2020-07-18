@@ -35,6 +35,11 @@ namespace Assets.NewUI
 
         public virtual bool SelectEdit(Curve3D curve,List<CurveTrackingValue> selectedPoints) { throw new NotImplementedException(); }
 
+        public bool IsInsideVisibleCurve(BezierCurve curve)
+        {
+            throw new NotImplementedException();
+        }
+
         [SerializeField]
         private SelectableGUID guid;
         [SerializeField]

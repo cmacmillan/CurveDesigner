@@ -187,5 +187,10 @@ public class PointGroup : ISelectEditable<PointGroup>
         }
         return true;
     }
+
+    public bool IsInsideVisibleCurve(BezierCurve curve)
+    {
+        return true;
+    }
     #endregion
 }

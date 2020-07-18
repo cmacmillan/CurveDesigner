@@ -19,9 +19,15 @@ namespace Assets.NewUI
             List<SelectableGUID> selectedPoints = curve.selectedPoints;
             if (selectedPoints.Count == 0)
                 return;
-            var primaryPointIndex = selectedPoints.First();
-            var primaryPoint = selectables.Where(a=>a.GUID==selectedPoints[0]).FirstOrDefault();
-            if (primaryPoint == null)
+            T primaryPoint=default;
+            for (int i = 0; i < selectedPoints.Count && primaryPoint==default; i++)
+                foreach (var j in selectables)
+                    if (j.GUID == selectedPoints[i] && j.IsInsideVisibleCurve(curve.positionCurve))
+                    {
+                        primaryPoint = j;
+                        break;
+                    }
+            if (primaryPoint == default)
                 return;
             EditorGUI.BeginChangeCheck();
             List<T> selected = new List<T>();
