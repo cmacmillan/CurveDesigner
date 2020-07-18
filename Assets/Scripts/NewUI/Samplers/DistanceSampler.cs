@@ -172,6 +172,11 @@ namespace Assets.NewUI
             return points;
         }
 
+        IEnumerable<ISamplerPoint> IDistanceSampler.GetPoints(BezierCurve curve)
+        {
+            return points;
+        }
+
         protected abstract T GetInterpolatedValueAtDistance(float distance, BezierCurve curve);
 
         public int InsertPointAtDistance(float distance, BezierCurve curve) {
@@ -254,6 +259,7 @@ namespace Assets.NewUI
     }
     public interface IDistanceSampler : IActiveElement
     {
+        IEnumerable<ISamplerPoint> GetPoints(BezierCurve curve);
         IEnumerable<ISamplerPoint> AllPoints();
         void RecalculateOpenCurveOnlyPoints(BezierCurve curve);
         void Sort(BezierCurve curve);

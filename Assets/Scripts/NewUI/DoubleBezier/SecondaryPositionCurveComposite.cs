@@ -14,7 +14,7 @@ namespace Assets.NewUI
         public PointAlongCurveComposite centerPoint;
         private Curve3D _curve;
         private TransformBlob transformBlob;
-        public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve, DoubleBezierPoint secondaryBezierCurve,IEnumerable<ISamplerPoint> sampler) : base (parent)
+        public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve, DoubleBezierPoint secondaryBezierCurve,IDistanceSampler sampler) : base (parent)
         {
             var curveInfoAtCenterPoint = curve.positionCurve.GetPointAtDistance(secondaryBezierCurve.GetDistance(curve.positionCurve));
             this._curve = curve; 

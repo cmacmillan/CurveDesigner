@@ -11,9 +11,9 @@ namespace Assets.NewUI
     {
         private ISamplerPoint _point;
         private PositionCurveComposite _positionCurve;
-        private IEnumerable<ISamplerPoint> sampler;
+        private IDistanceSampler sampler;
 
-        public PointOnCurveClickCommand(ISamplerPoint point,PositionCurveComposite positionCurve,IEnumerable<ISamplerPoint> sampler)
+        public PointOnCurveClickCommand(ISamplerPoint point,PositionCurveComposite positionCurve,IDistanceSampler sampler)
         {
             this.sampler = sampler;
             _point = point;
@@ -53,7 +53,7 @@ namespace Assets.NewUI
             var oldDistance = _point.GetDistance(_positionCurve.positionCurve);
             var currentDistance = _positionCurve.PointClosestToCursor.distanceFromStartOfCurve;
             float change = currentDistance - oldDistance;
-            var points = selected.GetSelected(sampler);
+            var points = selected.GetSelected(sampler.GetPoints(curve.positionCurve));
             bool isClosedLoop = _positionCurve.positionCurve.isClosedLoop;
             float length = _positionCurve.positionCurve.GetLength();
             ClampOffset(change, curve,points);
