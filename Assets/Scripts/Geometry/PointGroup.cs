@@ -188,6 +188,7 @@ public class PointGroup : ISelectEditable<PointGroup>
         return true;
     }
 
+    //point groups are always inside the visible curve
     public bool IsInsideVisibleCurve(BezierCurve curve)
     {
         return true;

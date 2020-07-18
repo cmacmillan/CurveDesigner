@@ -67,12 +67,7 @@ namespace Assets.NewUI
             float distanceOffset = EditorGUILayout.FloatField("Distance along curve", originalDistance) - originalDistance;
             if (distanceOffset == 0)
                 return false;
-            distanceOffset = PointOnCurveClickCommand.ClampOffset(distanceOffset, curve,selectedPoints);
-            foreach (var target in selectedPoints)
-            {
-                var ogDistance = target.GetDistance(curve.positionCurve);
-                target.SetDistance(ogDistance + distanceOffset, curve.positionCurve);
-            }
+            PointOnCurveClickCommand.ClampOffset(distanceOffset, curve,selectedPoints);
             return true;
         }
 

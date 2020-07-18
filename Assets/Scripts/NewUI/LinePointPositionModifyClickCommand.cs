@@ -20,23 +20,32 @@ namespace Assets.NewUI
             _positionCurve = positionCurve;
         }
 
-        public static float ClampOffset(float change,Curve3D curve, IEnumerable<ISamplerPoint> selectedPoints)
+        public static void ClampOffset(float change,Curve3D curve, IEnumerable<ISamplerPoint> selectedPoints)
         {
-            if (curve.isClosedLoop)
-                return change;
-            float minDist = float.MaxValue;
-            float maxDist = 0;
+            if (!curve.isClosedLoop)
+            {
+                float minDist = float.MaxValue;
+                float maxDist = 0;
+                foreach (var i in selectedPoints)
+                {
+                    var distance = i.GetDistance(curve.positionCurve);
+                    minDist = Mathf.Min(minDist, distance);
+                    maxDist = Mathf.Max(maxDist, distance);
+                }
+                if (change > 0)
+                    change = Mathf.Min(curve.positionCurve.GetLength() - maxDist, change);
+                else
+                    change = Mathf.Max(0 - minDist, change);
+            }
+            float length = curve.positionCurve.GetLength();
             foreach (var i in selectedPoints)
             {
-                var distance = i.GetDistance(curve.positionCurve);
-                minDist = Mathf.Min(minDist, distance);
-                maxDist = Mathf.Max(maxDist, distance);
+                var startingDistance = i.GetDistance(curve.positionCurve);
+                if (curve.isClosedLoop)
+                    i.SetDistance(mod(startingDistance+change,length),curve.positionCurve);
+                else
+                    i.SetDistance(startingDistance+change,curve.positionCurve);
             }
-            if (change > 0)
-                change = Mathf.Min(curve.positionCurve.GetLength() - maxDist, change);
-            else
-                change = Mathf.Max(0 - minDist, change);
-            return change;
         }
 
         void SetPosition(Curve3D curve,List<SelectableGUID> selected)
@@ -47,15 +56,7 @@ namespace Assets.NewUI
             var points = selected.GetSelected(sampler);
             bool isClosedLoop = _positionCurve.positionCurve.isClosedLoop;
             float length = _positionCurve.positionCurve.GetLength();
-            change = ClampOffset(change, curve,points);
-            foreach (var i in points)
-            {
-                var startingDistance = i.GetDistance(_positionCurve.positionCurve);
-                if (isClosedLoop)
-                    i.SetDistance(mod(startingDistance+change,length),_positionCurve.positionCurve);
-                else
-                    i.SetDistance(startingDistance+change,_positionCurve.positionCurve);
-            }
+            ClampOffset(change, curve,points);
         }
 
         static float mod(float x, float m)
