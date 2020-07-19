@@ -15,9 +15,19 @@ public class Curve3DInspector : Editor
 {
     private static readonly int _CurveHint = "NewGUI.CURVE".GetHashCode();
 
+    MonoScript script;
+    private void OnEnable()
+    {
+        script = MonoScript.FromMonoBehaviour((Curve3D)target);
+    }
+
     public override void OnInspectorGUI()
     {
-        var curve3d = (target as Curve3D); 
+        var curve3d = (target as Curve3D);
+
+        GUI.enabled = false;
+        script = EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false) as MonoScript;
+        GUI.enabled = true;
 
         float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
         EditorGUIUtility.labelWidth = 0;
