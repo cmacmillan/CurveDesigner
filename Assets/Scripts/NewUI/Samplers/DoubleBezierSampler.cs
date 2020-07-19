@@ -24,14 +24,23 @@ namespace Assets.NewUI
 
         protected override BezierCurve GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
         {
-            BezierCurve curveToCopy=null;
+            BezierCurve newPoint=null;
             var openPoints = GetPoints(curve);
             if (openPoints.Count > 0)
             {
                 float len = curve.GetLength();
-                curveToCopy = openPoints.OrderBy(a => curve.WrappedDistanceBetween(distance, a.GetDistance(curve))).First().value;
+                newPoint = openPoints.OrderBy(a => curve.WrappedDistanceBetween(distance, a.GetDistance(curve))).First().value;
+                newPoint = new BezierCurve(newPoint);
             }
-            return curveToCopy;
+            else
+            {
+                newPoint = new BezierCurve();
+                newPoint.owner = curve.owner;
+                newPoint.Initialize();
+            }
+            newPoint.dimensionLockMode = DimensionLockMode.z;
+            newPoint.Recalculate();
+            return newPoint;
         }
 
         ///Secondary curve distance is a value between 0 and 1
