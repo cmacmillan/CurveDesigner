@@ -126,7 +126,7 @@ public class Curve3DInspector : Editor
             string style;
             if (i == 0)
                 style = "ButtonLeft";
-            else if (i == editModes.editModes.Length - 1 - skipCount)
+            else if (i-skipCount == editModes.editModes.Length - 1 - skipCount)
                 style = "ButtonRight";
             else
                 style = "ButtonMid";
@@ -154,6 +154,8 @@ public class Curve3DInspector : Editor
             var drawer = curve.UICurve.GetWindowDrawer();
             drawer.DrawWindow(curve);
         }
+        if (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag)
+            Event.current.Use();
     }
 
     void HandleKeys(Curve3D curve3d)

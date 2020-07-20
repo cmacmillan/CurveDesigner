@@ -13,6 +13,7 @@ namespace Assets.NewUI
         public PositionCurveComposite positionCurve;
         public SizeCurveComposite sizeCurve;
         public RotationCurveComposite rotationCurve;
+        public ColorCurveComposite colorCurve;
         public DoubleBezierCurveComposite doubleBezierCurve;
 
         public IWindowDrawer GetWindowDrawer()
@@ -27,6 +28,8 @@ namespace Assets.NewUI
                     return rotationCurve;
                 case EditMode.Size:
                     return sizeCurve;
+                case EditMode.Color:
+                    return colorCurve;
                 default:
                     throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");
             }
@@ -48,6 +51,7 @@ namespace Assets.NewUI
             positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null));
             sizeCurve = new SizeCurveComposite(this,_curve.sizeSampler,_curve,positionCurve);
             rotationCurve = new RotationCurveComposite(this,_curve.rotationSampler,_curve,positionCurve);
+            colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
             _curve.RequestMeshUpdate();
             _curve.positionCurve.Recalculate();
@@ -118,6 +122,9 @@ namespace Assets.NewUI
                     break;
                 case EditMode.DoubleBezier:
                     yield return doubleBezierCurve;
+                    break;
+                case EditMode.Color:
+                    yield return colorCurve;
                     break;
                 default:
                     throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");

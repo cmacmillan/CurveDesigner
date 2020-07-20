@@ -139,6 +139,7 @@ namespace Assets.NewUI
 
         public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
         public static IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve) { return curve.UICurve.sizeCurve; }
+        public static IValueAlongCurvePointProvider GetColorCurve(Curve3D curve) { return curve.UICurve.colorCurve; }
         public static IValueAlongCurvePointProvider GetDoubleBezierCurve(Curve3D curve) { return curve.UICurve.doubleBezierCurve; }
 
         public ValueAlongCurveSplitCommand(Curve3D curve, IDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {

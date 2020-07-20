@@ -25,6 +25,7 @@ namespace Assets.NewUI
             {EditMode.Size, "Size"},
             {EditMode.Rotation, "Rotation"},
             {EditMode.DoubleBezier, "Double Bezier"},
+            {EditMode.Color, "Color"},
         };
         public EditMode[] editModes;
         public GUIStyle _centeredStyle;
@@ -76,7 +77,7 @@ namespace Assets.NewUI
                 string style;
                 if (i == 0)
                     style = "ButtonLeft";
-                else if (i == editModes.Length - 1-skipCount)
+                else if (i -skipCount == editModes.Length - 1-skipCount)
                     style = "ButtonRight";
                 else
                     style = "ButtonMid";

@@ -17,6 +17,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             yield return sizeSampler;
             yield return rotationSampler;
             yield return doubleBezierSampler;
+            yield return colorSampler;
         }
     }
     public IActiveElement ActiveElement
@@ -33,6 +34,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
                     return sizeSampler;
                 case EditMode.DoubleBezier:
                     return doubleBezierSampler;
+                case EditMode.Color:
+                    return colorSampler;
                 default:
                     throw new NotImplementedException();
             }
@@ -112,6 +115,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size");
     public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation (degrees)");
+    public ColorDistanceSampler colorSampler = new ColorDistanceSampler("Color");
     public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
 
     public void RequestMeshUpdate()
@@ -319,6 +323,7 @@ public class EditModeCategories
             {EditMode.Size, "Size"},
             {EditMode.Rotation, "Rotation"},
             {EditMode.DoubleBezier, "Double Bezier"},
+            {EditMode.Color, "Color" },
         };
     public EditMode[] editModes;
     public GUIStyle _centeredStyle;
@@ -349,6 +354,7 @@ public enum EditMode
     Rotation = 1,
     Size = 2,
     DoubleBezier = 3,
+    Color = 4,
 }
 public enum CurveType
 {

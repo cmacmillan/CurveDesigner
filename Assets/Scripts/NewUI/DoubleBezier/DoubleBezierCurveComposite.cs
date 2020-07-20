@@ -48,7 +48,7 @@ namespace Assets.NewUI
 
         public void DrawWindow(Curve3D curve)
         {
-            //throw new NotImplementedException();
+            WindowDrawer.Draw(_doubleBezierSampler.GetPoints(curve.positionCurve),curve);
         }
     }
 }
