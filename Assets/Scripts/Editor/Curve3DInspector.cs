@@ -154,8 +154,13 @@ public class Curve3DInspector : Editor
             var drawer = curve.UICurve.GetWindowDrawer();
             drawer.DrawWindow(curve);
         }
-        if (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag)
-            Event.current.Use();
+        if (Event.current.type == EventType.MouseUp)
+        {
+            //Debug.Log("asdfasf");
+            //Event.current.Use();
+            //int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
+                        //GUIUtility.hotControl = controlID;
+        }
     }
 
     void HandleKeys(Curve3D curve3d)
@@ -197,7 +202,8 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
-        GUILayout.Window(61732234,new Rect(20, 20, 0, 0),WindowFunc,$"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}");
+        var windowRect = new Rect(20, 20, 0, 0);
+        EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
 
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
@@ -322,6 +328,36 @@ public class Curve3DInspector : Editor
                 break;
         }
         curve3d.CopyRotations();
+    }
+
+    private void EatMouseInput(Rect position)
+    {
+        int id = GUIUtility.GetControlID(_CurveHint, FocusType.Passive, position);
+        switch (Event.current.GetTypeForControl(id))
+        {
+            case EventType.MouseDown:
+                if (position.Contains(Event.current.mousePosition))
+                {
+                    GUIUtility.hotControl = id;
+                    Event.current.Use();
+                }
+                break;
+            case EventType.MouseUp:
+                if (GUIUtility.hotControl == id)
+                {
+                    GUIUtility.hotControl = 0;
+                    Event.current.Use();
+                }
+                break;
+            case EventType.MouseDrag:
+                if (GUIUtility.hotControl == id)
+                    Event.current.Use();
+                break;
+            case EventType.ScrollWheel:
+                if (position.Contains(Event.current.mousePosition))
+                    Event.current.Use();
+                break;
+        }
     }
     private void UpdateMesh(Curve3D curve)
     {
