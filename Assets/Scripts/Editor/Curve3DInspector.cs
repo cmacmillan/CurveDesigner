@@ -205,6 +205,19 @@ public class Curve3DInspector : Editor
         var windowRect = new Rect(20, 20, 0, 0);
         EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
 
+        Handles.BeginGUI();
+        GUILayout.BeginArea(new Rect(400, 400, 50, 80),curve3d.settings.colorPickerBoxStyle);
+        GUILayout.TextArea("");
+        GUILayout.TextArea("");
+        GUILayout.TextArea("");
+        //GUILayout.Button("asdf");
+        EditorGUILayout.ColorField(Color.red);
+        GUILayout.EndArea();
+        /*
+        GUI.color = Color.green;
+        */
+        Handles.EndGUI();
+
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
         curve3d.positionCurve.dimensionLockMode = curve3d.lockToPositionZero;

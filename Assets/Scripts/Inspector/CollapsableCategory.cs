@@ -63,7 +63,7 @@ namespace Assets.NewUI
             GUILayout.BeginHorizontal();
             //GUILayout.Label("asdf");
             GUILayout.FlexibleSpace();
-            GUILayout.BeginHorizontal(curve.tabStyle.style);
+            GUILayout.BeginHorizontal(curve.settings.modeSelectorStyle);
             //GUILayout.BeginHorizontal(curve.tabStyle.style2);
             int skipCount = 0;
             if (curve.type != CurveType.DoubleBezier)
@@ -88,7 +88,7 @@ namespace Assets.NewUI
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginVertical(curve.tabStyle.style2);
+            GUILayout.BeginVertical(curve.settings.selectorWindowStyle);
             GUILayout.Label($"Click on the curve in the scene view to place a {editmodeNameMap[curve.editMode].ToLower()} control point",CenteredStyle);
             if (curve.editMode == EditMode.Size)
                 Field("size");

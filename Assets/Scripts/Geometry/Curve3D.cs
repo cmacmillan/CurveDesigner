@@ -92,8 +92,6 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     //public Material testMat;
     public CommandBuffer commandBuffer;
 
-    public MyGuiStyle tabStyle;
-
     public bool placeLockedPoints = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour = SplitInsertionNeighborModification.DoNotModifyNeighbors;
 
