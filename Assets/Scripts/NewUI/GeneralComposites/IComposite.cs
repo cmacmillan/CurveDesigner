@@ -31,10 +31,10 @@ namespace Assets.NewUI
         {
             return _parent;
         }
-        public virtual void Click(Vector2 mousePosition,List<ClickHitData> clickHits)
+        public virtual void Click(Vector2 mousePosition,List<ClickHitData> clickHits,EventType eventType)
         {
             foreach (var i in GetChildren())
-                i.Click(mousePosition, clickHits);
+                i.Click(mousePosition, clickHits,eventType);
         }
     }
 }

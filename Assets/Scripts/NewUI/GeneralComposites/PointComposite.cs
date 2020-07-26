@@ -26,7 +26,7 @@ namespace Assets.NewUI
 
         public override SelectableGUID Guid => guid;
 
-        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
+        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits,EventType eventType)
         {
             GUITools.WorldToGUISpace(_position.Position,out Vector2 guiPosition,out float screenDepth);
             float distance = Vector2.Distance(mousePosition,guiPosition);

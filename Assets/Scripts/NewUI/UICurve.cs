@@ -59,10 +59,10 @@ namespace Assets.NewUI
             doubleBezierCurve.FindClosestPointsToCursor();
         }
 
-        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
+        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits,EventType eventType)
         {
             FindClosestPoints();
-            base.Click(mousePosition, clickHits);
+            base.Click(mousePosition, clickHits,eventType);
         }
 
         public static void GetCurveDraw(List<IDraw> drawList,BezierCurve curve, TransformBlob transform, IComposite owner)

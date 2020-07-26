@@ -29,7 +29,9 @@ namespace Assets.NewUI
     {
         public override Color Field(string displayName, Color originalValue)
         {
-            return EditorGUILayout.ColorField(displayName, originalValue);
+            var label = new GUIContent();
+            label.text = displayName;
+            return EditorGUILayout.ColorField(label, originalValue,showEyedropper:false,showAlpha:true,hdr:false);
         }
 
         public override Color Add(Color v1, Color v2) { return v1 + v2; }

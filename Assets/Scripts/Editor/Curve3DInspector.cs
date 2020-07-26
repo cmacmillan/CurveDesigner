@@ -203,20 +203,7 @@ public class Curve3DInspector : Editor
     {
         var curve3d = (target as Curve3D);
         var windowRect = new Rect(20, 20, 0, 0);
-        EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
-
-        Handles.BeginGUI();
-        GUILayout.BeginArea(new Rect(400, 400, 50, 80),curve3d.settings.colorPickerBoxStyle);
-        GUILayout.TextArea("");
-        GUILayout.TextArea("");
-        GUILayout.TextArea("");
-        //GUILayout.Button("asdf");
-        EditorGUILayout.ColorField(Color.red);
-        GUILayout.EndArea();
-        /*
-        GUI.color = Color.green;
-        */
-        Handles.EndGUI();
+        MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
 
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
@@ -254,7 +241,8 @@ public class Curve3DInspector : Editor
             return curve3d.selectedPoints.Where(a => a == curve3d.elementClickedDown.owner.GUID).Count() > 0;
         }
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
-        switch (Event.current.GetTypeForControl(controlID))
+        var eventType = Event.current.GetTypeForControl(controlID);
+        switch (eventType)
         {
             case EventType.KeyDown:
                 HandleKeys(curve3d);
@@ -262,10 +250,17 @@ public class Curve3DInspector : Editor
             case EventType.Repaint:
                 Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints);
                 break;
+            case EventType.Layout:
+                List<IDraw> draws = new List<IDraw>();
+                curve3d.UICurve.Draw(draws, null);
+                foreach (var i in draws)
+                    if (i is ILayout)
+                        (i as ILayout).Layout();
+                break;
             case EventType.MouseDown:
                 if (Event.current.button == 0)
                 {
-                    var clicked = GetClosestElementToCursor(curveEditor, MousePos);
+                    var clicked = GetClosestElementToCursor(curveEditor, MousePos, EventType.MouseDown);
                     if (clicked != null)
                     {
                         GUIUtility.hotControl = controlID;
@@ -291,7 +286,7 @@ public class Curve3DInspector : Editor
                         {
                             curve3d.shiftControlState = Curve3D.ClickShiftControlState.none;
                             if (curve3d.selectedPoints.Contains(curve3d.elementClickedDown.owner.Guid))
-                                curve3d.SelectAdditionalPoint(curve3d.elementClickedDown.owner.Guid);
+                                curve3d.    SelectAdditionalPoint(curve3d.elementClickedDown.owner.Guid);
                             else 
                                 curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.Guid);
                         }
@@ -342,36 +337,6 @@ public class Curve3DInspector : Editor
         }
         curve3d.CopyRotations();
     }
-
-    private void EatMouseInput(Rect position)
-    {
-        int id = GUIUtility.GetControlID(_CurveHint, FocusType.Passive, position);
-        switch (Event.current.GetTypeForControl(id))
-        {
-            case EventType.MouseDown:
-                if (position.Contains(Event.current.mousePosition))
-                {
-                    GUIUtility.hotControl = id;
-                    Event.current.Use();
-                }
-                break;
-            case EventType.MouseUp:
-                if (GUIUtility.hotControl == id)
-                {
-                    GUIUtility.hotControl = 0;
-                    Event.current.Use();
-                }
-                break;
-            case EventType.MouseDrag:
-                if (GUIUtility.hotControl == id)
-                    Event.current.Use();
-                break;
-            case EventType.ScrollWheel:
-                if (position.Contains(Event.current.mousePosition))
-                    Event.current.Use();
-                break;
-        }
-    }
     private void UpdateMesh(Curve3D curve)
     {
         if (!MeshGenerator.IsBuzy)
@@ -408,7 +373,7 @@ public class Curve3DInspector : Editor
     }
     private const float SmallClickRadius = 5;
     private const float LargeClickRadius = 20;
-    ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition)
+    ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition,EventType eventType)
     {
         ClickHitData GetHit(List<ClickHitData> hits)
         {
@@ -430,7 +395,7 @@ public class Curve3DInspector : Editor
             }
         }
         List<ClickHitData> hitsList = new List<ClickHitData>();
-        root.Click(clickPosition, hitsList);
+        root.Click(clickPosition, hitsList,eventType);
 
         var highPriorityHits = hitsList.Where(a=>!a.isLowPriority).ToList();
         var highPriorityItem = GetHit(highPriorityHits);
@@ -449,7 +414,7 @@ public class Curve3DInspector : Editor
     {
         ClickHitData closestElementToCursor = null;
         if (currentlyHeldDown==null)
-            closestElementToCursor = GetClosestElementToCursor(root,mousePos);
+            closestElementToCursor = GetClosestElementToCursor(root,mousePos, EventType.Repaint);
         List<IDraw> draws = new List<IDraw>();
         root.Draw(draws,closestElementToCursor);
         draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
