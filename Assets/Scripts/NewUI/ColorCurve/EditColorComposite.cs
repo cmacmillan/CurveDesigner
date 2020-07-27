@@ -35,7 +35,7 @@ namespace Assets.NewUI
         protected override bool TryGetBounds(out Rect bounds)
         {
             if (GUITools.WorldToGUISpace(centerPoint.Position, out Vector2 guiPos, out float distFromCamera)) {
-                bounds = new Rect(guiPos, rectSize);
+                bounds = shrunkPos(guiPos);
                 return true;
             }
             bounds = Rect.zero;
@@ -43,6 +43,12 @@ namespace Assets.NewUI
         }
 
         private readonly Vector2 rectSize = new Vector2(28,28);
+        private readonly Vector2 shrunkRectSize = new Vector2(16,16);
+        private Rect shrunkPos(Vector2 guiPos)
+        {
+            var shrinkOffset = (rectSize - shrunkRectSize) / 2;
+            return new Rect(guiPos.x + shrinkOffset.x, guiPos.y + shrinkOffset.y, shrunkRectSize.x, shrunkRectSize.y);
+        }
 
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
@@ -61,13 +67,12 @@ namespace Assets.NewUI
             if (GUITools.WorldToGUISpace(centerPoint.Position, out Vector2 guiPos, out float distFromCamera))
             {
                 var colorRect = new Rect(guiPos.x, guiPos.y, rectSize.x,rectSize.y);
-                float shrinkFactor = 10;
-                var colorRectShrunk = new Rect(guiPos.x+shrinkFactor/2, guiPos.y+shrinkFactor/2, rectSize.x-shrinkFactor,rectSize.y-shrinkFactor);
+                var colorRectShrunk = shrunkPos(guiPos);
                 Handles.BeginGUI();
                 GUI.Box(colorRect, GUIContent.none, _curve.settings.colorPickerBoxStyle);
                 void WrapUp()
                 {
-                    MouseEater.EatMouseInput(colorRect);
+                    MouseEater.EatMouseInput(colorRectShrunk);
                     Handles.EndGUI();
                 }
                 try

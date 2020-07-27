@@ -367,7 +367,7 @@ public class Curve3DInspector : Editor
             curve.RequestMeshUpdate();
         }
     }
-    private const float BoundsExtension = 15;
+    private const float BoundsExtension = 20;
     ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition,EventType eventType)
     {
         ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
