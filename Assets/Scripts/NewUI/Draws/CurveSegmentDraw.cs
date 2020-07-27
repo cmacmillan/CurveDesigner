@@ -60,5 +60,9 @@ namespace Assets.NewUI
         {
             return _creator;
         }
+
+        public void Event()
+        {
+        }
     }
 }

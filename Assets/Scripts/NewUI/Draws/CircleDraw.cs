@@ -42,5 +42,9 @@ namespace Assets.NewUI
             Handles.DrawWireDisc(_center, _forward, _radius);
             Handles.color = beforeColor;
         }
+
+        public void Event()
+        {
+        }
     }
 }

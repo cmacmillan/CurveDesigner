@@ -28,7 +28,6 @@ namespace Assets.NewUI
         {
             yield return _point;
         }
-        private const float sortOverrideExtraDistance = 5000;
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits,EventType eventType)
         {
             List<ClickHitData> pointHits = new List<ClickHitData>();

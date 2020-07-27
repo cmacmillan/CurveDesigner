@@ -17,9 +17,48 @@ namespace Assets.NewUI
     }
     public abstract class IClickable : IComposite
     {
-        public IClickable(IComposite parent) : base(parent){}
+        protected bool useExtendedBounds;
+        public float distanceFromBounds;
 
-        public abstract IClickCommand GetClickCommand();    
+        public IClickable(IComposite parent,bool useExtendedBounds) : base(parent){
+            this.useExtendedBounds = useExtendedBounds;
+        }
+
+        public bool IsWithinBounds(Vector2 point)
+        {
+            if (!TryGetBounds(out Rect bounds))
+            {
+                distanceFromBounds = float.MaxValue;
+                return false;
+            }
+            if (bounds.Contains(point))
+            {
+                distanceFromBounds = 0;
+                return true;
+            }
+            if (!useExtendedBounds)
+                distanceFromBounds = float.MaxValue;
+            else
+            {
+                float xOffset;
+                if (point.x > bounds.xMax)
+                    xOffset = point.x - bounds.xMax;
+                else
+                    xOffset = bounds.xMin - point.x;
+
+                float yOffset;
+                if (point.y > bounds.yMax)
+                    yOffset = point.y - bounds.yMax;
+                else
+                    yOffset = bounds.yMin - point.y;
+                distanceFromBounds = new Vector2(xOffset, yOffset).magnitude;
+            }
+            return false;
+        }
+
+        protected abstract bool TryGetBounds(out Rect bounds);
+
+        public abstract IClickCommand GetClickCommand();
 
         public bool IsSelectable { get { return Guid == SelectableGUID.Null; } }
 

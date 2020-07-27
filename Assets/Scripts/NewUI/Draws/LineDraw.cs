@@ -45,5 +45,9 @@ namespace Assets.NewUI
             Handles.DrawAAPolyLine(CurveSegmentDraw.GetLineTextureByType(LineTextureType.Default), new Vector3[] { _startPoint, _endPoint});
             Handles.color = beforeColor;
         }
+
+        public void Event()
+        {
+        }
     }
 }

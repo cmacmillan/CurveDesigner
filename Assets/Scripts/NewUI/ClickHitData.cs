@@ -10,13 +10,12 @@ namespace Assets.NewUI
     {
         public float distanceFromClick;
         public float distanceFromCamera;
-        public bool isLowPriority;
         public IClickable owner;
         public Vector2 offset;
         public bool hasBeenDragged=false;
-        public ClickHitData(IClickable owner,float distanceFromClick, float distanceFromCamera, Vector2 offset, bool isLowPriority=false)
+        public bool isLowPriority = false;
+        public ClickHitData(IClickable owner,float distanceFromClick, float distanceFromCamera, Vector2 offset)
         {
-            this.isLowPriority = isLowPriority;
             this.distanceFromClick = distanceFromClick;
             this.distanceFromCamera = distanceFromCamera;
             this.owner = owner;

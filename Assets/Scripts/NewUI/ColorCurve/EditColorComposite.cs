@@ -15,7 +15,7 @@ namespace Assets.NewUI
         private Curve3D _curve;
         private EditColorClickCommand clickCommand;
         public override SelectableGUID GUID => _point.GUID;
-        public EditColorComposite(IComposite parent,ColorSamplerPoint point,ColorDistanceSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent)
+        public EditColorComposite(IComposite parent,ColorSamplerPoint point,ColorDistanceSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent,false)
         {
             _curve = curve;
             _point = point;
@@ -31,6 +31,19 @@ namespace Assets.NewUI
             return clickCommand;
         }
         public override SelectableGUID Guid => _point.GUID;
+
+        protected override bool TryGetBounds(out Rect bounds)
+        {
+            if (GUITools.WorldToGUISpace(centerPoint.Position, out Vector2 guiPos, out float distFromCamera)) {
+                bounds = new Rect(guiPos, rectSize);
+                return true;
+            }
+            bounds = Rect.zero;
+            return false;
+        }
+
+        private readonly Vector2 rectSize = new Vector2(28,28);
+
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
             drawList.Add(new EditColorDraw(this));
@@ -43,36 +56,32 @@ namespace Assets.NewUI
             clickHits.Add(new ClickHitData(this,distance,screenDepth,guiPosition-mousePosition));
             base.Click(mousePosition, clickHits,eventType);
         }
-        public void IMGUIElement(EventType eventType)
+        public void IMGUIElement()
         {
-            if (eventType == EventType.ScrollWheel)
-                return;
             if (GUITools.WorldToGUISpace(centerPoint.Position, out Vector2 guiPos, out float distFromCamera))
             {
-                var colorRect = new Rect(guiPos.x, guiPos.y, 28, 28);
+                var colorRect = new Rect(guiPos.x, guiPos.y, rectSize.x,rectSize.y);
+                float shrinkFactor = 10;
+                var colorRectShrunk = new Rect(guiPos.x+shrinkFactor/2, guiPos.y+shrinkFactor/2, rectSize.x-shrinkFactor,rectSize.y-shrinkFactor);
                 Handles.BeginGUI();
-                GUILayout.BeginArea(colorRect, _curve.settings.colorPickerBoxStyle);
+                GUI.Box(colorRect, GUIContent.none, _curve.settings.colorPickerBoxStyle);
                 void WrapUp()
                 {
-                    GUILayout.EndArea();
                     MouseEater.EatMouseInput(colorRect);
                     Handles.EndGUI();
                 }
                 try
                 {
-                    _point.value = EditorGUILayout.ColorField(GUIContent.none, _point.value, showEyedropper: false, showAlpha: true, hdr: false);
+                    _point.value = EditorGUI.ColorField(colorRectShrunk,GUIContent.none, _point.value, showEyedropper: false, showAlpha: true, hdr: false);
                 }
                 catch (ExitGUIException e) {
-                    WrapUp();
-                    throw e;
+                    //not sure if i should rethrow this or not...
+                    //WrapUp();
+                    //throw e;
                 }
                 WrapUp();
             }
         }
-    }
-    public interface ILayout
-    {
-        void Layout();
     }
     public class EditColorClickCommand : IClickCommand
     {
@@ -80,25 +89,23 @@ namespace Assets.NewUI
         public EditColorClickCommand(EditColorComposite creator)
         {
             this.creator = creator;
-
-
         }
         public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
         {
-            creator.IMGUIElement(EventType.MouseDown);
+            creator.IMGUIElement();
         }
 
         public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selected)
         {
-            creator.IMGUIElement(EventType.MouseDrag);
+            creator.IMGUIElement();
         }
 
         public void ClickUp(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
         {
-            creator.IMGUIElement(EventType.MouseUp);
+            creator.IMGUIElement();
         }
     }
-    public class EditColorDraw : IDraw, ILayout
+    public class EditColorDraw : IDraw
     {
         private EditColorComposite creator;
         private float _distFromCamera;
@@ -119,11 +126,11 @@ namespace Assets.NewUI
 
         public void Draw(DrawMode mode, SelectionState selectionState)
         {
-            creator.IMGUIElement(EventType.Repaint);
+            creator.IMGUIElement();
         }
-        public void Layout()
+        public void Event()
         {
-            creator.IMGUIElement(EventType.Layout);
+            creator.IMGUIElement();
         }
     }
 }

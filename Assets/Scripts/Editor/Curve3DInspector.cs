@@ -250,13 +250,6 @@ public class Curve3DInspector : Editor
             case EventType.Repaint:
                 Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints);
                 break;
-            case EventType.Layout:
-                List<IDraw> draws = new List<IDraw>();
-                curve3d.UICurve.Draw(draws, null);
-                foreach (var i in draws)
-                    if (i is ILayout)
-                        (i as ILayout).Layout();
-                break;
             case EventType.MouseDown:
                 if (Event.current.button == 0)
                 {
@@ -286,7 +279,7 @@ public class Curve3DInspector : Editor
                         {
                             curve3d.shiftControlState = Curve3D.ClickShiftControlState.none;
                             if (curve3d.selectedPoints.Contains(curve3d.elementClickedDown.owner.Guid))
-                                curve3d.    SelectAdditionalPoint(curve3d.elementClickedDown.owner.Guid);
+                                curve3d.SelectAdditionalPoint(curve3d.elementClickedDown.owner.Guid);
                             else 
                                 curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.Guid);
                         }
@@ -334,6 +327,9 @@ public class Curve3DInspector : Editor
             case EventType.MouseMove:
                 HandleUtility.Repaint();
                 break;
+            default:
+                Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints,true);//prolly move this back into layout
+                break;
         }
         curve3d.CopyRotations();
     }
@@ -371,46 +367,32 @@ public class Curve3DInspector : Editor
             curve.RequestMeshUpdate();
         }
     }
-    private const float SmallClickRadius = 5;
-    private const float LargeClickRadius = 20;
+    private const float BoundsExtension = 15;
     ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition,EventType eventType)
     {
-        ClickHitData GetHit(List<ClickHitData> hits)
+        ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
         {
-            var veryClosehits = hits.Where(a => a.distanceFromClick < SmallClickRadius).ToList();
-            if (veryClosehits.Count > 0)
-            {
-                veryClosehits.Sort((a, b) => (int)Mathf.Sign(a.distanceFromCamera - b.distanceFromCamera));
-                return veryClosehits[0];
-            }
-            else
-            {
-                var somewhatCloseHits = hits.Where(a => a.distanceFromClick < LargeClickRadius).ToList();
-                if (somewhatCloseHits.Count > 0)
-                {
-                    somewhatCloseHits.Sort((a, b) => (int)Mathf.Sign(a.distanceFromClick - b.distanceFromClick));
-                    return somewhatCloseHits[0];
-                }
-                return null;
-            }
+            var primaries = lst.Where(a => a.owner.IsWithinBounds(clickPosition)).OrderBy(a => a.distanceFromCamera);
+            if (primaries.Count() > 0)
+                return primaries.First();
+            //we didn't hit any primary hits, so we are gonna just pick the thing with min distanceFromBounds
+            var secondaries = lst.Where(a => a.owner.distanceFromBounds < BoundsExtension).OrderBy(a => a.owner.distanceFromBounds);
+            if (secondaries.Count() > 0)
+                return secondaries.First();
+            return null;
         }
-        List<ClickHitData> hitsList = new List<ClickHitData>();
-        root.Click(clickPosition, hitsList,eventType);
-
-        var highPriorityHits = hitsList.Where(a=>!a.isLowPriority).ToList();
-        var highPriorityItem = GetHit(highPriorityHits);
-        if (highPriorityItem != null)
-            return highPriorityItem;
-
-        var lowPriorityHits = hitsList.Where(a=>a.isLowPriority).ToList();
-        var lowPriorityItem = GetHit(lowPriorityHits);
-        if (lowPriorityItem != null)
-            return lowPriorityItem;
-
-        return null;
+        List<ClickHitData> hits = new List<ClickHitData>();
+        root.Click(clickPosition, hits, eventType);
+        var highPriority = hits.Where(a => !a.isLowPriority);
+        var high = GetFrom(highPriority);
+        if (high != null)
+            return high;
+        var lowPriority = hits.Where(a => a.isLowPriority);
+        var low = GetFrom(lowPriority);
+        return low;
     }
 
-    void Draw(IComposite root,Vector2 mousePos,ClickHitData currentlyHeldDown,List<SelectableGUID> selected)
+    void Draw(IComposite root,Vector2 mousePos,ClickHitData currentlyHeldDown,List<SelectableGUID> selected,bool layout=false)
     {
         ClickHitData closestElementToCursor = null;
         if (currentlyHeldDown==null)
@@ -428,12 +410,19 @@ public class Curve3DInspector : Editor
                 selectionState = SelectionState.secondarySelected;
             if (draw.DistFromCamera() > 0)
             {
-                if (closestElementToCursor != null && draw.Creator() == closestElementToCursor.owner)
-                    draw.Draw(DrawMode.hovered,selectionState);
-                else if (currentlyHeldDown != null && draw.Creator() == currentlyHeldDown.owner)
-                    draw.Draw(DrawMode.clicked,selectionState);
+                if (layout)
+                {
+                    draw.Event();
+                }
                 else
-                    draw.Draw(DrawMode.normal,selectionState);
+                {
+                    if (closestElementToCursor != null && draw.Creator() == closestElementToCursor.owner)
+                        draw.Draw(DrawMode.hovered, selectionState);
+                    else if (currentlyHeldDown != null && draw.Creator() == currentlyHeldDown.owner)
+                        draw.Draw(DrawMode.clicked, selectionState);
+                    else
+                        draw.Draw(DrawMode.normal, selectionState);
+                }
             }
         }
     }

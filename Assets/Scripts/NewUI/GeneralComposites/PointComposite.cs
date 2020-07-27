@@ -15,7 +15,7 @@ namespace Assets.NewUI
         private Color _color;
         private SelectableGUID guid;
 
-        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color,SelectableGUID guid) : base(parent)
+        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color,SelectableGUID guid) : base(parent,true)
         {
             this._position = positionProvider;
             this._pointTexture = textureType;
@@ -25,6 +25,19 @@ namespace Assets.NewUI
         }
 
         public override SelectableGUID Guid => guid;
+
+        protected override bool TryGetBounds(out Rect bounds)
+        {
+            if (GUITools.WorldToGUISpace(_position.Position,out Vector2 guiPosition,out float screenDepth))
+            {
+                float size = 10;
+                Vector2 bound = new Vector2(size, size);
+                bounds = new Rect(guiPosition-bound/2,bound);
+                return true;
+            }
+            bounds = Rect.zero;
+            return false;
+        }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits,EventType eventType)
         {

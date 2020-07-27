@@ -68,6 +68,7 @@ namespace Assets.NewUI
     public interface IDraw
     {
         void Draw(DrawMode mode,SelectionState selectionState);
+        void Event();
         float DistFromCamera();
         IComposite Creator();
     } 
