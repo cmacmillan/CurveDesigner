@@ -285,8 +285,9 @@ public class Curve3DInspector : Editor
                         }
                         if (IsActiveElementSelected())
                         {
-                            commandToExecute.ClickDown(clickPos,curve3d,curve3d.selectedPoints);
-                            commandToExecute.ClickDrag(clickPos, curve3d, curve3d.elementClickedDown,curve3d.selectedPoints);
+                            Draw(curveEditor, MousePos, clicked ,curve3d.selectedPoints,true); //this fixes it
+                            //commandToExecute.ClickDown(clickPos,curve3d,curve3d.selectedPoints);
+                            //commandToExecute.ClickDrag(clickPos, curve3d, curve3d.elementClickedDown,curve3d.selectedPoints);
                         }
                         curve3d.RequestMeshUpdate();
                         Event.current.Use();
@@ -325,10 +326,11 @@ public class Curve3DInspector : Editor
                 }
                 break;
             case EventType.MouseMove:
+                Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints,true);
                 HandleUtility.Repaint();
                 break;
             default:
-                Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints,true);//prolly move this back into layout
+                Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints,true);
                 break;
         }
         curve3d.CopyRotations();
@@ -392,7 +394,7 @@ public class Curve3DInspector : Editor
         return low;
     }
 
-    void Draw(IComposite root,Vector2 mousePos,ClickHitData currentlyHeldDown,List<SelectableGUID> selected,bool layout=false)
+    void Draw(IComposite root,Vector2 mousePos,ClickHitData currentlyHeldDown,List<SelectableGUID> selected,bool imgui=false)
     {
         ClickHitData closestElementToCursor = null;
         if (currentlyHeldDown==null)
@@ -410,7 +412,7 @@ public class Curve3DInspector : Editor
                 selectionState = SelectionState.secondarySelected;
             if (draw.DistFromCamera() > 0)
             {
-                if (layout)
+                if (imgui)
                 {
                     draw.Event();
                 }

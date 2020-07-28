@@ -73,7 +73,6 @@ namespace Assets.NewUI
                 void WrapUp()
                 {
                     MouseEater.EatMouseInput(colorRectShrunk);
-                    Handles.EndGUI();
                 }
                 try
                 {
@@ -81,10 +80,11 @@ namespace Assets.NewUI
                 }
                 catch (ExitGUIException e) {
                     //not sure if i should rethrow this or not...
-                    //WrapUp();
-                    //throw e;
+                    WrapUp();
+                    throw e;
                 }
                 WrapUp();
+                Handles.EndGUI();
             }
         }
     }

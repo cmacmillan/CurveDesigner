@@ -342,12 +342,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selectedPoints:
-  - id: 99913
+  - id: 115010
   shiftControlState: 0
   placeLockedPoints: 1
   splitInsertionBehaviour: 0
   guidFactory:
-    currentGUID: 146643
+    currentGUID: 149395
   sizeSampler:
     points:
     - value: 15.806778
@@ -391,19 +391,19 @@ MonoBehaviour:
     fieldDisplayName: Rotation (degrees)
   colorSampler:
     points:
-    - value: {r: 0.5870991, g: 0, b: 1, a: 1}
+    - value: {r: 0, g: 0.077199936, b: 1, a: 1}
       segmentIndex: 0
-      time: 0.39550585
+      time: 0.3002796
       _guid:
         id: 99913
-    - value: {r: 0.31243074, g: 1, b: 0.16509432, a: 1}
+    - value: {r: 0.89196634, g: 0, b: 1, a: 1}
       segmentIndex: 1
-      time: 0.17164834
+      time: 0.2186187
       _guid:
         id: 98662
-    - value: {r: 1, g: 0, b: 0, a: 1}
+    - value: {r: 0.55345297, g: 1, b: 0, a: 1}
       segmentIndex: 1
-      time: 0.8651342
+      time: 0.8100884
       _guid:
         id: 115010
     fieldDisplayName: Color
