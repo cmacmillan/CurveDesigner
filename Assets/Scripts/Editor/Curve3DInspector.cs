@@ -242,13 +242,52 @@ public class Curve3DInspector : Editor
         }
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
         var eventType = Event.current.GetTypeForControl(controlID);
+        ClickHitData closestElementToCursor = null;
+        if (elementClickedDown == null)
+            closestElementToCursor = GetClosestElementToCursor(curveEditor, MousePos, EventType.Repaint);
+        void DrawLoop(bool imguiEvent)
+        {
+            List<IDraw> draws = new List<IDraw>();
+            curveEditor.Draw(draws, closestElementToCursor);
+            draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
+            var selected = curve3d.selectedPoints;
+            foreach (var draw in draws)
+                if (draw.DistFromCamera() > 0)
+                {
+                    if (imguiEvent)
+                    {
+                        var imgui = draw as IIMGUI;
+                        if (imgui != null)
+                            imgui.Event();
+                    }
+                    else
+                    {
+                        SelectionState selectionState = SelectionState.unselected;
+                        var guid = draw.Creator().GUID;
+                        if (selected.Count > 0 && guid == selected[0])
+                            selectionState = SelectionState.primarySelected;
+                        else if (selected.Contains(guid))
+                            selectionState = SelectionState.secondarySelected;
+                        if (closestElementToCursor != null && draw.Creator() == closestElementToCursor.owner)
+                            draw.Draw(DrawMode.hovered, selectionState);
+                        else if (elementClickedDown != null && draw.Creator() == elementClickedDown.owner)
+                            draw.Draw(DrawMode.clicked, selectionState);
+                        else
+                            draw.Draw(DrawMode.normal, selectionState);
+                    }
+                }
+        }
+        void Draw() { DrawLoop(false); }
+        void IMGUI() { DrawLoop(true); }
+        //Regardless of event, you must call either Draw or IMGUI(), to make sure that 
         switch (eventType)
         {
             case EventType.KeyDown:
                 HandleKeys(curve3d);
+                IMGUI();
                 break;
             case EventType.Repaint:
-                Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints);
+                Draw();
                 break;
             case EventType.MouseDown:
                 if (Event.current.button == 0)
@@ -285,9 +324,9 @@ public class Curve3DInspector : Editor
                         }
                         if (IsActiveElementSelected())
                         {
-                            Draw(curveEditor, MousePos, clicked ,curve3d.selectedPoints,true); //this fixes it
-                            //commandToExecute.ClickDown(clickPos,curve3d,curve3d.selectedPoints);
-                            //commandToExecute.ClickDrag(clickPos, curve3d, curve3d.elementClickedDown,curve3d.selectedPoints);
+                            IMGUI();
+                            commandToExecute.ClickDown(clickPos,curve3d,curve3d.selectedPoints);
+                            commandToExecute.ClickDrag(clickPos, curve3d, curve3d.elementClickedDown,curve3d.selectedPoints);
                         }
                         curve3d.RequestMeshUpdate();
                         Event.current.Use();
@@ -302,6 +341,7 @@ public class Curve3DInspector : Editor
                     var commandToExecute = elementClickedDown.owner.GetClickCommand();
                     if (IsActiveElementSelected())
                         commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown,curve3d.selectedPoints);
+                    IMGUI();
                     Event.current.Use();
                     curve3d.RequestMeshUpdate();
                 }
@@ -320,17 +360,18 @@ public class Curve3DInspector : Editor
                         {
                             curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.Guid);
                         }
+                        IMGUI();
                         curve3d.elementClickedDown = null; 
                         Event.current.Use();
                     }
                 }
                 break;
             case EventType.MouseMove:
-                Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints,true);
+                IMGUI();
                 HandleUtility.Repaint();
                 break;
             default:
-                Draw(curveEditor, MousePos, elementClickedDown,curve3d.selectedPoints,true);
+                IMGUI();
                 break;
         }
         curve3d.CopyRotations();
@@ -343,6 +384,7 @@ public class Curve3DInspector : Editor
             {
                 if (MeshGenerator.didMeshGenerationSucceed)
                 {
+
                     if (curve.displayMesh == null)
                     {
                         curve.displayMesh = new Mesh();
@@ -366,6 +408,7 @@ public class Curve3DInspector : Editor
         }
         if (curve.HaveCurveSettingsChanged())
         {
+
             curve.RequestMeshUpdate();
         }
     }
@@ -392,41 +435,6 @@ public class Curve3DInspector : Editor
         var lowPriority = hits.Where(a => a.isLowPriority);
         var low = GetFrom(lowPriority);
         return low;
-    }
-
-    void Draw(IComposite root,Vector2 mousePos,ClickHitData currentlyHeldDown,List<SelectableGUID> selected,bool imgui=false)
-    {
-        ClickHitData closestElementToCursor = null;
-        if (currentlyHeldDown==null)
-            closestElementToCursor = GetClosestElementToCursor(root,mousePos, EventType.Repaint);
-        List<IDraw> draws = new List<IDraw>();
-        root.Draw(draws,closestElementToCursor);
-        draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
-        foreach (var draw in draws)
-        {
-            SelectionState selectionState = SelectionState.unselected;
-            var guid = draw.Creator().GUID;
-            if (selected.Count>0 && guid==selected[0])
-                selectionState = SelectionState.primarySelected;
-            else if (selected.Contains(guid))
-                selectionState = SelectionState.secondarySelected;
-            if (draw.DistFromCamera() > 0)
-            {
-                if (imgui)
-                {
-                    draw.Event();
-                }
-                else
-                {
-                    if (closestElementToCursor != null && draw.Creator() == closestElementToCursor.owner)
-                        draw.Draw(DrawMode.hovered, selectionState);
-                    else if (currentlyHeldDown != null && draw.Creator() == currentlyHeldDown.owner)
-                        draw.Draw(DrawMode.clicked, selectionState);
-                    else
-                        draw.Draw(DrawMode.normal, selectionState);
-                }
-            }
-        }
     }
 }
 /*

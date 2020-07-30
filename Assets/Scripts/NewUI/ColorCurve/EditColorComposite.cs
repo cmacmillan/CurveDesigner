@@ -13,13 +13,13 @@ namespace Assets.NewUI
         public PointAlongCurveComposite centerPoint;
         private ColorSamplerPoint _point;
         private Curve3D _curve;
-        private EditColorClickCommand clickCommand;
+        private DoNothingClickCommand clickCommand;
         public override SelectableGUID GUID => _point.GUID;
         public EditColorComposite(IComposite parent,ColorSamplerPoint point,ColorDistanceSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent,false)
         {
             _curve = curve;
             _point = point;
-            clickCommand = new EditColorClickCommand(this);
+            clickCommand = new DoNothingClickCommand();
             centerPoint = new PointAlongCurveComposite(this,point,positionCurveComposite,color,point.GUID,sampler);
         }
         public override IEnumerable<IComposite> GetChildren()
@@ -88,6 +88,7 @@ namespace Assets.NewUI
             }
         }
     }
+    /*
     public class EditColorClickCommand : IClickCommand
     {
         private EditColorComposite creator;
@@ -110,7 +111,8 @@ namespace Assets.NewUI
             creator.IMGUIElement();
         }
     }
-    public class EditColorDraw : IDraw
+    */
+    public class EditColorDraw : IDraw, IIMGUI
     {
         private EditColorComposite creator;
         private float _distFromCamera;
@@ -119,6 +121,7 @@ namespace Assets.NewUI
             this.creator = creator;
             GUITools.WorldToGUISpace(creator.centerPoint.Position, out Vector2 _guiPos, out _distFromCamera);
         }
+
         public IComposite Creator()
         {
             return creator;
@@ -133,6 +136,7 @@ namespace Assets.NewUI
         {
             creator.IMGUIElement();
         }
+
         public void Event()
         {
             creator.IMGUIElement();

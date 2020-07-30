@@ -68,10 +68,13 @@ namespace Assets.NewUI
     public interface IDraw
     {
         void Draw(DrawMode mode,SelectionState selectionState);
-        void Event();
         float DistFromCamera();
         IComposite Creator();
     } 
+    public interface IIMGUI
+    {
+        void Event();
+    }
     public enum IDrawSortLayers
     {
         Points = 0,

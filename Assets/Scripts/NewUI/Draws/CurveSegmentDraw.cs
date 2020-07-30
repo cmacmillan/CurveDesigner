@@ -36,6 +36,7 @@ namespace Assets.NewUI
             var avg = (_startPoint + _endPoint + _startTangent + _endTangent) / 4.0f;
             _distanceToPoint = GUITools.CameraDistanceToPoint(avg);
         }
+
         public float DistFromCamera()
         {
             return _distanceToPoint + (int)IDrawSortLayers.Curves;
@@ -59,10 +60,6 @@ namespace Assets.NewUI
         public IComposite Creator()
         {
             return _creator;
-        }
-
-        public void Event()
-        {
         }
     }
 }

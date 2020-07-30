@@ -15,6 +15,12 @@ namespace Assets.NewUI
         void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData clicked,List<SelectableGUID> selected);
         void ClickUp(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected);
     }
+    public class DoNothingClickCommand : IClickCommand
+    {
+        public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected) { }
+        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selected) { }
+        public void ClickUp(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected) { }
+    }
     public abstract class IClickable : IComposite
     {
         protected bool useExtendedBounds;

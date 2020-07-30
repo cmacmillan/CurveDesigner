@@ -28,6 +28,7 @@ namespace Assets.NewUI
         {
             return _distFromCamera+(int)IDrawSortLayers.Points;
         }
+
         public void Draw(DrawMode mode,SelectionState selectionState)
         {
             var rect = GUITools.GetRectCenteredAtPosition(_guiPos, _size, _size);
@@ -60,10 +61,6 @@ namespace Assets.NewUI
         public IComposite Creator()
         {
             return _creator;
-        }
-
-        public void Event()
-        {
         }
     }
 }
