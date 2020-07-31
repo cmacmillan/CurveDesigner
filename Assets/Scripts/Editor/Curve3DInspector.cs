@@ -251,11 +251,19 @@ public class Curve3DInspector : Editor
             curveEditor.Draw(draws, closestElementToCursor);
             draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
             var selected = curve3d.selectedPoints;
+            var currentEventType = Event.current.type;
             foreach (var draw in draws)
                 if (draw.DistFromCamera() > 0)
                 {
                     if (imguiEvent)
                     {
+                        if (currentEventType== EventType.MouseDown)
+                        {
+                            if (draw.Creator() == closestElementToCursor.owner)
+                                Event.current.type = EventType.MouseDown;
+                            else
+                                Event.current.type = EventType.Ignore;
+                        }
                         var imgui = draw as IIMGUI;
                         if (imgui != null)
                             imgui.Event();
@@ -276,10 +284,11 @@ public class Curve3DInspector : Editor
                             draw.Draw(DrawMode.normal, selectionState);
                     }
                 }
+            Event.current.type = currentEventType;
         }
         void Draw() { DrawLoop(false); }
         void IMGUI() { DrawLoop(true); }
-        //Regardless of event, you must call either Draw or IMGUI(), to make sure that 
+        //Regardless of event, you must call either Draw or IMGUI(), to make sure that imgui stuff gets all the events
         switch (eventType)
         {
             case EventType.KeyDown:
@@ -397,6 +406,7 @@ public class Curve3DInspector : Editor
                     curve.displayMesh.SetVertices(MeshGenerator.vertices);
                     curve.displayMesh.SetTriangles(MeshGenerator.triangles, 0);
                     curve.displayMesh.SetUVs(0, MeshGenerator.uvs);
+                    curve.displayMesh.SetColors(MeshGenerator.colors);
                     curve.displayMesh.RecalculateNormals();
                 }
                 curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;

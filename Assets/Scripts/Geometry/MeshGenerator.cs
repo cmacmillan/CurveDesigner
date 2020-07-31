@@ -37,6 +37,7 @@ public static class MeshGenerator
     public static List<Vector3> vertices;
     public static List<int> triangles;
     public static List<Vector2> uvs;
+    public static List<Color32> colors;
 
     public static bool IsBuzy = false;
 
@@ -47,6 +48,7 @@ public static class MeshGenerator
     public static DoubleBezierSampler doubleBezierSampler;
     public static FloatDistanceSampler sizeSampler;
     public static FloatDistanceSampler rotationSampler;
+    public static ColorDistanceSampler colorSampler;
 
     public static int RingPointCount = 8;
     public static float Radius=3.0f;
@@ -77,6 +79,7 @@ public static class MeshGenerator
             MeshGenerator.Rotation = curve.rotation;
             MeshGenerator.sizeSampler = new FloatDistanceSampler(curve.sizeSampler);
             MeshGenerator.rotationSampler = new FloatDistanceSampler(curve.rotationSampler);
+            MeshGenerator.colorSampler = new ColorDistanceSampler(curve.colorSampler);
             MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);
             MeshGenerator.Thickness = curve.thickness;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
@@ -167,6 +170,15 @@ public static class MeshGenerator
         {
             return sizeSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve, Radius);
         }
+        Color32 GetColorAtDistance(float distance)
+        {
+            Color32 color;
+            if (colorSampler.points.Count == 0)
+                color = Color.white;
+            else
+                color = colorSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve);
+            return color;
+        }
         sizeSampler.RecalculateOpenCurveOnlyPoints(curve);
         //var rand = new System.Random();
         void TrianglifyLayer(bool isExterior, int numPointsPerRing,int startIndex)
@@ -217,6 +229,13 @@ public static class MeshGenerator
                 vertices.Add(curr.side1Point2);
                 vertices.Add(curr.side2Point1);
                 vertices.Add(curr.side2Point2);
+
+                var color = GetColorAtDistance(curr.distanceAlongCurve);
+
+                colors.Add(color);
+                colors.Add(color);
+                colors.Add(color);
+                colors.Add(color);
 
                 var uvX = curr.distanceAlongCurve/Thickness;
 
@@ -282,6 +301,7 @@ public static class MeshGenerator
                 PointOnCurve currentPoint = points[i];
                 var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + (offsetInterior?offset:0)+ Radius);
                 var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + Rotation;
+                Color32 color = GetColorAtDistance(currentPoint.distanceFromStartOfCurve);
                 float currentLength = 0;
                 Vector3 previousPoint = Vector3.zero;  
                 for (int j = 0; j < pointsPerRing; j++)
@@ -301,7 +321,10 @@ public static class MeshGenerator
                 }
                 previousLength = currentLength;
                 for (int point = 0; point < pointsPerRing; point++)
+                {
                     uvs.Add(new Vector2(uvx,point/(float)(pointsPerRing-1)));
+                    colors.Add(color);
+                }
             }
         }
         float tubeDistanceFromFull = 360.0f - TubeArc;
@@ -346,6 +369,7 @@ public static class MeshGenerator
             InitOrClear(ref vertices);
             InitOrClear(ref triangles);
             InitOrClear(ref uvs);
+            InitOrClear(ref colors);
         }
         void CreateMeshInteriorExteriorEndPlates(int vertsPerRing,bool flip=false)
         {

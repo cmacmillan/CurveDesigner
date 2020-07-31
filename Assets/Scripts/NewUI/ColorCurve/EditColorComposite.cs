@@ -76,7 +76,10 @@ namespace Assets.NewUI
                 }
                 try
                 {
+                    EditorGUI.BeginChangeCheck();
                     _point.value = EditorGUI.ColorField(colorRectShrunk,GUIContent.none, _point.value, showEyedropper: false, showAlpha: true, hdr: false);
+                    if (EditorGUI.EndChangeCheck())
+                        _curve.RequestMeshUpdate();
                 }
                 catch (ExitGUIException e) {
                     //not sure if i should rethrow this or not...
@@ -88,30 +91,6 @@ namespace Assets.NewUI
             }
         }
     }
-    /*
-    public class EditColorClickCommand : IClickCommand
-    {
-        private EditColorComposite creator;
-        public EditColorClickCommand(EditColorComposite creator)
-        {
-            this.creator = creator;
-        }
-        public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
-        {
-            creator.IMGUIElement();
-        }
-
-        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selected)
-        {
-            creator.IMGUIElement();
-        }
-
-        public void ClickUp(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
-        {
-            creator.IMGUIElement();
-        }
-    }
-    */
     public class EditColorDraw : IDraw, IIMGUI
     {
         private EditColorComposite creator;

@@ -21,7 +21,12 @@ namespace Assets.NewUI
         }
         public override Color Lerp(Color val1, Color val2, float lerp)
         {
-            return Color.Lerp(val1,val2,lerp);
+            //this looks better when unity is set to linear rather than gamma color space
+            //see https://docs.unity3d.com/Manual/LinearRendering-LinearOrGammaWorkflow.html
+            //and https://www.youtube.com/watch?v=LKnqECcg6Gw
+            //if working in gamma, you can uncomment the following line to improve the appearance
+            //return Color.Lerp(val1.linear,val2.linear,lerp).gamma
+            return Color.Lerp(val1, val2,lerp);
         }
     }
     [System.Serializable]
