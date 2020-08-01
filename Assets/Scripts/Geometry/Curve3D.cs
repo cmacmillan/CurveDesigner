@@ -107,6 +107,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     public void OnAfterDeserialize()
     {
+        Debug.Log("DESERIALIZE");
         foreach (var i in DistanceSamplers)
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
     }
