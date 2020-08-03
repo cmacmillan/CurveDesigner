@@ -191,6 +191,9 @@ public class Curve3DInspector : Editor
                     curve3d.editMode = EditMode.Size;
                     break;
                 case EditMode.Size:
+                    curve3d.editMode = EditMode.Color;
+                    break;
+                case EditMode.Color:
                     curve3d.editMode = EditMode.PositionCurve;
                     break;
             }
