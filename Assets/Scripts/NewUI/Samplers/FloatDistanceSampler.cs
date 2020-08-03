@@ -11,18 +11,24 @@ namespace Assets.NewUI
     [System.Serializable]
     public class FloatDistanceSampler : ValueDistanceSampler<float, FloatSamplerPoint,FloatDistanceSampler>
     {
+        public FloatDistanceSampler(string fieldDisplayName,float defaultValue): base(fieldDisplayName)
+        {
+            constValue = defaultValue;
+        }
         public FloatDistanceSampler(FloatDistanceSampler objToClone) : base(objToClone) { }
-        public FloatDistanceSampler(string fieldDisplayName): base(fieldDisplayName) { }
 
-        public override float GetDefaultVal() { return 0; }
+        protected override float CloneValue(float value)
+        {
+            return value;
+        }
 
         public override float Lerp(float val1, float val2, float lerp) { return Mathf.Lerp(val1,val2,lerp); }
 
-        public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve,float baseVal)
+        public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve)
         {
             var pointsInsideCurve = GetPoints(curve);
             if (pointsInsideCurve.Count == 0)
-                return targetAreaUnderCurve / baseVal;
+                return targetAreaUnderCurve / constValue;
             var previousPoint = pointsInsideCurve[0];
             var previousDistance = previousPoint.GetDistance(curve);
             float areaUnderCurve = 0;
@@ -46,7 +52,7 @@ namespace Assets.NewUI
             areaUnderCurve += firstSegmentArea;
             float GetVal(FloatSamplerPoint val)
             {
-                return 1.0f / (val.value+baseVal);
+                return 1.0f / (val.value);
             }
             float AreaBeneathTwoPoints(float x1,float y1, float x2, float y2)
             {

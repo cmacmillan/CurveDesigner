@@ -111,8 +111,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
     }
 
-    public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size");
-    public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation (degrees)");
+    public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1);
+    public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0);
     public ColorDistanceSampler colorSampler = new ColorDistanceSampler("Color");
     public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
 
@@ -151,6 +151,30 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     /// Start of properties that redraw the curve
 
+    [SerializeField]
+    [HideInInspector]
+    private float old_constSize;
+
+    [SerializeField]
+    [HideInInspector]
+    private float old_constRotation;
+
+    [SerializeField]
+    [HideInInspector]
+    private Color old_constColor;
+
+    [SerializeField]
+    [HideInInspector]
+    private InterpolationType old_sizeInterpolation;
+
+    [SerializeField]
+    [HideInInspector]
+    private InterpolationType old_rotationInterpolation;
+
+    [SerializeField]
+    [HideInInspector]
+    private InterpolationType old_colorInterpolation;
+
     public bool useSeperateInnerAndOuterFaceTextures;
     [SerializeField]
     [HideInInspector]
@@ -167,12 +191,6 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     private float old_vertexDensity = -1;
 
-    [Min(0)]
-    public float size = 3.0f;
-    [SerializeField]
-    [HideInInspector]
-    private float old_size =-1;
-
     [Min(3)]
     public int ringPointCount = 8;
     [SerializeField]
@@ -184,12 +202,6 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [SerializeField]
     [HideInInspector]
     private float old_arcOfTube = -1;
-
-    [Range(0, 360)]
-    public float rotation = 360;
-    [SerializeField]
-    [HideInInspector]
-    private float old_rotation= -1;
 
     [Min(0)]
     public float thickness = .1f;
@@ -238,9 +250,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
         retr |= CheckFieldChanged(ringPointCount, ref old_ringPointCount);
         retr |= CheckFieldChanged(vertexDensity, ref old_vertexDensity);
-        retr |= CheckFieldChanged(size, ref old_size);
         retr |= CheckFieldChanged(arcOfTube, ref old_arcOfTube);
-        retr |= CheckFieldChanged(rotation, ref old_rotation);
         retr |= CheckFieldChanged(thickness, ref old_thickness);
         retr |= CheckFieldChanged(type, ref old_type);
         retr |= CheckFieldChanged(closeTilableMeshGap, ref old_closeTilableMeshGap);
@@ -248,6 +258,18 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
         retr |= CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
         retr |= CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
+
+        //color sampler
+        retr |= CheckFieldChanged(colorSampler.constValue, ref old_constColor);
+        retr |= CheckFieldChanged(colorSampler.Interpolation, ref old_colorInterpolation);
+
+        //size sampler
+        retr |= CheckFieldChanged(sizeSampler.constValue, ref old_constSize);
+        retr |= CheckFieldChanged(sizeSampler.Interpolation, ref old_sizeInterpolation);
+
+        //rotation sampler
+        retr |= CheckFieldChanged(rotationSampler.constValue, ref old_constRotation);
+        retr |= CheckFieldChanged(rotationSampler.Interpolation, ref old_rotationInterpolation);
 
         if (CheckFieldChanged(isClosedLoop, ref old_isClosedLoop))
         {
@@ -288,14 +310,20 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     {
         float avg = 0;
         var points = sizeSampler.GetPoints(this.positionCurve);
-        averageSize = 0;
-        if (points.Count > 0)
+        if (points.Count == 0)
         {
-            foreach (var i in points)
-                avg += i.value;
-            averageSize = avg / points.Count;
+            averageSize = sizeSampler.constValue;
         }
-        averageSize += size;
+        else
+        {
+            averageSize = 0;
+            if (points.Count > 0)
+            {
+                foreach (var i in points)
+                    avg += i.value;
+                averageSize = avg / points.Count;
+            }
+        }
     }
     private const float _densityToDistanceDistanceMax = 100.0f;
     private float DensityToDistance(float density)
@@ -345,6 +373,11 @@ public class EditModeCategories
         for (int i = 0; i < editModes.Length; i++)
             editModes[i] = (EditMode)baseEditModes.GetValue(i);
     }
+}
+public enum InterpolationType
+{
+    Constant=0,
+    Keyframes=1
 }
 public enum EditMode
 {

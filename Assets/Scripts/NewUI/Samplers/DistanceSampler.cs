@@ -87,15 +87,26 @@ namespace Assets.NewUI
     }
 
     [System.Serializable]
-    public abstract class ValueDistanceSampler<T,S,Q> : DistanceSampler<T, S, Q> where Q : ValueDistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
+    public abstract class ValueDistanceSampler<T,S,Q> : DistanceSampler<T, S, Q>, IValueSampler where Q : ValueDistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
     {
-        public abstract T GetDefaultVal();
+        public T constValue;
+
+        [SerializeField]
+        private InterpolationType _interpolation;
+
+        public InterpolationType Interpolation { get => _interpolation; set => _interpolation = value; }
+
+        protected abstract T CloneValue(T value);
+
         public abstract T Lerp(T val1, T val2, float lerp);
         public ValueDistanceSampler(string fieldDisplayName)
         {
             this.fieldDisplayName = fieldDisplayName;
         }
-        public ValueDistanceSampler(ValueDistanceSampler<T,S,Q> objToClone) : base(objToClone) { }
+        public ValueDistanceSampler(ValueDistanceSampler<T,S,Q> objToClone) : base(objToClone) {
+            _interpolation = objToClone._interpolation;
+            constValue = CloneValue(objToClone.constValue);
+        }
         protected override T GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
         {
             return GetValueAtDistance(distance, curve.isClosedLoop, curve.GetLength(),curve);
@@ -103,8 +114,10 @@ namespace Assets.NewUI
         public T GetValueAtDistance(float distance, bool isClosedLoop, float curveLength, BezierCurve curve)
         {
             var pointsInsideCurve = GetPoints(curve);
-            if (pointsInsideCurve.Count == 0)
-                return GetDefaultVal();
+            if (_interpolation == InterpolationType.Constant || pointsInsideCurve.Count == 0)
+            {
+                return constValue;
+            }
             var firstPoint = pointsInsideCurve[0];
             var lastPoint = pointsInsideCurve[pointsInsideCurve.Count - 1];
             var lastDistance = curveLength - lastPoint.GetDistance(curve);
@@ -264,5 +277,9 @@ namespace Assets.NewUI
         void RecalculateOpenCurveOnlyPoints(BezierCurve curve);
         void Sort(BezierCurve curve);
         int InsertPointAtDistance(float distance,BezierCurve curve);
+    }
+    public interface IValueSampler : IDistanceSampler
+    {
+        InterpolationType Interpolation { get; set; }
     }
 }

@@ -141,8 +141,8 @@ public class Curve3DInspector : Editor
             curve.positionCurve.owner = curve;
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;
-            curve.sizeSampler = new  FloatDistanceSampler("Size");
-            curve.rotationSampler = new FloatDistanceSampler("Rotation (degrees)");
+            curve.sizeSampler = new  FloatDistanceSampler("Size",1);
+            curve.rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0);
             curve.doubleBezierSampler = new DoubleBezierSampler();
             curve.UICurve = new UICurve(null, curve);
             curve.UICurve.Initialize();
@@ -203,7 +203,7 @@ public class Curve3DInspector : Editor
     {
         var curve3d = (target as Curve3D);
         var windowRect = new Rect(20, 20, 0, 0);
-        MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
+        //MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
 
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;

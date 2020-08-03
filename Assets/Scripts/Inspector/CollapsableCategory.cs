@@ -89,11 +89,50 @@ namespace Assets.NewUI
             GUILayout.EndHorizontal();
 
             GUILayout.BeginVertical(curve.settings.selectorWindowStyle);
-            GUILayout.Label($"Click on the curve in the scene view to place a {editmodeNameMap[curve.editMode].ToLower()} control point",CenteredStyle);
-            if (curve.editMode == EditMode.Size)
-                Field("size");
-            if (curve.editMode == EditMode.Rotation)
-                Field("rotation");
+            bool shouldDrawWindowContent = true;
+            switch (curve.editMode)
+            {
+                case EditMode.PositionCurve:
+                    break;
+                case EditMode.DoubleBezier:
+                    break;
+                default:
+                    var valueSampler = curve.ActiveElement as IValueSampler;
+                    valueSampler.Interpolation = (InterpolationType)EditorGUILayout.EnumPopup("Value Along Curve",valueSampler.Interpolation);
+                    if (valueSampler.Interpolation == InterpolationType.Constant)
+                    {
+                        shouldDrawWindowContent = false;
+                        if (curve.editMode == EditMode.Size)
+                            curve.sizeSampler.constValue = EditorGUILayout.FloatField("Size",curve.sizeSampler.constValue);
+                        if (curve.editMode == EditMode.Rotation)
+                            curve.rotationSampler.constValue = EditorGUILayout.FloatField("Rotation",curve.rotationSampler.constValue);
+                        if (curve.editMode == EditMode.Color)
+                            curve.colorSampler.constValue = EditorGUILayout.ColorField("Color",curve.colorSampler.constValue);
+                    }
+                    break;
+            }
+            if (shouldDrawWindowContent && curve.UICurve != null)
+            {
+                int pointCount = curve.ActiveElement.NumSelectables(curve);
+                if (pointCount == 0)
+                {
+                    GUILayout.Label($"Click on the curve in the scene view to place a {editmodeNameMap[curve.editMode].ToLower()} control point", CenteredStyle);
+                }
+                else
+                {
+                    int selectedPointCount = 0;
+                    int numPoints = curve.ActiveElement.NumSelectables(curve);
+                    for (int i = 0; i < numPoints; i++)
+                        if (curve.selectedPoints.Contains(curve.ActiveElement.GetSelectable(i, curve).GUID))
+                            selectedPointCount++;
+                    if (selectedPointCount == 0)
+                        GUILayout.Label("No points selected",CenteredStyle);
+                    else
+                        GUILayout.Label($"{selectedPointCount} point{(selectedPointCount != 1 ? "s" : "")} selected", CenteredStyle);
+                    var drawer = curve.UICurve.GetWindowDrawer();
+                    drawer.DrawWindow(curve);
+                }
+            }
             GUILayout.EndVertical();
 
             Field("type");

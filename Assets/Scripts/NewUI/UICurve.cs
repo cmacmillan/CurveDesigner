@@ -95,7 +95,7 @@ namespace Assets.NewUI
                 var curveLength = _curve.positionCurve.GetLength();
                 foreach (var i in points)
                 {
-                    var rotation = _curve.rotationSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve)+_curve.rotation;
+                    var rotation = _curve.rotationSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve);
                     var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
                     if (_curve.showNormals)
                         drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));

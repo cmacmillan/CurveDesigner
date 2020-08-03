@@ -11,14 +11,17 @@ namespace Assets.NewUI
     [System.Serializable]
     public class ColorDistanceSampler : ValueDistanceSampler<Color, ColorSamplerPoint, ColorDistanceSampler>
     {
-        public ColorDistanceSampler(string fieldDisplayName): base(fieldDisplayName) { }
+        public ColorDistanceSampler(string fieldDisplayName): base(fieldDisplayName) {
+            constValue = Color.white;
+        }
 
         public ColorDistanceSampler(ColorDistanceSampler objToClone) : base(objToClone) { }
 
-        public override Color GetDefaultVal()
+        protected override Color CloneValue(Color value)
         {
-            return Color.white;
+            return value;
         }
+
         public override Color Lerp(Color val1, Color val2, float lerp)
         {
             //this looks better when unity is set to linear rather than gamma color space
