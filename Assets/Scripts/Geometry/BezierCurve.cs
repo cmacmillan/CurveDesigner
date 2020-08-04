@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using Assets.NewUI;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,13 +41,137 @@ public partial class BezierCurve : IActiveElement
             retr.Add(i.GUID);
         return retr;
     }
+    #region deleting
+    private class PointGroupRun
+    {
+        public List<PointGroup> points = new List<PointGroup>();
+        public int start;
+        public int end;
+        public float runLength;
+        public void CalculateLength(BezierCurve curve)
+        {
+            end = start + points.Count;
+            runLength = 0;
+            for (int i = start; i < end; i++)
+                runLength += curve.segments[i].length;
+        }
+    }
+    private class ISamplerPointDeleteTracker
+    {
+        public ISamplerPointDeleteTracker(ISamplerPoint point,float distance)
+        {
+            this.point = point;
+            this.distance = distance;
+        }
+        public ISamplerPoint point;
+        public float distance;
+    }
     public bool Delete(List<SelectableGUID> guids, Curve3D curve)
     {
-        bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve,2);
-        if (didChange)
-            Recalculate();
-        return didChange;
+        ///////Preventing removing all the points
+        int numRemaining = 0;
+        PointGroup firstDeleted = null;
+        PointGroup lastDeleted = null;
+        for (int i = 0; i < PointGroups.Count; i++)
+        {
+            var pointGroup = PointGroups[i];
+            if (!guids.Contains(pointGroup.GUID))
+            {
+                numRemaining++;
+            }
+            else
+            {
+                if (firstDeleted == null)
+                    firstDeleted = pointGroup;
+                else
+                    lastDeleted = pointGroup;
+            }
+        }
+        if (numRemaining == 0 || numRemaining == 1)//both prevent firstDeleted
+            guids.RemoveAt(guids.IndexOf(firstDeleted.GUID));
+        if (numRemaining == 0)//only 0 prevents lastdeleted also
+            guids.RemoveAt(guids.IndexOf(lastDeleted.GUID));
+        /////////
+        bool IsDeleted(PointGroup point) { return guids.Contains(point.GUID); }
+        int currIndex = 0;
+        PointGroup curr=PointGroups[0];
+        bool isEnd = false;
+        void Next()
+        {
+            currIndex++;
+            if (currIndex < PointGroups.Count)
+                curr = PointGroups[currIndex];
+            else
+                isEnd = true; 
+        }
+        PointGroupRun GetRun()
+        {
+            PointGroupRun retr = new PointGroupRun();
+            retr.start = currIndex;
+            do
+            {
+                retr.points.Add(curr);
+                Next();
+            } while (!isEnd && IsDeleted(curr));
+            retr.CalculateLength(this);
+            return retr;
+        }
+        ///////////
+        bool hasLeftRun = IsDeleted(curr);
+        PointGroupRun leftRun = null;
+        if (hasLeftRun)
+            leftRun = GetRun();
+        List<PointGroupRun> runs = new List<PointGroupRun>();
+        while (!isEnd)
+            runs.Add(GetRun());
+        var rightRun = runs.Last();
+        bool hasRightRun = IsDeleted(rightRun.points.Last());
+        //////////
+        //Save all the old fractions along the run
+        /*
+        for (int i = 0; i < runs.Count; i++)
+        {
+            var run = runs[i];
+            int newSegmentIndex = i;
+            if (samplerPoint.SegmentIndex >= run.start && samplerPoint.SegmentIndex < run.end)
+            {
+                float newSegmentLength = segments[newSegmentIndex].length;
+
+                return;
+            }
+        }
+        */
+        PointGroupRun GetSamplerPointRun(ISamplerPoint point)
+        {
+            foreach (var i in runs)
+            {
+                if (i.start<=point.SegmentIndex && i.end < point.SegmentIndex)
+                {
+                    return i;
+                }
+            }
+            //then we gotta check the bounding stuff (Left/right)
+            throw new NotImplementedException();
+        }
+        List<ISamplerPointDeleteTracker> samplerList = new List<ISamplerPointDeleteTracker>();
+        foreach (var sampler in curve.DistanceSamplers)
+            foreach (var samplerPoint in sampler.AllPoints())
+            {
+                var run = GetSamplerPointRun(samplerPoint);
+                float lengthUpToSegmentStart = run.start==0?0:segments[run.start-1].cummulativeLength;
+                float distanceFromStartOfRun = samplerPoint.GetDistance(this) - lengthUpToSegmentStart;
+                samplerList.Add(new ISamplerPointDeleteTracker(samplerPoint,distanceFromStartOfRun));
+            }
+        /////////////// ACTUALLY DO THE DELETE
+        bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve);
+        if (!didChange)
+            return false;
+        Recalculate();
+        ///////////////
+        
+        return true;
     }
+    #endregion
 
     public float WrappedDistanceBetween(float distance1, float distance2)
     {

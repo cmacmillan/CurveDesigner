@@ -170,12 +170,7 @@ public static class MeshGenerator
         }
         Color32 GetColorAtDistance(float distance)
         {
-            Color32 color;
-            if (colorSampler.points.Count == 0)
-                color = Color.white;
-            else
-                color = colorSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve);
-            return color;
+            return colorSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve);
         }
         sizeSampler.RecalculateOpenCurveOnlyPoints(curve);
         //var rand = new System.Random();
