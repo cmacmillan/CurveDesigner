@@ -48,6 +48,10 @@ public partial class BezierCurve : IActiveElement
         public int start;
         public int end;
         public float runLength;
+        public bool IsWithinRange(ISamplerPoint point)
+        {
+            return point.SegmentIndex >= start && point.SegmentIndex < end;
+        }
         public void CalculateLength(BezierCurve curve)
         {
             end = start + points.Count;
@@ -58,13 +62,15 @@ public partial class BezierCurve : IActiveElement
     }
     private class ISamplerPointDeleteTracker
     {
-        public ISamplerPointDeleteTracker(ISamplerPoint point,float distance)
+        public ISamplerPointDeleteTracker(ISamplerPoint point,float fractionAlongSegment,int newSegmentIndex)
         {
             this.point = point;
-            this.distance = distance;
+            this.fractionAlongSegment = fractionAlongSegment;
+            this.newSegmentIndex = newSegmentIndex;
         }
         public ISamplerPoint point;
-        public float distance;
+        public float fractionAlongSegment;
+        public int newSegmentIndex;
     }
     public bool Delete(List<SelectableGUID> guids, Curve3D curve)
     {
@@ -92,6 +98,12 @@ public partial class BezierCurve : IActiveElement
         if (numRemaining == 0)//only 0 prevents lastdeleted also
             guids.RemoveAt(guids.IndexOf(lastDeleted.GUID));
         /////////
+        bool beforeIsClosedLoop = isClosedLoop;
+        if (!isClosedLoop)
+        {
+            isClosedLoop = true;
+            Recalculate();
+        }
         bool IsDeleted(PointGroup point) { return guids.Contains(point.GUID); }
         int currIndex = 0;
         PointGroup curr=PointGroups[0];
@@ -99,7 +111,7 @@ public partial class BezierCurve : IActiveElement
         void Next()
         {
             currIndex++;
-            if (currIndex < PointGroups.Count)
+            if (currIndex < PointGroups.Count-1)
                 curr = PointGroups[currIndex];
             else
                 isEnd = true; 
@@ -126,41 +138,67 @@ public partial class BezierCurve : IActiveElement
             runs.Add(GetRun());
         var rightRun = runs.Last();
         bool hasRightRun = IsDeleted(rightRun.points.Last());
+        if (hasRightRun)
+            Debug.Log($"right {rightRun.runLength}");
+        if (hasLeftRun)
+            Debug.Log($"left {leftRun.runLength}");
+        Debug.Log($"last {segments.Last().length}");
         //////////
         //Save all the old fractions along the run
-        /*
-        for (int i = 0; i < runs.Count; i++)
+        void GetSamplerPointRun(ISamplerPoint point,out int index,out float fractionAlongSegment)
         {
-            var run = runs[i];
-            int newSegmentIndex = i;
-            if (samplerPoint.SegmentIndex >= run.start && samplerPoint.SegmentIndex < run.end)
+            for (index = 0;index<runs.Count;index++)
             {
-                float newSegmentLength = segments[newSegmentIndex].length;
-
-                return;
-            }
-        }
-        */
-        PointGroupRun GetSamplerPointRun(ISamplerPoint point)
-        {
-            foreach (var i in runs)
-            {
-                if (i.start<=point.SegmentIndex && i.end < point.SegmentIndex)
+                var run = runs[index];
+                if (run.IsWithinRange(point))
                 {
-                    return i;
+                    float lengthUpToSegmentStart = run.start == 0 ? 0 : segments[run.start - 1].cummulativeLength;
+                    float distanceFromStartOfRun = point.GetDistance(this) - lengthUpToSegmentStart;
+                    fractionAlongSegment = distanceFromStartOfRun / run.runLength;
+                    return;
                 }
             }
-            //then we gotta check the bounding stuff (Left/right)
-            throw new NotImplementedException();
+            ///// handle closed loop
+            {
+                float closedLoopRunLength = segments.Last().length;
+                if (hasRightRun)
+                    closedLoopRunLength += rightRun.runLength;
+                if (hasLeftRun)
+                    closedLoopRunLength += leftRun.runLength;
+                index = runs.Count-1;
+                float lengthUpToSegmentStart = segments[segments.Count - 2].cummulativeLength;
+                float distanceAlongCurve; 
+                bool isInLeftRun = false;
+                if (hasLeftRun)
+                    isInLeftRun = leftRun.IsWithinRange(point);
+                if (isInLeftRun)
+                {
+                    distanceAlongCurve = closedLoopRunLength;
+                    float pointDist = point.GetDistance(this);
+                    PointGroupRun nextRun = null;
+                    if (runs.Count == 0)
+                        nextRun = rightRun;
+                    else
+                        nextRun = runs[0];
+                    float runStartDist = segments[nextRun.start - 1].cummulativeLength;
+                    float offset = runStartDist - pointDist;
+                    distanceAlongCurve -= offset;
+                }
+                else
+                {
+                    distanceAlongCurve = point.GetDistance(this);
+                }
+                float distanceFromStartOfRun = distanceAlongCurve - lengthUpToSegmentStart;
+                fractionAlongSegment = distanceFromStartOfRun / closedLoopRunLength;
+                return;
+            }
         }
         List<ISamplerPointDeleteTracker> samplerList = new List<ISamplerPointDeleteTracker>();
         foreach (var sampler in curve.DistanceSamplers)
             foreach (var samplerPoint in sampler.AllPoints())
             {
-                var run = GetSamplerPointRun(samplerPoint);
-                float lengthUpToSegmentStart = run.start==0?0:segments[run.start-1].cummulativeLength;
-                float distanceFromStartOfRun = samplerPoint.GetDistance(this) - lengthUpToSegmentStart;
-                samplerList.Add(new ISamplerPointDeleteTracker(samplerPoint,distanceFromStartOfRun));
+                GetSamplerPointRun(samplerPoint,out int runIndex,out float fractionAlongSegment);
+                samplerList.Add(new ISamplerPointDeleteTracker(samplerPoint,fractionAlongSegment,runIndex));
             }
         /////////////// ACTUALLY DO THE DELETE
         bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve);
@@ -168,7 +206,18 @@ public partial class BezierCurve : IActiveElement
             return false;
         Recalculate();
         ///////////////
-        
+        foreach (var i in samplerList)
+        {
+            float lengthUpToSegment = i.newSegmentIndex==0?0:segments[i.newSegmentIndex-1].cummulativeLength;
+            i.point.SetDistance(lengthUpToSegment+i.fractionAlongSegment*segments[i.newSegmentIndex].length, curve.positionCurve, false);
+        }
+        foreach (var i in curve.DistanceSamplers)
+            i.Sort(curve.positionCurve);
+        if (isClosedLoop != beforeIsClosedLoop)
+        {
+            isClosedLoop = beforeIsClosedLoop;
+            Recalculate();
+        }
         return true;
     }
     #endregion
