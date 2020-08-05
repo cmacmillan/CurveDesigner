@@ -111,7 +111,7 @@ public partial class BezierCurve : IActiveElement
         void Next()
         {
             currIndex++;
-            if (currIndex < PointGroups.Count-1)
+            if (currIndex < PointGroups.Count)
                 curr = PointGroups[currIndex];
             else
                 isEnd = true; 
@@ -139,7 +139,10 @@ public partial class BezierCurve : IActiveElement
         var rightRun = runs.Last();
         bool hasRightRun = IsDeleted(rightRun.points.Last());
         if (hasRightRun)
+        {
             runs.Remove(rightRun);
+            rightRun.runLength-=segments.Last().length;
+        }
         //////////
         //Save all the old fractions along the run
         void GetSamplerPointRun(ISamplerPoint point,out int index,out float fractionAlongSegment)
@@ -159,11 +162,14 @@ public partial class BezierCurve : IActiveElement
             ///// handle closed loop
             {
                 float closedLoopRunLength = segments.Last().length;
+                index = runs.Count-1;
                 if (hasRightRun)
+                {
                     closedLoopRunLength += rightRun.runLength;
+                    index++;
+                }
                 if (hasLeftRun)
                     closedLoopRunLength += leftRun.runLength;
-                index = runs.Count;
                 bool isInLeftRun = false;
                 if (hasLeftRun)
                     isInLeftRun = leftRun.IsWithinRange(point);
