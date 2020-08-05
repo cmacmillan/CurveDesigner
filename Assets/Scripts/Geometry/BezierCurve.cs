@@ -139,10 +139,7 @@ public partial class BezierCurve : IActiveElement
         var rightRun = runs.Last();
         bool hasRightRun = IsDeleted(rightRun.points.Last());
         if (hasRightRun)
-            Debug.Log($"right {rightRun.runLength}");
-        if (hasLeftRun)
-            Debug.Log($"left {leftRun.runLength}");
-        Debug.Log($"last {segments.Last().length}");
+            runs.Remove(rightRun);
         //////////
         //Save all the old fractions along the run
         void GetSamplerPointRun(ISamplerPoint point,out int index,out float fractionAlongSegment)
@@ -158,6 +155,7 @@ public partial class BezierCurve : IActiveElement
                     return;
                 }
             }
+
             ///// handle closed loop
             {
                 float closedLoopRunLength = segments.Last().length;
@@ -165,30 +163,22 @@ public partial class BezierCurve : IActiveElement
                     closedLoopRunLength += rightRun.runLength;
                 if (hasLeftRun)
                     closedLoopRunLength += leftRun.runLength;
-                index = runs.Count-1;
-                float lengthUpToSegmentStart = segments[segments.Count - 2].cummulativeLength;
-                float distanceAlongCurve; 
+                index = runs.Count;
                 bool isInLeftRun = false;
                 if (hasLeftRun)
                     isInLeftRun = leftRun.IsWithinRange(point);
+                float distanceFromStartOfRun;
                 if (isInLeftRun)
                 {
-                    distanceAlongCurve = closedLoopRunLength;
                     float pointDist = point.GetDistance(this);
-                    PointGroupRun nextRun = null;
-                    if (runs.Count == 0)
-                        nextRun = rightRun;
-                    else
-                        nextRun = runs[0];
-                    float runStartDist = segments[nextRun.start - 1].cummulativeLength;
-                    float offset = runStartDist - pointDist;
-                    distanceAlongCurve -= offset;
+                    distanceFromStartOfRun = pointDist+segments.Last().length+rightRun.runLength;
                 }
                 else
                 {
-                    distanceAlongCurve = point.GetDistance(this);
+                    float lengthUpToSegmentStart = segments[rightRun.start-1].cummulativeLength;
+                    float pointDist = point.GetDistance(this);
+                    distanceFromStartOfRun = pointDist - lengthUpToSegmentStart;
                 }
-                float distanceFromStartOfRun = distanceAlongCurve - lengthUpToSegmentStart;
                 fractionAlongSegment = distanceFromStartOfRun / closedLoopRunLength;
                 return;
             }
