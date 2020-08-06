@@ -141,7 +141,7 @@ public partial class BezierCurve : IActiveElement
         if (hasRightRun)
         {
             runs.Remove(rightRun);
-            rightRun.runLength-=segments.Last().length;
+            rightRun.runLength-=segments.Last().length;//ending on an open point made the right run include the open curve length
         }
         //////////
         //Save all the old fractions along the run

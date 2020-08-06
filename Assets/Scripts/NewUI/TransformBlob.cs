@@ -25,24 +25,27 @@ namespace Assets.NewUI
         }
         public Vector3 TransformPoint(Vector3 point)
         {
-            var retr = _baseTransform.TransformPoint(point);
+            Vector3 retr=point;
             if (_additionalTransform!=null)
                 retr = _additionalTransform.GetMatrix() * ToHomo(retr);
+            retr = _baseTransform.TransformPoint(retr);
             return retr;
         }
         public Vector3 TransformDirection(Vector3 direction)
         {
-            var retr = _baseTransform.TransformDirection(direction);
+            Vector3 retr = direction;
             if (_additionalTransform!=null)
                 retr = _additionalTransform.GetMatrix() * ToHomoDirection(retr);
+            retr = _baseTransform.TransformDirection(retr);
             return retr;
         }
         public Vector3 InverseTransformPoint(Vector3 point)
         {
             Vector3 retr = point;
+            retr = _baseTransform.InverseTransformPoint(retr);
             if (_additionalTransform != null)
                 retr = _additionalTransform.GetMatrix().inverse * ToHomo(retr);
-            return _baseTransform.InverseTransformPoint(retr);
+            return retr;
         }
     }
     public interface IPointOnCurveProvider
@@ -59,7 +62,7 @@ namespace Assets.NewUI
         public Matrix4x4 GetMatrix()
         {
             var pointOnCurve = point.PointOnCurve;
-            return Matrix4x4.Translate(pointOnCurve.position)*Matrix4x4.Rotate(Quaternion.LookRotation(pointOnCurve.tangent,pointOnCurve.reference));
+            return Matrix4x4.Translate(pointOnCurve.position) * Matrix4x4.Rotate(Quaternion.LookRotation(pointOnCurve.tangent, pointOnCurve.reference));
         }
     }
 }
