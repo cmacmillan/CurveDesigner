@@ -115,12 +115,8 @@ public static class ListSelectableGUIDExtension
     {
         List<T> retr = new List<T>();
         foreach (var i in points)
-            foreach (var j in selectionPoints)
-                if (i.GUID == j)
-                {
+            if (selectionPoints.Contains(i.GUID))
                     retr.Add(i);
-                    break;
-                }
         return retr;
     }
 }

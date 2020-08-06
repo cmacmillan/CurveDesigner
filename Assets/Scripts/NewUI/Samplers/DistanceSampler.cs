@@ -255,7 +255,7 @@ namespace Assets.NewUI
             return retr;
         }
 
-        public List<SelectableGUID> SelectAll(Curve3D curve)
+        public virtual List<SelectableGUID> SelectAll(Curve3D curve)
         {
             List<SelectableGUID> retr = new List<SelectableGUID>();
             var points = GetPoints(curve.positionCurve);

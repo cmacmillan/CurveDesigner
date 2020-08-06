@@ -92,6 +92,31 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     //public Material testMat;
     public CommandBuffer commandBuffer;
 
+    #region guistyles
+    GUIStyle GetStyle(ref GUIStyle style,string init) {
+        if (style == null)
+            style = init;
+        return style;
+    }
+    private GUIStyle m_effectBgStyle;
+    public GUIStyle effectBgStyle => GetStyle(ref m_effectBgStyle,"ShurikenEffectBg");
+    //////////////////////////////////////////////////////////////////////////////
+    private GUIStyle m_shurikenModuleBg;
+    public GUIStyle  shurikenModuleBg=> GetStyle(ref m_shurikenModuleBg,"ShurikenModuleBg");
+    //////////////////////////////////////////////////////////////////////////////
+    private GUIStyle m_mixedToggleStyle;
+    public GUIStyle  mixedToggleStyle =>GetStyle(ref m_mixedToggleStyle,"ShurikenToggleMixed");
+    //////////////////////////////////////////////////////////////////////////////
+    private GUIStyle m_initialHeaderStyle;
+    public GUIStyle  initialHeaderStyle=> GetStyle(ref m_initialHeaderStyle,"ShurikenEmitterTitle");
+    //////////////////////////////////////////////////////////////////////////////
+    private GUIStyle m_nonInitialHeaderStyle;
+    public GUIStyle  nonInitialHeaderStyle=> GetStyle(ref m_nonInitialHeaderStyle,"ShurikenModuleTitle");
+    //////////////////////////////////////////////////////////////////////////////
+    private GUIStyle m_dropdownStyle;
+    public GUIStyle dropdownStyle=> GetStyle(ref m_dropdownStyle,"ShurikenDropdown");
+    #endregion
+
     public bool placeLockedPoints = true;
     public SplitInsertionNeighborModification splitInsertionBehaviour = SplitInsertionNeighborModification.DoNotModifyNeighbors;
 

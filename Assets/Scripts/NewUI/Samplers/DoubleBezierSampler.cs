@@ -21,6 +21,18 @@ namespace Assets.NewUI
         public DoubleBezierSampler() : base() { }
 
         public DoubleBezierSampler(DoubleBezierSampler objToClone) : base(objToClone) { }
+        public override List<SelectableGUID> SelectAll(Curve3D curve)
+        {
+            List<SelectableGUID> retr = new List<SelectableGUID>();
+            var points = GetPoints(curve.positionCurve);
+            foreach (var i in points)
+            {
+                retr.Add(i.GUID);
+                foreach (var j in i.value.PointGroups)
+                    retr.Add(j.GUID);
+            }
+            return retr;
+        }
 
         protected override BezierCurve GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
         {

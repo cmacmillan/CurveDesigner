@@ -14,14 +14,14 @@ namespace Assets.NewUI
         public BezierCurve positionCurve;
         public TransformBlob transformBlob;
         public PointOnCurve PointClosestToCursor { get; private set; }
-        public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve,IClickCommand clickCommand, TransformBlob transformBlob) : base(parent)
+        public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve,IClickCommand clickCommand, TransformBlob transformBlob,List<BezierCurve> allCurves) : base(parent)
         {
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
             _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,clickCommand,Curve3DSettings.Green,this);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in positionCurve.PointGroups)
-                pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve,group.GUID));
+                pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve,group.GUID,allCurves));
         }
         public void FindPointClosestToCursor()
         {

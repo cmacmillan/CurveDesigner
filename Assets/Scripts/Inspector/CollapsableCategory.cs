@@ -50,6 +50,22 @@ namespace Assets.NewUI
 
         public override string GetName(Curve3D curve) { return curve.name; }
 
+        /// Shuriken field with dropdown triangle
+        protected const float k_minMaxToggleWidth = 13;
+        protected static Rect GetPopupRect(Rect position)
+        {
+            position.xMin = position.xMax - k_minMaxToggleWidth;
+            return position;
+        }
+        protected static Rect SubtractPopupWidth(Rect position)
+        {
+            position.width -= 1 + k_minMaxToggleWidth;
+            return position;
+        }
+        ///////////////////////////////
+
+
+
         public override void Draw(Curve3D curve)
         {
             obj= new SerializedObject(curve);
@@ -137,6 +153,12 @@ namespace Assets.NewUI
 
             Field("type");
             Field("isClosedLoop");
+            /*
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.FloatField("taco",5);
+            EditorGUILayout.DropdownButton(GUIContent.none,FocusType.Passive,dropdownStyle);
+            EditorGUILayout.EndHorizontal();
+            */
             if (curve.type!= CurveType.NoMesh)
             {
                 if (curve.type== CurveType.Cylinder || curve.type== CurveType.DoubleBezier || curve.type == CurveType.HollowTube || curve.type== CurveType.Cylinder)

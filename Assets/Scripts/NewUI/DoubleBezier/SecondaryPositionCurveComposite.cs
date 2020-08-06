@@ -14,12 +14,12 @@ namespace Assets.NewUI
         public PointAlongCurveComposite centerPoint;
         private Curve3D _curve;
         private TransformBlob transformBlob;
-        public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve, DoubleBezierPoint secondaryBezierCurve,IDistanceSampler sampler) : base (parent)
+        public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve, DoubleBezierPoint secondaryBezierCurve,IDistanceSampler sampler,List<BezierCurve> allCurves) : base (parent)
         {
             var curveInfoAtCenterPoint = curve.positionCurve.GetPointAtDistance(secondaryBezierCurve.GetDistance(curve.positionCurve));
             this._curve = curve; 
             transformBlob = new TransformBlob(curve.transform,null);
-            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.value ,new SecondaryPositionCurveSplitCommand(secondaryBezierCurve.value,curve,this),transformBlob);
+            this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.value ,new SecondaryPositionCurveSplitCommand(secondaryBezierCurve.value,curve,this),transformBlob,allCurves);
             centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, curve.UICurve.positionCurve, UnityEngine.Color.green,secondaryBezierCurve.GUID,sampler);
             transformBlob._additionalTransform = new DynamicMatrix4x4(centerPoint);//works because transform blob is immutable
         }

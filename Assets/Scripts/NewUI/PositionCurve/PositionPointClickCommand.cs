@@ -12,13 +12,15 @@ namespace Assets.NewUI
         private PointGroup _group;
         private PGIndex _index;
         private BezierCurve positionCurve;
+        private List<BezierCurve> allCurves;
         private TransformBlob _transformBlob;
-        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve,TransformBlob transformBlob)
+        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve,TransformBlob transformBlob,List<BezierCurve> otherCurves)
         {
             this._group = group;
             this._index = indexType;
             this.positionCurve = curve;
             this._transformBlob = transformBlob;
+            this.allCurves = otherCurves;
         }
 
         public void ClickDown(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected)
@@ -61,7 +63,11 @@ namespace Assets.NewUI
             {
                 var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);
                 Vector3 pointOffset = newPointPosition - oldPointPosition;
-                var selectedPointGroups = selected.GetSelected(positionCurve.PointGroups);
+                List<PointGroup> selectedPointGroups = new List<PointGroup>();
+                foreach (var i in allCurves)
+                    foreach (var j in i.PointGroups)
+                        if (selected.Contains(j.GUID))
+                            selectedPointGroups.Add(j);
                 foreach (var i in selectedPointGroups)
                     i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index,dimensionLockMode)+pointOffset, dimensionLockMode);
 

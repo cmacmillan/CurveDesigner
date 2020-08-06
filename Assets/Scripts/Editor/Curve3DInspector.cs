@@ -34,14 +34,9 @@ public class Curve3DInspector : Editor
         EditorGUIUtility.labelWidth = EditorGUIUtility.labelWidth - 4;
 
         EditorGUILayout.BeginVertical();
-        GUIStyle effectBgStyle = "ShurikenEffectBg";
-        GUIStyle shurikenModuleBg = "ShurikenModuleBg";
-        GUIStyle mixedToggleStyle = "ShurikenToggleMixed";
-        GUIStyle initialHeaderStyle = "ShurikenEmitterTitle";
-        GUIStyle nonInitialHeaderStyle = "ShurikenModuleTitle";
         bool isDisabled = false;
 
-        GUILayout.BeginVertical(effectBgStyle);
+        GUILayout.BeginVertical(curve3d.effectBgStyle);
         {
             for (int i = 0; i < curve3d.collapsableCategories.Length; i++)
             {
@@ -52,11 +47,11 @@ public class Curve3DInspector : Editor
                 if (isInitial)
                 {
                     headerHeight = 25;
-                    headerStyle = initialHeaderStyle;
+                    headerStyle = curve3d.initialHeaderStyle;
                 } else
                 {
                     headerHeight = 15;
-                    headerStyle = nonInitialHeaderStyle;
+                    headerStyle = curve3d.nonInitialHeaderStyle;
                 }
                 Rect headerRect = GUILayoutUtility.GetRect(width, headerHeight);
                 int iconSize = 21;
@@ -71,7 +66,7 @@ public class Curve3DInspector : Editor
                         {
                             moduleSize.y -= 4;
                             moduleSize.height += 4;
-                            GUI.Label(moduleSize, GUIContent.none, shurikenModuleBg);
+                            GUI.Label(moduleSize, GUIContent.none, curve3d.shurikenModuleBg);
                             curr.Draw(curve3d);
                         }
                         EditorGUILayout.EndVertical();
@@ -143,6 +138,7 @@ public class Curve3DInspector : Editor
             curve.positionCurve.isCurveOutOfDate = true;
             curve.sizeSampler = new  FloatDistanceSampler("Size",1);
             curve.rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0);
+            GUIStyle dropdownStyle = "ShurikenDropdown";
             curve.doubleBezierSampler = new DoubleBezierSampler();
             curve.UICurve = new UICurve(null, curve);
             curve.UICurve.Initialize();
