@@ -231,6 +231,10 @@ public class Curve3DInspector : Editor
         {
             curve3d.UICurve=new UICurve(null,curve3d);
             curve3d.UICurve.Initialize();
+        } 
+        else if (curve3d.UICurve._curve==null)
+        {
+            curve3d.UICurve._curve = curve3d;
         }
         UpdateMesh(curve3d);
         var curveEditor = curve3d.UICurve;
@@ -392,7 +396,6 @@ public class Curve3DInspector : Editor
             {
                 if (MeshGenerator.didMeshGenerationSucceed)
                 {
-
                     if (curve.displayMesh == null)
                     {
                         curve.displayMesh = new Mesh();
@@ -407,6 +410,11 @@ public class Curve3DInspector : Editor
                     curve.displayMesh.SetUVs(0, MeshGenerator.uvs);
                     curve.displayMesh.SetColors(MeshGenerator.colors);
                     curve.displayMesh.RecalculateNormals();
+                    curve.collider = curve.GetComponent<MeshCollider>();
+                    if (curve.collider != null)
+                    {
+                        curve.collider.sharedMesh = curve.displayMesh;
+                    }
                 }
                 curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
             }

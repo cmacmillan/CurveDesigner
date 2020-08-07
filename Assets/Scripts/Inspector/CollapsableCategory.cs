@@ -169,6 +169,11 @@ namespace Assets.NewUI
                 {
                     Field("arcOfTube");
                 }
+                if (curve.type == CurveType.Mesh)
+                {
+                    Field("meshToTile");
+                    Field("clampAndStretchMeshToCurve");
+                }
                 if (curve.type != CurveType.Mesh)
                     Field("thickness");
                 if (curve.type != CurveType.Mesh)

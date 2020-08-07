@@ -55,6 +55,7 @@ public static class MeshGenerator
     public static float TubeArc = 360.0f;
 
     public static float Thickness = 0.0f;
+    public static bool clampAndStretchMeshToCurve = true;
     public static bool IsClosedLoop = false;
     public static CurveType CurveType;
     public static ThreadMesh meshToTile;
@@ -87,6 +88,7 @@ public static class MeshGenerator
             MeshGenerator.colorSampler = new ColorDistanceSampler(curve.colorSampler);
             MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);
             MeshGenerator.Thickness = curve.thickness;
+            MeshGenerator.clampAndStretchMeshToCurve = curve.clampAndStretchMeshToCurve;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
             MeshGenerator.meshToTile = curve.meshToTile == null ? null : new ThreadMesh(curve.meshToTile);
@@ -583,7 +585,11 @@ public static class MeshGenerator
                         for (int i = 0; i < meshToTile.verts.Length; i++)
                         {
                             var vert = meshToTile.verts[i];
-                            var distance = GetDistanceByArea((vert.x + c * (closeTilableMeshGap + meshLength))/secondaryDimensionLength);
+                            float distance;
+                            if (clampAndStretchMeshToCurve)
+                                distance = (vert.x/meshLength)*curveLength;
+                            else
+                                distance = GetDistanceByArea((vert.x + c * (closeTilableMeshGap + meshLength)) / secondaryDimensionLength);
                             max = Mathf.Max(max, distance);
                             if (distance > curveLength)
                             {

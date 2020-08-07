@@ -35,7 +35,7 @@ namespace Assets.NewUI
             }
         }
 
-        private Curve3D _curve;
+        public Curve3D _curve;
 
         public override SelectableGUID GUID => SelectableGUID.Null;
 

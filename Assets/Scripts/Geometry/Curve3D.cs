@@ -169,6 +169,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     public Curve3dSettings settings;
 
+    public MeshCollider collider;
     public MeshFilter filter;
     [FormerlySerializedAs("mesh")]
     public Mesh displayMesh;
@@ -199,6 +200,12 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [SerializeField]
     [HideInInspector]
     private InterpolationType old_colorInterpolation;
+
+
+    public bool clampAndStretchMeshToCurve = true;
+    [SerializeField]
+    [HideInInspector]
+    private bool old_clampAndStretchMeshToCurve;
 
     public bool useSeperateInnerAndOuterFaceTextures;
     [SerializeField]
@@ -283,6 +290,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
         retr |= CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
         retr |= CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
+        retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
 
         //color sampler
         retr |= CheckFieldChanged(colorSampler.constValue, ref old_constColor);
