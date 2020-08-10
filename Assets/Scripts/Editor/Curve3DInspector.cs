@@ -203,6 +203,13 @@ public class Curve3DInspector : Editor
         var curve3d = (target as Curve3D);
         var windowRect = new Rect(20, 20, 0, 0);
         //MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
+        //Handles.DrawAAConvexPolygon(new Vector3[4] { new Vector3(0,1,0), new Vector3(1,0,0),new Vector3(-1,0,0),new Vector3(0,0,1)});
+        /*
+        if (curve3d.graphicsMesh!=null && curve3d.graphicsMaterial!=null)
+        {
+            Graphics.DrawMesh(curve3d.graphicsMesh,Matrix4x4.identity,curve3d.graphicsMaterial,1<<5);
+        }
+        */
 
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
@@ -244,6 +251,7 @@ public class Curve3DInspector : Editor
             return curve3d.selectedPoints.Where(a => a == curve3d.elementClickedDown.owner.GUID).Count() > 0;
         }
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
+
         var eventType = Event.current.GetTypeForControl(controlID);
         ClickHitData closestElementToCursor = null;
         if (elementClickedDown == null)
@@ -387,6 +395,24 @@ public class Curve3DInspector : Editor
                 break;
         }
         curve3d.CopyRotations();
+
+        void DirectionHandle(Color color, Vector3 direction,Vector3 ortho)
+        {
+            //DO NOT CALL THIS FUNCTION DURING LAYOUT or it will call AddControl
+            Handles.color = color;
+            float size;
+            Vector3 initialPos = curve3d.transform.TransformPoint(curve3d.positionCurve.PointGroups[0].GetWorldPositionByIndex(PGIndex.Position, DimensionLockMode.none));
+            var initialHandleSpace = Handles.matrix * new Vector4(initialPos.x, initialPos.y, initialPos.z, 1);
+            float offsetAmount = 3f;
+            size = HandleUtility.GetHandleSize(initialHandleSpace) * .2f;
+            var offsetInitialPos = initialPos + size * direction*offsetAmount;
+            var finalHandleSpace = Handles.matrix * new Vector4(offsetInitialPos.x, offsetInitialPos.y, offsetInitialPos.z, 1);
+            Handles.DrawLine(initialHandleSpace, finalHandleSpace);
+            Handles.ConeHandleCap(-1, finalHandleSpace, Quaternion.LookRotation(direction, ortho), size, Event.current.type);
+        }
+        DirectionHandle(Color.blue, Vector3.forward,Vector3.up);
+        DirectionHandle(Color.green,Vector3.up,Vector3.forward);
+        DirectionHandle(Color.red,Vector3.right,Vector3.up);
     }
     private void UpdateMesh(Curve3D curve)
     {

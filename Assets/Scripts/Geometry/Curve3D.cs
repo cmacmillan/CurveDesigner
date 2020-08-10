@@ -49,6 +49,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         new PreferencesCollapsableCategory(),
     };
 
+    public Mesh graphicsMesh;
+    public Material graphicsMaterial;
     //sorted from most recent to oldest
     public List<SelectableGUID> selectedPoints = new List<SelectableGUID>();
     public ClickShiftControlState shiftControlState = ClickShiftControlState.none;
