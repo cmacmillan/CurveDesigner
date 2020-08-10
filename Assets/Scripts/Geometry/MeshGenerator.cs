@@ -586,10 +586,12 @@ public static class MeshGenerator
                         {
                             var vert = meshToTile.verts[i];
                             float distance;
+                            float scaler = 120;
                             if (clampAndStretchMeshToCurve)
-                                distance = (vert.x/meshLength)*curveLength;
+                                distance = (vert.x / meshLength) * curveLength;
                             else
-                                distance = GetDistanceByArea((vert.x + c * (closeTilableMeshGap + meshLength)) / secondaryDimensionLength);
+                                distance = vert.x/scaler+c*(meshLength+closeTilableMeshGap)/scaler;//fast alternative
+                                //distance = GetDistanceByArea((vert.x + c * (closeTilableMeshGap + meshLength)) / secondaryDimensionLength);
                             max = Mathf.Max(max, distance);
                             if (distance > curveLength)
                             {
@@ -608,6 +610,7 @@ public static class MeshGenerator
                             var reference = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
                             var cross = Vector3.Cross(reference, point.tangent);
                             vertices.Add(point.position + reference * vert.y * sizeScale + cross * vert.z * sizeScale);
+                            colors.Add(GetColorAtDistance(distance));
                             if (useUvs)
                                 uvs.Add(meshToTile.uv[i]);
                         }
