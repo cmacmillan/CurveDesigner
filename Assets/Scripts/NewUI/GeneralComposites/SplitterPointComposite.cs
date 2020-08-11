@@ -17,12 +17,7 @@ namespace Assets.NewUI
         {
             _positionCurveComposite = positionCurveComposite;
             _transformBlob = transformBlob;
-            _point = new PointComposite(this,this,textureType,clickCommand,color,SelectableGUID.Null);
-        }
-        public override void Draw(List<IDraw> drawlist,ClickHitData closestElementToCursor)
-        {
-            if (closestElementToCursor != null && closestElementToCursor.owner != null && closestElementToCursor.owner.GetParent() == this && closestElementToCursor.distanceFromClick < _maxSplitClickDistance)
-                base.Draw(drawlist,closestElementToCursor);
+            _point = new PointComposite(this,this,textureType,clickCommand,color,SelectableGUID.Null,true);
         }
         public override IEnumerable<IComposite> GetChildren()
         {

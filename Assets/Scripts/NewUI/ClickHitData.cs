@@ -8,15 +8,17 @@ namespace Assets.NewUI
 {
     public class ClickHitData
     {
-        public float distanceFromClick;
+        public float DistanceFromMouse(Vector2 mousePos)
+        {
+            return owner.DistanceFromMouse(mousePos);
+        }
         public float distanceFromCamera;
         public IClickable owner;
         public Vector2 offset;
         public bool hasBeenDragged=false;
         public bool isLowPriority = false;
-        public ClickHitData(IClickable owner,float distanceFromClick, float distanceFromCamera, Vector2 offset)
+        public ClickHitData(IClickable owner,float distanceFromCamera, Vector2 offset)
         {
-            this.distanceFromClick = distanceFromClick;
             this.distanceFromCamera = distanceFromCamera;
             this.owner = owner;
             this.offset = offset;

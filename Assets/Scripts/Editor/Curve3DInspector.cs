@@ -396,9 +396,10 @@ public class Curve3DInspector : Editor
         }
         curve3d.CopyRotations();
 
-        void DirectionHandle(Color color, Vector3 direction,Vector3 ortho)
+        void DrawDirectionHandle(Color color, Vector3 direction,Vector3 ortho)
         {
-            //DO NOT CALL THIS FUNCTION DURING LAYOUT or it will call AddControl
+            if (Event.current.type != EventType.Repaint)
+                return;
             Handles.color = color;
             float size;
             Vector3 initialPos = curve3d.transform.TransformPoint(curve3d.positionCurve.PointGroups[0].GetWorldPositionByIndex(PGIndex.Position, DimensionLockMode.none));
@@ -410,9 +411,9 @@ public class Curve3DInspector : Editor
             Handles.DrawLine(initialHandleSpace, finalHandleSpace);
             Handles.ConeHandleCap(-1, finalHandleSpace, Quaternion.LookRotation(direction, ortho), size, Event.current.type);
         }
-        DirectionHandle(Color.blue, Vector3.forward,Vector3.up);
-        DirectionHandle(Color.green,Vector3.up,Vector3.forward);
-        DirectionHandle(Color.red,Vector3.right,Vector3.up);
+        DrawDirectionHandle(Color.blue, Vector3.forward,Vector3.up);
+        DrawDirectionHandle(Color.green,Vector3.up,Vector3.forward);
+        DrawDirectionHandle(Color.red,Vector3.right,Vector3.up);
     }
     private void UpdateMesh(Curve3D curve)
     {
@@ -455,18 +456,15 @@ public class Curve3DInspector : Editor
             curve.RequestMeshUpdate();
         }
     }
-    private const float BoundsExtension = 20;
+    private const float maxDistance = 20;
     ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition,EventType eventType)
     {
         ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
         {
-            var primaries = lst.Where(a => a.owner.IsWithinBounds(clickPosition)).OrderBy(a => a.distanceFromCamera);
-            if (primaries.Count() > 0)
-                return primaries.First();
-            //we didn't hit any primary hits, so we are gonna just pick the thing with min distanceFromBounds
-            var secondaries = lst.Where(a => a.owner.distanceFromBounds < BoundsExtension).OrderBy(a => a.owner.distanceFromBounds);
-            if (secondaries.Count() > 0)
-                return secondaries.First();
+            var clicks = lst.OrderBy(a => a.distanceFromCamera);
+            foreach (var i in clicks)
+                if (i.DistanceFromMouse(clickPosition) < maxDistance)
+                    return i;
             return null;
         }
         List<ClickHitData> hits = new List<ClickHitData>();

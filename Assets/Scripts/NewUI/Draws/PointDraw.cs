@@ -16,13 +16,16 @@ namespace Assets.NewUI
         PointTextureType type;
         Color _color;
         IComposite _creator;
-        public PointDraw(IComposite creator,Vector3 position,PointTextureType type,Color color,int size = 5)
+        bool hideIfNotHovered;
+        
+        public PointDraw(IComposite creator,Vector3 position,PointTextureType type,Color color,int size = 5,bool hideIfNotHovered=false)
         {
             GUITools.WorldToGUISpace(position, out _guiPos, out _distFromCamera);
             this._color = color;
             this._size = size;
             this.type = type;
             this._creator = creator;
+            this.hideIfNotHovered = hideIfNotHovered;
         }
         public float DistFromCamera()
         {
@@ -31,8 +34,11 @@ namespace Assets.NewUI
 
         public void Draw(DrawMode mode,SelectionState selectionState)
         {
-            var rect = GUITools.GetRectCenteredAtPosition(_guiPos, _size, _size);
-            DrawPoint(rect, mode.Tint(selectionState,_color),GetPointTexture(type));
+            if (mode == DrawMode.hovered || !hideIfNotHovered)
+            {
+                var rect = GUITools.GetRectCenteredAtPosition(_guiPos, _size, _size);
+                DrawPoint(rect, mode.Tint(selectionState, _color), GetPointTexture(type));
+            }
         }
         private static void DrawPoint(Rect position, Color color, Texture2D tex)
         {

@@ -15,7 +15,7 @@ namespace Assets.NewUI
         private Curve3D _curve;
         private DoNothingClickCommand clickCommand;
         public override SelectableGUID GUID => _point.GUID;
-        public EditColorComposite(IComposite parent,ColorSamplerPoint point,ColorDistanceSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent,false)
+        public EditColorComposite(IComposite parent,ColorSamplerPoint point,ColorDistanceSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent)
         {
             _curve = curve;
             _point = point;
@@ -32,14 +32,12 @@ namespace Assets.NewUI
         }
         public override SelectableGUID Guid => _point.GUID;
 
-        protected override bool TryGetBounds(out Rect bounds)
+        public override float DistanceFromMouse(Vector2 mouse)
         {
-            if (GUITools.WorldToGUISpace(centerPoint.Position, out Vector2 guiPos, out float distFromCamera)) {
-                bounds = shrunkPos(guiPos);
-                return true;
-            }
-            bounds = Rect.zero;
-            return false;
+            if (GUITools.WorldToGUISpace(centerPoint.Position, out Vector2 guiPos, out float distFromCamera))
+                if (shrunkPos(guiPos).Contains(mouse))
+                    return 0;
+            return float.MaxValue;
         }
 
         private readonly Vector2 rectSize = new Vector2(28,28);
@@ -59,7 +57,7 @@ namespace Assets.NewUI
         {
             GUITools.WorldToGUISpace(centerPoint.Position,out Vector2 guiPosition,out float screenDepth);
             float distance = Vector2.Distance(mousePosition,guiPosition);
-            clickHits.Add(new ClickHitData(this,distance,screenDepth,guiPosition-mousePosition));
+            clickHits.Add(new ClickHitData(this,screenDepth,guiPosition-mousePosition));
             base.Click(mousePosition, clickHits,eventType);
         }
         public void IMGUIElement()

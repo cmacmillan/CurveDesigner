@@ -14,41 +14,35 @@ namespace Assets.NewUI
         private IClickCommand _clickAction;
         private Color _color;
         private SelectableGUID guid;
+        private bool hideIfNotHovered;
 
-        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color,SelectableGUID guid) : base(parent,true)
+        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color,SelectableGUID guid,bool hideIfNotHovered=false) : base(parent)
         {
             this._position = positionProvider;
             this._pointTexture = textureType;
             this._clickAction = clickAction;
             this._color = color;
             this.guid = guid;
+            this.hideIfNotHovered = hideIfNotHovered;
         }
 
         public override SelectableGUID Guid => guid;
-
-        protected override bool TryGetBounds(out Rect bounds)
+        public override float DistanceFromMouse(Vector2 mouse)
         {
-            if (GUITools.WorldToGUISpace(_position.Position,out Vector2 guiPosition,out float screenDepth))
-            {
-                float size = 10;
-                Vector2 bound = new Vector2(size, size);
-                bounds = new Rect(guiPosition-bound/2,bound);
-                return true;
-            }
-            bounds = Rect.zero;
-            return false;
+            if (GUITools.WorldToGUISpace(_position.Position, out Vector2 guiPosition, out float screenDepth))
+                return Vector2.Distance(mouse, guiPosition);
+            return float.MaxValue;
         }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits,EventType eventType)
         {
             GUITools.WorldToGUISpace(_position.Position,out Vector2 guiPosition,out float screenDepth);
-            float distance = Vector2.Distance(mousePosition,guiPosition);
-            clickHits.Add(new ClickHitData(this,distance,screenDepth,guiPosition-mousePosition));
+            clickHits.Add(new ClickHitData(this,screenDepth,guiPosition-mousePosition));
         }
 
         public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
         {
-            drawList.Add(new PointDraw(this,_position.Position, _pointTexture,_color));
+            drawList.Add(new PointDraw(this,_position.Position, _pointTexture,_color,hideIfNotHovered:hideIfNotHovered));
         }
 
         public override IClickCommand GetClickCommand()
