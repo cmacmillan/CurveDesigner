@@ -26,11 +26,11 @@ namespace Assets.NewUI
             this.hideIfNotHovered = hideIfNotHovered;
         }
 
-        public override SelectableGUID Guid => guid;
+        public override SelectableGUID GUID => guid;
         public override float DistanceFromMouse(Vector2 mouse)
         {
             if (GUITools.WorldToGUISpace(_position.Position, out Vector2 guiPosition, out float screenDepth))
-                return Vector2.Distance(mouse, guiPosition);
+                return Vector2.Distance(mouse, guiPosition);//-15;//extend hitbox by 15
             return float.MaxValue;
         }
 

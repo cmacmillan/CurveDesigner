@@ -29,8 +29,7 @@ namespace Assets.NewUI
        
         public abstract IClickCommand GetClickCommand();
 
-        public bool IsSelectable { get { return Guid == SelectableGUID.Null; } }
+        public bool IsSelectable { get { return GUID == SelectableGUID.Null; } }
 
-        public abstract SelectableGUID Guid { get; }
     }
 }

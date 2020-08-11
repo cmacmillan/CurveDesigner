@@ -324,7 +324,7 @@ public class Curve3DInspector : Editor
                         if (Event.current.control || isSplitAndShift)  /////CONTROL CLICK
                         {
                             curve3d.shiftControlState = Curve3D.ClickShiftControlState.control;
-                            curve3d.ToggleSelectPoint(curve3d.elementClickedDown.owner.Guid);
+                            curve3d.ToggleSelectPoint(curve3d.elementClickedDown.owner.GUID);
                         }
                         else if (Event.current.shift) /////SHIFT CLICK
                         {
@@ -332,15 +332,15 @@ public class Curve3DInspector : Editor
                             SelectableGUID previous = SelectableGUID.Null;
                             if (curve3d.selectedPoints.Count > 0)
                                 previous = curve3d.selectedPoints[0];
-                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, curve3d.elementClickedDown.owner.Guid,curve3d,curve3d.positionCurve);//for a double bezier selection should use that curve instead of main
+                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, curve3d.elementClickedDown.owner.GUID,curve3d,curve3d.positionCurve);//for a double bezier selection should use that curve instead of main
                         }
                         else
                         {
                             curve3d.shiftControlState = Curve3D.ClickShiftControlState.none;
-                            if (curve3d.selectedPoints.Contains(curve3d.elementClickedDown.owner.Guid))
-                                curve3d.SelectAdditionalPoint(curve3d.elementClickedDown.owner.Guid);
+                            if (curve3d.selectedPoints.Contains(curve3d.elementClickedDown.owner.GUID))
+                                curve3d.SelectAdditionalPoint(curve3d.elementClickedDown.owner.GUID);
                             else 
-                                curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.Guid);
+                                curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.GUID);
                         }
                         if (IsActiveElementSelected())
                         {
@@ -378,7 +378,7 @@ public class Curve3DInspector : Editor
                         curve3d.RequestMeshUpdate();
                         if (!curve3d.elementClickedDown.hasBeenDragged && curve3d.shiftControlState==Curve3D.ClickShiftControlState.none)
                         {
-                            curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.Guid);
+                            curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.GUID);
                         }
                         IMGUI();
                         curve3d.elementClickedDown = null; 
@@ -395,25 +395,6 @@ public class Curve3DInspector : Editor
                 break;
         }
         curve3d.CopyRotations();
-
-        void DrawDirectionHandle(Color color, Vector3 direction,Vector3 ortho)
-        {
-            if (Event.current.type != EventType.Repaint)
-                return;
-            Handles.color = color;
-            float size;
-            Vector3 initialPos = curve3d.transform.TransformPoint(curve3d.positionCurve.PointGroups[0].GetWorldPositionByIndex(PGIndex.Position, DimensionLockMode.none));
-            var initialHandleSpace = Handles.matrix * new Vector4(initialPos.x, initialPos.y, initialPos.z, 1);
-            float offsetAmount = 3f;
-            size = HandleUtility.GetHandleSize(initialHandleSpace) * .2f;
-            var offsetInitialPos = initialPos + size * direction*offsetAmount;
-            var finalHandleSpace = Handles.matrix * new Vector4(offsetInitialPos.x, offsetInitialPos.y, offsetInitialPos.z, 1);
-            Handles.DrawLine(initialHandleSpace, finalHandleSpace);
-            Handles.ConeHandleCap(-1, finalHandleSpace, Quaternion.LookRotation(direction, ortho), size, Event.current.type);
-        }
-        DrawDirectionHandle(Color.blue, Vector3.forward,Vector3.up);
-        DrawDirectionHandle(Color.green,Vector3.up,Vector3.forward);
-        DrawDirectionHandle(Color.red,Vector3.right,Vector3.up);
     }
     private void UpdateMesh(Curve3D curve)
     {
@@ -456,14 +437,14 @@ public class Curve3DInspector : Editor
             curve.RequestMeshUpdate();
         }
     }
-    private const float maxDistance = 20;
+    private const float maxDistance = 5;
     ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition,EventType eventType)
     {
         ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
         {
             var clicks = lst.OrderBy(a => a.distanceFromCamera);
             foreach (var i in clicks)
-                if (i.DistanceFromMouse(clickPosition) < maxDistance)
+                if (i.owner.DistanceFromMouse(clickPosition) < maxDistance)
                     return i;
             return null;
         }

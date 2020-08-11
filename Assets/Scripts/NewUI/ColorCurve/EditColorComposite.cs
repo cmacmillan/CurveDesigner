@@ -30,7 +30,6 @@ namespace Assets.NewUI
         {
             return clickCommand;
         }
-        public override SelectableGUID Guid => _point.GUID;
 
         public override float DistanceFromMouse(Vector2 mouse)
         {

@@ -152,7 +152,7 @@ namespace Assets.NewUI
             int index = _sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve, _curve.positionCurve);
             _curve.UICurve.Initialize();//See above
             var selected = _pointsProvider(_curve).GetPointAtIndex(index);
-            curve.SelectAdditionalPoint(selected.Guid);
+            curve.SelectAdditionalPoint(selected.GUID);
             _curve.elementClickedDown.owner = selected;
         }
     }

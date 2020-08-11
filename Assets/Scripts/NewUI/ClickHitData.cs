@@ -8,10 +8,6 @@ namespace Assets.NewUI
 {
     public class ClickHitData
     {
-        public float DistanceFromMouse(Vector2 mousePos)
-        {
-            return owner.DistanceFromMouse(mousePos);
-        }
         public float distanceFromCamera;
         public IClickable owner;
         public Vector2 offset;
