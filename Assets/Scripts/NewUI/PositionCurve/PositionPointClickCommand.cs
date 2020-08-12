@@ -25,6 +25,7 @@ namespace Assets.NewUI
 
         public void ClickDown(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected)
         {
+
         }
 
         public void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData data,List<SelectableGUID> selected)

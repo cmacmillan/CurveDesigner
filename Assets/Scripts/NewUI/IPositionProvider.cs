@@ -7,11 +7,16 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
+    public interface IPosition : IPositionSetter, IPositionProvider { }
+    public interface IPositionSetter
+    {
+        void SetPosition(Vector3 position);
+    }
     public interface IPositionProvider
     {
         Vector3 Position { get; }
     }
-    public class PointGroupPointPositionProvider : IPositionProvider
+    public class PointGroupPointPositionProvider : IPosition
     {
         private PointGroup _group;
         private PGIndex _type;
@@ -28,6 +33,10 @@ namespace Assets.NewUI
             get {
                 return transformBlob.TransformPoint(_group.GetWorldPositionByIndex(_type,_positionCurve.dimensionLockMode));
             }
+        }
+        public void SetPosition(Vector3 position)
+        {
+            _group.SetWorldPositionByIndex(_type,transformBlob.InverseTransformPoint(position) ,_positionCurve.dimensionLockMode);
         }
     }
 }

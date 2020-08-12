@@ -11,8 +11,8 @@ namespace Assets.NewUI
         private AxisHandleComposite rightAxis;
         private AxisHandleComposite upAxis;
         private AxisHandleComposite forwardAxis;
-        private IPositionProvider positionProvider;
-        public PositionHandleComposite(IComposite parent,Curve3D curve,IPositionProvider positionProvider) : base(parent)
+        private IPosition positionProvider;
+        public PositionHandleComposite(IComposite parent,Curve3D curve,IPosition positionProvider) : base(parent)
         {
             this.positionProvider = positionProvider;
             rightAxis = new AxisHandleComposite(this, curve, Vector3.right,positionProvider);
