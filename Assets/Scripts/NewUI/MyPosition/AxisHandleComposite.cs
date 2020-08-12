@@ -11,11 +11,13 @@ namespace Assets.NewUI
         private Curve3D curve;
         private Vector3 axis;
         private IPosition positionProvider;
+        private AxisHandleClickCommand clickCommand;
         public AxisHandleComposite(IComposite parent,Curve3D curve,Vector3 axis,IPosition positionProvider) : base(parent)
         {
             this.curve = curve;
             this.axis = axis;
             this.positionProvider = positionProvider;
+            this.clickCommand = new AxisHandleClickCommand(positionProvider,axis);
         }
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
@@ -54,7 +56,7 @@ namespace Assets.NewUI
 
         public override IClickCommand GetClickCommand()
         {
-            return new AxisHandleClickCommand(positionProvider,axis);
+            return clickCommand;
         }
     }
     public class AxisHandleClickCommand : IClickCommand
@@ -66,31 +68,23 @@ namespace Assets.NewUI
             this.position = position;
             this.axis = axis;
         }
-        void Set(Curve3D curve,Vector2 mousePos)
-        {
-            Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
-            var screenRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
-            var oldPos = position.Position;
-            Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin, screenRay.direction, oldPos,axis);//transform axis?
-            pos.y = 2*oldPos.y-pos.y;
-            //Debug.DrawLine(screenRay.origin,screenRay.origin+screenRay.direction*10+Vector3.up,Color.green);
-            //Debug.DrawLine(oldPos, oldPos+ Vector3.right,Color.red);
-            //Debug.DrawLine(pos, pos + Vector3.right,Color.blue);
-            position.SetPosition(pos);
-        }
+        private Vector3 startPosition;
+        private Vector2 startMousePosition;
         public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
         {
-            Set(curve,mousePos);
+            startPosition = position.Position;
+            startMousePosition = mousePos;
         }
 
         public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selected)
         {
-            Set(curve,mousePos);
+            float dist = HandleUtility.CalcLineTranslation(startMousePosition, mousePos, startPosition, axis);
+            Vector3 worldPosition = startPosition+ axis* dist;
+            position.SetPosition(worldPosition);
         }
 
         public void ClickUp(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
         {
-            Set(curve,mousePos);
         }
     }
 }
