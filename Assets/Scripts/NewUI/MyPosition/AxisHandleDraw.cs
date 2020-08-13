@@ -47,12 +47,20 @@ namespace Assets.NewUI
         }
         public void Draw(DrawMode mode, SelectionState selectionState)
         {
+            Color Tint(Color c)
+            {
+                if (mode == DrawMode.hovered)
+                    return mode.Tint(selectionState, c);
+                else if (mode == DrawMode.clicked)
+                    return mode.Tint(selectionState, c);
+                return c;
+            }
             if (axis == Vector3.forward)
-                DrawDirectionHandle(mode.Tint(selectionState,Color.blue), Vector3.forward, Vector3.up);
+                DrawDirectionHandle(Tint(Color.blue), Vector3.forward, Vector3.up);
             else if (axis == Vector3.up)
-                DrawDirectionHandle(mode.Tint(selectionState,Color.green), Vector3.up, Vector3.forward);
+                DrawDirectionHandle(Tint(Color.green), Vector3.up, Vector3.forward);
             else if (axis == Vector3.right)
-                DrawDirectionHandle(mode.Tint(selectionState,Color.red), Vector3.right, Vector3.up);
+                DrawDirectionHandle(Tint(Color.red), Vector3.right, Vector3.up);
             else
                 throw new System.ArgumentException("Direction must be axis aligned");
         }

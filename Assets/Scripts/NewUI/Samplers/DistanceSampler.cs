@@ -39,6 +39,10 @@ namespace Assets.NewUI
         public int segmentIndex;
         public float time;
 
+        [SerializeField]
+        private InterpolationMode _interpolationMode;
+        public InterpolationMode InterpolationMode { get => _interpolationMode; set => _interpolationMode= value; }
+
         public abstract T CloneValue(T value);
 
         public void Copy(SamplerPoint<T,S,Q> objToClone, DistanceSampler<T,S,Q> newOwner)
@@ -47,6 +51,7 @@ namespace Assets.NewUI
             owner = newOwner as Q;
             segmentIndex = objToClone.segmentIndex;
             time = objToClone.time;
+            _interpolationMode =  objToClone._interpolationMode;
         }
 
         [SerializeField]
@@ -65,6 +70,7 @@ namespace Assets.NewUI
         {
             float originalDistance = GetDistance(curve.positionCurve);
             float distanceOffset = EditorGUILayout.FloatField("Distance along curve", originalDistance) - originalDistance;
+            InterpolationMode = (InterpolationMode)EditorGUILayout.EnumPopup("Interpolation",InterpolationMode);
             if (distanceOffset == 0)
                 return false;
             PointOnCurveClickCommand.ClampOffset(distanceOffset, curve,selectedPoints);
@@ -92,9 +98,9 @@ namespace Assets.NewUI
         public T constValue;
 
         [SerializeField]
-        private InterpolationType _interpolation;
+        private ValueType _valueType;
 
-        public InterpolationType Interpolation { get => _interpolation; set => _interpolation = value; }
+        public ValueType ValueType { get => _valueType; set => _valueType = value; }
 
         protected abstract T CloneValue(T value);
 
@@ -104,7 +110,7 @@ namespace Assets.NewUI
             this.fieldDisplayName = fieldDisplayName;
         }
         public ValueDistanceSampler(ValueDistanceSampler<T,S,Q> objToClone) : base(objToClone) {
-            _interpolation = objToClone._interpolation;
+            _valueType = objToClone._valueType;
             constValue = CloneValue(objToClone.constValue);
         }
         protected override T GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
@@ -114,7 +120,7 @@ namespace Assets.NewUI
         public T GetValueAtDistance(float distance, bool isClosedLoop, float curveLength, BezierCurve curve)
         {
             var pointsInsideCurve = GetPoints(curve);
-            if (_interpolation == InterpolationType.Constant || pointsInsideCurve.Count == 0)
+            if (_valueType == ValueType.Constant || pointsInsideCurve.Count == 0)
             {
                 return constValue;
             }
@@ -123,7 +129,7 @@ namespace Assets.NewUI
             var lastDistance = curveLength - lastPoint.GetDistance(curve);
             float endSegmentDistance = firstPoint.GetDistance(curve) + lastDistance;
             if (pointsInsideCurve[0].GetDistance(curve) >= distance)
-                if (isClosedLoop)
+                if (isClosedLoop && lastPoint.InterpolationMode == InterpolationMode.Linear)
                 {
                     float lerpVal = (lastDistance + distance) / endSegmentDistance;
                     return Lerp(lastPoint.value, firstPoint.value, lerpVal);
@@ -135,10 +141,15 @@ namespace Assets.NewUI
             {
                 var current = pointsInsideCurve[i];
                 if (current.GetDistance(curve) >= distance)
-                    return Lerp(previous.value, current.value, (distance - previous.GetDistance(curve)) / (current.GetDistance(curve) - previous.GetDistance(curve)));
+                {
+                    if (previous.InterpolationMode == InterpolationMode.Linear)
+                        return Lerp(previous.value, current.value, (distance - previous.GetDistance(curve)) / (current.GetDistance(curve) - previous.GetDistance(curve)));
+                    else
+                        return previous.value;
+                }
                 previous = current;
             }
-            if (isClosedLoop)
+            if (isClosedLoop && lastPoint.InterpolationMode == InterpolationMode.Linear)
             {
                 float lerpVal = (distance - lastPoint.GetDistance(curve)) / endSegmentDistance;
                 return Lerp(lastPoint.value, firstPoint.value, lerpVal);
@@ -198,11 +209,36 @@ namespace Assets.NewUI
             newPoint.GUID = curve.owner.guidFactory.GetGUID();
             newPoint.value = interpolatedValue;
             newPoint.owner = this as Q;
+            var valuePoint = newPoint as ISamplerPoint;
+            if (valuePoint != null && TryGetPointBelowDistance(distance, curve, out S point))
+                valuePoint.InterpolationMode = point.InterpolationMode;
             points.Add(newPoint);
             newPoint.SetDistance(distance,curve);
             return points.IndexOf(newPoint);
         }
 
+        private bool TryGetPointBelowDistance(float distance, BezierCurve curve,out S point)
+        {
+            point = null;
+            var points = GetPoints(curve);
+            if (points.Count == 0)
+                return false;
+            if (distance < points[0].GetDistance(curve) && !curve.isClosedLoop){
+                point = points[0];
+                return true;
+            }
+            for (int i = 0; i < points.Count; i++)
+            {
+                var curr = points[i];
+                if (curr.GetDistance(curve) > distance)
+                {
+                    point = points[i - 1];
+                    return true;
+                }
+            }
+            point = points.Last();
+            return true;
+        }
         public List<S> GetPoints(BezierCurve curve)
         {
             if (curve.isClosedLoop)
@@ -269,6 +305,7 @@ namespace Assets.NewUI
         float Time { get; set; }
         int SegmentIndex { get; set; }
         void SetDistance(float distance,BezierCurve curve,bool shouldSort=true);
+        InterpolationMode InterpolationMode { get; set; } 
     }
     public interface IDistanceSampler : IActiveElement
     {
@@ -280,6 +317,6 @@ namespace Assets.NewUI
     }
     public interface IValueSampler : IDistanceSampler
     {
-        InterpolationType Interpolation { get; set; }
+        ValueType ValueType { get; set; }
     }
 }

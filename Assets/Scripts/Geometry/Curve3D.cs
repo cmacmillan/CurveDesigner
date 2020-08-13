@@ -193,15 +193,15 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     [SerializeField]
     [HideInInspector]
-    private InterpolationType old_sizeInterpolation;
+    private ValueType old_sizeInterpolation;
 
     [SerializeField]
     [HideInInspector]
-    private InterpolationType old_rotationInterpolation;
+    private ValueType old_rotationInterpolation;
 
     [SerializeField]
     [HideInInspector]
-    private InterpolationType old_colorInterpolation;
+    private ValueType old_colorInterpolation;
 
 
     public bool clampAndStretchMeshToCurve = true;
@@ -296,15 +296,15 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
         //color sampler
         retr |= CheckFieldChanged(colorSampler.constValue, ref old_constColor);
-        retr |= CheckFieldChanged(colorSampler.Interpolation, ref old_colorInterpolation);
+        retr |= CheckFieldChanged(colorSampler.ValueType, ref old_colorInterpolation);
 
         //size sampler
         retr |= CheckFieldChanged(sizeSampler.constValue, ref old_constSize);
-        retr |= CheckFieldChanged(sizeSampler.Interpolation, ref old_sizeInterpolation);
+        retr |= CheckFieldChanged(sizeSampler.ValueType, ref old_sizeInterpolation);
 
         //rotation sampler
         retr |= CheckFieldChanged(rotationSampler.constValue, ref old_constRotation);
-        retr |= CheckFieldChanged(rotationSampler.Interpolation, ref old_rotationInterpolation);
+        retr |= CheckFieldChanged(rotationSampler.ValueType, ref old_rotationInterpolation);
 
         if (CheckFieldChanged(isClosedLoop, ref old_isClosedLoop))
         {
@@ -409,10 +409,15 @@ public class EditModeCategories
             editModes[i] = (EditMode)baseEditModes.GetValue(i);
     }
 }
-public enum InterpolationType
+public enum ValueType
 {
     Constant=0,
     Keyframes=1
+}
+public enum InterpolationMode
+{
+    Linear = 0,
+    Flat = 1,
 }
 public enum EditMode
 {

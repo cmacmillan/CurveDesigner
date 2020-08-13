@@ -114,8 +114,8 @@ namespace Assets.NewUI
                     break;
                 default:
                     var valueSampler = curve.ActiveElement as IValueSampler;
-                    valueSampler.Interpolation = (InterpolationType)EditorGUILayout.EnumPopup("Value Along Curve",valueSampler.Interpolation);
-                    if (valueSampler.Interpolation == InterpolationType.Constant)
+                    valueSampler.ValueType = (ValueType)EditorGUILayout.EnumPopup("Value Along Curve",valueSampler.ValueType);
+                    if (valueSampler.ValueType == ValueType.Constant)
                     {
                         shouldDrawWindowContent = false;
                         if (curve.editMode == EditMode.Size)

@@ -25,6 +25,8 @@ namespace Assets.NewUI
 
         private TransformBlob _transformBlob;
 
+        private Curve3D curve;
+
         public override SelectableGUID GUID => _pointGroup.GUID;
 
         private List<BezierCurve> allCurves;
@@ -36,6 +38,7 @@ namespace Assets.NewUI
         public PositionPointGroupComposite(IComposite parent, PointGroup group, TransformBlob transformBlob, BezierCurve positionCurve,SelectableGUID guid,List<BezierCurve> allCurves,Curve3D curve) : base(parent)
         {
             this._transformBlob = transformBlob;
+            this.curve = curve;
             _pointGroup = group;
             this._positionCurve = positionCurve;
             this.allCurves = allCurves;
@@ -65,19 +68,23 @@ namespace Assets.NewUI
 
         public override IEnumerable<IComposite> GetChildren()
         {
+            bool isSelected = curve.selectedPoints.Contains(GUID);
             if (leftTangentPoint != null)
             {
                 yield return leftTangentPoint;
                 yield return leftTangentLine;
-                yield return leftTangentPositionHandle;
+                if (isSelected)
+                    yield return leftTangentPositionHandle;
             }
             yield return centerPoint;
-            yield return centerPositionHandle;
+            if (isSelected)
+                yield return centerPositionHandle;
             if (rightTangentPoint != null)
             {
                 yield return rightTangentPoint;
                 yield return rightTangentLine;
-                yield return rightTangentPositionHandle;
+                if (isSelected)
+                    yield return rightTangentPositionHandle;
             }
         }
     }
