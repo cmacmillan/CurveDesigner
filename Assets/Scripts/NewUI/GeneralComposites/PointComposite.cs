@@ -15,8 +15,9 @@ namespace Assets.NewUI
         private Color _color;
         private SelectableGUID guid;
         private bool hideIfNotHovered;
+        private float hitboxExtension;
 
-        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color,SelectableGUID guid,bool hideIfNotHovered=false) : base(parent)
+        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color, SelectableGUID guid, bool hideIfNotHovered = false, float hitboxExtension = 15) : base(parent)
         {
             this._position = positionProvider;
             this._pointTexture = textureType;
@@ -24,13 +25,14 @@ namespace Assets.NewUI
             this._color = color;
             this.guid = guid;
             this.hideIfNotHovered = hideIfNotHovered;
+            this.hitboxExtension = hitboxExtension;
         }
 
         public override SelectableGUID GUID => guid;
         public override float DistanceFromMouse(Vector2 mouse)
         {
             if (GUITools.WorldToGUISpace(_position.Position, out Vector2 guiPosition, out float screenDepth))
-                return Vector2.Distance(mouse, guiPosition)-5;//extend hitbox by 5
+                return Vector2.Distance(mouse, guiPosition) - hitboxExtension;
             return float.MaxValue;
         }
 

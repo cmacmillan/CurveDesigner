@@ -165,17 +165,21 @@ namespace Assets.NewUI
                 {
                     Field("ringPointCount");
                 }
+                /*
                 if (curve.type == CurveType.Cylinder || curve.type == CurveType.HollowTube)
                 {
                     Field("arcOfTube");
                 }
+                */
                 if (curve.type == CurveType.Mesh)
                 {
                     Field("meshToTile");
                     Field("clampAndStretchMeshToCurve");
                 }
+                /*
                 if (curve.type != CurveType.Mesh)
                     Field("thickness");
+                */
                 if (curve.type != CurveType.Mesh)
                     Field("vertexDensity");
             }

@@ -116,7 +116,7 @@ namespace Assets.NewUI
 
             var closestPoint = _curve.UICurve.positionCurve.PointClosestToCursor;
             var pointGuid = _curve.positionCurve.InsertSegmentAfterIndex(closestPoint,_curve.placeLockedPoints,_curve.splitInsertionBehaviour);
-            _curve.SelectAdditionalPoint(pointGuid);
+            _curve.SelectOnlyPoint(pointGuid);
             _curve.UICurve.Initialize();//ideally we would only reinitialize the components that have updated. Basically we should be able to refresh the tree below any IComposite
 
             /////////////////
@@ -152,7 +152,7 @@ namespace Assets.NewUI
             int index = _sampler.InsertPointAtDistance(_curve.UICurve.positionCurve.PointClosestToCursor.distanceFromStartOfCurve, _curve.positionCurve);
             _curve.UICurve.Initialize();//See above
             var selected = _pointsProvider(_curve).GetPointAtIndex(index);
-            curve.SelectAdditionalPoint(selected.GUID);
+            curve.SelectOnlyPoint(selected.GUID);
             _curve.elementClickedDown.owner = selected;
         }
     }

@@ -139,6 +139,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     }
 
     public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1);
+    public FloatDistanceSampler arcOfTubeSampler = new FloatDistanceSampler("Arc", 180);
+    public FloatDistanceSampler thicknessSampler = new FloatDistanceSampler("Thickness", .1f);
     public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0);
     public ColorDistanceSampler colorSampler = new ColorDistanceSampler("Color");
     public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
@@ -193,6 +195,14 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     [SerializeField]
     [HideInInspector]
+    private float old_constArcOfTube;
+
+    [SerializeField]
+    [HideInInspector]
+    private float old_constThickness;
+
+    [SerializeField]
+    [HideInInspector]
     private ValueType old_sizeInterpolation;
 
     [SerializeField]
@@ -203,6 +213,13 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     private ValueType old_colorInterpolation;
 
+    [SerializeField]
+    [HideInInspector]
+    private ValueType old_arcOfTubeInterpolation;
+
+    [SerializeField]
+    [HideInInspector]
+    private ValueType old_thicknessInterpolation;
 
     public bool clampAndStretchMeshToCurve = true;
     [SerializeField]
@@ -231,18 +248,6 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     private int old_ringPointCount=-1;
 
-    [Range(0, 360)]
-    public float arcOfTube = 360;
-    [SerializeField]
-    [HideInInspector]
-    private float old_arcOfTube = -1;
-
-    [Min(0)]
-    public float thickness = .1f;
-    [HideInInspector]
-    [SerializeField]
-    private float old_thickness = -1;
-
     public CurveType type = CurveType.HollowTube;
     [HideInInspector]
     [SerializeField]
@@ -268,6 +273,16 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     private MeshPrimaryAxis old_meshPrimaryAxis;
 
+    /*
+    public Texture2D displacementTexture = null;
+    [SerializeField]
+    [HideInInspector]
+    private Texture2D old_displacementTexture=null;
+    [SerializeField]
+    [HideInInspector]
+    public Color32[] displacementTextureColors = null;
+    */
+
     private bool CheckFieldChanged<T>(T field, ref T oldField)
     {
         if (!field.Equals(oldField))
@@ -282,10 +297,13 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     {
         bool retr = false;
 
+        void CheckSamplerChanged<T>(IValueSampler<T> sampler,ref T oldConst, ref ValueType oldInterpolation)
+        {
+            retr |= CheckFieldChanged(sampler.ConstValue, ref oldConst);
+            retr |= CheckFieldChanged(sampler.ValueType, ref oldInterpolation);
+        }
         retr |= CheckFieldChanged(ringPointCount, ref old_ringPointCount);
         retr |= CheckFieldChanged(vertexDensity, ref old_vertexDensity);
-        retr |= CheckFieldChanged(arcOfTube, ref old_arcOfTube);
-        retr |= CheckFieldChanged(thickness, ref old_thickness);
         retr |= CheckFieldChanged(type, ref old_type);
         retr |= CheckFieldChanged(closeTilableMeshGap, ref old_closeTilableMeshGap);
         retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
@@ -294,17 +312,20 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         retr |= CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
         retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
 
-        //color sampler
-        retr |= CheckFieldChanged(colorSampler.constValue, ref old_constColor);
-        retr |= CheckFieldChanged(colorSampler.ValueType, ref old_colorInterpolation);
+        CheckSamplerChanged(colorSampler, ref old_constColor, ref old_colorInterpolation);
+        CheckSamplerChanged(sizeSampler, ref old_constSize, ref old_sizeInterpolation);
+        CheckSamplerChanged(rotationSampler, ref old_constRotation, ref old_rotationInterpolation);
+        CheckSamplerChanged(arcOfTubeSampler, ref old_constArcOfTube, ref old_arcOfTubeInterpolation);
+        CheckSamplerChanged(thicknessSampler, ref old_constThickness, ref old_thicknessInterpolation);
 
-        //size sampler
-        retr |= CheckFieldChanged(sizeSampler.constValue, ref old_constSize);
-        retr |= CheckFieldChanged(sizeSampler.ValueType, ref old_sizeInterpolation);
-
-        //rotation sampler
-        retr |= CheckFieldChanged(rotationSampler.constValue, ref old_constRotation);
-        retr |= CheckFieldChanged(rotationSampler.ValueType, ref old_rotationInterpolation);
+        /*
+        if (displacementTexture != old_displacementTexture)
+        {
+            old_displacementTexture = displacementTexture;
+            displacementTextureColors = displacementTexture?.GetPixels32();
+            retr = true;
+        }
+        */
 
         if (CheckFieldChanged(isClosedLoop, ref old_isClosedLoop))
         {

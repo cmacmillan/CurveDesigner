@@ -45,16 +45,18 @@ public static class MeshGenerator
 
     public static BezierCurve curve;
 
+    //public static Color32[] displacementColors;
+
     public static DoubleBezierSampler doubleBezierSampler;
     public static FloatDistanceSampler sizeSampler;
     public static FloatDistanceSampler rotationSampler;
     public static ColorDistanceSampler colorSampler;
+    public static FloatDistanceSampler tubeArcSampler;
+    public static FloatDistanceSampler thicknessSampler;
 
     public static int RingPointCount = 8;
     public static float VertexSampleDistance = 1.0f;
-    public static float TubeArc = 360.0f;
 
-    public static float Thickness = 0.0f;
     public static bool clampAndStretchMeshToCurve = true;
     public static bool IsClosedLoop = false;
     public static CurveType CurveType;
@@ -82,18 +84,31 @@ public static class MeshGenerator
             MeshGenerator.curve = clonedCurve;
             MeshGenerator.RingPointCount = curve.ringPointCount;
             MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
-            MeshGenerator.TubeArc = curve.arcOfTube;
+            MeshGenerator.tubeArcSampler = new FloatDistanceSampler(curve.arcOfTubeSampler);
             MeshGenerator.sizeSampler = new FloatDistanceSampler(curve.sizeSampler);
             MeshGenerator.rotationSampler = new FloatDistanceSampler(curve.rotationSampler);
             MeshGenerator.colorSampler = new ColorDistanceSampler(curve.colorSampler);
             MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);
-            MeshGenerator.Thickness = curve.thickness;
+            MeshGenerator.thicknessSampler = new FloatDistanceSampler(curve.thicknessSampler);
             MeshGenerator.clampAndStretchMeshToCurve = curve.clampAndStretchMeshToCurve;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;
             MeshGenerator.meshToTile = curve.meshToTile == null ? null : new ThreadMesh(curve.meshToTile);
             MeshGenerator.closeTilableMeshGap = curve.closeTilableMeshGap;
             MeshGenerator.meshPrimaryAxis = curve.meshPrimaryAxis;
+
+            /*
+            if (curve.displacementTextureColors!=null)
+            {
+                int len = curve.displacementTextureColors.Length;
+                MeshGenerator.displacementColors = new Color32[len];
+                Array.Copy(curve.displacementTextureColors, MeshGenerator.displacementColors, len);
+            } 
+            else
+            {
+                MeshGenerator.displacementColors = null;
+            }
+            */
 
             Thread thread = new Thread(TryFinallyGenerateMesh);
             thread.Start();
@@ -133,7 +148,7 @@ public static class MeshGenerator
         }
     }
 
-    private delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset);
+    private delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset,float pointDistance);
     private static bool GenerateMesh()
     {
         //Debug.Log("started thread");
@@ -169,6 +184,18 @@ public static class MeshGenerator
         float GetDistanceByArea(float area)
         {
             return sizeSampler.GetDistanceByAreaUnderInverseCurve(area, IsClosedLoop, curveLength, curve);
+        }
+        float GetSizeAtDistance(float distance)
+        {
+            return sizeSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve);
+        }
+        float GetTubeArcAtDistance(float distance)
+        {
+            return tubeArcSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve);
+        }
+        float GetThicknessAtDistance(float distance)
+        {
+            return thicknessSampler.GetValueAtDistance(distance, IsClosedLoop, curveLength, curve);
         }
         Color32 GetColorAtDistance(float distance)
         {
@@ -226,13 +253,14 @@ public static class MeshGenerator
                 vertices.Add(curr.side2Point2);
 
                 var color = GetColorAtDistance(curr.distanceAlongCurve);
+                var thickness = GetThicknessAtDistance(curr.distanceAlongCurve);
 
                 colors.Add(color);
                 colors.Add(color);
                 colors.Add(color);
                 colors.Add(color);
 
-                var uvX = curr.distanceAlongCurve/Thickness;
+                var uvX = curr.distanceAlongCurve/thickness;
 
                 uvs.Add(new Vector2(uvX,0));
                 uvs.Add(new Vector2(uvX,1));
@@ -294,14 +322,15 @@ public static class MeshGenerator
             for (int i = 0; i < points.Count; i++)
             {
                 PointOnCurve currentPoint = points[i];
-                var size = Mathf.Max(0, sizeSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve) + (offsetInterior?offset:0));
+                float currOffset = offset * GetThicknessAtDistance(currentPoint.distanceFromStartOfCurve);
+                var size = Mathf.Max(0, GetSizeAtDistance(currentPoint.distanceFromStartOfCurve) + (offsetInterior?currOffset:0));
                 var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve);
                 Color32 color = GetColorAtDistance(currentPoint.distanceFromStartOfCurve);
                 float currentLength = 0;
                 Vector3 previousPoint = Vector3.zero;  
                 for (int j = 0; j < pointsPerRing; j++)
                 {
-                    var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation,offset);
+                    var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation,currOffset,currentPoint.distanceFromStartOfCurve);
                     vertices.Add(position);
                     if (j > 0)
                         currentLength += Vector3.Distance(previousPoint,position);
@@ -322,8 +351,7 @@ public static class MeshGenerator
                 }
             }
         }
-        float tubeDistanceFromFull = 360.0f - TubeArc;
-        Vector3 DoubleBezierPointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+        Vector3 DoubleBezierPointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float pointDistance)
         {
             float progress = currentIndex / (float)totalPointCount;
             var relativePos = doubleBezierSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference);
@@ -336,7 +364,7 @@ public static class MeshGenerator
             var absolutePos = point.position + TransformVector3(relativePos);
             return absolutePos + TransformVector3(reference).normalized * offset;
         }
-        Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+        Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float pointDistance)
         {
             var center = point.position;
             var up = Quaternion.AngleAxis(rotation, point.tangent) * point.reference.normalized;
@@ -347,16 +375,17 @@ public static class MeshGenerator
             Vector3 lineEnd = center + scaledUp - scaledRight;
             return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
         }
-        Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+        Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float pointDistance)
         {
-            float theta = (TubeArc * currentIndex / (totalPointCount - 1)) + tubeDistanceFromFull / 2 + rotation;
+            float arc = GetTubeArcAtDistance(pointDistance);
+            float theta = (arc * currentIndex / (totalPointCount - 1)) + (360.0f-arc)/ 2 + rotation;
             Vector3 rotatedVect = Quaternion.AngleAxis(theta, point.tangent) * point.reference;
             return point.GetRingPoint(theta, size);
         }
-        Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+        Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float pointDistance)
         {
-            Vector3 lineStart = TubePointCreator(point, 0, totalPointCount, size, rotation, offset);
-            Vector3 lineEnd = TubePointCreator(point, totalPointCount-1, totalPointCount, size, rotation, offset);
+            Vector3 lineStart = TubePointCreator(point, 0, totalPointCount, size, rotation, offset,pointDistance);
+            Vector3 lineEnd = TubePointCreator(point, totalPointCount-1, totalPointCount, size, rotation, offset,pointDistance);
             return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
         }
         void InitLists()
@@ -451,8 +480,8 @@ public static class MeshGenerator
                 {
                     numVerts = RingPointCount* sampled.Count;
                     InitLists();
-                    CreatePointsAlongCurve(TubePointCreator,sampled,.5f*Thickness,RingPointCount,true);
-                    CreatePointsAlongCurve(TubeFlatPlateCreator, sampled,.5f*Thickness, 3, true);
+                    CreatePointsAlongCurve(TubePointCreator,sampled,.5f,RingPointCount,true);
+                    CreatePointsAlongCurve(TubeFlatPlateCreator, sampled,.5f, 3, true);
                     //CreateRingPointsAlongCurve(sampled, ActualRingPointCount, true);
                     TrianglifyLayer(true, RingPointCount,0);
                     TrianglifyLayer(false, 3,numVerts);
@@ -467,8 +496,8 @@ public static class MeshGenerator
                 {
                     numVerts = RingPointCount * sampled.Count * 2;
                     InitLists();
-                    CreatePointsAlongCurve(TubePointCreator,sampled,.5f*Thickness,RingPointCount,true);
-                    CreatePointsAlongCurve(TubePointCreator,sampled,-.5f*Thickness,RingPointCount,false);
+                    CreatePointsAlongCurve(TubePointCreator,sampled,.5f,RingPointCount,true);
+                    CreatePointsAlongCurve(TubePointCreator,sampled,-.5f,RingPointCount,false);
                     TrianglifyLayer(true, RingPointCount,0);
                     TrianglifyLayer(false, RingPointCount,numVerts/2);
                     CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount));
@@ -483,8 +512,8 @@ public static class MeshGenerator
                     int pointsPerFace = RingPointCount;
                     numVerts = 2*pointsPerFace * sampled.Count;
                     InitLists();
-                    CreatePointsAlongCurve(RectanglePointCreator, sampled, .25f*Thickness, pointsPerFace,false);
-                    CreatePointsAlongCurve(RectanglePointCreator, sampled, -.25f*Thickness, pointsPerFace,false);
+                    CreatePointsAlongCurve(RectanglePointCreator, sampled, .25f, pointsPerFace,false);
+                    CreatePointsAlongCurve(RectanglePointCreator, sampled, -.25f, pointsPerFace,false);
                     TrianglifyLayer(true, pointsPerFace,0);
                     TrianglifyLayer(false, pointsPerFace,numVerts/2);
                     CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointsPerFace));
@@ -500,8 +529,8 @@ public static class MeshGenerator
                     int pointCount = RingPointCount;
                     numVerts = 2 * pointCount*sampled.Count;
                     InitLists();
-                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, Thickness * .25f, pointCount, true);
-                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, -Thickness * .25f, pointCount, true);
+                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, -.25f, pointCount, true);
+                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, .25f, pointCount, true);
                     TrianglifyLayer(false, pointCount,0);
                     TrianglifyLayer(true, pointCount,numVerts/2);
                     CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount),true);

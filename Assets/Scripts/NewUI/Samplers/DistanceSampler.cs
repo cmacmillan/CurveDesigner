@@ -40,7 +40,7 @@ namespace Assets.NewUI
         public float time;
 
         [SerializeField]
-        private InterpolationMode _interpolationMode;
+        private InterpolationMode _interpolationMode = InterpolationMode.Flat;
         public InterpolationMode InterpolationMode { get => _interpolationMode; set => _interpolationMode= value; }
 
         public abstract T CloneValue(T value);
@@ -93,7 +93,7 @@ namespace Assets.NewUI
     }
 
     [System.Serializable]
-    public abstract class ValueDistanceSampler<T,S,Q> : DistanceSampler<T, S, Q>, IValueSampler where Q : ValueDistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
+    public abstract class ValueDistanceSampler<T,S,Q> : DistanceSampler<T, S, Q>, IValueSampler<T> where Q : ValueDistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
     {
         public T constValue;
 
@@ -101,6 +101,7 @@ namespace Assets.NewUI
         private ValueType _valueType;
 
         public ValueType ValueType { get => _valueType; set => _valueType = value; }
+        public T ConstValue { get => constValue; set => constValue = value; }
 
         protected abstract T CloneValue(T value);
 
@@ -314,6 +315,10 @@ namespace Assets.NewUI
         void RecalculateOpenCurveOnlyPoints(BezierCurve curve);
         void Sort(BezierCurve curve);
         int InsertPointAtDistance(float distance,BezierCurve curve);
+    }
+    public interface IValueSampler<T> : IValueSampler
+    {
+        T ConstValue { get; set; }
     }
     public interface IValueSampler : IDistanceSampler
     {

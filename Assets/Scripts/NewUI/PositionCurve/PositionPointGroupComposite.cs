@@ -68,7 +68,7 @@ namespace Assets.NewUI
 
         public override IEnumerable<IComposite> GetChildren()
         {
-            bool isSelected = curve.selectedPoints.Contains(GUID);
+            bool isSelected = curve.selectedPoints.Contains(GUID)&&false;
             if (leftTangentPoint != null)
             {
                 yield return leftTangentPoint;
