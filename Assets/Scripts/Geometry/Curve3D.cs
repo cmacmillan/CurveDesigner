@@ -18,6 +18,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             yield return rotationSampler;
             yield return doubleBezierSampler;
             yield return colorSampler;
+            yield return arcOfTubeSampler;
+            yield return thicknessSampler;
         }
     }
     public IActiveElement ActiveElement
@@ -100,7 +102,15 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             style = init;
         return style;
     }
+
+    private GUIStyle m_particleLabelStyle;
+    public GUIStyle particleLabelStyle => GetStyle(ref m_particleLabelStyle,"ShurikenLabel");
+    /////////////////////////////////////////////////
+    private GUIStyle m_controlRectStyle;
+    public GUIStyle controlRectStyle { get { if (m_controlRectStyle == null) { m_controlRectStyle = new GUIStyle { margin = new RectOffset(0, 0, 2, 2) };} return m_controlRectStyle; } } 
+    //////////////////////////////////////////////////////////////////////////////
     private GUIStyle m_effectBgStyle;
+
     public GUIStyle effectBgStyle => GetStyle(ref m_effectBgStyle,"ShurikenEffectBg");
     //////////////////////////////////////////////////////////////////////////////
     private GUIStyle m_shurikenModuleBg;

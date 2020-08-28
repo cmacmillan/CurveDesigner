@@ -327,7 +327,7 @@ public static class MeshGenerator
                 var rotation = rotationSampler.GetValueAtDistance(currentPoint.distanceFromStartOfCurve, IsClosedLoop, curveLength, curve);
                 Color32 color = GetColorAtDistance(currentPoint.distanceFromStartOfCurve);
                 float currentLength = 0;
-                Vector3 previousPoint = Vector3.zero;  
+                Vector3 previousPoint = Vector3.zero;
                 for (int j = 0; j < pointsPerRing; j++)
                 {
                     var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation,currOffset,currentPoint.distanceFromStartOfCurve);

@@ -62,6 +62,80 @@ namespace Assets.NewUI
             position.width -= 1 + k_minMaxToggleWidth;
             return position;
         }
+
+        private const int kSingleLineHeight = 18;
+
+        protected static Rect GetControlRect(int height,Curve3D curve, params GUILayoutOption[] layoutOptions)
+        {
+            return GUILayoutUtility.GetRect(0, height, curve.controlRectStyle, layoutOptions);
+        }
+
+        protected static Rect FieldPosition(Rect totalPosition, out Rect labelPosition)
+        {
+            labelPosition = new Rect(totalPosition.x, totalPosition.y, EditorGUIUtility.labelWidth, kSingleLineHeight);
+            return new Rect(totalPosition.x + EditorGUIUtility.labelWidth, totalPosition.y, totalPosition.width - EditorGUIUtility.labelWidth, totalPosition.height);
+        }
+        private static Rect PrefixLabel(Rect totalPosition, GUIContent label,Curve3D curve)
+        {
+            Rect labelPosition;
+            Rect fieldPosition = FieldPosition(totalPosition, out labelPosition);
+            EditorGUI.HandlePrefixLabel(totalPosition, labelPosition, label, 0);
+            return fieldPosition;
+        }
+
+        private void SamplerField(GUIContent label, IValueSampler sampler,Curve3D curve, params GUILayoutOption[] layoutOptions)
+        {
+            Rect rect = GetControlRect(kSingleLineHeight, curve,layoutOptions);
+            Rect popupRect = GetPopupRect(rect);
+            popupRect.height = kSingleLineHeight;
+            rect = SubtractPopupWidth(rect);
+            Rect controlRect = PrefixLabel(rect, label,curve);
+
+            ValueType state = sampler.ValueType;
+
+            switch (state)
+            {
+                case ValueType.Constant:
+                    //EditorGUI.BeginChangeCheck();
+                    //float newValue = FloatDraggable(rect, mmCurve.scalar, mmCurve.m_RemapValue, EditorGUIUtility.labelWidth);
+                    //if (EditorGUI.EndChangeCheck() && !mmCurve.signedRange)
+                    //mmCurve.scalar.floatValue = Mathf.Max(newValue, 0f);
+                    rect.xMin += EditorGUIUtility.labelWidth;
+                    EditorGUI.FloatField(rect,10);
+                    break;
+                case ValueType.Keyframes:
+                    //Rect previewRange = mmCurve.signedRange ? kSignedRange : kUnsignedRange;
+                    //SerializedProperty minCurve = (state == MinMaxCurveState.k_TwoCurves) ? mmCurve.minCurve : null;
+                    //GUICurveField(controlRect, mmCurve.maxCurve, minCurve, GetColor(mmCurve), previewRange, mmCurve.OnCurveAreaMouseDown);
+                    break;
+            }
+
+            // PopUp minmaxState menu
+            if (EditorGUI.DropdownButton(popupRect, GUIContent.none, FocusType.Passive, curve.dropdownStyle))
+            {
+                GUIContent[] texts =        {   EditorGUIUtility.TrTextContent("Constant"),
+                                                EditorGUIUtility.TrTextContent("Curve") };
+                ValueType[] states = {  ValueType.Constant,
+                                        ValueType.Keyframes};
+                GenericMenu menu = new GenericMenu();
+                for (int i = 0; i < texts.Length; ++i)
+                {
+                    menu.AddItem(texts[i], state == states[i], SelectValueTypeState,sampler);
+                }
+                menu.DropDown(popupRect);
+                Event.current.Use();
+            }
+            //EditorGUI.EndProperty();
+        }
+
+        void SelectValueTypeState(object sampler)
+        {
+            var valueSampler = sampler as IValueSampler;
+            if (valueSampler != null)
+            {
+
+            }
+        }
         ///////////////////////////////
 
 
@@ -165,6 +239,7 @@ namespace Assets.NewUI
                 {
                     Field("ringPointCount");
                 }
+                SamplerField(new GUIContent("asdf"), curve.rotationSampler,curve);
                 /*
                 if (curve.type == CurveType.Cylinder || curve.type == CurveType.HollowTube)
                 {
