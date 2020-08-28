@@ -102,6 +102,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             style = init;
         return style;
     }
+    public float TestThing = 10;
+    ////////////////////////////
 
     private GUIStyle m_particleLabelStyle;
     public GUIStyle particleLabelStyle => GetStyle(ref m_particleLabelStyle,"ShurikenLabel");
