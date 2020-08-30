@@ -28,16 +28,6 @@ namespace Assets.NewUI
             {EditMode.Color, "Color"},
         };
         public EditMode[] editModes;
-        public GUIStyle _centeredStyle;
-        private GUIStyle CenteredStyle { get
-            {
-                if (_centeredStyle == null) {
-                    _centeredStyle = GUI.skin.GetStyle("Label");
-                    _centeredStyle.alignment = TextAnchor.UpperCenter;
-                }
-                return _centeredStyle;
-            }
-        }
         public MainCollapsableCategory()
         {
             isExpanded = true;
@@ -70,28 +60,36 @@ namespace Assets.NewUI
             return GUILayoutUtility.GetRect(0, height, curve.controlRectStyle, layoutOptions);
         }
 
-        private void SamplerField(SerializedObject obj, string path, IValueSampler sampler,Curve3D curve, params GUILayoutOption[] layoutOptions)
+        private void EditModeSwitchButton(string label, EditMode mode,Curve3D curve, Rect rect)
         {
-            Rect rect = GetControlRect(kSingleLineHeight, curve,layoutOptions);
-            Rect popupRect = GetPopupRect(rect);
+            EditMode thisEditMode = mode;
+            bool isSelected = curve.editMode == thisEditMode;
+            GUI.Label(new Rect(rect.position, new Vector2(EditorGUIUtility.labelWidth, rect.height)), label, EditorStyles.label);
+            rect.xMin += EditorGUIUtility.labelWidth;
+            if (GUI.Toggle(rect, isSelected, EditorGUIUtility.TrTextContent($"{(isSelected ? "Editing" : "Edit")} {label}"), curve.buttonStyle))
+                curve.editMode = thisEditMode;
+        }
+        private Rect GetFieldRects(Curve3D curve,out Rect popupRect)
+        {
+            Rect rect = GetControlRect(kSingleLineHeight, curve);
+            popupRect = GetPopupRect(rect);
             popupRect.height = kSingleLineHeight;
             rect = SubtractPopupWidth(rect);
+            return rect;
+        }
+        private void SamplerField(SerializedObject obj, string path, IValueSampler sampler, Curve3D curve)
+        {
+            Rect rect = GetFieldRects(curve,out Rect popupRect);
 
             ValueType state = sampler.ValueType;
 
             switch (state)
             {
                 case ValueType.Constant:
-                    /*
-                        EditorGUI.PropertyField(rect,obj.FindProperty($"{path}.constValue"),new GUIContent(sampler.GetLabel()));
-                        break;
-                    case ValueType.Keyframes:
-                    */
-                    GUI.Label(new Rect(rect.position,new Vector2(EditorGUIUtility.labelWidth,rect.height)), sampler.GetLabel(),EditorStyles.label);
-                    rect.xMin += EditorGUIUtility.labelWidth;
-                    EditMode thisEditMode = sampler.GetEditMode();
-                    if (GUI.Toggle(rect,curve.editMode == thisEditMode, EditorGUIUtility.TrTextContent(sampler.GetLabel()), curve.buttonStyle))
-                        curve.editMode = thisEditMode;
+                    EditorGUI.PropertyField(rect, obj.FindProperty($"{path}.constValue"), new GUIContent(sampler.GetLabel()));
+                    break;
+                case ValueType.Keyframes:
+                    EditModeSwitchButton(sampler.GetLabel(),sampler.GetEditMode(),curve,rect);
                     break;
             }
 
@@ -105,19 +103,29 @@ namespace Assets.NewUI
                 GenericMenu menu = new GenericMenu();
                 for (int i = 0; i < texts.Length; ++i)
                 {
-                    menu.AddItem(texts[i], state == states[i], SelectValueTypeState,sampler);
+                    menu.AddItem(texts[i], state == states[i], SelectValueTypeState, new SelectValueTypeStateTuple(sampler,states[i]));
                 }
                 menu.DropDown(popupRect);
                 Event.current.Use();
             }
         }
 
-        void SelectValueTypeState(object sampler)
+        private class SelectValueTypeStateTuple
         {
-            var valueSampler = sampler as IValueSampler;
-            if (valueSampler != null)
+            public IValueSampler sampler;
+            public ValueType mode;
+            public SelectValueTypeStateTuple(IValueSampler sampler, ValueType mode)
             {
-
+                this.sampler = sampler;
+                this.mode = mode;
+            }
+        }
+        void SelectValueTypeState(object arg)
+        {
+            var tuple = arg as SelectValueTypeStateTuple;
+            if (tuple != null)
+            {
+                tuple.sampler.ValueType = tuple.mode;
             }
         }
         ///////////////////////////////
@@ -129,56 +137,7 @@ namespace Assets.NewUI
             obj= new SerializedObject(curve);
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             /*
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.BeginHorizontal(curve.settings.modeSelectorStyle);
-            int skipCount = 0;
-            if (curve.type != CurveType.DoubleBezier)
-                skipCount++;
-            for (int i = 0; i < editModes.Length; i++)
-            {
-                EditMode currMode = editModes[i];
-                if (curve.type != CurveType.DoubleBezier && currMode == EditMode.DoubleBezier)
-                    continue;
-                string currName = editmodeNameMap[currMode];
-                string style;
-                if (i == 0)
-                    style = "ButtonLeft";
-                else if (i -skipCount == editModes.Length - 1-skipCount)
-                    style = "ButtonRight";
-                else
-                    style = "ButtonMid";
-                if (GUILayout.Toggle(curve.editMode == currMode,EditorGUIUtility.TrTextContent(currName), style))
-                    curve.editMode = currMode;
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
-            */
-
-            GUILayout.BeginVertical(curve.settings.selectorWindowStyle);
             bool shouldDrawWindowContent = true;
-            switch (curve.editMode)
-            {
-                case EditMode.PositionCurve:
-                    break;
-                case EditMode.DoubleBezier:
-                    break;
-                default:
-                    var valueSampler = curve.ActiveElement as IValueSampler;
-                    valueSampler.ValueType = (ValueType)EditorGUILayout.EnumPopup("Value Along Curve",valueSampler.ValueType);
-                    if (valueSampler.ValueType == ValueType.Constant)
-                    {
-                        shouldDrawWindowContent = false;
-                        if (curve.editMode == EditMode.Size)
-                            curve.sizeSampler.constValue = EditorGUILayout.FloatField("Size",curve.sizeSampler.constValue);
-                        if (curve.editMode == EditMode.Rotation)
-                            curve.rotationSampler.constValue = EditorGUILayout.FloatField("Rotation",curve.rotationSampler.constValue);
-                        if (curve.editMode == EditMode.Color)
-                            curve.colorSampler.constValue = EditorGUILayout.ColorField("Color",curve.colorSampler.constValue);
-                    }
-                    break;
-            }
             if (shouldDrawWindowContent && curve.UICurve != null)
             {
                 int pointCount = curve.ActiveElement.NumSelectables(curve);
@@ -201,10 +160,8 @@ namespace Assets.NewUI
                     drawer.DrawWindow(curve);
                 }
             }
-            GUILayout.EndVertical();
-
-            Field("type");
-            Field("isClosedLoop");
+            */
+            EditModeSwitchButton("Position", EditMode.PositionCurve,curve,GetFieldRects(curve,out _));
             if (curve.type!= CurveType.NoMesh)
             {
                 SamplerField(obj, "sizeSampler", curve.sizeSampler,curve);
@@ -213,23 +170,27 @@ namespace Assets.NewUI
                 {
                     SamplerField(obj, "arcOfTubeSampler", curve.arcOfTubeSampler,curve);
                 }
-                if (curve.type == CurveType.Mesh)
-                {
-                    Field("meshToTile");
-                    Field("clampAndStretchMeshToCurve");
-                }
                 if (curve.type != CurveType.Mesh)
                 {
                     SamplerField(obj, "thicknessSampler",curve.thicknessSampler,curve);
                 }
-                if (curve.type != CurveType.Mesh)
-                {
-                    Field("vertexDensity");
-                }
-                if (curve.type== CurveType.Cylinder || curve.type== CurveType.DoubleBezier || curve.type == CurveType.HollowTube || curve.type== CurveType.Cylinder)
-                {
-                    Field("ringPointCount");
-                }
+            }
+            if (curve.type == CurveType.DoubleBezier)
+                EditModeSwitchButton("Double Bezier", EditMode.DoubleBezier, curve,GetFieldRects(curve,out _));
+            if (curve.type != CurveType.Mesh && curve.type!=CurveType.NoMesh)
+            {
+                Field("vertexDensity");
+            }
+            Field("type");
+            Field("isClosedLoop");
+            if (curve.type == CurveType.Mesh)
+            {
+                Field("meshToTile");
+                Field("clampAndStretchMeshToCurve");
+            }
+            if (curve.type == CurveType.Cylinder || curve.type == CurveType.DoubleBezier || curve.type == CurveType.HollowTube || curve.type == CurveType.Cylinder)
+            {
+                Field("ringPointCount");
             }
             obj.ApplyModifiedProperties();
         }

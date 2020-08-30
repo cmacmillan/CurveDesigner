@@ -96,66 +96,33 @@ public class Curve3DInspector : Editor
                 HandleKeys(curve3d);
                 break;
         }
-
-
-        //GUILayout.Label("asdf"); 
-        //base.OnInspectorGUI();
     }
 
     private void WindowFunc(int id)
     {
         var curve = (target as Curve3D);
         var editModes = curve.editModeCategories;
-        GUILayout.BeginVertical();
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        int skipCount = 0;
-        if (curve.type != CurveType.DoubleBezier)
-            skipCount++;
-        for (int i = 0; i < editModes.editModes.Length; i++)
-        {
-            EditMode currMode = editModes.editModes[i];
-            if (curve.type != CurveType.DoubleBezier && currMode == EditMode.DoubleBezier)
-                continue;
-            string currName = editModes.editmodeNameMap[currMode];
-            string style;
-            if (i == 0)
-                style = "ButtonLeft";
-            else if (i-skipCount == editModes.editModes.Length - 1 - skipCount)
-                style = "ButtonRight";
-            else
-                style = "ButtonMid";
-            if (GUILayout.Toggle(curve.editMode == currMode, EditorGUIUtility.TrTextContent(currName), style))
-                curve.editMode = currMode;
-        }
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-        if (GUILayout.Button("Clear"))
-        {
-            curve.positionCurve = new BezierCurve();
-            curve.positionCurve.owner = curve;
-            curve.positionCurve.Initialize();
-            curve.positionCurve.isCurveOutOfDate = true;
-            curve.sizeSampler = new  FloatDistanceSampler("Size",1, EditMode.Size);
-            curve.rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0, EditMode.Rotation);
-            GUIStyle dropdownStyle = "ShurikenDropdown";
-            curve.doubleBezierSampler = new DoubleBezierSampler("Double Bezier", EditMode.DoubleBezier);
-            curve.UICurve = new UICurve(null, curve);
-            curve.UICurve.Initialize();
-            Debug.Log("cleared");
-        }
-        GUILayout.EndVertical();
         if (curve.UICurve != null)
         {
-            var drawer = curve.UICurve.GetWindowDrawer();
-            drawer.DrawWindow(curve);
-        }
-        if (Event.current.type == EventType.MouseUp)
-        {
-            //Debug.Log("asdfasf");
-            //Event.current.Use();
-            //int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
-                        //GUIUtility.hotControl = controlID;
+            int pointCount = curve.ActiveElement.NumSelectables(curve);
+            if (pointCount == 0)
+            {
+                GUILayout.Label($"Click on the curve in the scene view to place a {curve.ActiveElement.GetPointName()} control point", curve.CenteredStyle);
+            }
+            else
+            {
+                int selectedPointCount = 0;
+                int numPoints = curve.ActiveElement.NumSelectables(curve);
+                for (int i = 0; i < numPoints; i++)
+                    if (curve.selectedPoints.Contains(curve.ActiveElement.GetSelectable(i, curve).GUID))
+                        selectedPointCount++;
+                if (selectedPointCount == 0)
+                    GUILayout.Label("No points selected", curve.CenteredStyle);
+                else
+                    GUILayout.Label($"{selectedPointCount} point{(selectedPointCount != 1 ? "s" : "")} selected", curve.CenteredStyle);
+                var drawer = curve.UICurve.GetWindowDrawer();
+                drawer.DrawWindow(curve);
+            }
         }
     }
 
@@ -202,7 +169,7 @@ public class Curve3DInspector : Editor
     {
         var curve3d = (target as Curve3D);
         var windowRect = new Rect(20, 20, 0, 0);
-        //MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
+        MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
         //Handles.DrawAAConvexPolygon(new Vector3[4] { new Vector3(0,1,0), new Vector3(1,0,0),new Vector3(-1,0,0),new Vector3(0,0,1)});
         /*
         if (curve3d.graphicsMesh!=null && curve3d.graphicsMaterial!=null)

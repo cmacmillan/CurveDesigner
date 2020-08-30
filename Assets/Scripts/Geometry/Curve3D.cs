@@ -103,6 +103,20 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         return style;
     }
 
+    private GUIStyle _centeredStyle;
+    public GUIStyle CenteredStyle
+    {
+        get
+        {
+            if (_centeredStyle == null)
+            {
+                _centeredStyle = GUI.skin.GetStyle("Label");
+                _centeredStyle.alignment = TextAnchor.UpperCenter;
+            }
+            return _centeredStyle;
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////////
     private GUIStyle m_buttonStyle;
     public GUIStyle buttonStyle => GetStyle(ref m_buttonStyle,"Button");
     //////////////////////////////////////////////////////////////////////////////
@@ -154,7 +168,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1,EditMode.Size);
     public FloatDistanceSampler arcOfTubeSampler = new FloatDistanceSampler("Arc", 180,EditMode.Arc);
     public FloatDistanceSampler thicknessSampler = new FloatDistanceSampler("Thickness", .1f,EditMode.Thickness);
-    public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0,EditMode.Rotation);
+    public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation",0,EditMode.Rotation);
     public ColorDistanceSampler colorSampler = new ColorDistanceSampler("Color",EditMode.Color);
     public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler("Double Bezier",EditMode.DoubleBezier);
 
@@ -349,17 +363,25 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         return retr;
     }
 
-    [ContextMenu("Reset curve")]
     public void ResetCurve()
     {
         positionCurve.Initialize();
         UICurve.Initialize();
     }
-    [ContextMenu("Clear double")]
-    public void ClearDouble()
+    [ContextMenu("Clear")]
+    public void Clear()
     {
-        doubleBezierSampler = new DoubleBezierSampler("Double Beizer",EditMode.DoubleBezier);
-        this.UICurve.Initialize();
+        positionCurve = new BezierCurve();
+        positionCurve.owner = this;
+        positionCurve.Initialize();
+        positionCurve.isCurveOutOfDate = true;
+        sizeSampler = new FloatDistanceSampler("Size", 1, EditMode.Size);
+        rotationSampler = new FloatDistanceSampler("Rotation", 0, EditMode.Rotation);
+        GUIStyle dropdownStyle = "ShurikenDropdown";
+        doubleBezierSampler = new DoubleBezierSampler("Double Bezier", EditMode.DoubleBezier);
+        UICurve = new UICurve(null, this);
+        UICurve.Initialize();
+        Debug.Log("cleared");
     }
     public void TryInitialize()
     {

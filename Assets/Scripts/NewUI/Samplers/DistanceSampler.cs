@@ -316,6 +316,11 @@ namespace Assets.NewUI
                 retr.Add(i.GUID);
             return retr;
         }
+
+        public string GetPointName()
+        {
+            return label.ToLower();
+        }
     }
     public interface ISamplerPoint : ISelectable
     {

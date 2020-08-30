@@ -625,4 +625,9 @@ public partial class BezierCurve : IActiveElement
     public int GetPointGroupIndex(int childIndex) {
         return ((childIndex + 1) / 3)%PointGroups.Count;
     }
+
+    public string GetPointName()
+    {
+        return "position";
+    }
 }
