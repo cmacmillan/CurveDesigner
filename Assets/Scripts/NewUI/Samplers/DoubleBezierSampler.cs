@@ -18,7 +18,7 @@ namespace Assets.NewUI
     [System.Serializable]
     public class DoubleBezierSampler : DistanceSampler<BezierCurve, DoubleBezierPoint,DoubleBezierSampler>
     {
-        public DoubleBezierSampler() : base() { }
+        public DoubleBezierSampler(string label, EditMode editMode) : base(label,editMode) { }
 
         public DoubleBezierSampler(DoubleBezierSampler objToClone) : base(objToClone) { }
         public override List<SelectableGUID> SelectAll(Curve3D curve)

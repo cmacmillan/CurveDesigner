@@ -19,7 +19,7 @@ namespace Assets.NewUI
         public override bool SelectEdit(Curve3D curve, List<S> selectedPoints)
         {
             T originalValue = value;
-            T fieldVal = Field(owner.fieldDisplayName, originalValue);
+            T fieldVal = Field(owner.GetLabel(), originalValue);
             T valueOffset = Subtract(fieldVal,originalValue);
             base.SelectEdit(curve, selectedPoints);
             if (valueOffset.Equals(Zero()))
@@ -106,9 +106,8 @@ namespace Assets.NewUI
         protected abstract T CloneValue(T value);
 
         public abstract T Lerp(T val1, T val2, float lerp);
-        public ValueDistanceSampler(string fieldDisplayName)
+        public ValueDistanceSampler(string label,EditMode editMode) : base(label,editMode)
         {
-            this.fieldDisplayName = fieldDisplayName;
         }
         public ValueDistanceSampler(ValueDistanceSampler<T,S,Q> objToClone) : base(objToClone) {
             _valueType = objToClone._valueType;
@@ -170,18 +169,26 @@ namespace Assets.NewUI
 
         public string fieldDisplayName="";
 
-        public DistanceSampler() { }
+        [SerializeField]
+        private string label;
+        [SerializeField]
+        private EditMode editMode;
+        public DistanceSampler(string label, EditMode editMode) {
+            this.label = label;
+            this.editMode = editMode;
+        }
 
         public DistanceSampler(DistanceSampler<T,S,Q> objToClone)
         {
-            fieldDisplayName = objToClone.fieldDisplayName;
-
             S Clone(S obj)
             {
                 var clonedPoint = new S();
                 clonedPoint.Copy(obj, this);
                 return clonedPoint;
             }
+
+            this.label = objToClone.label;
+            this.editMode = objToClone.editMode;
 
             foreach (var i in objToClone.points)
                 points.Add(Clone(i));
@@ -190,6 +197,15 @@ namespace Assets.NewUI
 
             foreach (var i in objToClone.points_openCurveOnly)
                 points_openCurveOnly.Add(Clone(i));
+        }
+        public string GetLabel()
+        {
+            return label;
+        }
+
+        public EditMode GetEditMode()
+        {
+            return editMode;
         }
 
         public IEnumerable<ISamplerPoint> AllPoints()
@@ -310,6 +326,8 @@ namespace Assets.NewUI
     }
     public interface IDistanceSampler : IActiveElement
     {
+        string GetLabel();
+        EditMode GetEditMode();
         IEnumerable<ISamplerPoint> GetPoints(BezierCurve curve);
         IEnumerable<ISamplerPoint> AllPoints();
         void RecalculateOpenCurveOnlyPoints(BezierCurve curve);

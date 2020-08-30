@@ -136,10 +136,10 @@ public class Curve3DInspector : Editor
             curve.positionCurve.owner = curve;
             curve.positionCurve.Initialize();
             curve.positionCurve.isCurveOutOfDate = true;
-            curve.sizeSampler = new  FloatDistanceSampler("Size",1);
-            curve.rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0);
+            curve.sizeSampler = new  FloatDistanceSampler("Size",1, EditMode.Size);
+            curve.rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0, EditMode.Rotation);
             GUIStyle dropdownStyle = "ShurikenDropdown";
-            curve.doubleBezierSampler = new DoubleBezierSampler();
+            curve.doubleBezierSampler = new DoubleBezierSampler("Double Bezier", EditMode.DoubleBezier);
             curve.UICurve = new UICurve(null, curve);
             curve.UICurve.Initialize();
             Debug.Log("cleared");

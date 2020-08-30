@@ -11,7 +11,7 @@ namespace Assets.NewUI
     [System.Serializable]
     public class FloatDistanceSampler : ValueDistanceSampler<float, FloatSamplerPoint,FloatDistanceSampler>
     {
-        public FloatDistanceSampler(string fieldDisplayName,float defaultValue): base(fieldDisplayName)
+        public FloatDistanceSampler(string label,float defaultValue,EditMode editMode): base(label, editMode)
         {
             constValue = defaultValue;
         }

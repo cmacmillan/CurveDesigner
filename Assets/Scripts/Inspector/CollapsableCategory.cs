@@ -70,31 +70,28 @@ namespace Assets.NewUI
             return GUILayoutUtility.GetRect(0, height, curve.controlRectStyle, layoutOptions);
         }
 
-        private void SamplerField(GUIContent label, IValueSampler sampler,Curve3D curve, params GUILayoutOption[] layoutOptions)
+        private void SamplerField(SerializedObject obj, string path, IValueSampler sampler,Curve3D curve, params GUILayoutOption[] layoutOptions)
         {
             Rect rect = GetControlRect(kSingleLineHeight, curve,layoutOptions);
             Rect popupRect = GetPopupRect(rect);
             popupRect.height = kSingleLineHeight;
             rect = SubtractPopupWidth(rect);
-            //Rect controlRect = PrefixLabel(rect, label,curve);
 
             ValueType state = sampler.ValueType;
 
             switch (state)
             {
                 case ValueType.Constant:
-                    //EditorGUI.BeginChangeCheck();
-                    //float newValue = FloatDraggable(rect, mmCurve.scalar, mmCurve.m_RemapValue, EditorGUIUtility.labelWidth);
-                    //if (EditorGUI.EndChangeCheck() && !mmCurve.signedRange)
-                    //mmCurve.scalar.floatValue = Mathf.Max(newValue, 0f);
-                    EditorGUI.PropertyField(rect,new SerializedObject(curve).FindProperty("TestThing"));
-                    //rect.xMin += EditorGUIUtility.labelWidth;
-                    //EditorGUI.FloatField(rect,10);
-                    break;
-                case ValueType.Keyframes:
-                    //Rect previewRange = mmCurve.signedRange ? kSignedRange : kUnsignedRange;
-                    //SerializedProperty minCurve = (state == MinMaxCurveState.k_TwoCurves) ? mmCurve.minCurve : null;
-                    //GUICurveField(controlRect, mmCurve.maxCurve, minCurve, GetColor(mmCurve), previewRange, mmCurve.OnCurveAreaMouseDown);
+                    /*
+                        EditorGUI.PropertyField(rect,obj.FindProperty($"{path}.constValue"),new GUIContent(sampler.GetLabel()));
+                        break;
+                    case ValueType.Keyframes:
+                    */
+                    GUI.Label(new Rect(rect.position,new Vector2(EditorGUIUtility.labelWidth,rect.height)), sampler.GetLabel(),EditorStyles.label);
+                    rect.xMin += EditorGUIUtility.labelWidth;
+                    EditMode thisEditMode = sampler.GetEditMode();
+                    if (GUI.Toggle(rect,curve.editMode == thisEditMode, EditorGUIUtility.TrTextContent(sampler.GetLabel()), curve.buttonStyle))
+                        curve.editMode = thisEditMode;
                     break;
             }
 
@@ -113,7 +110,6 @@ namespace Assets.NewUI
                 menu.DropDown(popupRect);
                 Event.current.Use();
             }
-            //EditorGUI.EndProperty();
         }
 
         void SelectValueTypeState(object sampler)
@@ -131,18 +127,11 @@ namespace Assets.NewUI
         public override void Draw(Curve3D curve)
         {
             obj= new SerializedObject(curve);
-            //if (GUILayout.Button(isPlaying ? s_Texts.pause : playText, "ButtonLeft"))
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
-            //Field("tabStyle");
-            //GUILayout.BeginHorizontal(GUILayout.Width(width-50));
-            //if (curve.tab)
-            //GUILayout.Button("asdf", curve.tabStyle.style);
-            //curve.tabStyle.asdf = "ButtonRight";
+            /*
             GUILayout.BeginHorizontal();
-            //GUILayout.Label("asdf");
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal(curve.settings.modeSelectorStyle);
-            //GUILayout.BeginHorizontal(curve.tabStyle.style2);
             int skipCount = 0;
             if (curve.type != CurveType.DoubleBezier)
                 skipCount++;
@@ -165,6 +154,7 @@ namespace Assets.NewUI
             GUILayout.EndHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
+            */
 
             GUILayout.BeginVertical(curve.settings.selectorWindowStyle);
             bool shouldDrawWindowContent = true;
@@ -215,36 +205,31 @@ namespace Assets.NewUI
 
             Field("type");
             Field("isClosedLoop");
-            /*
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.FloatField("taco",5);
-            EditorGUILayout.DropdownButton(GUIContent.none,FocusType.Passive,dropdownStyle);
-            EditorGUILayout.EndHorizontal();
-            */
             if (curve.type!= CurveType.NoMesh)
             {
-                if (curve.type== CurveType.Cylinder || curve.type== CurveType.DoubleBezier || curve.type == CurveType.HollowTube || curve.type== CurveType.Cylinder)
-                {
-                    Field("ringPointCount");
-                }
-                SamplerField(new GUIContent("asdf"), curve.rotationSampler,curve);
-                /*
+                SamplerField(obj, "sizeSampler", curve.sizeSampler,curve);
+                SamplerField(obj, "rotationSampler", curve.rotationSampler,curve);
                 if (curve.type == CurveType.Cylinder || curve.type == CurveType.HollowTube)
                 {
-                    Field("arcOfTube");
+                    SamplerField(obj, "arcOfTubeSampler", curve.arcOfTubeSampler,curve);
                 }
-                */
                 if (curve.type == CurveType.Mesh)
                 {
                     Field("meshToTile");
                     Field("clampAndStretchMeshToCurve");
                 }
-                /*
                 if (curve.type != CurveType.Mesh)
-                    Field("thickness");
-                */
+                {
+                    SamplerField(obj, "thicknessSampler",curve.thicknessSampler,curve);
+                }
                 if (curve.type != CurveType.Mesh)
+                {
                     Field("vertexDensity");
+                }
+                if (curve.type== CurveType.Cylinder || curve.type== CurveType.DoubleBezier || curve.type == CurveType.HollowTube || curve.type== CurveType.Cylinder)
+                {
+                    Field("ringPointCount");
+                }
             }
             obj.ApplyModifiedProperties();
         }

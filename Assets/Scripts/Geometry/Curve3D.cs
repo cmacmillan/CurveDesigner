@@ -102,12 +102,13 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             style = init;
         return style;
     }
-    public float TestThing = 10;
-    ////////////////////////////
 
+    private GUIStyle m_buttonStyle;
+    public GUIStyle buttonStyle => GetStyle(ref m_buttonStyle,"Button");
+    //////////////////////////////////////////////////////////////////////////////
     private GUIStyle m_particleLabelStyle;
     public GUIStyle particleLabelStyle => GetStyle(ref m_particleLabelStyle,"ShurikenLabel");
-    /////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
     private GUIStyle m_controlRectStyle;
     public GUIStyle controlRectStyle { get { if (m_controlRectStyle == null) { m_controlRectStyle = new GUIStyle { margin = new RectOffset(0, 0, 2, 2) };} return m_controlRectStyle; } } 
     //////////////////////////////////////////////////////////////////////////////
@@ -150,12 +151,12 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
     }
 
-    public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1);
-    public FloatDistanceSampler arcOfTubeSampler = new FloatDistanceSampler("Arc", 180);
-    public FloatDistanceSampler thicknessSampler = new FloatDistanceSampler("Thickness", .1f);
-    public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0);
-    public ColorDistanceSampler colorSampler = new ColorDistanceSampler("Color");
-    public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler();
+    public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1,EditMode.Size);
+    public FloatDistanceSampler arcOfTubeSampler = new FloatDistanceSampler("Arc", 180,EditMode.Arc);
+    public FloatDistanceSampler thicknessSampler = new FloatDistanceSampler("Thickness", .1f,EditMode.Thickness);
+    public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation (degrees)",0,EditMode.Rotation);
+    public ColorDistanceSampler colorSampler = new ColorDistanceSampler("Color",EditMode.Color);
+    public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler("Double Bezier",EditMode.DoubleBezier);
 
     public void RequestMeshUpdate()
     {
@@ -357,7 +358,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [ContextMenu("Clear double")]
     public void ClearDouble()
     {
-        doubleBezierSampler = new DoubleBezierSampler();
+        doubleBezierSampler = new DoubleBezierSampler("Double Beizer",EditMode.DoubleBezier);
         this.UICurve.Initialize();
     }
     public void TryInitialize()
@@ -459,6 +460,8 @@ public enum EditMode
     Size = 2,
     DoubleBezier = 3,
     Color = 4,
+    Arc = 5,
+    Thickness = 6,
 }
 public enum CurveType
 {

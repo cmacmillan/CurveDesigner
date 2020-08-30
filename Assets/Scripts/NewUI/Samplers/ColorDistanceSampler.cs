@@ -11,7 +11,7 @@ namespace Assets.NewUI
     [System.Serializable]
     public class ColorDistanceSampler : ValueDistanceSampler<Color, ColorSamplerPoint, ColorDistanceSampler>
     {
-        public ColorDistanceSampler(string fieldDisplayName): base(fieldDisplayName) {
+        public ColorDistanceSampler(string label,EditMode editMode): base(label,editMode) {
             constValue = Color.white;
         }
 
