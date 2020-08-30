@@ -103,7 +103,7 @@ namespace Assets.NewUI
                 GenericMenu menu = new GenericMenu();
                 for (int i = 0; i < texts.Length; ++i)
                 {
-                    menu.AddItem(texts[i], state == states[i], SelectValueTypeState, new SelectValueTypeStateTuple(sampler,states[i]));
+                    menu.AddItem(texts[i], state == states[i], SelectValueTypeState, new SelectValueTypeStateTuple(sampler,states[i],curve));
                 }
                 menu.DropDown(popupRect);
                 Event.current.Use();
@@ -114,10 +114,12 @@ namespace Assets.NewUI
         {
             public IValueSampler sampler;
             public ValueType mode;
-            public SelectValueTypeStateTuple(IValueSampler sampler, ValueType mode)
+            public Curve3D curve;
+            public SelectValueTypeStateTuple(IValueSampler sampler, ValueType mode,Curve3D curve)
             {
                 this.sampler = sampler;
                 this.mode = mode;
+                this.curve = curve;
             }
         }
         void SelectValueTypeState(object arg)
@@ -126,9 +128,10 @@ namespace Assets.NewUI
             if (tuple != null)
             {
                 tuple.sampler.ValueType = tuple.mode;
+                if (tuple.mode == ValueType.Constant && tuple.curve.editMode == tuple.sampler.GetEditMode())
+                    tuple.curve.editMode = EditMode.PositionCurve;//default to position
             }
         }
-        ///////////////////////////////
 
 
 
@@ -136,31 +139,6 @@ namespace Assets.NewUI
         {
             obj= new SerializedObject(curve);
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
-            /*
-            bool shouldDrawWindowContent = true;
-            if (shouldDrawWindowContent && curve.UICurve != null)
-            {
-                int pointCount = curve.ActiveElement.NumSelectables(curve);
-                if (pointCount == 0)
-                {
-                    GUILayout.Label($"Click on the curve in the scene view to place a {editmodeNameMap[curve.editMode].ToLower()} control point", CenteredStyle);
-                }
-                else
-                {
-                    int selectedPointCount = 0;
-                    int numPoints = curve.ActiveElement.NumSelectables(curve);
-                    for (int i = 0; i < numPoints; i++)
-                        if (curve.selectedPoints.Contains(curve.ActiveElement.GetSelectable(i, curve).GUID))
-                            selectedPointCount++;
-                    if (selectedPointCount == 0)
-                        GUILayout.Label("No points selected",CenteredStyle);
-                    else
-                        GUILayout.Label($"{selectedPointCount} point{(selectedPointCount != 1 ? "s" : "")} selected", CenteredStyle);
-                    var drawer = curve.UICurve.GetWindowDrawer();
-                    drawer.DrawWindow(curve);
-                }
-            }
-            */
             EditModeSwitchButton("Position", EditMode.PositionCurve,curve,GetFieldRects(curve,out _));
             if (curve.type!= CurveType.NoMesh)
             {

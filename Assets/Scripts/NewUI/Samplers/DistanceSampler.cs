@@ -73,6 +73,7 @@ namespace Assets.NewUI
             InterpolationMode = (InterpolationMode)EditorGUILayout.EnumPopup("Interpolation",InterpolationMode);
             if (distanceOffset == 0)
                 return false;
+            EditorGUIUtility.SetWantsMouseJumping(1);
             PointOnCurveClickCommand.ClampOffset(distanceOffset, curve,selectedPoints);
             return true;
         }
