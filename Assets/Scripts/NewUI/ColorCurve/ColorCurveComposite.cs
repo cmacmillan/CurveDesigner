@@ -18,7 +18,7 @@ namespace Assets.NewUI
             this.sampler = sampler;
             this.curve = curve;
             var pinkColor = new Color(.95f,.1f,.8f);
-            splitterPoint = new SplitterPointComposite(this, new TransformBlob(curve.transform), PointTextureType.circle,new ValueAlongCurveSplitCommand(curve,sampler,ValueAlongCurveSplitCommand.GetColorCurve),pinkColor,positionCurveComposite);
+            splitterPoint = new SplitterPointComposite(this, positionCurveComposite.transformBlob, PointTextureType.circle,new ValueAlongCurveSplitCommand(curve,sampler,ValueAlongCurveSplitCommand.GetColorCurve),pinkColor,positionCurveComposite);
             foreach (var i in sampler.GetPoints(curve.positionCurve))
                 colorPoints.Add(new EditColorComposite(this,i,sampler,pinkColor,positionCurveComposite,curve));
         }

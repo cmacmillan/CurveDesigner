@@ -46,6 +46,12 @@ namespace Assets.NewUI
             _curve = curve;
         }
 
+        public void BakeBlobs()
+        {
+            positionCurve.transformBlob.Bake();
+            foreach (var i in doubleBezierCurve._secondaryCurves)
+                i.transformBlob.Bake();
+        }
         public void Initialize()
         {
             var mainPositionCurve = new List<BezierCurve>();
@@ -55,6 +61,7 @@ namespace Assets.NewUI
             rotationCurve = new RotationCurveComposite(this,_curve.rotationSampler,_curve,positionCurve);
             colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
+            BakeBlobs();
             _curve.RequestMeshUpdate();
             _curve.positionCurve.Recalculate();
             positionCurve.FindPointClosestToCursor();
@@ -83,7 +90,8 @@ namespace Assets.NewUI
         {
             _curve.positionCurve.Recalculate();
             positionCurve.FindPointClosestToCursor();
-            doubleBezierCurve.FindClosestPointsToCursor();
+            if (_curve.type == CurveType.DoubleBezier)
+                doubleBezierCurve.FindClosestPointsToCursor();
         }
 
         public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
@@ -105,7 +113,7 @@ namespace Assets.NewUI
                         drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(i.tangent* visualNormalLength+ i.position), Color.cyan));
                 }
             }
-            GetCurveDraw(drawList,_curve.positionCurve,new TransformBlob(_curve.transform,null),this);
+            GetCurveDraw(drawList,_curve.positionCurve,positionCurve.transformBlob,this);
             base.Draw(drawList,closestElementToCursor);
         }
 

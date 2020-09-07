@@ -10,13 +10,13 @@ namespace Assets.NewUI
     public class DoubleBezierCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
     {
         private DoubleBezierSampler _doubleBezierSampler;
-        private List<SecondaryPositionCurveComposite> _secondaryCurves;
+        public List<SecondaryPositionCurveComposite> _secondaryCurves;
         private SplitterPointComposite _splitterPoint;
         public DoubleBezierCurveComposite(IComposite parent,DoubleBezierSampler doubleBezierSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _doubleBezierSampler = doubleBezierSampler;
             _secondaryCurves = new List<SecondaryPositionCurveComposite>();
-            _splitterPoint = new SplitterPointComposite(this,new TransformBlob(curve.transform,null), PointTextureType.circle, new ValueAlongCurveSplitCommand(curve,_doubleBezierSampler,ValueAlongCurveSplitCommand.GetDoubleBezierCurve), Color.green,positionCurveComposite);
+            _splitterPoint = new SplitterPointComposite(this,positionCurveComposite.transformBlob, PointTextureType.circle, new ValueAlongCurveSplitCommand(curve,_doubleBezierSampler,ValueAlongCurveSplitCommand.GetDoubleBezierCurve), Color.green,positionCurveComposite);
             var allCurves = new List<BezierCurve>();
             var points = doubleBezierSampler.GetPoints(curve.positionCurve);
             foreach (var i in points)

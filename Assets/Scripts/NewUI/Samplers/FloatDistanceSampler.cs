@@ -99,6 +99,7 @@ namespace Assets.NewUI
     {
         public override float Field(string displayName, float originalValue)
         {
+            EditorGUIUtility.SetWantsMouseJumping(1);
             return EditorGUILayout.FloatField(displayName, originalValue);
         }
 

@@ -168,8 +168,13 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
-        var windowRect = new Rect(20, 20, 0, 0);
-        MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
+        if (curve3d.editMode == EditMode.DoubleBezier && curve3d.type != CurveType.DoubleBezier)
+            curve3d.editMode = EditMode.PositionCurve;
+        var windowRect = new Rect(20, 40, 0, 0);
+        if (curve3d.showPointSelectionWindow)
+        {
+            MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
+        }
         //Handles.DrawAAConvexPolygon(new Vector3[4] { new Vector3(0,1,0), new Vector3(1,0,0),new Vector3(-1,0,0),new Vector3(0,0,1)});
         /*
         if (curve3d.graphicsMesh!=null && curve3d.graphicsMaterial!=null)
@@ -210,6 +215,7 @@ public class Curve3DInspector : Editor
         {
             curve3d.UICurve._curve = curve3d;
         }
+        curve3d.UICurve.BakeBlobs();
         UpdateMesh(curve3d);
         var curveEditor = curve3d.UICurve;
         var MousePos = Event.current.mousePosition;

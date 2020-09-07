@@ -193,6 +193,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [NonSerialized]
     public UICurve UICurve=null;
 
+    public bool showPositionHandles = false;
+    public bool showPointSelectionWindow = true;
     public bool showNormals = true;
     public bool showTangents = true;
 

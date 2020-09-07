@@ -130,10 +130,10 @@ namespace Assets.NewUI
                 tuple.sampler.ValueType = tuple.mode;
                 if (tuple.mode == ValueType.Constant && tuple.curve.editMode == tuple.sampler.GetEditMode())
                     tuple.curve.editMode = EditMode.PositionCurve;//default to position
+                if (tuple.mode == ValueType.Keyframes)
+                    tuple.curve.editMode = tuple.sampler.GetEditMode();
             }
         }
-
-
 
         public override void Draw(Curve3D curve)
         {
@@ -160,6 +160,10 @@ namespace Assets.NewUI
                 Field("vertexDensity");
             }
             Field("type");
+            /*
+            if (curve.editMode == EditMode.DoubleBezier && typeBefore == CurveType.DoubleBezier && typeAfter != CurveType.DoubleBezier)
+                curve.editMode = EditMode.PositionCurve;
+            */
             Field("isClosedLoop");
             if (curve.type == CurveType.Mesh)
             {
@@ -195,6 +199,8 @@ namespace Assets.NewUI
         public override void Draw(Curve3D curve)
         {
             obj = new SerializedObject(curve);
+            Field("showPointSelectionWindow");
+            Field("showPositionHandles");
             Field("showNormals");
             Field("showTangents");
             Field("lockToPositionZero");

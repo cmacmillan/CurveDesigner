@@ -11,6 +11,19 @@ namespace Assets.NewUI
     {
         private Transform _baseTransform;
         public DynamicMatrix4x4 _additionalTransform;
+        public Matrix4x4? _additionalMatrix=null;
+        public Matrix4x4? _additionalMatrixInverse=null;
+        public void Bake()
+        {
+            if (_additionalTransform != null)
+            {
+                _additionalMatrix = _additionalTransform.GetMatrix();
+                _additionalMatrixInverse = _additionalMatrix.Value.inverse;
+            }
+        }
+        /// <summary>
+        /// Should only really be instantiated by a curve, and referenced by everyone else
+        /// </summary>
         public TransformBlob(Transform baseTransform, DynamicMatrix4x4 additionalTransform = null) {
             _baseTransform = baseTransform;
             _additionalTransform = additionalTransform;
@@ -27,7 +40,7 @@ namespace Assets.NewUI
         {
             Vector3 retr=point;
             if (_additionalTransform!=null)
-                retr = _additionalTransform.GetMatrix() * ToHomo(retr);
+                retr = _additionalMatrix.Value * ToHomo(retr);
             retr = _baseTransform.TransformPoint(retr);
             return retr;
         }
@@ -35,7 +48,7 @@ namespace Assets.NewUI
         {
             Vector3 retr = direction;
             if (_additionalTransform!=null)
-                retr = _additionalTransform.GetMatrix() * ToHomoDirection(retr);
+                retr = _additionalMatrix.Value * ToHomoDirection(retr);
             retr = _baseTransform.TransformDirection(retr);
             return retr;
         }
@@ -44,7 +57,7 @@ namespace Assets.NewUI
             Vector3 retr = point;
             retr = _baseTransform.InverseTransformPoint(retr);
             if (_additionalTransform != null)
-                retr = _additionalTransform.GetMatrix().inverse * ToHomo(retr);
+                retr = _additionalMatrixInverse.Value * ToHomo(retr);
             return retr;
         }
     }
