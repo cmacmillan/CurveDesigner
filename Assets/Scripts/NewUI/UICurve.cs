@@ -54,6 +54,7 @@ namespace Assets.NewUI
         }
         public void Initialize()
         {
+            _curve.Recalculate();
             var mainPositionCurve = new List<BezierCurve>();
             mainPositionCurve.Add(_curve.positionCurve);
             positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null),mainPositionCurve);
@@ -63,7 +64,6 @@ namespace Assets.NewUI
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
             BakeBlobs();
             _curve.RequestMeshUpdate();
-            _curve.positionCurve.Recalculate();
             positionCurve.FindPointClosestToCursor();
             doubleBezierCurve.FindClosestPointsToCursor();
         }
@@ -88,7 +88,6 @@ namespace Assets.NewUI
 
         void FindClosestPoints()
         {
-            _curve.positionCurve.Recalculate();
             positionCurve.FindPointClosestToCursor();
             if (_curve.type == CurveType.DoubleBezier)
                 doubleBezierCurve.FindClosestPointsToCursor();

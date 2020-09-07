@@ -393,6 +393,19 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             ResetCurve();
         }
     }
+    public void Recalculate()
+    {
+        positionCurve.Recalculate();
+        var secondaryCurves = doubleBezierSampler.points;
+        if (secondaryCurves.Count > 0)
+        {
+            foreach (var curr in secondaryCurves)
+                curr.value.owner = this;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
+            var referenceHint = secondaryCurves[0].value.Recalculate();
+            for (int i = 1; i < secondaryCurves.Count; i++)
+                referenceHint = secondaryCurves[i].value.Recalculate(referenceHint);
+        }
+    }
     public void CopyRotations()
     {
         previousRotations.Clear();

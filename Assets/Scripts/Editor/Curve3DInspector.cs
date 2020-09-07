@@ -186,16 +186,6 @@ public class Curve3DInspector : Editor
         curve3d.positionCurve.owner = curve3d;
         curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
         curve3d.positionCurve.dimensionLockMode = curve3d.lockToPositionZero;
-        curve3d.positionCurve.Recalculate();
-        var secondaryCurves = curve3d.doubleBezierSampler.points;
-        if (secondaryCurves.Count > 0)
-        {
-            foreach (var curr in secondaryCurves)
-                curr.value.owner = curve3d;//gotta be careful that I'm not referencing stuff in owner that I shouldn't be
-            var referenceHint = secondaryCurves[0].value.Recalculate();
-            for (int i = 1; i < secondaryCurves.Count; i++)
-                referenceHint = secondaryCurves[i].value.Recalculate(referenceHint);
-        }
         curve3d.CacheAverageSize();
         var rotationPoints = curve3d.rotationSampler.GetPoints(curve3d.positionCurve);
         if (curve3d.previousRotations.Count != rotationPoints.Count)
@@ -224,7 +214,6 @@ public class Curve3DInspector : Editor
             return curve3d.selectedPoints.Where(a => a == curve3d.elementClickedDown.owner.GUID).Count() > 0;
         }
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
-
         var eventType = Event.current.GetTypeForControl(controlID);
         ClickHitData closestElementToCursor = null;
         if (elementClickedDown == null)

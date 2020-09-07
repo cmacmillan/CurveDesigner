@@ -73,6 +73,7 @@ namespace Assets.NewUI
                     i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index,dimensionLockMode)+pointOffset, dimensionLockMode);
 
             }
+            positionCurve.Recalculate();
         }
 
         public void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)

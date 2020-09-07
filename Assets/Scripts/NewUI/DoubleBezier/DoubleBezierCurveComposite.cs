@@ -27,10 +27,7 @@ namespace Assets.NewUI
         public void FindClosestPointsToCursor()
         {
             foreach (var i in _secondaryCurves)
-            {
-                i.positionCurve.positionCurve.Recalculate();
                 i.positionCurve.FindPointClosestToCursor();
-            }
         }
         public SecondaryPositionCurveComposite GetSecondaryCompositeByBackingCurve(BezierCurve backingCurve)
         {
