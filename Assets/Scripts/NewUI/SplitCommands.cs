@@ -139,6 +139,8 @@ namespace Assets.NewUI
 
         public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
         public static IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve) { return curve.UICurve.sizeCurve; }
+        public static IValueAlongCurvePointProvider GetThicknessCurve(Curve3D curve) { return curve.UICurve.thicknessCurve; }
+        public static IValueAlongCurvePointProvider GetArcCurve(Curve3D curve) { return curve.UICurve.arcCurve; }
         public static IValueAlongCurvePointProvider GetColorCurve(Curve3D curve) { return curve.UICurve.colorCurve; }
         public static IValueAlongCurvePointProvider GetDoubleBezierCurve(Curve3D curve) { return curve.UICurve.doubleBezierCurve; }
 

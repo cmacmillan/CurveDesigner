@@ -40,7 +40,7 @@ namespace Assets.NewUI
         public float time;
 
         [SerializeField]
-        private InterpolationMode _interpolationMode = InterpolationMode.Flat;
+        private InterpolationMode _interpolationMode = InterpolationMode.Linear;
         public InterpolationMode InterpolationMode { get => _interpolationMode; set => _interpolationMode= value; }
 
         public abstract T CloneValue(T value);
@@ -241,8 +241,11 @@ namespace Assets.NewUI
             var points = GetPoints(curve);
             if (points.Count == 0)
                 return false;
-            if (distance < points[0].GetDistance(curve) && !curve.isClosedLoop){
-                point = points[0];
+            if (distance < points[0].GetDistance(curve)){
+                if (curve.isClosedLoop)
+                    point = points[points.Count - 1];
+                else
+                    point = points[0];
                 return true;
             }
             for (int i = 0; i < points.Count; i++)

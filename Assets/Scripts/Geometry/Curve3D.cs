@@ -38,6 +38,10 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
                     return doubleBezierSampler;
                 case EditMode.Color:
                     return colorSampler;
+                case EditMode.Thickness:
+                    return thicknessSampler;
+                case EditMode.Arc:
+                    return arcOfTubeSampler;
                 default:
                     throw new NotImplementedException();
             }
@@ -163,6 +167,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     {
         foreach (var i in DistanceSamplers)
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
+        serializedObj = null;
+        fields.Clear();
     }
 
     public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1,EditMode.Size);
@@ -187,18 +193,147 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     public List<float> previousRotations = new List<float>();
     [HideInInspector]
     public BezierCurve positionCurve;
+    public void BindDataToPositionCurve()
+    {
+        positionCurve.owner = this;
+        positionCurve.isClosedLoop = isClosedLoop;
+        positionCurve.dimensionLockMode = lockToPositionZero;
+    }
+
+    #region serializedObj
+    [NonSerialized]
+    private SerializedObject serializedObj;
+    [NonSerialized]
+    private Dictionary<string, SerializedProperty> fields = new Dictionary<string, SerializedProperty>();
+    public void Field(string fieldName)
+    {
+        if (serializedObj == null)
+            serializedObj= new SerializedObject(this);
+        EditorGUILayout.PropertyField(GetField(fieldName));
+    }
+    private SerializedProperty GetField(string fieldName)
+    {
+        if (!fields.ContainsKey(fieldName))
+            fields.Add(fieldName, serializedObj.FindProperty(fieldName));
+        return fields[fieldName];
+    }
+    public void ApplyFieldChanges()
+    {
+        if (serializedObj != null)
+            serializedObj.ApplyModifiedProperties();
+    }
+    /// Shuriken field with dropdown triangle
+    protected const float k_minMaxToggleWidth = 13;
+    protected static Rect GetPopupRect(Rect position)
+    {
+        position.xMin = position.xMax - k_minMaxToggleWidth;
+        return position;
+    }
+    protected static Rect SubtractPopupWidth(Rect position)
+    {
+        position.width -= 1 + k_minMaxToggleWidth;
+        return position;
+    }
+
+    private const int kSingleLineHeight = 18;
+
+    protected static Rect GetControlRect(int height, Curve3D curve, params GUILayoutOption[] layoutOptions)
+    {
+        return GUILayoutUtility.GetRect(0, height, curve.controlRectStyle, layoutOptions);
+    }
+
+    public void EditModeSwitchButton(string label, EditMode mode,Rect rect)
+    {
+        EditMode thisEditMode = mode;
+        bool isSelected = editMode == thisEditMode;
+        GUI.Label(new Rect(rect.position, new Vector2(EditorGUIUtility.labelWidth, rect.height)), label, EditorStyles.label);
+        rect.xMin += EditorGUIUtility.labelWidth;
+        if (GUI.Toggle(rect, isSelected, EditorGUIUtility.TrTextContent($"{(isSelected ? "Editing" : "Edit")} {label}"), buttonStyle))
+            editMode = thisEditMode;
+    }
+    public Rect GetFieldRects(out Rect popupRect)
+    {
+        Rect rect = GetControlRect(kSingleLineHeight, this);
+        popupRect = GetPopupRect(rect);
+        popupRect.height = kSingleLineHeight;
+        rect = SubtractPopupWidth(rect);
+        return rect;
+    }
+    public void SamplerField(string path, IValueSampler sampler)
+    {
+        if (serializedObj == null)
+            serializedObj= new SerializedObject(this);
+        Rect rect = GetFieldRects(out Rect popupRect);
+
+        ValueType state = sampler.ValueType;
+
+        switch (state)
+        {
+            case ValueType.Constant:
+                EditorGUI.PropertyField(rect, GetField($"{path}.constValue"), new GUIContent(sampler.GetLabel()));
+                break;
+            case ValueType.Keyframes:
+                EditModeSwitchButton(sampler.GetLabel(), sampler.GetEditMode(), rect);
+                break;
+        }
+
+        // PopUp minmaxState menu
+        if (EditorGUI.DropdownButton(popupRect, GUIContent.none, FocusType.Passive, dropdownStyle))
+        {
+            GUIContent[] texts =        {   EditorGUIUtility.TrTextContent("Constant"),
+                                                EditorGUIUtility.TrTextContent("Curve") };
+            ValueType[] states = {  ValueType.Constant,
+                                        ValueType.Keyframes};
+            GenericMenu menu = new GenericMenu();
+            for (int i = 0; i < texts.Length; ++i)
+            {
+                menu.AddItem(texts[i], state == states[i], SelectValueTypeState, new SelectValueTypeStateTuple(sampler, states[i], this));
+            }
+            menu.DropDown(popupRect);
+            Event.current.Use();
+        }
+    }
+
+    private class SelectValueTypeStateTuple
+    {
+        public IValueSampler sampler;
+        public ValueType mode;
+        public Curve3D curve;
+        public SelectValueTypeStateTuple(IValueSampler sampler, ValueType mode, Curve3D curve)
+        {
+            this.sampler = sampler;
+            this.mode = mode;
+            this.curve = curve;
+        }
+    }
+    void SelectValueTypeState(object arg)
+    {
+        var tuple = arg as SelectValueTypeStateTuple;
+        if (tuple != null)
+        {
+            tuple.sampler.ValueType = tuple.mode;
+            if (tuple.mode == ValueType.Constant && tuple.curve.editMode == tuple.sampler.GetEditMode())
+            {
+                tuple.curve.editMode = EditMode.PositionCurve;//default to position
+            }
+            if (tuple.mode == ValueType.Keyframes)
+                tuple.curve.editMode = tuple.sampler.GetEditMode();
+            HandleUtility.Repaint();
+        }
+    }
+    #endregion
 
     [NonSerialized]
     public ClickHitData elementClickedDown;
     [NonSerialized]
-    public UICurve UICurve=null;
+    public UICurve UICurve = null;
 
     public bool showPositionHandles = false;
     public bool showPointSelectionWindow = true;
     public bool showNormals = true;
     public bool showTangents = true;
 
-    public EditMode editMode=EditMode.PositionCurve;
+    public EditMode editMode = EditMode.PositionCurve;
 
     public Curve3dSettings settings;
 
@@ -255,10 +390,10 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     private bool old_clampAndStretchMeshToCurve;
 
-    public bool useSeperateInnerAndOuterFaceTextures;
+    public bool seperateInnerOuterTextures;
     [SerializeField]
     [HideInInspector]
-    private bool old_useSeperateInnerAndOuterFaceTextures;
+    private bool old_seperateInnerOuterTextures;
 
     public DimensionLockMode lockToPositionZero;
     [SerializeField]
@@ -338,7 +473,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
         retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
         retr |= CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
-        retr |= CheckFieldChanged(useSeperateInnerAndOuterFaceTextures, ref old_useSeperateInnerAndOuterFaceTextures);
+        retr |= CheckFieldChanged(seperateInnerOuterTextures, ref old_seperateInnerOuterTextures);
         retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
 
         CheckSamplerChanged(colorSampler, ref old_constColor, ref old_colorInterpolation);
@@ -347,6 +482,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         CheckSamplerChanged(arcOfTubeSampler, ref old_constArcOfTube, ref old_arcOfTubeInterpolation);
         CheckSamplerChanged(thicknessSampler, ref old_constThickness, ref old_thicknessInterpolation);
 
+        retr |= CheckClosedLoopToggled();
         /*
         if (displacementTexture != old_displacementTexture)
         {
@@ -356,13 +492,17 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         }
         */
 
+        return retr;
+    }
+    public bool CheckClosedLoopToggled()
+    {
         if (CheckFieldChanged(isClosedLoop, ref old_isClosedLoop))
         {
-            retr = true;
             positionCurve.Recalculate();
             UICurve.Initialize();
+            return true;
         }
-        return retr;
+        return false;
     }
 
     public void ResetCurve()
@@ -456,6 +596,8 @@ public class EditModeCategories
             {EditMode.Rotation, "Rotation"},
             {EditMode.DoubleBezier, "Double Bezier"},
             {EditMode.Color, "Color" },
+            {EditMode.Arc, "Arc" },
+            {EditMode.Thickness, "Thickness" },
         };
     public EditMode[] editModes;
     public GUIStyle _centeredStyle;

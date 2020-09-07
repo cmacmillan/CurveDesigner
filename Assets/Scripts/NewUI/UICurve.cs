@@ -15,6 +15,8 @@ namespace Assets.NewUI
         public RotationCurveComposite rotationCurve;
         public ColorCurveComposite colorCurve;
         public DoubleBezierCurveComposite doubleBezierCurve;
+        public ThicknessCurveComposite thicknessCurve;
+        public ArcCurveComposite arcCurve;
 
         public IWindowDrawer GetWindowDrawer()
         {
@@ -30,6 +32,10 @@ namespace Assets.NewUI
                     return sizeCurve;
                 case EditMode.Color:
                     return colorCurve;
+                case EditMode.Thickness:
+                    return thicknessCurve;
+                case EditMode.Arc:
+                    return arcCurve;
                 default:
                     throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");
             }
@@ -54,6 +60,7 @@ namespace Assets.NewUI
         }
         public void Initialize()
         {
+            _curve.BindDataToPositionCurve();
             _curve.Recalculate();
             var mainPositionCurve = new List<BezierCurve>();
             mainPositionCurve.Add(_curve.positionCurve);
@@ -61,6 +68,9 @@ namespace Assets.NewUI
             sizeCurve = new SizeCurveComposite(this,_curve.sizeSampler,_curve,positionCurve);
             rotationCurve = new RotationCurveComposite(this,_curve.rotationSampler,_curve,positionCurve);
             colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);
+            thicknessCurve = new ThicknessCurveComposite(this, _curve.thicknessSampler, _curve, positionCurve);
+            //arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
+            arcCurve = new ArcCurveComposite(this);
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
             BakeBlobs();
             _curve.RequestMeshUpdate();
@@ -134,6 +144,12 @@ namespace Assets.NewUI
                     break;
                 case EditMode.Color:
                     yield return colorCurve;
+                    break;
+                case EditMode.Thickness:
+                    yield return thicknessCurve;
+                    break;
+                case EditMode.Arc:
+                    yield return arcCurve;
                     break;
                 default:
                     throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");

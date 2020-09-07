@@ -15,12 +15,13 @@ namespace Assets.NewUI
         public PointAlongCurveComposite linePoint;
         public FloatSamplerPoint value;
         public FloatDistanceSampler _sampler;
+        private IOffsetProvider offset;
 
         public const int ringPointCount=4;
 
         public override SelectableGUID GUID => value.GUID;
 
-        public SizeCircleComposite(IComposite parent,FloatSamplerPoint value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatDistanceSampler _sampler) : base(parent)
+        public SizeCircleComposite(IComposite parent,FloatSamplerPoint value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatDistanceSampler _sampler,IOffsetProvider offset = null) : base(parent)
         {
             this._sampler = _sampler;
             this.value = value;
@@ -28,10 +29,11 @@ namespace Assets.NewUI
             linePoint = new PointAlongCurveComposite(this, value, positionCurveComposite,purpleColor,value.GUID,_sampler);
             this._positionCurve = positionCurve;
             this._curve = curve;
+            this.offset = offset;
             for (int i = 0; i < ringPointCount; i++)
             {
-                var edgePointProvider = new SizeCircleEdgePointPositionProvider(value,i,curve);
-                var clickCommmand = new SizeCurveEdgeClickCommand(value,edgePointProvider,this,curve);
+                var edgePointProvider = new SizeCircleEdgePointPositionProvider(value,i,curve,offset);
+                var clickCommmand = new SizeCurveEdgeClickCommand(value,edgePointProvider,this,curve,offset);
                 ringPoints.Add(new PointComposite(this,edgePointProvider,PointTextureType.diamond,clickCommmand,purpleColor,value.GUID));
             }
         }
@@ -39,7 +41,11 @@ namespace Assets.NewUI
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
             linePoint.GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
-            drawList.Add(new CircleDraw(this,Color.white,_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),value.value));
+            if (offset != null)
+            {
+                drawList.Add(new CircleDraw(this,new Color(.5f,.5f,.5f),_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),(offset==null?0:offset.Offset)));
+            }
+            drawList.Add(new CircleDraw(this,Color.white,_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),value.value+(offset==null?0:offset.Offset)));
             base.Draw(drawList, closestElementToCursor);
         }
 
@@ -88,12 +94,14 @@ namespace Assets.NewUI
         private SizeCircleEdgePointPositionProvider _point;
         private SizeCircleComposite _owner;
         private Curve3D curve;
+        private IOffsetProvider offset;
 
-        public SizeCurveEdgeClickCommand(FloatSamplerPoint ring, SizeCircleEdgePointPositionProvider point,SizeCircleComposite owner,Curve3D curve)
+        public SizeCurveEdgeClickCommand(FloatSamplerPoint ring, SizeCircleEdgePointPositionProvider point,SizeCircleComposite owner,Curve3D curve,IOffsetProvider offset =null)
         {
             this._owner = owner;
             this._ring = ring;
             this._point = point;
+            this.offset = offset;
             this.curve = curve;
         }
 
@@ -104,10 +112,10 @@ namespace Assets.NewUI
             Camera sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
             var screenRay = sceneCam.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(Event.current.mousePosition));
             Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
-            var sizeChange = (Vector3.Distance(pos, centerPoint))-_ring.value;
+            var sizeChange = (Vector3.Distance(pos, centerPoint))-(_ring.value+(offset==null?0:offset.Offset));
             var selectedSizePoints = selectedPoints.GetSelected(_owner._sampler.GetPoints(curve.positionCurve));
             foreach (var i in selectedSizePoints)
-                i.value += sizeChange;
+                i.value += sizeChange;//might need to use offset here if buggy
         }
 
         public void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
@@ -130,16 +138,18 @@ namespace Assets.NewUI
         private int _ringPointIndex;
         private FloatSamplerPoint _ring;
         private Curve3D curve;
-        public SizeCircleEdgePointPositionProvider(FloatSamplerPoint ring, int ringPointIndex,Curve3D curve)
+        private IOffsetProvider offset;
+        public SizeCircleEdgePointPositionProvider(FloatSamplerPoint ring, int ringPointIndex,Curve3D curve,IOffsetProvider offset = null)
         {
             this._ringPointIndex = ringPointIndex;
             this._ring = ring;
             this.curve = curve;
+            this.offset = offset;
         }
 
         public Vector3 Position {
             get {
-                return curve.transform.TransformPoint(curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve)).GetRingPoint(360.0f * _ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value));
+                return curve.transform.TransformPoint(curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve)).GetRingPoint(360.0f * _ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value+(offset==null?0:offset.Offset)));
             }
         }
     }

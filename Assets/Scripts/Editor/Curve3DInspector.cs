@@ -23,6 +23,7 @@ public class Curve3DInspector : Editor
 
     public override void OnInspectorGUI()
     {
+        EnsureValidEditMode();
         var curve3d = (target as Curve3D);
 
         GUI.enabled = false;
@@ -96,6 +97,7 @@ public class Curve3DInspector : Editor
                 HandleKeys(curve3d);
                 break;
         }
+        UpdateMesh(curve3d);
     }
 
     private void WindowFunc(int id)
@@ -165,11 +167,19 @@ public class Curve3DInspector : Editor
         SceneView.RepaintAll();
     }
 
-    private void OnSceneGUI()
+    void EnsureValidEditMode()
     {
         var curve3d = (target as Curve3D);
         if (curve3d.editMode == EditMode.DoubleBezier && curve3d.type != CurveType.DoubleBezier)
             curve3d.editMode = EditMode.PositionCurve;
+        if (curve3d.editMode == EditMode.Arc && curve3d.type != CurveType.Cylinder && curve3d.type != CurveType.HollowTube)
+            curve3d.editMode = EditMode.PositionCurve;
+    }
+
+    private void OnSceneGUI()
+    {
+        var curve3d = (target as Curve3D);
+        EnsureValidEditMode();
         var windowRect = new Rect(20, 40, 0, 0);
         if (curve3d.showPointSelectionWindow)
         {
@@ -183,9 +193,7 @@ public class Curve3DInspector : Editor
         }
         */
 
-        curve3d.positionCurve.owner = curve3d;
-        curve3d.positionCurve.isClosedLoop = curve3d.isClosedLoop;
-        curve3d.positionCurve.dimensionLockMode = curve3d.lockToPositionZero;
+        curve3d.BindDataToPositionCurve();
         curve3d.CacheAverageSize();
         var rotationPoints = curve3d.rotationSampler.GetPoints(curve3d.positionCurve);
         if (curve3d.previousRotations.Count != rotationPoints.Count)
@@ -395,7 +403,6 @@ public class Curve3DInspector : Editor
         }
         if (curve.HaveCurveSettingsChanged())
         {
-
             curve.RequestMeshUpdate();
         }
     }
