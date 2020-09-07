@@ -43,7 +43,7 @@ namespace Assets.NewUI
             linePoint.GetPositionForwardAndReference(out Vector3 position, out Vector3 forward,out Vector3 reference);
             if (offset != null)
             {
-                drawList.Add(new CircleDraw(this,new Color(.5f,.5f,.5f),_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),(offset==null?0:offset.Offset)));
+                drawList.Add(new CircleDraw(this,new Color(.8f,.8f,.8f),_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),(offset==null?0:offset.Offset))); 
             }
             drawList.Add(new CircleDraw(this,Color.white,_curve.transform.TransformPoint(position),_curve.transform.TransformDirection(forward),value.value+(offset==null?0:offset.Offset)));
             base.Draw(drawList, closestElementToCursor);

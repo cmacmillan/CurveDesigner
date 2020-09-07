@@ -69,8 +69,7 @@ namespace Assets.NewUI
             rotationCurve = new RotationCurveComposite(this,_curve.rotationSampler,_curve,positionCurve);
             colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);
             thicknessCurve = new ThicknessCurveComposite(this, _curve.thicknessSampler, _curve, positionCurve);
-            //arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
-            arcCurve = new ArcCurveComposite(this);
+            arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
             doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
             BakeBlobs();
             _curve.RequestMeshUpdate();

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class EditRotationComposite : IComposite, IPositionProvider
+    public class RotationPointComposite : IComposite, IPositionProvider
     {
         public FloatSamplerPoint _point;
         public PointAlongCurveComposite centerPoint;
@@ -15,7 +15,7 @@ namespace Assets.NewUI
         public Curve3D _curve;
         public override SelectableGUID GUID => _point.GUID;
 
-        public EditRotationComposite(IComposite parent,FloatSamplerPoint value,Curve3D curve,FloatDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
+        public RotationPointComposite(IComposite parent,FloatSamplerPoint value,Curve3D curve,FloatDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
             _point = value;
             _curve = curve;
@@ -53,7 +53,7 @@ namespace Assets.NewUI
     }
     public class EditRotationClickCommand : IClickCommand
     {
-        private EditRotationComposite _owner;
+        private RotationPointComposite _owner;
         private FloatSamplerPoint _value;
         private FloatDistanceSampler _sampler;
         private Curve3D _curve;
@@ -68,7 +68,7 @@ namespace Assets.NewUI
             }
         }
 
-        public EditRotationClickCommand(EditRotationComposite owner,FloatSamplerPoint value,FloatDistanceSampler sampler,Curve3D curve)
+        public EditRotationClickCommand(RotationPointComposite owner,FloatSamplerPoint value,FloatDistanceSampler sampler,Curve3D curve)
         {
             _owner = owner;
             _value = value;
