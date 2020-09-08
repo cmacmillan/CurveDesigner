@@ -167,8 +167,6 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     {
         foreach (var i in DistanceSamplers)
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
-        serializedObj = null;
-        fields.Clear();
     }
 
     public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1,EditMode.Size);
@@ -200,128 +198,6 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         positionCurve.dimensionLockMode = lockToPositionZero;
     }
 
-    #region serializedObj
-    [NonSerialized]
-    private SerializedObject serializedObj;
-    [NonSerialized]
-    private Dictionary<string, SerializedProperty> fields = new Dictionary<string, SerializedProperty>();
-    public void Field(string fieldName)
-    {
-        if (serializedObj == null)
-            serializedObj= new SerializedObject(this);
-        EditorGUILayout.PropertyField(GetField(fieldName));
-    }
-    private SerializedProperty GetField(string fieldName)
-    {
-        if (!fields.ContainsKey(fieldName))
-            fields.Add(fieldName, serializedObj.FindProperty(fieldName));
-        return fields[fieldName];
-    }
-    public void ApplyFieldChanges()
-    {
-        if (serializedObj != null)
-            serializedObj.ApplyModifiedProperties();
-    }
-    /// Shuriken field with dropdown triangle
-    protected const float k_minMaxToggleWidth = 13;
-    protected static Rect GetPopupRect(Rect position)
-    {
-        position.xMin = position.xMax - k_minMaxToggleWidth;
-        return position;
-    }
-    protected static Rect SubtractPopupWidth(Rect position)
-    {
-        position.width -= 1 + k_minMaxToggleWidth;
-        return position;
-    }
-
-    private const int kSingleLineHeight = 18;
-
-    protected static Rect GetControlRect(int height, Curve3D curve, params GUILayoutOption[] layoutOptions)
-    {
-        return GUILayoutUtility.GetRect(0, height, curve.controlRectStyle, layoutOptions);
-    }
-
-    public void EditModeSwitchButton(string label, EditMode mode,Rect rect)
-    {
-        EditMode thisEditMode = mode;
-        bool isSelected = editMode == thisEditMode;
-        GUI.Label(new Rect(rect.position, new Vector2(EditorGUIUtility.labelWidth, rect.height)), label, EditorStyles.label);
-        rect.xMin += EditorGUIUtility.labelWidth;
-        if (GUI.Toggle(rect, isSelected, EditorGUIUtility.TrTextContent($"{(isSelected ? "Editing" : "Edit")} {label}"), buttonStyle))
-            editMode = thisEditMode;
-    }
-    public Rect GetFieldRects(out Rect popupRect)
-    {
-        Rect rect = GetControlRect(kSingleLineHeight, this);
-        popupRect = GetPopupRect(rect);
-        popupRect.height = kSingleLineHeight;
-        rect = SubtractPopupWidth(rect);
-        return rect;
-    }
-    public void SamplerField(string path, IValueSampler sampler)
-    {
-        if (serializedObj == null)
-            serializedObj= new SerializedObject(this);
-        Rect rect = GetFieldRects(out Rect popupRect);
-
-        ValueType state = sampler.ValueType;
-
-        switch (state)
-        {
-            case ValueType.Constant:
-                EditorGUI.PropertyField(rect, GetField($"{path}.constValue"), new GUIContent(sampler.GetLabel()));
-                break;
-            case ValueType.Keyframes:
-                EditModeSwitchButton(sampler.GetLabel(), sampler.GetEditMode(), rect);
-                break;
-        }
-
-        // PopUp minmaxState menu
-        if (EditorGUI.DropdownButton(popupRect, GUIContent.none, FocusType.Passive, dropdownStyle))
-        {
-            GUIContent[] texts =        {   EditorGUIUtility.TrTextContent("Constant"),
-                                                EditorGUIUtility.TrTextContent("Curve") };
-            ValueType[] states = {  ValueType.Constant,
-                                        ValueType.Keyframes};
-            GenericMenu menu = new GenericMenu();
-            for (int i = 0; i < texts.Length; ++i)
-            {
-                menu.AddItem(texts[i], state == states[i], SelectValueTypeState, new SelectValueTypeStateTuple(sampler, states[i], this));
-            }
-            menu.DropDown(popupRect);
-            Event.current.Use();
-        }
-    }
-
-    private class SelectValueTypeStateTuple
-    {
-        public IValueSampler sampler;
-        public ValueType mode;
-        public Curve3D curve;
-        public SelectValueTypeStateTuple(IValueSampler sampler, ValueType mode, Curve3D curve)
-        {
-            this.sampler = sampler;
-            this.mode = mode;
-            this.curve = curve;
-        }
-    }
-    void SelectValueTypeState(object arg)
-    {
-        var tuple = arg as SelectValueTypeStateTuple;
-        if (tuple != null)
-        {
-            tuple.sampler.ValueType = tuple.mode;
-            if (tuple.mode == ValueType.Constant && tuple.curve.editMode == tuple.sampler.GetEditMode())
-            {
-                tuple.curve.editMode = EditMode.PositionCurve;//default to position
-            }
-            if (tuple.mode == ValueType.Keyframes)
-                tuple.curve.editMode = tuple.sampler.GetEditMode();
-            HandleUtility.Repaint();
-        }
-    }
-    #endregion
 
     [NonSerialized]
     public ClickHitData elementClickedDown;

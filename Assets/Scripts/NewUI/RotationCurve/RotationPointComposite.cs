@@ -80,7 +80,7 @@ namespace Assets.NewUI
             if (CirclePlaneTools.GetCursorPointOnPlane(_owner.centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference,_curve))
             {
                 var previousVector = _owner.GetVectorByAngle(_owner._curve.previousRotations[Index],out PointOnCurve point);
-                float amountToRotate = Vector3.SignedAngle(_curve.transform.TransformDirection(previousVector),cursorHitPosition-centerPoint,centerForward);
+                float amountToRotate = Vector3.SignedAngle(_curve.transform.TransformDirection(previousVector),cursorHitPosition-centerPoint, centerForward);
                 var selectedEditRotations = selected.GetSelected(_sampler.GetPoints(curve.positionCurve));
                 foreach (var i in selectedEditRotations)
                     i.value += amountToRotate;

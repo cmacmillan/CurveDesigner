@@ -41,7 +41,8 @@ namespace Assets.NewUI
         {
             centerPoint.GetPositionForwardAndReference(out Vector3 circlePosition, out Vector3 circleForward,out Vector3 circleReference);
             drawList.Add(new CircleDraw(this,Color.white, _curve.transform.TransformPoint(circlePosition),_curve.transform.TransformDirection(circleForward),_curve.averageSize));
-            drawList.Add(new ArcDraw(this, new Color(1,1,1,.1f), _curve.transform.TransformPoint(circlePosition), _curve.transform.TransformDirection(circleForward), _curve.averageSize,_point.value,_curve.transform.TransformDirection(Quaternion.AngleAxis(180-_point.value/2, circleForward)*circleReference)));
+            var reference = _curve.transform.TransformDirection(Quaternion.AngleAxis(180 - _point.value / 2 + _curve.rotationSampler.GetValueAtDistance(_point.GetDistance(_curve.positionCurve), _curve.isClosedLoop, _curve.positionCurve.GetLength(), _curve.positionCurve), circleForward) * circleReference);
+            drawList.Add(new ArcDraw(this, new Color(1,1,1,.1f), _curve.transform.TransformPoint(circlePosition), _curve.transform.TransformDirection(circleForward), _curve.averageSize,_point.value,reference));
             drawList.Add(new LineDraw(this,centerPoint.Position,_leftPosition.Position));
             drawList.Add(new LineDraw(this,centerPoint.Position,_rightPosition.Position));
             base.Draw(drawList, closestElementToCursor);
@@ -67,7 +68,7 @@ namespace Assets.NewUI
         }
         public Vector3 GetVectorByArc(float arc, bool isLeft,out PointOnCurve point)
         {
-            float angle = 180+(_isLeft?-1:1)*arc / 2;
+            float angle = 180+(_isLeft?-1:1)*arc / 2 + _curve.rotationSampler.GetValueAtDistance(_point.GetDistance(_curve.positionCurve),_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
             point = _curve.positionCurve.GetPointAtDistance(_point.GetDistance(_curve.positionCurve));
             return Quaternion.AngleAxis(angle, point.tangent) * (point.reference.normalized);
         }
@@ -93,9 +94,11 @@ namespace Assets.NewUI
             if (CirclePlaneTools.GetCursorPointOnPlane(_owner.centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference,_curve))
             {
                 //var previousVector = _owner.GetVectorByAngle(_owner._curve.previousRotations[Index],out PointOnCurve point);
-                float amountToRotate = Vector3.SignedAngle(_curve.transform.TransformDirection(centerReference),cursorHitPosition-centerPoint,centerForward);
-                _point.value = 2*(180 - Mathf.Abs(amountToRotate));
-                Debug.Log(amountToRotate);
+                float angle = _curve.rotationSampler.GetValueAtDistance(_point.GetDistance(_curve.positionCurve), _curve.isClosedLoop, _curve.positionCurve.GetLength(), _curve.positionCurve);
+                var rotation = Quaternion.AngleAxis(angle,centerForward);
+                //var reference = _curve.transform.TransformDirection(Quaternion.AngleAxis(-rotation, centerForward) * centerReference);
+                float amountToRotate = Vector3.SignedAngle(rotation*centerReference,cursorHitPosition-centerPoint,centerForward);
+                _point.value = 2 * (180 - Mathf.Abs(amountToRotate));
                 /*
                 var selectedEditRotations = selected.GetSelected(_sampler.GetPoints(curve.positionCurve));
                 foreach (var i in selectedEditRotations)

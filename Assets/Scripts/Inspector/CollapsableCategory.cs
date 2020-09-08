@@ -11,6 +11,109 @@ namespace Assets.NewUI
         public bool isExpanded;
         public abstract string GetName(Curve3D curve);
         public abstract void Draw(Curve3D curve);
+
+        protected SerializedObject serializedObj;
+        public void Field(string fieldName)
+        {
+            EditorGUILayout.PropertyField(serializedObj.FindProperty(fieldName));
+        }
+        /// Shuriken field with dropdown triangle
+        protected const float k_minMaxToggleWidth = 13;
+        protected static Rect GetPopupRect(Rect position)
+        {
+            position.xMin = position.xMax - k_minMaxToggleWidth;
+            return position;
+        }
+        protected static Rect SubtractPopupWidth(Rect position)
+        {
+            position.width -= 1 + k_minMaxToggleWidth;
+            return position;
+        }
+
+        private const int kSingleLineHeight = 18;
+
+        protected static Rect GetControlRect(int height, Curve3D curve, params GUILayoutOption[] layoutOptions)
+        {
+            return GUILayoutUtility.GetRect(0, height, curve.controlRectStyle, layoutOptions);
+        }
+
+        public void EditModeSwitchButton(string label, EditMode mode, Rect rect,Curve3D curve)
+        {
+            EditMode thisEditMode = mode;
+            bool isSelected = curve.editMode == thisEditMode;
+            GUI.Label(new Rect(rect.position, new Vector2(EditorGUIUtility.labelWidth, rect.height)), label, EditorStyles.label);
+            rect.xMin += EditorGUIUtility.labelWidth;
+            if (GUI.Toggle(rect, isSelected, EditorGUIUtility.TrTextContent($"{(isSelected ? "Editing" : "Edit")} {label}"), curve.buttonStyle))
+                curve.editMode = thisEditMode;
+        }
+        public Rect GetFieldRects(out Rect popupRect,Curve3D curve)
+        {
+            Rect rect = GetControlRect(kSingleLineHeight, curve);
+            popupRect = GetPopupRect(rect);
+            popupRect.height = kSingleLineHeight;
+            rect = SubtractPopupWidth(rect);
+            return rect;
+        }
+        public void SamplerField(string path, IValueSampler sampler,Curve3D curve)
+        {
+            Rect rect = GetFieldRects(out Rect popupRect,curve);
+
+            ValueType state = sampler.ValueType;
+
+            switch (state)
+            {
+                case ValueType.Constant:
+                    EditorGUI.PropertyField(rect,serializedObj.FindProperty($"{path}.constValue"), new GUIContent(sampler.GetLabel()));
+                    break;
+                case ValueType.Keyframes:
+                    EditModeSwitchButton(sampler.GetLabel(), sampler.GetEditMode(), rect,curve);
+                    break;
+            }
+
+            // PopUp minmaxState menu
+            if (EditorGUI.DropdownButton(popupRect, GUIContent.none, FocusType.Passive, curve.dropdownStyle))
+            {
+                GUIContent[] texts =        {   EditorGUIUtility.TrTextContent("Constant"),
+                                                EditorGUIUtility.TrTextContent("Curve") };
+                ValueType[] states = {  ValueType.Constant,
+                                        ValueType.Keyframes};
+                GenericMenu menu = new GenericMenu();
+                for (int i = 0; i < texts.Length; ++i)
+                {
+                    menu.AddItem(texts[i], state == states[i], SelectValueTypeState, new SelectValueTypeStateTuple(sampler, states[i], curve));
+                }
+                menu.DropDown(popupRect);
+                Event.current.Use();
+            }
+        }
+
+        private class SelectValueTypeStateTuple
+        {
+            public IValueSampler sampler;
+            public ValueType mode;
+            public Curve3D curve;
+            public SelectValueTypeStateTuple(IValueSampler sampler, ValueType mode, Curve3D curve)
+            {
+                this.sampler = sampler;
+                this.mode = mode;
+                this.curve = curve;
+            }
+        }
+        void SelectValueTypeState(object arg)
+        {
+            var tuple = arg as SelectValueTypeStateTuple;
+            if (tuple != null)
+            {
+                tuple.sampler.ValueType = tuple.mode;
+                if (tuple.mode == ValueType.Constant && tuple.curve.editMode == tuple.sampler.GetEditMode())
+                {
+                    tuple.curve.editMode = EditMode.PositionCurve;//default to position
+                }
+                if (tuple.mode == ValueType.Keyframes)
+                    tuple.curve.editMode = tuple.sampler.GetEditMode();
+                HandleUtility.Repaint();
+            }
+        }
     }
     public class MainCollapsableCategory : CollapsableCategory
     {
@@ -38,51 +141,52 @@ namespace Assets.NewUI
 
         public override void Draw(Curve3D curve)
         {
+            serializedObj = new SerializedObject(curve);
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             bool needsReinitCurve = false;
-            curve.EditModeSwitchButton("Position", EditMode.PositionCurve,curve.GetFieldRects(out _));
+            EditModeSwitchButton("Position", EditMode.PositionCurve,GetFieldRects(out _,curve),curve);
             if (curve.type!= CurveType.NoMesh)
             {
-                curve.SamplerField("sizeSampler", curve.sizeSampler);
-                curve.SamplerField("rotationSampler", curve.rotationSampler);
+                SamplerField("sizeSampler", curve.sizeSampler,curve);
+                SamplerField("rotationSampler", curve.rotationSampler,curve);
                 if (curve.type == CurveType.Cylinder || curve.type == CurveType.HollowTube)
                 {
-                    curve.SamplerField("arcOfTubeSampler", curve.arcOfTubeSampler);
+                    SamplerField("arcOfTubeSampler", curve.arcOfTubeSampler,curve);
                 }
                 if (curve.type != CurveType.Mesh)
                 {
-                    curve.SamplerField("thicknessSampler",curve.thicknessSampler);
+                    SamplerField("thicknessSampler",curve.thicknessSampler,curve);
                 }
             }
             if (curve.type == CurveType.DoubleBezier)
-                curve.EditModeSwitchButton("Double Bezier", EditMode.DoubleBezier, curve.GetFieldRects(out _));
+                EditModeSwitchButton("Double Bezier", EditMode.DoubleBezier, GetFieldRects(out _,curve),curve);
             if (curve.type != CurveType.Mesh && curve.type!=CurveType.NoMesh)
             {
-                curve.Field("vertexDensity");
+                Field("vertexDensity");
             }
-            curve.Field("type");
+            Field("type");
             /*
             if (curve.editMode == EditMode.DoubleBezier && typeBefore == CurveType.DoubleBezier && typeAfter != CurveType.DoubleBezier)
                 curve.editMode = EditMode.PositionCurve;
             */
             EditorGUI.BeginChangeCheck();
-            curve.Field("isClosedLoop");
+            Field("isClosedLoop");
             if (EditorGUI.EndChangeCheck())
             {
                 needsReinitCurve = true;
             }
             if (curve.type == CurveType.Mesh)
             {
-                curve.Field("meshToTile");
-                curve.Field("clampAndStretchMeshToCurve");
-                curve.Field("meshPrimaryAxis");
-                curve.Field("closeTilableMeshGap");
+                Field("meshToTile");
+                Field("clampAndStretchMeshToCurve");
+                Field("meshPrimaryAxis");
+                Field("closeTilableMeshGap");
             }
             if (curve.type == CurveType.Cylinder || curve.type == CurveType.DoubleBezier || curve.type == CurveType.HollowTube || curve.type == CurveType.Cylinder)
             {
-                curve.Field("ringPointCount");
+                Field("ringPointCount");
             }
-            curve.ApplyFieldChanges();
+            serializedObj.ApplyModifiedProperties();
             if (needsReinitCurve)
                 curve.UICurve.Initialize();
         }
@@ -93,9 +197,10 @@ namespace Assets.NewUI
 
         public override void Draw(Curve3D curve)
         {
+            serializedObj = new SerializedObject(curve);
             //GUILayout.Label("textures");
-            curve.Field("seperateInnerOuterTextures");
-            curve.ApplyFieldChanges();
+            Field("seperateInnerOuterTextures");
+            serializedObj.ApplyModifiedProperties();
         }
     }
     public class PreferencesCollapsableCategory : CollapsableCategory
@@ -104,14 +209,15 @@ namespace Assets.NewUI
 
         public override void Draw(Curve3D curve)
         {
-            curve.Field("showPointSelectionWindow");
-            curve.Field("showPositionHandles");
-            curve.Field("showNormals");
-            curve.Field("showTangents");
-            curve.Field("lockToPositionZero");
-            curve.Field("placeLockedPoints");
-            curve.Field("settings");
-            curve.ApplyFieldChanges();
+            serializedObj = new SerializedObject(curve);
+            Field("showPointSelectionWindow");
+            Field("showPositionHandles");
+            Field("showNormals");
+            Field("showTangents");
+            Field("lockToPositionZero");
+            Field("placeLockedPoints");
+            Field("settings");
+            serializedObj.ApplyModifiedProperties();
         }
     }
 }
