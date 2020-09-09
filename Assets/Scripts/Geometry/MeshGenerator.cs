@@ -54,7 +54,8 @@ public static class MeshGenerator
     public static FloatDistanceSampler tubeArcSampler;
     public static FloatDistanceSampler thicknessSampler;
 
-    public static int RingPointCount = 8;
+    public static int RingPointCount = 2;
+    public static int EdgePointCount = 20;
     public static float VertexSampleDistance = 1.0f;
 
     public static bool clampAndStretchMeshToCurve = true;
@@ -244,9 +245,10 @@ public static class MeshGenerator
             int s2p1 = -1;
             int s2p2 = -1;
 
-            for (int i=0;i<edgePointInfos.Count;i++)
+            for (int i = 0; i < edgePointInfos.Count; i++)
             {
                 var curr = edgePointInfos[i];
+
                 vertices.Add(curr.side1Point1);
                 vertices.Add(curr.side1Point2);
                 vertices.Add(curr.side2Point1);
@@ -260,12 +262,12 @@ public static class MeshGenerator
                 colors.Add(color);
                 colors.Add(color);
 
-                var uvX = curr.distanceAlongCurve/thickness;
+                var uvX = curr.distanceAlongCurve / thickness;
 
-                uvs.Add(new Vector2(uvX,0));
-                uvs.Add(new Vector2(uvX,1));
-                uvs.Add(new Vector2(uvX,0));
-                uvs.Add(new Vector2(uvX,1));
+                uvs.Add(new Vector2(uvX, 0));
+                uvs.Add(new Vector2(uvX, 1));
+                uvs.Add(new Vector2(uvX, 0));
+                uvs.Add(new Vector2(uvX, 1));
 
                 s1p1 = vertices.Count - 4;
                 s1p2 = vertices.Count - 3;
@@ -280,8 +282,8 @@ public static class MeshGenerator
                     }
                     else
                     {
-                        DrawQuad(prevs1p1, prevs1p2,s1p1, s1p2);
-                        DrawQuad(s2p1, s2p2,prevs2p1, prevs2p2);
+                        DrawQuad(prevs1p1, prevs1p2, s1p1, s1p2);
+                        DrawQuad(s2p1, s2p2, prevs2p1, prevs2p2);
                     }
 
                 }

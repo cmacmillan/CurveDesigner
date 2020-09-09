@@ -32,7 +32,7 @@ public enum DimensionLockMode
     y,
     z
 }
-/// <summary>
+/// <summary>l
 /// A point group groups 3 control points together, left tangent, right tangent and the point itself
 /// </summary>
 [System.Serializable]
@@ -161,7 +161,11 @@ public class PointGroup : ISelectEditable<PointGroup>
     {
         var initialLocked = isPointLocked;
         bool? isLocked = null;
+        float initialWidth = EditorGUIUtility.labelWidth;
+        //EditorGUIUtility.labelWidth = 112;
+        EditorGUIUtility.labelWidth = 230;
         bool currentLockState = EditorGUILayout.Toggle("Tangents Locked", initialLocked);//, "ToggleMixed");
+        EditorGUIUtility.labelWidth = initialWidth;
         if (initialLocked != currentLockState)
             isLocked = currentLockState;
 
@@ -173,6 +177,8 @@ public class PointGroup : ISelectEditable<PointGroup>
 
         var initialRight = GetWorldPositionByIndex(PGIndex.RightTangent, curve.lockToPositionZero);
         var rightTangentOffset = EditorGUILayout.Vector3Field("Right Tangent", initialRight)-initialRight;
+
+        EditorGUIUtility.SetWantsMouseJumping(1);
 
         if (isLocked==initialLocked && initialLeft==leftTangentOffset && initialPos==positionOffset && initialRight == rightTangentOffset)
             return false;

@@ -102,6 +102,10 @@ public class Curve3DInspector : Editor
 
     private void WindowFunc(int id)
     {
+        bool isWideMode = EditorGUIUtility.wideMode;
+        float initialLabelWidth = EditorGUIUtility.labelWidth;
+        EditorGUIUtility.wideMode = true;
+        EditorGUIUtility.labelWidth = 90;
         var curve = (target as Curve3D);
         var editModes = curve.editModeCategories;
         if (curve.UICurve != null)
@@ -123,9 +127,16 @@ public class Curve3DInspector : Editor
                 else
                     GUILayout.Label($"{selectedPointCount} point{(selectedPointCount != 1 ? "s" : "")} selected", curve.CenteredStyle);
                 var drawer = curve.UICurve.GetWindowDrawer();
+                EditorGUI.BeginChangeCheck();
                 drawer.DrawWindow(curve);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    curve.Recalculate();
+                }
             }
         }
+        EditorGUIUtility.wideMode = isWideMode;
+        EditorGUIUtility.labelWidth = initialLabelWidth;
     }
 
     void HandleKeys(Curve3D curve3d)
@@ -180,7 +191,7 @@ public class Curve3DInspector : Editor
     {
         var curve3d = (target as Curve3D);
         EnsureValidEditMode();
-        var windowRect = new Rect(20, 40, 0, 0);
+        var windowRect = new Rect(20, 40, 260, 0);
         if (curve3d.showPointSelectionWindow)
         {
             MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
