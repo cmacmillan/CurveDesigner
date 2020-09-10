@@ -114,8 +114,16 @@ namespace Assets.NewUI
             Vector3 pos = GUITools.GetClosestPointBetweenTwoLines(screenRay.origin,screenRay.direction,centerPoint,_point.Position-centerPoint);
             var sizeChange = (Vector3.Distance(pos, centerPoint))-(_ring.value+(offset==null?0:offset.Offset));
             var selectedSizePoints = selectedPoints.GetSelected(_owner._sampler.GetPoints(curve.positionCurve));
+            float minChange = float.MaxValue;
             foreach (var i in selectedSizePoints)
-                i.value += sizeChange;//might need to use offset here if buggy
+            {
+                float newVal = Mathf.Max(0, i.value + sizeChange);
+                float change = newVal - i.value;
+                if (Mathf.Abs(change) < Mathf.Abs(minChange))
+                    minChange = change;
+            }
+            foreach (var i in selectedSizePoints)
+                i.value += minChange;
         }
 
         public void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
