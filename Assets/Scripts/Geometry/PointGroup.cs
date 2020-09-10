@@ -162,9 +162,8 @@ public class PointGroup : ISelectEditable<PointGroup>
         var initialLocked = isPointLocked;
         bool? isLocked = null;
         float initialWidth = EditorGUIUtility.labelWidth;
-        //EditorGUIUtility.labelWidth = 112;
         EditorGUIUtility.labelWidth = 230;
-        bool currentLockState = EditorGUILayout.Toggle("Tangents Locked", initialLocked);//, "ToggleMixed");
+        bool currentLockState = EditorGUILayout.Toggle("Tangents Locked", initialLocked);
         EditorGUIUtility.labelWidth = initialWidth;
         if (initialLocked != currentLockState)
             isLocked = currentLockState;
