@@ -169,9 +169,9 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
     }
 
-    public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1,EditMode.Size);
-    public FloatDistanceSampler arcOfTubeSampler = new FloatDistanceSampler("Arc", 180,EditMode.Arc);
-    public FloatDistanceSampler thicknessSampler = new FloatDistanceSampler("Thickness", .1f,EditMode.Thickness);
+    public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1,EditMode.Size,0);
+    public FloatDistanceSampler arcOfTubeSampler = new FloatDistanceSampler("Arc", 180,EditMode.Arc,0,360);
+    public FloatDistanceSampler thicknessSampler = new FloatDistanceSampler("Thickness", .1f,EditMode.Thickness,0);
     public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation",0,EditMode.Rotation);
     public ColorDistanceSampler colorSampler = new ColorDistanceSampler("Color",EditMode.Color);
     public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler("Double Bezier",EditMode.DoubleBezier);
@@ -393,10 +393,13 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         positionCurve.owner = this;
         positionCurve.Initialize();
         positionCurve.isCurveOutOfDate = true;
-        sizeSampler = new FloatDistanceSampler("Size", 1, EditMode.Size);
+        sizeSampler = new FloatDistanceSampler("Size", 1, EditMode.Size,0);
         rotationSampler = new FloatDistanceSampler("Rotation", 0, EditMode.Rotation);
-        GUIStyle dropdownStyle = "ShurikenDropdown";
+        arcOfTubeSampler = new FloatDistanceSampler("Arc", 180, EditMode.Arc, 0, 360);
+        thicknessSampler = new FloatDistanceSampler("Thickness", .1f, EditMode.Thickness, 0);
+        colorSampler = new ColorDistanceSampler("Color",EditMode.Color);
         doubleBezierSampler = new DoubleBezierSampler("Double Bezier", EditMode.DoubleBezier);
+        GUIStyle dropdownStyle = "ShurikenDropdown";
         UICurve = new UICurve(null, this);
         UICurve.Initialize();
         Debug.Log("cleared");

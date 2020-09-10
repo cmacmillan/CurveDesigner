@@ -11,17 +11,28 @@ namespace Assets.NewUI
     [System.Serializable]
     public class FloatDistanceSampler : ValueDistanceSampler<float, FloatSamplerPoint,FloatDistanceSampler>
     {
-        public FloatDistanceSampler(string label,float defaultValue,EditMode editMode): base(label, editMode)
+        public float minValue;
+        public float maxValue;
+        public FloatDistanceSampler(string label,float defaultValue,EditMode editMode,float minValue = float.NegativeInfinity, float maxValue = float.PositiveInfinity): base(label, editMode)
         {
             constValue = defaultValue;
+            this.minValue = minValue;
+            this.maxValue = maxValue;
         }
-        public FloatDistanceSampler(FloatDistanceSampler objToClone) : base(objToClone) { }
+        public FloatDistanceSampler(FloatDistanceSampler objToClone) : base(objToClone) {
+            this.minValue = objToClone.minValue;
+            this.maxValue = objToClone.maxValue;
+        }
 
         protected override float CloneValue(float value)
         {
             return value;
         }
 
+        public override float Constrain(float v1)
+        {
+            return Mathf.Clamp(v1,minValue,maxValue);
+        }
         public override float Lerp(float val1, float val2, float lerp) { return Mathf.Lerp(val1,val2,lerp); }
 
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve)
@@ -109,6 +120,13 @@ namespace Assets.NewUI
 
         public override float Zero() { return 0; }
 
+        public override float MinChange(float v1, float v2)
+        {
+            if (Mathf.Abs(v1) < Mathf.Abs(v2))
+                return v1;
+            return v2;
+        }
+        public override float MaxValue() { return float.MaxValue; }
         public override float CloneValue(float value)
         {
             return value;

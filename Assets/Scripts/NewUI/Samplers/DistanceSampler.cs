@@ -16,16 +16,25 @@ namespace Assets.NewUI
         public abstract T Subtract(T v1, T v2);
         public abstract T Add(T v1, T v2);
         public abstract T Zero();
+        public abstract T MinChange(T v1, T v2);
+        public abstract T MaxValue();
         public override bool SelectEdit(Curve3D curve, List<S> selectedPoints)
         {
             T originalValue = value;
             T fieldVal = Field(owner.GetLabel(), originalValue);
             T valueOffset = Subtract(fieldVal,originalValue);
+            T minChange = MaxValue();
+            foreach (var i in selectedPoints)
+            {
+                T newVal = owner.Constrain(Add(i.value, valueOffset));
+                T change = Subtract(newVal, i.value);
+                minChange = MinChange(minChange,change);
+            }
             base.SelectEdit(curve, selectedPoints);
-            if (valueOffset.Equals(Zero()))
+            if (minChange.Equals(Zero()))
                 return false;
             foreach (var target in selectedPoints)
-                target.value = Add(target.value,valueOffset);
+                target.value = Add(target.value,minChange);
             return true;
         }
     }
@@ -177,6 +186,10 @@ namespace Assets.NewUI
         public DistanceSampler(string label, EditMode editMode) {
             this.label = label;
             this.editMode = editMode;
+        }
+        public virtual T Constrain(T v1)
+        {
+            return v1;
         }
 
         public DistanceSampler(DistanceSampler<T,S,Q> objToClone)

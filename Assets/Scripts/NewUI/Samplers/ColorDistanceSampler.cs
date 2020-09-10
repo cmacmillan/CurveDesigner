@@ -47,10 +47,14 @@ namespace Assets.NewUI
         public override Color Subtract(Color v1, Color v2) { return v1 - v2; }
 
         public override Color Zero() { return Color.black; }
+        public override Color MaxValue() { return Color.white; }
 
-        public override Color CloneValue(Color value)
+        public override Color CloneValue(Color value) { return value; }
+
+        public override Color MinChange(Color v1, Color v2)
         {
-            return value;
+            return v1;//not really supported, so kinda arbitrary (curse you oop code! You've tricked me once again!)
         }
+
     }
 }
