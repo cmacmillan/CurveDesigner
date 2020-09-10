@@ -17,6 +17,10 @@ namespace Assets.NewUI
 
         public ColorDistanceSampler(ColorDistanceSampler objToClone) : base(objToClone) { }
 
+        public override void ConstantField(Rect rect)
+        {
+            constValue = EditorGUI.ColorField(rect, GetLabel(), constValue);
+        }
         protected override Color CloneValue(Color value)
         {
             return value;

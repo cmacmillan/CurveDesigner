@@ -21,6 +21,10 @@ namespace Assets.NewUI
         public DoubleBezierSampler(string label, EditMode editMode) : base(label,editMode) { }
 
         public DoubleBezierSampler(DoubleBezierSampler objToClone) : base(objToClone) { }
+        public override void ConstantField(Rect rect)
+        {
+            throw new InvalidOperationException();
+        }
         public override List<SelectableGUID> SelectAll(Curve3D curve)
         {
             List<SelectableGUID> retr = new List<SelectableGUID>();

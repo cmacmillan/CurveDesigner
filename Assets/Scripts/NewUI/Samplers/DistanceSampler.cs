@@ -28,7 +28,7 @@ namespace Assets.NewUI
             {
                 T newVal = owner.Constrain(Add(i.value, valueOffset));
                 T change = Subtract(newVal, i.value);
-                minChange = MinChange(minChange,change);
+                minChange = MinChange(change,minChange);
             }
             base.SelectEdit(curve, selectedPoints);
             if (minChange.Equals(Zero()))
@@ -338,6 +338,8 @@ namespace Assets.NewUI
         {
             return label.ToLower();
         }
+
+        public abstract void ConstantField(Rect rect);
     }
     public interface ISamplerPoint : ISelectable
     {
@@ -348,6 +350,7 @@ namespace Assets.NewUI
     }
     public interface IDistanceSampler : IActiveElement
     {
+        void ConstantField(Rect rect);
         string GetLabel();
         EditMode GetEditMode();
         IEnumerable<ISamplerPoint> GetPoints(BezierCurve curve);

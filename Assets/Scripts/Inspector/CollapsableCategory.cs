@@ -63,7 +63,7 @@ namespace Assets.NewUI
             switch (state)
             {
                 case ValueType.Constant:
-                    EditorGUI.PropertyField(rect,serializedObj.FindProperty($"{path}.constValue"), new GUIContent(sampler.GetLabel()));
+                    sampler.ConstantField(rect);
                     break;
                 case ValueType.Keyframes:
                     EditModeSwitchButton(sampler.GetLabel(), sampler.GetEditMode(), rect,curve);
@@ -157,6 +157,7 @@ namespace Assets.NewUI
                 {
                     SamplerField("thicknessSampler",curve.thicknessSampler,curve);
                 }
+                SamplerField("colorSampler", curve.colorSampler, curve);
             }
             if (curve.type == CurveType.DoubleBezier)
                 EditModeSwitchButton("Double Bezier", EditMode.DoubleBezier, GetFieldRects(out _,curve),curve);

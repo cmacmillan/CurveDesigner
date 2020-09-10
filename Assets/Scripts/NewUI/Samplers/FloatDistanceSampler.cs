@@ -24,6 +24,11 @@ namespace Assets.NewUI
             this.maxValue = objToClone.maxValue;
         }
 
+        public override void ConstantField(Rect rect)
+        {
+            constValue = Constrain(EditorGUI.FloatField(rect, GetLabel(), constValue));
+        }
+
         protected override float CloneValue(float value)
         {
             return value;
