@@ -30,6 +30,7 @@ namespace Assets.NewUI
         }
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
+            UICurve.GetNormalsTangentsDraw(drawList, _curve, this,transformBlob,positionCurve.positionCurve);
             UICurve.GetCurveDraw(drawList,positionCurve.positionCurve,transformBlob,this);
             base.Draw(drawList, closestElementToCursor);
         }

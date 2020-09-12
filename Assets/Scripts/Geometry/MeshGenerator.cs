@@ -531,8 +531,8 @@ public static class MeshGenerator
                     int pointCount = RingPointCount;
                     numVerts = 2 * pointCount*sampled.Count;
                     InitLists();
-                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, -.5f, pointCount, true);
                     CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, .5f, pointCount, true);
+                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, -.5f, pointCount, true);
                     TrianglifyLayer(false, pointCount,0);
                     TrianglifyLayer(true, pointCount,numVerts/2);
                     CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount),true);

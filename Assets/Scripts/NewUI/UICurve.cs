@@ -83,6 +83,25 @@ namespace Assets.NewUI
             base.Click(mousePosition, clickHits,eventType);
         }
 
+        public static void GetNormalsTangentsDraw(List<IDraw> drawList,Curve3D _curve,IComposite creator,TransformBlob transform,BezierCurve curveToDraw)
+        {
+            if (_curve.showNormals || _curve.showTangents)
+            {
+                float sampleDist = _curve.GetNormalDensityDistance();
+                List<PointOnCurve> points = curveToDraw.GetPointsWithSpacing(sampleDist);
+                var visualNormalLength = _curve.VisualNormalsLength();
+                var curveLength = curveToDraw.GetLength();
+                foreach (var i in points)
+                {
+                    var rotation = _curve.rotationSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve);
+                    var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
+                    if (_curve.showNormals)
+                        drawList.Add(new LineDraw(creator, transform.TransformPoint(i.position), transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));
+                    if (_curve.showTangents)
+                        drawList.Add(new LineDraw(creator, transform.TransformPoint(i.position), transform.TransformPoint(i.tangent* visualNormalLength+ i.position), Color.cyan));
+                }
+            }
+        }
         public static void GetCurveDraw(List<IDraw> drawList,BezierCurve curve, TransformBlob transform, IComposite owner)
         {
             for (int i = 0; i < curve.NumSegments; i++)
@@ -105,22 +124,7 @@ namespace Assets.NewUI
         public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
         {
             FindClosestPoints();
-            if (_curve.showNormals || _curve.showTangents)
-            {
-                float sampleDist = _curve.GetNormalDensityDistance();
-                List<PointOnCurve> points = _curve.positionCurve.GetPointsWithSpacing(sampleDist);
-                var visualNormalLength = _curve.VisualNormalsLength();
-                var curveLength = _curve.positionCurve.GetLength();
-                foreach (var i in points)
-                {
-                    var rotation = _curve.rotationSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve);
-                    var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
-                    if (_curve.showNormals)
-                        drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));
-                    if (_curve.showTangents)
-                        drawList.Add(new LineDraw(this, _curve.transform.TransformPoint(i.position), _curve.transform.TransformPoint(i.tangent* visualNormalLength+ i.position), Color.cyan));
-                }
-            }
+            GetNormalsTangentsDraw(drawList, _curve, this, positionCurve.transformBlob,_curve.positionCurve);
             GetCurveDraw(drawList,_curve.positionCurve,positionCurve.transformBlob,this);
             base.Draw(drawList,closestElementToCursor);
         }

@@ -448,26 +448,29 @@ public partial class BezierCurve : IActiveElement
     {
         return segments[NumSegments - 1].cummulativeLength;
     }
-    private static Vector3 NormalTangent(Vector3 forwardVector, Vector3 previous)
-    {
-        return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
-    }
     public Vector3 GetDefaultReferenceVector(Vector3 tangent)
     {
         Vector3 reference = Vector3.up;
+        Vector3 alt = Vector3.right;
         switch (dimensionLockMode)
         {
             case DimensionLockMode.x:
                 reference = Vector3.forward;
+                alt = Vector3.up;
                 break;
             case DimensionLockMode.y:
                 reference = Vector3.right;
+                alt = Vector3.forward;
                 break;
             case DimensionLockMode.z:
                 reference = Vector3.up;
+                alt = Vector3.right;
                 break;
         }
-        return NormalTangent(tangent, reference);
+        var retr = Vector3.ProjectOnPlane(reference,tangent).normalized;
+        if (Vector3.Dot(tangent, alt) < 0)
+            return -retr;
+        return retr;
     }
     /// <summary>
     /// must call after modifying points
