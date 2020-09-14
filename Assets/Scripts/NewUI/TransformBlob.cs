@@ -13,20 +13,22 @@ namespace Assets.NewUI
         public DynamicMatrix4x4 _additionalTransform;
         public Matrix4x4? _additionalMatrix=null;
         public Matrix4x4? _additionalMatrixInverse=null;
+        public Curve3D curve;
         public void Bake()
         {
             if (_additionalTransform != null)
             {
-                _additionalMatrix = _additionalTransform.GetMatrix();
+                _additionalMatrix = _additionalTransform.GetMatrix(curve);
                 _additionalMatrixInverse = _additionalMatrix.Value.inverse;
             }
         }
         /// <summary>
         /// Should only really be instantiated by a curve, and referenced by everyone else
         /// </summary>
-        public TransformBlob(Transform baseTransform, DynamicMatrix4x4 additionalTransform = null) {
+        public TransformBlob(Transform baseTransform, DynamicMatrix4x4 additionalTransform = null,Curve3D curve= null) {
             _baseTransform = baseTransform;
             _additionalTransform = additionalTransform;
+            this.curve = curve;
         }
         Vector4 ToHomo(Vector3 vect)
         {
@@ -72,10 +74,15 @@ namespace Assets.NewUI
         {
             this.point = point;
         }
-        public Matrix4x4 GetMatrix()
+        public Matrix4x4 GetMatrix(Curve3D curve)
         {
             var pointOnCurve = point.PointOnCurve;
-            return Matrix4x4.Translate(pointOnCurve.position) * Matrix4x4.Rotate(Quaternion.LookRotation(pointOnCurve.tangent, pointOnCurve.reference));
+            float degrees = 0; 
+            if (curve!=null)
+            {
+                degrees = curve.rotationSampler.GetValueAtDistance(pointOnCurve.distanceFromStartOfCurve,curve.isClosedLoop,curve.positionCurve.GetLength(),curve.positionCurve);
+            }
+            return Matrix4x4.Translate(pointOnCurve.position) * Matrix4x4.Rotate(Quaternion.AngleAxis(degrees,pointOnCurve.tangent)*Quaternion.LookRotation(pointOnCurve.tangent, pointOnCurve.reference));
         }
     }
 }

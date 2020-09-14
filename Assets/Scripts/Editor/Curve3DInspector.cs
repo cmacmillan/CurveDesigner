@@ -186,7 +186,7 @@ public class Curve3DInspector : Editor
         if (curve3d.editMode == EditMode.Arc && curve3d.type != CurveType.Cylinder && curve3d.type != CurveType.HollowTube)
             curve3d.editMode = EditMode.PositionCurve;
     }
-
+    public static IComposite clickeddown;
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
@@ -236,7 +236,7 @@ public class Curve3DInspector : Editor
         var eventType = Event.current.GetTypeForControl(controlID);
         ClickHitData closestElementToCursor = null;
         if (elementClickedDown == null)
-            closestElementToCursor = GetClosestElementToCursor(curveEditor, MousePos, EventType.Repaint);
+            closestElementToCursor = GetClosestElementToCursor(curveEditor, MousePos);
         void DrawLoop(bool imguiEvent)
         {
             List<IDraw> draws = new List<IDraw>();
@@ -293,11 +293,10 @@ public class Curve3DInspector : Editor
             case EventType.MouseDown:
                 if (Event.current.button == 0)
                 {
-                    var clicked = GetClosestElementToCursor(curveEditor, MousePos, EventType.MouseDown);
-                    if (clicked != null)
+                    if (closestElementToCursor!=null)
                     {
                         GUIUtility.hotControl = controlID;
-                        curve3d.elementClickedDown = clicked;
+                        curve3d.elementClickedDown = closestElementToCursor;
                         var clickPos = MousePos + curve3d.elementClickedDown.offset;
                         var commandToExecute = curve3d.elementClickedDown.owner.GetClickCommand();
                         //shift will behave like control if it's a split command, also just fixed a bug when shift-clicking a split point
@@ -417,19 +416,31 @@ public class Curve3DInspector : Editor
             curve.RequestMeshUpdate();
         }
     }
-    private const float maxDistance = 5;
-    ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition,EventType eventType)
+    private const float smallDist = 5;
+    private const float bigDist = 20;
+    ClickHitData GetClosestElementToCursor(IComposite root,Vector2 clickPosition)
     {
         ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
         {
-            var clicks = lst.OrderBy(a => a.distanceFromCamera);
-            foreach (var i in clicks)
-                if (i.owner.DistanceFromMouse(clickPosition) < maxDistance)
+            //Remove .ToList
+            var smallClicks = lst.OrderBy(a => a.distanceFromCamera).ToList();
+            foreach (var i in smallClicks) 
+            {
+                float dist = i.owner.DistanceFromMouse(clickPosition);
+                if (dist < smallDist)
                     return i;
+            }
+            var bigClicks = lst.OrderBy(a => a.owner.DistanceFromMouse(clickPosition)).ToList();
+            foreach (var i in bigClicks)
+            {
+                float dist = i.owner.DistanceFromMouse(clickPosition);
+                if (dist < bigDist)
+                    return i;
+            }
             return null;
         }
         List<ClickHitData> hits = new List<ClickHitData>();
-        root.Click(clickPosition, hits, eventType);
+        root.Click(clickPosition, hits);
         var highPriority = hits.Where(a => !a.isLowPriority);
         var high = GetFrom(highPriority);
         if (high != null)

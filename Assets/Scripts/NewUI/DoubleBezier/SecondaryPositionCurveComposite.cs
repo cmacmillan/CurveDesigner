@@ -18,7 +18,7 @@ namespace Assets.NewUI
         {
             var curveInfoAtCenterPoint = curve.positionCurve.GetPointAtDistance(secondaryBezierCurve.GetDistance(curve.positionCurve));
             this._curve = curve; 
-            transformBlob = new TransformBlob(curve.transform,null);
+            transformBlob = new TransformBlob(curve.transform,null,curve);
             this.positionCurve = new PositionCurveComposite(this, curve, secondaryBezierCurve.value ,new SecondaryPositionCurveSplitCommand(secondaryBezierCurve.value,curve,this),transformBlob,allCurves);
             centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, curve.UICurve.positionCurve, UnityEngine.Color.green,secondaryBezierCurve.GUID,sampler);
             transformBlob._additionalTransform = new DynamicMatrix4x4(centerPoint);//works because transform blob is immutable

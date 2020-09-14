@@ -23,10 +23,10 @@ namespace Assets.NewUI
         {
             yield return _point;
         }
-        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits,EventType eventType)
+        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
             List<ClickHitData> pointHits = new List<ClickHitData>();
-            _point.Click(mousePosition, pointHits,eventType);
+            _point.Click(mousePosition, pointHits);
             foreach (var i in pointHits)
                 i.isLowPriority = true;
             clickHits.AddRange(pointHits);

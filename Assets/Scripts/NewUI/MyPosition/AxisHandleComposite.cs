@@ -23,7 +23,7 @@ namespace Assets.NewUI
         {
             drawList.Add(new AxisHandleDraw(this, curve, axis,positionProvider.Position));
         }
-        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits, EventType eventType)
+        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
             GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,clickLineStartOffset);
             GUITools.WorldToGUISpace(HandleToWorldSpace(lineEnd),out Vector2 guiPosition,out float screenDepth);

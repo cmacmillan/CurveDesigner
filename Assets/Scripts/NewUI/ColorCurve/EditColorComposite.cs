@@ -52,12 +52,12 @@ namespace Assets.NewUI
             drawList.Add(new EditColorDraw(this));
             base.Draw(drawList, closestElementToCursor);
         }
-        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits,EventType eventType)
+        public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
             GUITools.WorldToGUISpace(centerPoint.Position,out Vector2 guiPosition,out float screenDepth);
             float distance = Vector2.Distance(mousePosition,guiPosition);
             clickHits.Add(new ClickHitData(this,screenDepth,guiPosition-mousePosition));
-            base.Click(mousePosition, clickHits,eventType);
+            base.Click(mousePosition, clickHits);
         }
         public void IMGUIElement()
         {
