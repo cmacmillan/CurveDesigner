@@ -13,12 +13,12 @@ namespace Assets.NewUI
         private bool isPrepend;
         private BezierCurve positionCurve;
         private TransformBlob transformBlob;
-        public AddPositionPointButton(IComposite parent,Curve3D curve,BezierCurve positionCurve,bool isPrepend,TransformBlob transformBlob) : base(parent)
+        public AddPositionPointButton(IComposite parent,Curve3D curve,BezierCurve positionCurve,bool isPrepend,TransformBlob transformBlob,PositionCurveComposite curveComposite) : base(parent)
         {
-            PlusButtonPoint = new PointComposite(this, this,  PointTextureType.plus, new DoNothingClickCommand(), Color.green, SelectableGUID.Null,false,5);
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
             this.isPrepend = isPrepend;
+            PlusButtonPoint = new PointComposite(this, this,  PointTextureType.plus, new AddPositionPointClickCommand(isPrepend,positionCurve,curveComposite,this), Color.green, SelectableGUID.Null,false,5);
         }
 
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
@@ -42,10 +42,11 @@ namespace Assets.NewUI
         }
         private PGIndex GetIndex()
         {
+            //backwards, then we reflect
             if (isPrepend)
-                return PGIndex.LeftTangent;
-            else
                 return PGIndex.RightTangent;
+            else
+                return PGIndex.LeftTangent;
         }
         public Vector3 Position
         {
@@ -53,8 +54,8 @@ namespace Assets.NewUI
             {
                 PointGroup pointGroup = GetPointGroup();
                 PGIndex index = GetIndex();
-                var centerPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(PGIndex.Position, positionCurve.dimensionLockMode));
-                var offsetPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(index, positionCurve.dimensionLockMode));
+                var centerPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(PGIndex.Position, positionCurve.dimensionLockMode,true));
+                var offsetPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(index, positionCurve.dimensionLockMode,true));
                 GUITools.WorldToGUISpace(centerPos, out Vector2 centerGuiPos, out float centerScreenDepth);
                 GUITools.WorldToGUISpace(offsetPos, out Vector2 offsetGuiPos, out float offsetScreenDepth);
                 var diff = offsetGuiPos - centerGuiPos;
@@ -64,27 +65,6 @@ namespace Assets.NewUI
                 var depthDirection = depthDiff * factor;
                 return GUITools.GUIToWorldSpace(centerGuiPos+direction, centerScreenDepth + depthDirection);
             }
-        }
-    }
-    public class AddPositionPointClickCommand : IClickCommand
-    {
-        public AddPositionPointClickCommand(Curve3D curve)
-        {
-
-        }
-        public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selected)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ClickUp(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
-        {
-            throw new NotImplementedException();
         }
     }
 }

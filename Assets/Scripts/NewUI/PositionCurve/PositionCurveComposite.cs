@@ -21,8 +21,8 @@ namespace Assets.NewUI
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
             _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,clickCommand,Curve3DSettings.Green,this);
-            _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob);
-            _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob);
+            _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob,this);
+            _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob,this);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in positionCurve.PointGroups)
                 pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve,group.GUID,allCurves,curve));
@@ -43,8 +43,11 @@ namespace Assets.NewUI
         public override IEnumerable<IComposite> GetChildren()
         {
             yield return _splitterPoint;
-            yield return _leftAddPositionPoint;
-            yield return _rightAddPositionPoint;
+            if (!positionCurve.isClosedLoop)
+            {
+                yield return _leftAddPositionPoint;
+                yield return _rightAddPositionPoint;
+            }
             foreach (var i in pointGroups)
                 yield return i;
         }

@@ -137,16 +137,16 @@ public class PointGroup : ISelectEditable<PointGroup>
                 throw new System.ArgumentException();
         }
     }
-    public Vector3 GetWorldPositionByIndex(PGIndex index, DimensionLockMode dimensionLockMode)
+    public Vector3 GetWorldPositionByIndex(PGIndex index, DimensionLockMode dimensionLockMode,bool reflect = false)
     {
         switch (index)
         {
             case PGIndex.LeftTangent:
-                return LockAxis(leftTangent + position,dimensionLockMode);
+                return LockAxis((reflect?reflectAcrossPosition(leftTangent):leftTangent) + position,dimensionLockMode);
             case PGIndex.Position:
                 return LockAxis(position,dimensionLockMode);
             case PGIndex.RightTangent:
-                return LockAxis(rightTangent + position, dimensionLockMode);
+                return LockAxis((reflect?reflectAcrossPosition(rightTangent):rightTangent) + position, dimensionLockMode);
             default:
                 throw new System.ArgumentException();
         }

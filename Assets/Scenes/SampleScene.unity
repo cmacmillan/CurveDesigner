@@ -365,12 +365,12 @@ MonoBehaviour:
   graphicsMesh: {fileID: 0}
   graphicsMaterial: {fileID: 0}
   selectedPoints:
-  - id: 1345098
+  - id: 1010053
   shiftControlState: 0
   placeLockedPoints: 1
   splitInsertionBehaviour: 0
   guidFactory:
-    currentGUID: 1442487
+    currentGUID: 1451052
   sizeSampler:
     points:
     - value: 44.885494
@@ -490,10 +490,10 @@ MonoBehaviour:
   - -171.34805
   positionCurve:
     PointGroups:
-    - isPointLocked: 1
-      leftTangent: {x: -0, y: 8.564331, z: 4.916668}
-      rightTangent: {x: 0, y: -8.564331, z: -4.916668}
-      position: {x: 0, y: 0.35079956, z: 11.695255}
+    - isPointLocked: 0
+      leftTangent: {x: 0, y: -2.5164795, z: 9.563449}
+      rightTangent: {x: 0, y: -8.564331, z: -4.916669}
+      position: {x: 0, y: 0.35079956, z: 11.69526}
       guid:
         id: 1345098
     - isPointLocked: 1

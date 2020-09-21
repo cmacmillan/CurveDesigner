@@ -19,26 +19,6 @@ namespace Assets.NewUI
         public virtual void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked,List<SelectableGUID> selectedPoints) { }
         public virtual void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints) { }
     }
-    /*
-    public class DoubleBezierCurveSplitCommand : SplitCommand
-    {
-        private Old_DoubleBezierSampler sampler;
-        private PositionCurveComposite _positionCurveComposite;
-        public DoubleBezierCurveSplitCommand(Curve3D curve, Old_DoubleBezierSampler sampler,PositionCurveComposite positionCurveComposite) : base(curve)
-        {
-            _positionCurveComposite = positionCurveComposite;
-            _curve = curve;
-            this.sampler = sampler; 
-        }
-        public override void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)
-        {
-            int index = sampler.InsertPointAtDistance(_positionCurveComposite.PointClosestToCursor.distanceFromStartOfCurve,_curve.isClosedLoop,_curve.positionCurve.GetLength(),_curve.positionCurve);
-            _curve.UICurve.Initialize();
-            var selected = _curve.UICurve.doubleBezierCurve.GetPointAtIndex(index);
-            _curve.elementClickedDown.owner = selected;
-        }
-    }
-    */
     public class ModificationTracker
     {
         private struct CurveItem
@@ -75,6 +55,40 @@ namespace Assets.NewUI
                     points[i].SetDistance(curr.distance,curve,false);
             }
         }
+    }
+    public class AddPositionPointClickCommand : IClickCommand
+    {
+        private bool isPrepend;
+        private BezierCurve curveToModify;
+        private PositionCurveComposite compositeToModify;
+        private AddPositionPointButton button;
+        public AddPositionPointClickCommand(bool isPrepend,BezierCurve curveToModify,PositionCurveComposite compositeToModify,AddPositionPointButton button)
+        {
+            this.compositeToModify = compositeToModify;
+            this.curveToModify = curveToModify;
+            this.isPrepend = isPrepend;
+            this.button = button;
+        }
+        public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selectedPoints)
+        {
+            var pointGuid = curveToModify.AppendPoint(isPrepend,curve.placeLockedPoints,button.Position);
+            int bumpAboveIndex = isPrepend ? 1 : curveToModify.PointGroups.Count-1;//we either bump >=1 or just the last one
+            foreach (var sampler in curve.DistanceSamplers)
+                foreach (var point in sampler.AllPoints())
+                    if (point.SegmentIndex >= bumpAboveIndex)
+                        point.SegmentIndex++;
+
+            curve.SelectOnlyPoint(pointGuid);
+            curve.UICurve.Initialize();
+
+            int finalIndex = isPrepend ? 0 : curveToModify.PointGroups.Count-1;//either the first or the last point group
+            var selected = compositeToModify.pointGroups[finalIndex].centerPoint;
+            curve.elementClickedDown.owner = selected;
+        }
+
+        public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selected){ }
+
+        public void ClickUp(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected) { }
     }
     public class SecondaryPositionCurveSplitCommand : IClickCommand
     {

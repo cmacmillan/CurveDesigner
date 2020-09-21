@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 //A class which defines a chain of 3rd order bezier curves (4 control points per segment)
@@ -275,13 +276,41 @@ public partial class BezierCurve : IActiveElement
         PointGroups.Add(pointB);
     }
 
+    public SelectableGUID AppendPoint(bool isPrepend,bool lockPlacedPoint, Vector3 newPointPos)
+    {
+        PointGroup fromPoint = isPrepend ?PointGroups[0]:PointGroups.Last();
+        PGIndex outTangent;//out of the curve
+        PGIndex inTangent;//into the curve
+        if (isPrepend)
+        {
+            outTangent = PGIndex.LeftTangent;
+            inTangent = PGIndex.RightTangent;
+        }
+        else
+        {
+            outTangent = PGIndex.RightTangent;
+            inTangent = PGIndex.LeftTangent;
+        }
+        fromPoint.SetWorldPositionByIndex(outTangent, fromPoint.GetWorldPositionByIndex(inTangent,dimensionLockMode,true), dimensionLockMode);
+
+        PointGroup newPoint = new PointGroup(lockPlacedPoint,owner);
+        if (isPrepend)
+            PointGroups.Insert(0, newPoint);
+        else
+            PointGroups.Append(newPoint);
+        newPoint.SetWorldPositionByIndex(PGIndex.Position,newPointPos, dimensionLockMode);
+        Vector3 middlePoint = (newPointPos + fromPoint.GetWorldPositionByIndex(PGIndex.Position, dimensionLockMode))/2.0f;
+        newPoint.SetWorldPositionByIndex(inTangent, middlePoint, dimensionLockMode);
+        newPoint.SetWorldPositionByIndex(outTangent, newPoint.GetWorldPositionByIndex(inTangent,dimensionLockMode,true), dimensionLockMode);
+        return newPoint.GUID;
+    }
     public SelectableGUID InsertSegmentAfterIndex(ISegmentTime splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
     {
         var prePointGroup = PointGroups[splitPoint.SegmentIndex];
         var postPointGroup = PointGroups[(splitPoint.SegmentIndex + 1)%PointGroups.Count];
-        PointGroup point = new PointGroup(lockPlacedPoint,owner);
+        PointGroup newPoint = new PointGroup(lockPlacedPoint,owner);
         var basePosition = this.GetSegmentPositionAtTime(splitPoint.SegmentIndex, splitPoint.Time);
-        point.SetWorldPositionByIndex(PGIndex.Position,basePosition,dimensionLockMode);
+        newPoint.SetWorldPositionByIndex(PGIndex.Position,basePosition,dimensionLockMode);
         Vector3 leftTangent;
         Vector3 rightTangent;
         Vector3 preLeftTangent;
@@ -309,19 +338,19 @@ public partial class BezierCurve : IActiveElement
         }
 
         //use the bigger tangent, this only matters if the point is locked
-        if ((leftTangent-point.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode)).magnitude<(rightTangent-point.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode)).magnitude)
+        if ((leftTangent-newPoint.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode)).magnitude<(rightTangent-newPoint.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode)).magnitude)
         {
-            point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent,dimensionLockMode);
-            point.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent,dimensionLockMode);
+            newPoint.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent,dimensionLockMode);
+            newPoint.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent,dimensionLockMode);
         }
         else
         {
-            point.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent,dimensionLockMode);
-            point.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent,dimensionLockMode);
+            newPoint.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent,dimensionLockMode);
+            newPoint.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent,dimensionLockMode);
         }
 
-        PointGroups.Insert(splitPoint.SegmentIndex+1,point);
-        return point.GUID;
+        PointGroups.Insert(splitPoint.SegmentIndex+1,newPoint);
+        return newPoint.GUID;
     }
 
     public void AddDefaultSegment()
