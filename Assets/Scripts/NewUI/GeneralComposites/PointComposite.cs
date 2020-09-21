@@ -14,14 +14,16 @@ namespace Assets.NewUI
         private IClickCommand _clickAction;
         private Color _color;
         private SelectableGUID guid;
+        private int size;
         private bool hideIfNotHovered;
 
-        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color, SelectableGUID guid, bool hideIfNotHovered = false) : base(parent)
+        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color, SelectableGUID guid, bool hideIfNotHovered = false,int size=5) : base(parent)
         {
             this._position = positionProvider;
             this._pointTexture = textureType;
             this._clickAction = clickAction;
             this._color = color;
+            this.size = size;
             this.guid = guid;
             this.hideIfNotHovered = hideIfNotHovered;
         }
@@ -42,7 +44,7 @@ namespace Assets.NewUI
 
         public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
         {
-            drawList.Add(new PointDraw(this,_position.Position, _pointTexture,_color,hideIfNotHovered:hideIfNotHovered));
+            drawList.Add(new PointDraw(this,_position.Position, _pointTexture,_color,size,hideIfNotHovered));
         }
 
         public override IClickCommand GetClickCommand()

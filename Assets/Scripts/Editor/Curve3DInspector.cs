@@ -186,7 +186,6 @@ public class Curve3DInspector : Editor
         if (curve3d.editMode == EditMode.Arc && curve3d.type != CurveType.Cylinder && curve3d.type != CurveType.HollowTube)
             curve3d.editMode = EditMode.PositionCurve;
     }
-    public static IComposite clickeddown;
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
@@ -212,6 +211,7 @@ public class Curve3DInspector : Editor
         Undo.RecordObject(curve3d, "curve");
         ClickHitData elementClickedDown = curve3d.elementClickedDown;
         Curve3DSettings.circleTexture = curve3d.settings.circleIcon;
+        Curve3DSettings.plusTexture= curve3d.settings.plusButton;
         Curve3DSettings.squareTexture = curve3d.settings.squareIcon;
         Curve3DSettings.diamondTexture = curve3d.settings.diamondIcon;
         Curve3DSettings.defaultLineTexture = curve3d.settings.lineTex;
@@ -227,6 +227,7 @@ public class Curve3DInspector : Editor
         curve3d.UICurve.BakeBlobs();
         UpdateMesh(curve3d);
         var curveEditor = curve3d.UICurve;
+        //var MousePos = new Vector2(480.9996f,312.9997f);//Event.current.mousePosition;
         var MousePos = Event.current.mousePosition;
         bool IsActiveElementSelected()
         {
@@ -281,6 +282,7 @@ public class Curve3DInspector : Editor
         void Draw() { DrawLoop(false); }
         void IMGUI() { DrawLoop(true); }
         //Regardless of event, you must call either Draw or IMGUI(), to make sure that imgui stuff gets all the events
+        var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
         switch (eventType)
         {
             case EventType.KeyDown:
@@ -288,6 +290,9 @@ public class Curve3DInspector : Editor
                 IMGUI();
                 break;
             case EventType.Repaint:
+                //var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
+                //curve3d.worldSpaceToClipSpace = sceneCam.previousViewProjectionMatrix;
+                //Debug.Log($"{sceneCam.pixelRect} repaint");
                 Draw();
                 break;
             case EventType.MouseDown:
@@ -300,6 +305,7 @@ public class Curve3DInspector : Editor
                         var clickPos = MousePos + curve3d.elementClickedDown.offset;
                         var commandToExecute = curve3d.elementClickedDown.owner.GetClickCommand();
                         //shift will behave like control if it's a split command, also just fixed a bug when shift-clicking a split point
+
                         bool isSplitAndShift = Event.current.shift && (commandToExecute is SplitCommand);
                         if (Event.current.control || isSplitAndShift)  /////CONTROL CLICK
                         {
@@ -371,6 +377,7 @@ public class Curve3DInspector : Editor
                 HandleUtility.Repaint();
                 break;
             default:
+                //Debug.Log($"{sceneCam.pixelRect} default");
                 IMGUI();
                 break;
         }
@@ -423,12 +430,17 @@ public class Curve3DInspector : Editor
         ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
         {
             //Remove .ToList
+            var list = lst.ToList();
             var smallClicks = lst.OrderBy(a => a.distanceFromCamera).ToList();
             foreach (var i in smallClicks) 
             {
                 float dist = i.owner.DistanceFromMouse(clickPosition);
                 if (dist < smallDist)
                     return i;
+            }
+            foreach (var i in list)
+            {
+                float d = i.owner.DistanceFromMouse(clickPosition);
             }
             var bigClicks = lst.OrderBy(a => a.owner.DistanceFromMouse(clickPosition)).ToList();
             foreach (var i in bigClicks)

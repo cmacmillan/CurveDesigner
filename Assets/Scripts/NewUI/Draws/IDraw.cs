@@ -64,6 +64,7 @@ namespace Assets.NewUI
         circle = 0,
         square = 1,
         diamond = 2,
+        plus = 3,
     }
     public interface IDraw
     {

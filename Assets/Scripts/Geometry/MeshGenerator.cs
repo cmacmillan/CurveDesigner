@@ -479,6 +479,9 @@ public static class MeshGenerator
         */
         switch (CurveType)
         {
+            case CurveType.NoMesh:
+                InitLists();
+                return true;
             case CurveType.Cylinder:
                 {
                     numVerts = RingPointCount* sampled.Count;

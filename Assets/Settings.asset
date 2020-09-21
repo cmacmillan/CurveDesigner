@@ -17,7 +17,7 @@ MonoBehaviour:
   circleIcon: {fileID: 2800000, guid: 971f68b2bfc7a704181c2904de1fe15d, type: 3}
   squareIcon: {fileID: 2800000, guid: e33d07ce577ea5f45bc068384c03d5b0, type: 3}
   diamondIcon: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
-  plusButton: {fileID: 2800000, guid: f51d65338667352499cbbbb985e6cac0, type: 3}
+  plusButton: {fileID: 2800000, guid: 0b1d1254fff0ff749b2ef1f9891d163c, type: 3}
   uiIcon: {fileID: 2800000, guid: 3ed5e6254e93c3145a2d5f0a42a48fed, type: 3}
   uiArea: {fileID: 2800000, guid: 6d9ab6ac9f8f12f459c12ba2845bde9a, type: 3}
   modeSelectorStyle:
@@ -221,77 +221,4 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 1
-  rightAlignStyle:
-    m_Name: RightAlightToggle
-    m_Normal:
-      m_Background: {fileID: 0}
-      m_ScaledBackgrounds:
-      - {fileID: 3713486776681669033, guid: 0000000000000000d000000000000000, type: 0}
-      m_TextColor: {r: 0.007843138, g: 0.007843138, b: 0.007843138, a: 1}
-    m_Hover:
-      m_Background: {fileID: 0}
-      m_ScaledBackgrounds: []
-      m_TextColor: {r: 0.007843138, g: 0.007843138, b: 0.007843138, a: 1}
-    m_Active:
-      m_Background: {fileID: 0}
-      m_ScaledBackgrounds:
-      - {fileID: -4339080970778619922, guid: 0000000000000000d000000000000000, type: 0}
-      m_TextColor: {r: 0.007843138, g: 0.007843138, b: 0.007843138, a: 1}
-    m_Focused:
-      m_Background: {fileID: 0}
-      m_ScaledBackgrounds:
-      - {fileID: -5916554232991449898, guid: 0000000000000000d000000000000000, type: 0}
-      m_TextColor: {r: 0.007843138, g: 0.007843138, b: 0.007843138, a: 1}
-    m_OnNormal:
-      m_Background: {fileID: 0}
-      m_ScaledBackgrounds:
-      - {fileID: -3891748276938030385, guid: 0000000000000000d000000000000000, type: 0}
-      m_TextColor: {r: 0.007843138, g: 0.007843138, b: 0.007843138, a: 1}
-    m_OnHover:
-      m_Background: {fileID: 0}
-      m_ScaledBackgrounds: []
-      m_TextColor: {r: 0.007843138, g: 0.007843138, b: 0.007843138, a: 1}
-    m_OnActive:
-      m_Background: {fileID: 0}
-      m_ScaledBackgrounds:
-      - {fileID: -6892289883839395259, guid: 0000000000000000d000000000000000, type: 0}
-      m_TextColor: {r: 0, g: 0, b: 0, a: 1}
-    m_OnFocused:
-      m_Background: {fileID: 0}
-      m_ScaledBackgrounds:
-      - {fileID: 6320351700436647650, guid: 0000000000000000d000000000000000, type: 0}
-      m_TextColor: {r: 0.007843138, g: 0.007843138, b: 0.007843138, a: 1}
-    m_Border:
-      m_Left: 15
-      m_Right: 0
-      m_Top: 13
-      m_Bottom: 0
-    m_Margin:
-      m_Left: 30
-      m_Right: 0
-      m_Top: 0
-      m_Bottom: 0
-    m_Padding:
-      m_Left: 17
-      m_Right: 0
-      m_Top: 0
-      m_Bottom: 0
-    m_Overflow:
-      m_Left: 0
-      m_Right: 0
-      m_Top: -2
-      m_Bottom: 2
-    m_Font: {fileID: 0}
-    m_FontSize: 12
-    m_FontStyle: 0
-    m_Alignment: 3
-    m_WordWrap: 0
-    m_RichText: 0
-    m_TextClipping: 1
-    m_ImagePosition: 0
-    m_ContentOffset: {x: 0, y: 1}
-    m_FixedWidth: 0
-    m_FixedHeight: 0
-    m_StretchWidth: 1
-    m_StretchHeight: 0
   textureSize: 2048

@@ -59,6 +59,8 @@ namespace Assets.NewUI
                     return Curve3DSettings.squareTexture;
                 case PointTextureType.diamond:
                     return Curve3DSettings.diamondTexture;
+                case PointTextureType.plus:
+                    return Curve3DSettings.plusTexture;
                 default:
                     throw new KeyNotFoundException();
             }

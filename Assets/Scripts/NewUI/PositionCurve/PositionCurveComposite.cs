@@ -11,6 +11,8 @@ namespace Assets.NewUI
     {
         public List<PositionPointGroupComposite> pointGroups = null;
         private SplitterPointComposite _splitterPoint = null;
+        private AddPositionPointButton _leftAddPositionPoint = null;
+        private AddPositionPointButton _rightAddPositionPoint = null;
         public BezierCurve positionCurve;
         public TransformBlob transformBlob;
         public PointOnCurve PointClosestToCursor { get; private set; }
@@ -19,6 +21,8 @@ namespace Assets.NewUI
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
             _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,clickCommand,Curve3DSettings.Green,this);
+            _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob);
+            _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in positionCurve.PointGroups)
                 pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve,group.GUID,allCurves,curve));
@@ -39,6 +43,8 @@ namespace Assets.NewUI
         public override IEnumerable<IComposite> GetChildren()
         {
             yield return _splitterPoint;
+            yield return _leftAddPositionPoint;
+            yield return _rightAddPositionPoint;
             foreach (var i in pointGroups)
                 yield return i;
         }
