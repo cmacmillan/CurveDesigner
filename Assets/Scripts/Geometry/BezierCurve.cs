@@ -297,7 +297,7 @@ public partial class BezierCurve : IActiveElement
         if (isPrepend)
             PointGroups.Insert(0, newPoint);
         else
-            PointGroups.Append(newPoint);
+            PointGroups.Add(newPoint);
         newPoint.SetWorldPositionByIndex(PGIndex.Position,newPointPos, dimensionLockMode);
         Vector3 middlePoint = (newPointPos + fromPoint.GetWorldPositionByIndex(PGIndex.Position, dimensionLockMode))/2.0f;
         newPoint.SetWorldPositionByIndex(inTangent, middlePoint, dimensionLockMode);

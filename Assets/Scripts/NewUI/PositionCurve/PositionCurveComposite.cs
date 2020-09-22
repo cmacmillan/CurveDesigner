@@ -21,8 +21,8 @@ namespace Assets.NewUI
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
             _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,clickCommand,Curve3DSettings.Green,this);
-            _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob,this);
-            _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob,this);
+            _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob,this,true,-1);
+            _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob,this,true,-1);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in positionCurve.PointGroups)
                 pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve,group.GUID,allCurves,curve));

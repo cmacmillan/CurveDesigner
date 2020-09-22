@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -60,19 +61,23 @@ namespace Assets.NewUI
     {
         private bool isPrepend;
         private BezierCurve curveToModify;
-        private PositionCurveComposite compositeToModify;
         private AddPositionPointButton button;
-        public AddPositionPointClickCommand(bool isPrepend,BezierCurve curveToModify,PositionCurveComposite compositeToModify,AddPositionPointButton button)
+        private bool isMainPositionCurve;
+        private int secondaryCurveIndex;
+        private TransformBlob transformBlob;
+        public AddPositionPointClickCommand(bool isPrepend,BezierCurve curveToModify,AddPositionPointButton button,bool isMainPositionCurve, int secondaryCurveIndex,TransformBlob transformBlob)
         {
-            this.compositeToModify = compositeToModify;
             this.curveToModify = curveToModify;
             this.isPrepend = isPrepend;
             this.button = button;
+            this.isMainPositionCurve = isMainPositionCurve;
+            this.secondaryCurveIndex = secondaryCurveIndex;
+            this.transformBlob = transformBlob;
         }
         public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selectedPoints)
         {
-            var pointGuid = curveToModify.AppendPoint(isPrepend,curve.placeLockedPoints,button.Position);
-            int bumpAboveIndex = isPrepend ? 1 : curveToModify.PointGroups.Count-1;//we either bump >=1 or just the last one
+            var pointGuid = curveToModify.AppendPoint(isPrepend,curve.placeLockedPoints,transformBlob.InverseTransformPoint(button.Position));
+            int bumpAboveIndex = isPrepend ? 1 : curveToModify.PointGroups.Count-2;
             foreach (var sampler in curve.DistanceSamplers)
                 foreach (var point in sampler.AllPoints())
                     if (point.SegmentIndex >= bumpAboveIndex)
@@ -81,8 +86,13 @@ namespace Assets.NewUI
             curve.SelectOnlyPoint(pointGuid);
             curve.UICurve.Initialize();
 
-            int finalIndex = isPrepend ? 0 : curveToModify.PointGroups.Count-1;//either the first or the last point group
-            var selected = compositeToModify.pointGroups[finalIndex].centerPoint;
+            int finalIndex = isPrepend ? 0 : curveToModify.PointGroups.Count-1;
+            PositionCurveComposite posCurve;
+            if (isMainPositionCurve)
+                posCurve = curve.UICurve.positionCurve;
+            else
+                posCurve = curve.UICurve.doubleBezierCurve._secondaryCurves[secondaryCurveIndex].positionCurve;
+            var selected = posCurve.pointGroups[finalIndex].centerPoint;
             curve.elementClickedDown.owner = selected;
         }
 
