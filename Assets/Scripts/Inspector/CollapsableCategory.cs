@@ -217,7 +217,7 @@ namespace Assets.NewUI
             Field("showTangents");
             Field("lockToPositionZero");
             Field("placeLockedPoints");
-            Field("settings");
+            Field("_settings");
             serializedObj.ApplyModifiedProperties();
         }
     }

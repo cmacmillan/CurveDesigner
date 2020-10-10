@@ -8,6 +8,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 using static BezierCurve;
 
+[RequireComponent(typeof(MeshFilter))]
 public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 {
     public IEnumerable<IDistanceSampler> DistanceSamplers
@@ -173,12 +174,12 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
     }
 
-    public FloatDistanceSampler sizeSampler = new FloatDistanceSampler("Size",1,EditMode.Size,0);
-    public FloatDistanceSampler arcOfTubeSampler = new FloatDistanceSampler("Arc", 180,EditMode.Arc,0,360);
-    public FloatDistanceSampler thicknessSampler = new FloatDistanceSampler("Thickness", .1f,EditMode.Thickness,0);
-    public FloatDistanceSampler rotationSampler = new FloatDistanceSampler("Rotation",0,EditMode.Rotation);
-    public ColorDistanceSampler colorSampler = new ColorDistanceSampler("Color",EditMode.Color);
-    public DoubleBezierSampler doubleBezierSampler = new DoubleBezierSampler("Double Bezier",EditMode.DoubleBezier);
+    public FloatDistanceSampler sizeSampler;
+    public FloatDistanceSampler arcOfTubeSampler;
+    public FloatDistanceSampler thicknessSampler;
+    public FloatDistanceSampler rotationSampler;
+    public ColorDistanceSampler colorSampler;
+    public DoubleBezierSampler doubleBezierSampler;
 
     public void RequestMeshUpdate()
     {
@@ -215,12 +216,26 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     public EditMode editMode = EditMode.PositionCurve;
 
-    public Curve3dSettings settings;
+    [SerializeField]
+    public Curve3dSettings _settings;
+    public Curve3dSettings settings
+    {
+        get
+        {
+            if (_settings == null)
+            {
+                _settings = Resources.Load<Curve3dSettings>("CurveDesignerSettings");
+            }
+            return _settings;
+        }
+    }
 
     public MeshCollider collider;
     public MeshFilter filter;
     [FormerlySerializedAs("mesh")]
     public Mesh displayMesh;
+    [SerializeField]
+    [HideInInspector]
     private bool isInitialized = false;
 
     /// Start of properties that redraw the curve
@@ -350,7 +365,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         retr |= CheckFieldChanged(vertexDensity, ref old_vertexDensity);
         retr |= CheckFieldChanged(type, ref old_type);
         retr |= CheckFieldChanged(closeTilableMeshGap, ref old_closeTilableMeshGap);
-        retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
+        if (meshToTile!=null)
+            retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
         retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
         retr |= CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
         retr |= CheckFieldChanged(seperateInnerOuterTextures, ref old_seperateInnerOuterTextures);
@@ -385,35 +401,30 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         return false;
     }
 
-    public void ResetCurve()
-    {
-        positionCurve.Initialize();
-        UICurve.Initialize();
-    }
     [ContextMenu("Clear")]
     public void Clear()
     {
-        positionCurve = new BezierCurve();
-        positionCurve.owner = this;
-        positionCurve.Initialize();
-        positionCurve.isCurveOutOfDate = true;
+        filter = GetComponent<MeshFilter>();
         sizeSampler = new FloatDistanceSampler("Size", 1, EditMode.Size,0);
         rotationSampler = new FloatDistanceSampler("Rotation", 0, EditMode.Rotation);
         arcOfTubeSampler = new FloatDistanceSampler("Arc", 180, EditMode.Arc, 0, 360);
         thicknessSampler = new FloatDistanceSampler("Thickness", .1f, EditMode.Thickness, 0);
         colorSampler = new ColorDistanceSampler("Color",EditMode.Color);
         doubleBezierSampler = new DoubleBezierSampler("Double Bezier", EditMode.DoubleBezier);
+        positionCurve = new BezierCurve();
+        positionCurve.owner = this;
+        positionCurve.Initialize();
+        positionCurve.isCurveOutOfDate = true;
         GUIStyle dropdownStyle = "ShurikenDropdown";
         UICurve = new UICurve(null, this);
         UICurve.Initialize();
-        Debug.Log("cleared");
     }
     public void TryInitialize()
     {
         if (!isInitialized)
         {
             isInitialized = true;
-            ResetCurve();
+            Clear();
         }
     }
     public void Recalculate()

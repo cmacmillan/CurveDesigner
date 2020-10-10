@@ -189,6 +189,7 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
+        curve3d.TryInitialize();
         EnsureValidEditMode();
         var windowRect = new Rect(20, 40, 260, 0);
         if (curve3d.showPointSelectionWindow)
