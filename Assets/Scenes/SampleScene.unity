@@ -5697,7 +5697,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 584730010}
-  - component: {fileID: 584730009}
   m_Layer: 0
   m_Name: Test
   m_TagString: Untagged
@@ -5705,18 +5704,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &584730009
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 584730008}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88f55e251621e2940b7292f6e0232ad6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &584730010
 Transform:
   m_ObjectHideFlags: 0
@@ -5882,8 +5869,8 @@ Mesh:
       m_BitSize: 0
     m_UVInfo: 0
   m_LocalAABB:
-    m_Center: {x: 2.9820118, y: 6.849826, z: -1.4958014}
-    m_Extent: {x: 32.310677, y: 22.553574, z: 11.017851}
+    m_Center: {x: 3.1216593, y: 5.3422613, z: -1.4903145}
+    m_Extent: {x: 32.37557, y: 23.965221, z: 11.090347}
   m_MeshUsageFlags: 0
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
@@ -7439,12 +7426,12 @@ MonoBehaviour:
   graphicsMesh: {fileID: 0}
   graphicsMaterial: {fileID: 0}
   selectedPoints:
-  - id: 1
+  - id: 39786
   shiftControlState: 0
   placeLockedPoints: 1
   splitInsertionBehaviour: 0
   guidFactory:
-    currentGUID: 39779
+    currentGUID: 40317
   sizeSampler:
     points:
     - value: 0.732953
@@ -7494,12 +7481,18 @@ MonoBehaviour:
     minValue: -Infinity
     maxValue: Infinity
   colorSampler:
-    points: []
+    points:
+    - value: {r: 1, g: 1, b: 1, a: 1}
+      segmentIndex: 1
+      time: 0.43025082
+      _interpolationMode: 0
+      _guid:
+        id: 39786
     fieldDisplayName: 
     label: Color
     editMode: 4
     constValue: {r: 1, g: 1, b: 1, a: 1}
-    _valueType: 0
+    _valueType: 1
   doubleBezierSampler:
     points: []
     fieldDisplayName: 
@@ -7535,7 +7528,7 @@ MonoBehaviour:
   showPointSelectionWindow: 1
   showNormals: 0
   showTangents: 0
-  editMode: 0
+  editMode: 4
   _settings: {fileID: 11400000, guid: 8871c79c537415748bb7ba49f5fcb187, type: 2}
   collider: {fileID: 0}
   filter: {fileID: 1904824865}
@@ -7548,7 +7541,7 @@ MonoBehaviour:
   old_constThickness: 0.1
   old_sizeInterpolation: 0
   old_rotationInterpolation: 0
-  old_colorInterpolation: 0
+  old_colorInterpolation: 1
   old_arcOfTubeInterpolation: 0
   old_thicknessInterpolation: 0
   clampAndStretchMeshToCurve: 1
@@ -7591,7 +7584,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 25
+  m_RootOrder: 24
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &1904824867
 MeshRenderer:
@@ -7676,219 +7669,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 17
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2020365347
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2020365351}
-  - component: {fileID: 2020365350}
-  - component: {fileID: 2020365349}
-  - component: {fileID: 2020365348}
-  m_Layer: 0
-  m_Name: Curve (4)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!23 &2020365348
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2020365347}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 944463113244f4bf8b05c1757cd838a4, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &2020365349
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2020365347}
-  m_Mesh: {fileID: 615118916}
---- !u!114 &2020365350
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2020365347}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 85850b8b95539404a8db8795f4a6083e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  graphicsMesh: {fileID: 0}
-  graphicsMaterial: {fileID: 0}
-  selectedPoints:
-  - id: 1562880
-  shiftControlState: 0
-  placeLockedPoints: 1
-  splitInsertionBehaviour: 0
-  guidFactory:
-    currentGUID: 1562948
-  sizeSampler:
-    points: []
-    fieldDisplayName: 
-    label: Size
-    editMode: 2
-    constValue: 1
-    _valueType: 0
-    minValue: 0
-    maxValue: Infinity
-  arcOfTubeSampler:
-    points: []
-    fieldDisplayName: 
-    label: Arc
-    editMode: 5
-    constValue: 180
-    _valueType: 0
-    minValue: 0
-    maxValue: 360
-  thicknessSampler:
-    points: []
-    fieldDisplayName: 
-    label: Thickness
-    editMode: 6
-    constValue: 0.1
-    _valueType: 0
-    minValue: 0
-    maxValue: Infinity
-  rotationSampler:
-    points: []
-    fieldDisplayName: 
-    label: Rotation
-    editMode: 1
-    constValue: 0
-    _valueType: 0
-    minValue: -Infinity
-    maxValue: Infinity
-  colorSampler:
-    points: []
-    fieldDisplayName: 
-    label: Color
-    editMode: 4
-    constValue: {r: 1, g: 1, b: 1, a: 1}
-    _valueType: 0
-  doubleBezierSampler:
-    points: []
-    fieldDisplayName: 
-    label: Double Bezier
-    editMode: 3
-  averageSize: 1
-  previousRotations: []
-  positionCurve:
-    PointGroups:
-    - isPointLocked: 1
-      leftTangent: {x: -1, y: -0, z: -0}
-      rightTangent: {x: 1, y: 0, z: 0}
-      position: {x: 0, y: 0, z: 0}
-      guid:
-        id: 1562937
-    - isPointLocked: 1
-      leftTangent: {x: -1, y: -0, z: -0}
-      rightTangent: {x: 1, y: 0, z: 0}
-      position: {x: 1, y: 1, z: 0}
-      guid:
-        id: 1562938
-    isCurveOutOfDate: 1
-    dimensionLockMode: 1
-    owner: {fileID: 2020365350}
-    isClosedLoop: 0
-  showPositionHandles: 0
-  showPointSelectionWindow: 1
-  showNormals: 0
-  showTangents: 0
-  editMode: 0
-  _settings: {fileID: 11400000, guid: 8871c79c537415748bb7ba49f5fcb187, type: 2}
-  collider: {fileID: 0}
-  filter: {fileID: 2020365349}
-  displayMesh: {fileID: 615118916}
-  isInitialized: 1
-  old_constSize: 1
-  old_constRotation: 0
-  old_constColor: {r: 1, g: 1, b: 1, a: 1}
-  old_constArcOfTube: 180
-  old_constThickness: 0.1
-  old_sizeInterpolation: 0
-  old_rotationInterpolation: 0
-  old_colorInterpolation: 0
-  old_arcOfTubeInterpolation: 0
-  old_thicknessInterpolation: 0
-  clampAndStretchMeshToCurve: 0
-  old_clampAndStretchMeshToCurve: 0
-  seperateInnerOuterTextures: 0
-  old_seperateInnerOuterTextures: 0
-  lockToPositionZero: 1
-  old_lockToPositionZero: 1
-  vertexDensity: 51.39
-  old_vertexDensity: 51.39
-  ringPointCount: 30
-  old_ringPointCount: 30
-  type: 3
-  old_type: 3
-  closeTilableMeshGap: -0.1
-  old_closeTilableMeshGap: -0.1
-  meshToTile: {fileID: 6370725653051128224, guid: 4595cac3226159f43ba300ae40748156,
-    type: 3}
-  old_meshToTile: {fileID: 6370725653051128224, guid: 4595cac3226159f43ba300ae40748156,
-    type: 3}
-  isClosedLoop: 0
-  old_isClosedLoop: 0
-  meshPrimaryAxis: 0
-  old_meshPrimaryAxis: 0
---- !u!4 &2020365351
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2020365347}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 345.7, y: -329.7, z: -2.3}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 24
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3496752112192644680
 PrefabInstance:

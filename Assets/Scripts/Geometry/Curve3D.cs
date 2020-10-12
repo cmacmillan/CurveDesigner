@@ -66,6 +66,14 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     public List<SelectableGUID> selectedPoints = new List<SelectableGUID>();
     public ClickShiftControlState shiftControlState = ClickShiftControlState.none;
 
+    private int meshGenerationId = -1;
+    public int GetMeshGenerationID()
+    {
+        if (meshGenerationId == -1)
+            meshGenerationId = MeshGenerator.GetCurve3DID();
+        return meshGenerationId;
+    }
+
     public enum ClickShiftControlState
     {
         none=0,
@@ -189,7 +197,9 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     public float averageSize;
     [HideInInspector]
+    [NonSerialized]
     public DateTime lastMeshUpdateStartTime;
+    [NonSerialized]
     [HideInInspector]
     public DateTime lastMeshUpdateEndTime;
     [HideInInspector]
@@ -211,8 +221,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     public bool showPositionHandles = false;
     public bool showPointSelectionWindow = true;
-    public bool showNormals = true;
-    public bool showTangents = true;
+    public bool showNormals = false;
+    public bool showTangents = false;
 
     public EditMode editMode = EditMode.PositionCurve;
 
@@ -477,7 +487,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     private const float normalGapSizeMultiplier = 2.0f;
     public float VisualNormalsLength()
     {
-        return averageSize/normalValueLengthDivisor;
+        return positionCurve.GetLength() / 30;
     }
     public float GetNormalDensityDistance() { return VisualNormalsLength()*normalGapSizeMultiplier; }
 }

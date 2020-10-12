@@ -192,9 +192,12 @@ public class Curve3DInspector : Editor
         curve3d.TryInitialize();
         EnsureValidEditMode();
         var windowRect = new Rect(20, 40, 400, 0);
+        bool didWindowEatMouse = false;
         if (curve3d.showPointSelectionWindow)
         {
-            MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
+            var actualWindowRect = GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}");
+            didWindowEatMouse = actualWindowRect.Contains(Event.current.mousePosition);
+            MouseEater.EatMouseInput(actualWindowRect);
         }
         //Handles.DrawAAConvexPolygon(new Vector3[4] { new Vector3(0,1,0), new Vector3(1,0,0),new Vector3(-1,0,0),new Vector3(0,0,1)});
         /*
@@ -205,7 +208,6 @@ public class Curve3DInspector : Editor
         */
 
         curve3d.BindDataToPositionCurve();
-        curve3d.CacheAverageSize();
         var rotationPoints = curve3d.rotationSampler.GetPoints(curve3d.positionCurve);
         if (curve3d.previousRotations.Count != rotationPoints.Count)
             curve3d.CopyRotations();
@@ -237,7 +239,7 @@ public class Curve3DInspector : Editor
         int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
         var eventType = Event.current.GetTypeForControl(controlID);
         ClickHitData closestElementToCursor = null;
-        if (elementClickedDown == null)
+        if (elementClickedDown == null && !didWindowEatMouse)
             closestElementToCursor = GetClosestElementToCursor(curveEditor, MousePos);
         void DrawLoop(bool imguiEvent)
         {
@@ -393,7 +395,7 @@ public class Curve3DInspector : Editor
     {
         if (!MeshGenerator.IsBuzy)
         {
-            if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime)
+            if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime && curve.GetMeshGenerationID()==MeshGenerator.currentlyGeneratingCurve3D)
             {
                 if (MeshGenerator.didMeshGenerationSucceed)
                 {

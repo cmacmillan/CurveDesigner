@@ -38,6 +38,14 @@ public static class MeshGenerator
     public static List<int> triangles;
     public static List<Vector2> uvs;
     public static List<Color32> colors;
+    public static int currentlyGeneratingCurve3D = -1;
+
+    private static int _currentCurve3Did = 0;
+    public static int GetCurve3DID()
+    {
+        _currentCurve3Did++;
+        return _currentCurve3Did;
+    }
 
     public static bool IsBuzy = false;
 
@@ -79,6 +87,7 @@ public static class MeshGenerator
         if (!IsBuzy)
         {
             IsBuzy = true;
+            currentlyGeneratingCurve3D = curve.GetMeshGenerationID();
             BezierCurve clonedCurve = new BezierCurve(curve.positionCurve);
             lastUpdateTime = curve.lastMeshUpdateStartTime;
 

@@ -60,6 +60,12 @@ namespace Assets.NewUI
         }
         public void Initialize()
         {
+            if (_curve == null)
+            {
+                Undo.undoRedoPerformed -= Initialize;
+                return;
+            }
+
             _curve.BindDataToPositionCurve();
             _curve.Recalculate();
             var mainPositionCurve = new List<BezierCurve>();
