@@ -103,7 +103,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
 
     //public Mesh testMesh;
     //public Material testMat;
-    public CommandBuffer commandBuffer;
+    //public CommandBuffer commandBuffer;
 
     #region guistyles
     GUIStyle GetStyle(ref GUIStyle style,string init) {

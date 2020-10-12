@@ -24,7 +24,7 @@ namespace Assets.NewUI
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
             var centerPos = transformBlob.TransformPoint(GetPointGroup().GetWorldPositionByIndex(PGIndex.Position, positionCurve.dimensionLockMode));
-            drawList.Add(new LineDraw(this, centerPos, Position, Color.grey));
+            drawList.Add(new LineDraw(this, centerPos, Position, Color.white));
             base.Draw(drawList, closestElementToCursor);
         }
         public override IEnumerable<IComposite> GetChildren()
@@ -32,7 +32,7 @@ namespace Assets.NewUI
             yield return PlusButtonPoint;
         }
 
-        private const float guiOffsetPixelAmount = 20;
+        private const float guiOffsetPixelAmount = 40;
         private PointGroup GetPointGroup()
         {
             if (isPrepend)

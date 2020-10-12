@@ -73,7 +73,7 @@ public class Curve3DInspector : Editor
                         EditorGUILayout.EndVertical();
                     }
                 }
-                if (isInitial && curve3d.settings.uiIcon!=null)
+                if (isInitial && curve3d.settings.uiIcon != null)
                 {
                     GUI.DrawTexture(iconRect, curve3d.settings.uiIcon, ScaleMode.StretchToFill, true);
                 }
@@ -191,7 +191,7 @@ public class Curve3DInspector : Editor
         var curve3d = (target as Curve3D);
         curve3d.TryInitialize();
         EnsureValidEditMode();
-        var windowRect = new Rect(20, 40, 260, 0);
+        var windowRect = new Rect(20, 40, 400, 0);
         if (curve3d.showPointSelectionWindow)
         {
             MouseEater.EatMouseInput(GUILayout.Window(61732234, windowRect, WindowFunc, $"Editing {curve3d.editModeCategories.editmodeNameMap[curve3d.editMode]}"));
@@ -245,18 +245,25 @@ public class Curve3DInspector : Editor
             curveEditor.Draw(draws, closestElementToCursor);
             draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
             var selected = curve3d.selectedPoints;
-            var currentEventType = Event.current.type;
+            var currentEvent = Event.current;
+            var currentEventType = currentEvent.type;
             foreach (var draw in draws)
                 if (draw.DistFromCamera() > 0)
                 {
                     if (imguiEvent)
                     {
-                        if (currentEventType== EventType.MouseDown)
+                        if (currentEvent.type== EventType.MouseDown)
                         {
                             if (draw.Creator() == closestElementToCursor.owner)
-                                Event.current.type = EventType.MouseDown;
+                            {
+                                currentEvent.type = EventType.MouseDown;
+                                Event.current = currentEvent;
+                            }
                             else
-                                Event.current.type = EventType.Ignore;
+                            {
+                                currentEvent.type = EventType.Ignore;
+                                Event.current = currentEvent;
+                            }
                         }
                         var imgui = draw as IIMGUI;
                         if (imgui != null)
@@ -278,7 +285,8 @@ public class Curve3DInspector : Editor
                             draw.Draw(DrawMode.normal, selectionState);
                     }
                 }
-            Event.current.type = currentEventType;
+            if (imguiEvent && currentEventType == EventType.MouseDown)
+                currentEvent.type = currentEventType;
         }
         void Draw() { DrawLoop(false); }
         void IMGUI() { DrawLoop(true); }
@@ -341,16 +349,19 @@ public class Curve3DInspector : Editor
                 }
                 break;
             case EventType.MouseDrag:
-                if (elementClickedDown != null)
+                if (Event.current.button == 0)
                 {
-                    var clickPos = MousePos + elementClickedDown.offset;
-                    elementClickedDown.hasBeenDragged = true;
-                    var commandToExecute = elementClickedDown.owner.GetClickCommand();
-                    if (IsActiveElementSelected())
-                        commandToExecute.ClickDrag(clickPos,curve3d,elementClickedDown,curve3d.selectedPoints);
-                    IMGUI();
-                    Event.current.Use();
-                    curve3d.RequestMeshUpdate();
+                    if (elementClickedDown != null)
+                    {
+                        var clickPos = MousePos + elementClickedDown.offset;
+                        elementClickedDown.hasBeenDragged = true;
+                        var commandToExecute = elementClickedDown.owner.GetClickCommand();
+                        if (IsActiveElementSelected())
+                            commandToExecute.ClickDrag(clickPos, curve3d, elementClickedDown, curve3d.selectedPoints);
+                        IMGUI();
+                        Event.current.Use();
+                        curve3d.RequestMeshUpdate();
+                    }
                 }
                 break;
             case EventType.MouseUp:
@@ -368,7 +379,7 @@ public class Curve3DInspector : Editor
                             curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.GUID);
                         }
                         IMGUI();
-                        curve3d.elementClickedDown = null; 
+                        curve3d.elementClickedDown = null;
                         Event.current.Use();
                     }
                 }
