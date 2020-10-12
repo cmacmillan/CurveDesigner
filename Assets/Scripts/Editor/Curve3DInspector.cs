@@ -245,24 +245,21 @@ public class Curve3DInspector : Editor
             curveEditor.Draw(draws, closestElementToCursor);
             draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
             var selected = curve3d.selectedPoints;
-            var currentEvent = Event.current;
-            var currentEventType = currentEvent.type;
+            var currentEventType = Event.current.type;
             foreach (var draw in draws)
                 if (draw.DistFromCamera() > 0)
                 {
                     if (imguiEvent)
                     {
-                        if (currentEvent.type== EventType.MouseDown)
+                        if (currentEventType== EventType.MouseDown)
                         {
                             if (draw.Creator() == closestElementToCursor.owner)
                             {
-                                currentEvent.type = EventType.MouseDown;
-                                Event.current = currentEvent;
+                                Event.current.type = EventType.MouseDown;
                             }
                             else
                             {
-                                currentEvent.type = EventType.Ignore;
-                                Event.current = currentEvent;
+                                Event.current.type = EventType.Ignore;
                             }
                         }
                         var imgui = draw as IIMGUI;
@@ -286,7 +283,7 @@ public class Curve3DInspector : Editor
                     }
                 }
             if (imguiEvent && currentEventType == EventType.MouseDown)
-                currentEvent.type = currentEventType;
+                Event.current.type = currentEventType;
         }
         void Draw() { DrawLoop(false); }
         void IMGUI() { DrawLoop(true); }
@@ -349,19 +346,16 @@ public class Curve3DInspector : Editor
                 }
                 break;
             case EventType.MouseDrag:
-                if (Event.current.button == 0)
+                if (elementClickedDown != null)
                 {
-                    if (elementClickedDown != null)
-                    {
-                        var clickPos = MousePos + elementClickedDown.offset;
-                        elementClickedDown.hasBeenDragged = true;
-                        var commandToExecute = elementClickedDown.owner.GetClickCommand();
-                        if (IsActiveElementSelected())
-                            commandToExecute.ClickDrag(clickPos, curve3d, elementClickedDown, curve3d.selectedPoints);
-                        IMGUI();
-                        Event.current.Use();
-                        curve3d.RequestMeshUpdate();
-                    }
+                    var clickPos = MousePos + elementClickedDown.offset;
+                    elementClickedDown.hasBeenDragged = true;
+                    var commandToExecute = elementClickedDown.owner.GetClickCommand();
+                    if (IsActiveElementSelected())
+                        commandToExecute.ClickDrag(clickPos, curve3d, elementClickedDown, curve3d.selectedPoints);
+                    IMGUI();
+                    Event.current.Use();
+                    curve3d.RequestMeshUpdate();
                 }
                 break;
             case EventType.MouseUp:
