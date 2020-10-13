@@ -78,7 +78,7 @@ namespace Assets.NewUI
         public virtual bool SelectEdit(Curve3D curve, List<S> selectedPoints)
         {
             float originalDistance = GetDistance(curve.positionCurve);
-            float distanceOffset = EditorGUILayout.FloatField("Distance along curve", originalDistance) - originalDistance;
+            float distanceOffset = EditorGUILayout.FloatField("Distance", originalDistance) - originalDistance;
             InterpolationMode = (InterpolationMode)EditorGUILayout.EnumPopup("Interpolation",InterpolationMode);
             if (distanceOffset == 0)
                 return false;

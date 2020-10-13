@@ -162,20 +162,19 @@ public class PointGroup : ISelectEditable<PointGroup>
         var initialLocked = isPointLocked;
         bool? isLocked = null;
         float initialWidth = EditorGUIUtility.labelWidth;
-        EditorGUIUtility.labelWidth = 230;
+        EditorGUIUtility.labelWidth = 370;
         bool currentLockState = EditorGUILayout.Toggle("Tangents Locked", initialLocked);
         EditorGUIUtility.labelWidth = initialWidth;
         if (initialLocked != currentLockState)
             isLocked = currentLockState;
 
         var initialLeft = GetWorldPositionByIndex(PGIndex.LeftTangent, curve.lockToPositionZero);
-        var leftTangentOffset = EditorGUILayout.Vector3Field("Left Tangent", initialLeft)-initialLeft;
-
         var initialPos = GetWorldPositionByIndex(PGIndex.Position, curve.lockToPositionZero);
-        var positionOffset = EditorGUILayout.Vector3Field("Position", initialPos)-initialPos;
-
         var initialRight = GetWorldPositionByIndex(PGIndex.RightTangent, curve.lockToPositionZero);
-        var rightTangentOffset = EditorGUILayout.Vector3Field("Right Tangent", initialRight)-initialRight;
+
+        var leftTangentOffset = EditorGUILayout.Vector3Field("Left Tangent", initialLeft-initialPos)-initialLeft+initialPos;
+        var positionOffset = EditorGUILayout.Vector3Field("Position", initialPos)-initialPos;
+        var rightTangentOffset = EditorGUILayout.Vector3Field("Right Tangent", initialRight-initialPos)-initialRight+initialPos;
 
         EditorGUIUtility.SetWantsMouseJumping(1);
 

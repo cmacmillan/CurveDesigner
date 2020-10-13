@@ -44,7 +44,10 @@ namespace Assets.NewUI
             GUI.Label(new Rect(rect.position, new Vector2(EditorGUIUtility.labelWidth, rect.height)), label, EditorStyles.label);
             rect.xMin += EditorGUIUtility.labelWidth;
             if (GUI.Toggle(rect, isSelected, EditorGUIUtility.TrTextContent($"{(isSelected ? "Editing" : "Edit")} {label}"), curve.buttonStyle))
+            {
                 curve.editMode = thisEditMode;
+                SceneView.RepaintAll();
+            }
         }
         public Rect GetFieldRects(out Rect popupRect,Curve3D curve)
         {
