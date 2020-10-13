@@ -114,53 +114,38 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     //public CommandBuffer commandBuffer;
 
     #region guistyles
-    GUIStyle GetStyle(ref GUIStyle style,string init) {
-        if (style == null)
-            style = init;
-        return style;
-    }
-
-    private GUIStyle _centeredStyle;
-    public GUIStyle CenteredStyle
+    private bool stylesInitialized = false;
+    public void TryInitStyles()
     {
-        get
-        {
-            if (_centeredStyle == null)
-            {
-                _centeredStyle = GUI.skin.GetStyle("Label");
-                _centeredStyle.alignment = TextAnchor.UpperCenter;
-            }
-            return _centeredStyle;
-        }
-    }
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_buttonStyle;
-    public GUIStyle buttonStyle => GetStyle(ref m_buttonStyle,"Button");
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_particleLabelStyle;
-    public GUIStyle particleLabelStyle => GetStyle(ref m_particleLabelStyle,"ShurikenLabel");
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_controlRectStyle;
-    public GUIStyle controlRectStyle { get { if (m_controlRectStyle == null) { m_controlRectStyle = new GUIStyle { margin = new RectOffset(0, 0, 2, 2) };} return m_controlRectStyle; } } 
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_effectBgStyle;
+        if (stylesInitialized)
+            return;
+        buttonStyle = "Button";
+        dropdownStyle ="ShurikenDropdown";
+        particleLabelStyle = "ShurikenLabel";
+        effectBgStyle= "ShurikenEffectBg";
+        shurikenModuleBg = "ShurikenModuleBg";
+        mixedToggleStyle = "ShurikenToggleMixed";
+        initialHeaderStyle = "ShurikenEmitterTitle";
+        nonInitialHeaderStyle = "ShurikenModuleTitle";
 
-    public GUIStyle effectBgStyle => GetStyle(ref m_effectBgStyle,"ShurikenEffectBg");
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_shurikenModuleBg;
-    public GUIStyle  shurikenModuleBg=> GetStyle(ref m_shurikenModuleBg,"ShurikenModuleBg");
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_mixedToggleStyle;
-    public GUIStyle  mixedToggleStyle =>GetStyle(ref m_mixedToggleStyle,"ShurikenToggleMixed");
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_initialHeaderStyle;
-    public GUIStyle  initialHeaderStyle=> GetStyle(ref m_initialHeaderStyle,"ShurikenEmitterTitle");
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_nonInitialHeaderStyle;
-    public GUIStyle  nonInitialHeaderStyle=> GetStyle(ref m_nonInitialHeaderStyle,"ShurikenModuleTitle");
-    //////////////////////////////////////////////////////////////////////////////
-    private GUIStyle m_dropdownStyle;
-    public GUIStyle dropdownStyle=> GetStyle(ref m_dropdownStyle,"ShurikenDropdown");
+        if (controlRectStyle == null)
+            controlRectStyle = new GUIStyle { margin = new RectOffset(0, 0, 2, 2) };
+
+        centeredStyle = GUI.skin.GetStyle("Label");
+        centeredStyle.alignment = TextAnchor.UpperCenter;
+        stylesInitialized = true;
+    }
+
+    public GUIStyle centeredStyle;
+    public GUIStyle buttonStyle;
+    public GUIStyle particleLabelStyle;
+    public GUIStyle controlRectStyle;
+    public GUIStyle effectBgStyle;
+    public GUIStyle shurikenModuleBg;
+    public GUIStyle mixedToggleStyle;
+    public GUIStyle initialHeaderStyle;
+    public GUIStyle nonInitialHeaderStyle;
+    public GUIStyle dropdownStyle;
     #endregion
 
     public bool placeLockedPoints = true;

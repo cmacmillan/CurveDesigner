@@ -70,7 +70,7 @@ namespace Assets.NewUI
             _curve.Recalculate();
             var mainPositionCurve = new List<BezierCurve>();
             mainPositionCurve.Add(_curve.positionCurve);
-            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null,null),mainPositionCurve);
+            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null,null),mainPositionCurve,-1);
             sizeCurve = new SizeCurveComposite(this,_curve.sizeSampler,_curve,positionCurve);
             rotationCurve = new RotationCurveComposite(this,_curve.rotationSampler,_curve,positionCurve);
             colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);

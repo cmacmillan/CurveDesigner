@@ -13,12 +13,12 @@ namespace Assets.NewUI
         private bool isPrepend;
         private BezierCurve positionCurve;
         private TransformBlob transformBlob;
-        public AddPositionPointButton(IComposite parent,Curve3D curve,BezierCurve positionCurve,bool isPrepend,TransformBlob transformBlob,PositionCurveComposite curveComposite,bool isMainCurve, int secondaryCurveIndex) : base(parent)
+        public AddPositionPointButton(IComposite parent,Curve3D curve,BezierCurve positionCurve,bool isPrepend,TransformBlob transformBlob,PositionCurveComposite curveComposite,int secondaryCurveIndex) : base(parent)
         {
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
             this.isPrepend = isPrepend;
-            PlusButtonPoint = new PointComposite(this, this,  PointTextureType.plus, new AddPositionPointClickCommand(isPrepend,positionCurve,this,isMainCurve,secondaryCurveIndex,transformBlob), Color.green, SelectableGUID.Null,false,5);
+            PlusButtonPoint = new PointComposite(this, this,  PointTextureType.plus, new AddPositionPointClickCommand(isPrepend,positionCurve,this,secondaryCurveIndex,transformBlob), Color.green, SelectableGUID.Null,false,5);
         }
 
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)

@@ -21,8 +21,12 @@ namespace Assets.NewUI
             var points = doubleBezierSampler.GetPoints(curve.positionCurve);
             foreach (var i in points)
                 allCurves.Add(i.value);
+            int curveIndex = 0;
             foreach (var i in doubleBezierSampler.GetPoints(curve.positionCurve))
-                _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i,doubleBezierSampler,allCurves));
+            {
+                _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i,doubleBezierSampler,allCurves,curveIndex));
+                curveIndex++;
+            }
         }
         public void FindClosestPointsToCursor()
         {

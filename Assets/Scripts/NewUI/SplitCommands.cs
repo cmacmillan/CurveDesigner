@@ -62,15 +62,14 @@ namespace Assets.NewUI
         private bool isPrepend;
         private BezierCurve curveToModify;
         private AddPositionPointButton button;
-        private bool isMainPositionCurve;
+        private bool isMainPositionCurve => secondaryCurveIndex == -1;
         private int secondaryCurveIndex;
         private TransformBlob transformBlob;
-        public AddPositionPointClickCommand(bool isPrepend,BezierCurve curveToModify,AddPositionPointButton button,bool isMainPositionCurve, int secondaryCurveIndex,TransformBlob transformBlob)
+        public AddPositionPointClickCommand(bool isPrepend,BezierCurve curveToModify,AddPositionPointButton button, int secondaryCurveIndex,TransformBlob transformBlob)
         {
             this.curveToModify = curveToModify;
             this.isPrepend = isPrepend;
             this.button = button;
-            this.isMainPositionCurve = isMainPositionCurve;
             this.secondaryCurveIndex = secondaryCurveIndex;
             this.transformBlob = transformBlob;
         }
@@ -78,10 +77,13 @@ namespace Assets.NewUI
         {
             var pointGuid = curveToModify.AppendPoint(isPrepend,curve.placeLockedPoints,transformBlob.InverseTransformPoint(button.Position));
             int bumpAboveIndex = isPrepend ? 1 : curveToModify.PointGroups.Count-2;
-            foreach (var sampler in curve.DistanceSamplers)
-                foreach (var point in sampler.AllPoints())
-                    if (point.SegmentIndex >= bumpAboveIndex)
-                        point.SegmentIndex++;
+            if (isMainPositionCurve)//secondary position curves don't have samplers that need to be bumped
+            {
+                foreach (var sampler in curve.DistanceSamplers)
+                    foreach (var point in sampler.AllPoints())
+                        if (point.SegmentIndex >= bumpAboveIndex)
+                            point.SegmentIndex++;
+            }
 
             curve.SelectOnlyPoint(pointGuid);
             curve.UICurve.Initialize();
@@ -119,6 +121,7 @@ namespace Assets.NewUI
             curve.UICurve.Initialize();
             var newSecondaryCurve = curve.UICurve.doubleBezierCurve.GetSecondaryCompositeByBackingCurve(secondaryPositionCurve);
             var selected = newSecondaryCurve.positionCurve.pointGroups[closestPoint.segmentIndex + 1].centerPoint;
+            curve.SelectOnlyPoint(selected.GUID);
             curve.elementClickedDown.owner = selected;
         }
 

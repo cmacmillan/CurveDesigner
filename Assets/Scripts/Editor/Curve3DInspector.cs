@@ -25,6 +25,10 @@ public class Curve3DInspector : Editor
     {
         EnsureValidEditMode();
         var curve3d = (target as Curve3D);
+        curve3d.TryInitStyles();
+        curve3d.TryInitialize();
+        EnsureValidEditMode();
+        curve3d.BindDataToPositionCurve();
 
         GUI.enabled = false;
         script = EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false) as MonoScript;
@@ -113,7 +117,7 @@ public class Curve3DInspector : Editor
             int pointCount = curve.ActiveElement.NumSelectables(curve);
             if (pointCount == 0)
             {
-                GUILayout.Label($"Click on the curve in the scene view to place a {curve.ActiveElement.GetPointName()} control point", curve.CenteredStyle);
+                GUILayout.Label($"Click on the curve in the scene view to place a {curve.ActiveElement.GetPointName()} control point", curve.centeredStyle);
             }
             else
             {
@@ -123,9 +127,9 @@ public class Curve3DInspector : Editor
                     if (curve.selectedPoints.Contains(curve.ActiveElement.GetSelectable(i, curve).GUID))
                         selectedPointCount++;
                 if (selectedPointCount == 0)
-                    GUILayout.Label("No points selected", curve.CenteredStyle);
+                    GUILayout.Label("No points selected", curve.centeredStyle);
                 else
-                    GUILayout.Label($"{selectedPointCount} point{(selectedPointCount != 1 ? "s" : "")} selected", curve.CenteredStyle);
+                    GUILayout.Label($"{selectedPointCount} point{(selectedPointCount != 1 ? "s" : "")} selected", curve.centeredStyle);
                 var drawer = curve.UICurve.GetWindowDrawer();
                 EditorGUI.BeginChangeCheck();
                 drawer.DrawWindow(curve);
@@ -189,8 +193,10 @@ public class Curve3DInspector : Editor
     private void OnSceneGUI()
     {
         var curve3d = (target as Curve3D);
+        curve3d.TryInitStyles();
         curve3d.TryInitialize();
         EnsureValidEditMode();
+        curve3d.BindDataToPositionCurve();
         var windowRect = new Rect(20, 40, 400, 0);
         bool didWindowEatMouse = false;
         if (curve3d.showPointSelectionWindow)
@@ -199,15 +205,6 @@ public class Curve3DInspector : Editor
             didWindowEatMouse = actualWindowRect.Contains(Event.current.mousePosition);
             MouseEater.EatMouseInput(actualWindowRect);
         }
-        //Handles.DrawAAConvexPolygon(new Vector3[4] { new Vector3(0,1,0), new Vector3(1,0,0),new Vector3(-1,0,0),new Vector3(0,0,1)});
-        /*
-        if (curve3d.graphicsMesh!=null && curve3d.graphicsMaterial!=null)
-        {
-            Graphics.DrawMesh(curve3d.graphicsMesh,Matrix4x4.identity,curve3d.graphicsMaterial,1<<5);
-        }
-        */
-
-        curve3d.BindDataToPositionCurve();
         var rotationPoints = curve3d.rotationSampler.GetPoints(curve3d.positionCurve);
         if (curve3d.previousRotations.Count != rotationPoints.Count)
             curve3d.CopyRotations();

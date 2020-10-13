@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,13 +17,13 @@ namespace Assets.NewUI
         public BezierCurve positionCurve;
         public TransformBlob transformBlob;
         public PointOnCurve PointClosestToCursor { get; private set; }
-        public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve,IClickCommand clickCommand, TransformBlob transformBlob,List<BezierCurve> allCurves) : base(parent)
+        public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve,IClickCommand splitterPointClickCommand, TransformBlob transformBlob,List<BezierCurve> allCurves,int secondaryCurveIndex) : base(parent)
         {
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
-            _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,clickCommand,Curve3DSettings.Green,this);
-            _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob,this,true,-1);
-            _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob,this,true,-1);
+            _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,splitterPointClickCommand,Curve3DSettings.Green,this);
+            _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob,this,secondaryCurveIndex);
+            _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob,this,secondaryCurveIndex);
             pointGroups = new List<PositionPointGroupComposite>();
             foreach (var group in positionCurve.PointGroups)
                 pointGroups.Add(new PositionPointGroupComposite(this,group,transformBlob,positionCurve,group.GUID,allCurves,curve));
