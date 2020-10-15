@@ -17,7 +17,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         {
             yield return sizeSampler;
             yield return rotationSampler;
-            yield return doubleBezierSampler;
+            yield return extrudeSampler;
             yield return colorSampler;
             yield return arcOfTubeSampler;
             yield return thicknessSampler;
@@ -35,8 +35,8 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
                     return rotationSampler;
                 case EditMode.Size:
                     return sizeSampler;
-                case EditMode.DoubleBezier:
-                    return doubleBezierSampler;
+                case EditMode.Extrude:
+                    return extrudeSampler;
                 case EditMode.Color:
                     return colorSampler;
                 case EditMode.Thickness:
@@ -172,7 +172,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     public FloatDistanceSampler thicknessSampler;
     public FloatDistanceSampler rotationSampler;
     public ColorDistanceSampler colorSampler;
-    public DoubleBezierSampler doubleBezierSampler;
+    public ExtrudeSampler extrudeSampler;
 
     public void RequestMeshUpdate()
     {
@@ -405,12 +405,11 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         arcOfTubeSampler = new FloatDistanceSampler("Arc", 180, EditMode.Arc, 0, 360);
         thicknessSampler = new FloatDistanceSampler("Thickness", .1f, EditMode.Thickness, 0);
         colorSampler = new ColorDistanceSampler("Color",EditMode.Color);
-        doubleBezierSampler = new DoubleBezierSampler("Double Bezier", EditMode.DoubleBezier);
+        extrudeSampler = new ExtrudeSampler("Extrude", EditMode.Extrude);
         positionCurve = new BezierCurve();
         positionCurve.owner = this;
         positionCurve.Initialize();
         positionCurve.isCurveOutOfDate = true;
-        GUIStyle dropdownStyle = "ShurikenDropdown";
         UICurve = new UICurve(null, this);
         UICurve.Initialize();
     }
@@ -425,7 +424,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     public void Recalculate()
     {
         positionCurve.Recalculate();
-        var secondaryCurves = doubleBezierSampler.points;
+        var secondaryCurves = extrudeSampler.points;
         if (secondaryCurves.Count > 0)
         {
             foreach (var curr in secondaryCurves)
@@ -483,7 +482,7 @@ public class EditModeCategories
             {EditMode.PositionCurve, "Position"},
             {EditMode.Size, "Size"},
             {EditMode.Rotation, "Rotation"},
-            {EditMode.DoubleBezier, "Double Bezier"},
+            {EditMode.Extrude, "Extrude"},
             {EditMode.Color, "Color" },
             {EditMode.Arc, "Arc" },
             {EditMode.Thickness, "Thickness" },
@@ -526,7 +525,7 @@ public enum EditMode
     PositionCurve = 0,
     Rotation = 1,
     Size = 2,
-    DoubleBezier = 3,
+    Extrude = 3,
     Color = 4,
     Arc = 5,
     Thickness = 6,
@@ -535,7 +534,7 @@ public enum CurveType
 {
     HollowTube = 0,
     Flat = 1,
-    DoubleBezier = 2,
+    Extrude = 2,
     NoMesh = 3,
     Cylinder = 4,
     Mesh = 5,

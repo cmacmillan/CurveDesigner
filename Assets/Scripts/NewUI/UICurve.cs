@@ -14,7 +14,7 @@ namespace Assets.NewUI
         public SizeCurveComposite sizeCurve;
         public RotationCurveComposite rotationCurve;
         public ColorCurveComposite colorCurve;
-        public DoubleBezierCurveComposite doubleBezierCurve;
+        public ExtrudeCurveComposite extrudeCurve;
         public ThicknessCurveComposite thicknessCurve;
         public ArcCurveComposite arcCurve;
 
@@ -22,8 +22,8 @@ namespace Assets.NewUI
         {
             switch (_curve.editMode)
             {
-                case EditMode.DoubleBezier:
-                    return doubleBezierCurve;
+                case EditMode.Extrude:
+                    return extrudeCurve;
                 case EditMode.PositionCurve:
                     return positionCurve;
                 case EditMode.Rotation:
@@ -55,7 +55,7 @@ namespace Assets.NewUI
         public void BakeBlobs()
         {
             positionCurve.transformBlob.Bake();
-            foreach (var i in doubleBezierCurve._secondaryCurves)
+            foreach (var i in extrudeCurve._secondaryCurves)
                 i.transformBlob.Bake();
         }
         public void Initialize()
@@ -76,11 +76,11 @@ namespace Assets.NewUI
             colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);
             thicknessCurve = new ThicknessCurveComposite(this, _curve.thicknessSampler, _curve, positionCurve);
             arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
-            doubleBezierCurve = new DoubleBezierCurveComposite(this, _curve.doubleBezierSampler, _curve,positionCurve);
+            extrudeCurve = new ExtrudeCurveComposite(this, _curve.extrudeSampler, _curve,positionCurve);
             BakeBlobs();
             _curve.RequestMeshUpdate();
             positionCurve.FindPointClosestToCursor();
-            doubleBezierCurve.FindClosestPointsToCursor();
+            extrudeCurve.FindClosestPointsToCursor();
         }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
@@ -123,8 +123,8 @@ namespace Assets.NewUI
         void FindClosestPoints()
         {
             positionCurve.FindPointClosestToCursor();
-            if (_curve.type == CurveType.DoubleBezier)
-                doubleBezierCurve.FindClosestPointsToCursor();
+            if (_curve.type == CurveType.Extrude)
+                extrudeCurve.FindClosestPointsToCursor();
         }
 
         public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
@@ -148,8 +148,8 @@ namespace Assets.NewUI
                 case EditMode.Rotation:
                     yield return rotationCurve;
                     break;
-                case EditMode.DoubleBezier:
-                    yield return doubleBezierCurve;
+                case EditMode.Extrude:
+                    yield return extrudeCurve;
                     break;
                 case EditMode.Color:
                     yield return colorCurve;

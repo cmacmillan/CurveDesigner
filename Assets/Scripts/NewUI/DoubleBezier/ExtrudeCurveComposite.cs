@@ -7,24 +7,24 @@ using UnityEngine;
 
 namespace Assets.NewUI
 {
-    public class DoubleBezierCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
+    public class ExtrudeCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
     {
-        private DoubleBezierSampler _doubleBezierSampler;
+        private ExtrudeSampler _extrudeSampler;
         public List<SecondaryPositionCurveComposite> _secondaryCurves;
         private SplitterPointComposite _splitterPoint;
-        public DoubleBezierCurveComposite(IComposite parent,DoubleBezierSampler doubleBezierSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public ExtrudeCurveComposite(IComposite parent,ExtrudeSampler extrudeSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
-            _doubleBezierSampler = doubleBezierSampler;
+            _extrudeSampler = extrudeSampler;
             _secondaryCurves = new List<SecondaryPositionCurveComposite>();
-            _splitterPoint = new SplitterPointComposite(this,positionCurveComposite.transformBlob, PointTextureType.circle, new ValueAlongCurveSplitCommand(curve,_doubleBezierSampler,ValueAlongCurveSplitCommand.GetDoubleBezierCurve), Color.green,positionCurveComposite);
+            _splitterPoint = new SplitterPointComposite(this,positionCurveComposite.transformBlob, PointTextureType.circle, new ValueAlongCurveSplitCommand(curve,_extrudeSampler,ValueAlongCurveSplitCommand.GetExtrudeCurve), Color.green,positionCurveComposite);
             var allCurves = new List<BezierCurve>();
-            var points = doubleBezierSampler.GetPoints(curve.positionCurve);
+            var points = extrudeSampler.GetPoints(curve.positionCurve);
             foreach (var i in points)
                 allCurves.Add(i.value);
             int curveIndex = 0;
-            foreach (var i in doubleBezierSampler.GetPoints(curve.positionCurve))
+            foreach (var i in extrudeSampler.GetPoints(curve.positionCurve))
             {
-                _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i,doubleBezierSampler,allCurves,curveIndex));
+                _secondaryCurves.Add(new SecondaryPositionCurveComposite(this,curve,i,extrudeSampler,allCurves,curveIndex));
                 curveIndex++;
             }
         }
@@ -53,7 +53,7 @@ namespace Assets.NewUI
 
         public void DrawWindow(Curve3D curve)
         {
-            WindowDrawer.Draw(_doubleBezierSampler.GetPoints(curve.positionCurve),curve);
+            WindowDrawer.Draw(_extrudeSampler.GetPoints(curve.positionCurve),curve);
         }
     }
 }

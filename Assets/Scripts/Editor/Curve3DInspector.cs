@@ -185,7 +185,7 @@ public class Curve3DInspector : Editor
     void EnsureValidEditMode()
     {
         var curve3d = (target as Curve3D);
-        if (curve3d.editMode == EditMode.DoubleBezier && curve3d.type != CurveType.DoubleBezier)
+        if (curve3d.editMode == EditMode.Extrude && curve3d.type != CurveType.Extrude)
             curve3d.editMode = EditMode.PositionCurve;
         if (curve3d.editMode == EditMode.Arc && curve3d.type != CurveType.Cylinder && curve3d.type != CurveType.HollowTube)
             curve3d.editMode = EditMode.PositionCurve;
@@ -323,7 +323,7 @@ public class Curve3DInspector : Editor
                             SelectableGUID previous = SelectableGUID.Null;
                             if (curve3d.selectedPoints.Count > 0)
                                 previous = curve3d.selectedPoints[0];
-                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, curve3d.elementClickedDown.owner.GUID,curve3d,curve3d.positionCurve);//for a double bezier selection should use that curve instead of main
+                            curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, curve3d.elementClickedDown.owner.GUID,curve3d,curve3d.positionCurve);//for a extrude selection should use that curve instead of main
                         }
                         else
                         {

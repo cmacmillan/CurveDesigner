@@ -55,7 +55,7 @@ public static class MeshGenerator
 
     //public static Color32[] displacementColors;
 
-    public static DoubleBezierSampler doubleBezierSampler;
+    public static ExtrudeSampler extrudeSampler;
     public static FloatDistanceSampler sizeSampler;
     public static FloatDistanceSampler rotationSampler;
     public static ColorDistanceSampler colorSampler;
@@ -98,7 +98,7 @@ public static class MeshGenerator
             MeshGenerator.sizeSampler = new FloatDistanceSampler(curve.sizeSampler);
             MeshGenerator.rotationSampler = new FloatDistanceSampler(curve.rotationSampler);
             MeshGenerator.colorSampler = new ColorDistanceSampler(curve.colorSampler);
-            MeshGenerator.doubleBezierSampler = new DoubleBezierSampler(curve.doubleBezierSampler);
+            MeshGenerator.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler);
             MeshGenerator.thicknessSampler = new FloatDistanceSampler(curve.thicknessSampler);
             MeshGenerator.clampAndStretchMeshToCurve = curve.clampAndStretchMeshToCurve;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
@@ -362,10 +362,10 @@ public static class MeshGenerator
                 }
             }
         }
-        Vector3 DoubleBezierPointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float pointDistance)
+        Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float pointDistance)
         {
             float progress = currentIndex / (float)totalPointCount;
-            var relativePos = doubleBezierSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference);//*size;
+            var relativePos = extrudeSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference);//*size;
             var rotationMat = Quaternion.AngleAxis(rotation, point.tangent);
             //Lets say z is forward
             var cross = Vector3.Cross(point.tangent, point.reference).normalized;
@@ -537,15 +537,15 @@ public static class MeshGenerator
                     return true;
                 }
             #endregion
-            case CurveType.DoubleBezier:
+            case CurveType.Extrude:
                 {
                     List<Vector3> backSideBuffer = new List<Vector3>();
-                    doubleBezierSampler.RecalculateOpenCurveOnlyPoints(curve);
+                    extrudeSampler.RecalculateOpenCurveOnlyPoints(curve);
                     int pointCount = RingPointCount;
                     numVerts = 2 * pointCount*sampled.Count;
                     InitLists();
-                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, .5f, pointCount);
-                    CreatePointsAlongCurve(DoubleBezierPointCreator, sampled, -.5f, pointCount);
+                    CreatePointsAlongCurve(ExtrudePointCreator, sampled, .5f, pointCount);
+                    CreatePointsAlongCurve(ExtrudePointCreator, sampled, -.5f, pointCount);
                     TrianglifyLayer(false, pointCount,0);
                     TrianglifyLayer(true, pointCount,numVerts/2);
                     CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount),true);

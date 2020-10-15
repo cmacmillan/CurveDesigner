@@ -14,7 +14,7 @@ namespace Assets.NewUI
         public PointAlongCurveComposite centerPoint;
         private Curve3D _curve;
         public TransformBlob transformBlob;
-        public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve, DoubleBezierPoint secondaryBezierCurve,IDistanceSampler sampler,List<BezierCurve> allCurves,int secondaryCurveIndex) : base (parent)
+        public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve, ExtrudePoint secondaryBezierCurve,IDistanceSampler sampler,List<BezierCurve> allCurves,int secondaryCurveIndex) : base (parent)
         {
             this._curve = curve; 
             transformBlob = new TransformBlob(curve.transform,null,curve);

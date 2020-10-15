@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Assets.NewUI
 {
     [System.Serializable]
-    public class DoubleBezierPoint : SamplerPoint<BezierCurve, DoubleBezierPoint, DoubleBezierSampler> //Gotta make sure to handle a null value
+    public class ExtrudePoint : SamplerPoint<BezierCurve, ExtrudePoint, ExtrudeSampler> //Gotta make sure to handle a null value
     {
         public override BezierCurve CloneValue(BezierCurve value)
         {
@@ -16,11 +16,11 @@ namespace Assets.NewUI
         }
     }
     [System.Serializable]
-    public class DoubleBezierSampler : DistanceSampler<BezierCurve, DoubleBezierPoint,DoubleBezierSampler>
+    public class ExtrudeSampler : DistanceSampler<BezierCurve, ExtrudePoint,ExtrudeSampler>
     {
-        public DoubleBezierSampler(string label, EditMode editMode) : base(label,editMode) { }
+        public ExtrudeSampler(string label, EditMode editMode) : base(label,editMode) { }
 
-        public DoubleBezierSampler(DoubleBezierSampler objToClone) : base(objToClone) { }
+        public ExtrudeSampler(ExtrudeSampler objToClone) : base(objToClone) { }
         public override void ConstantField(Rect rect)
         {
             throw new InvalidOperationException();
@@ -63,13 +63,13 @@ namespace Assets.NewUI
         public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference)
         {
             //This needs to interpolate references smoothly
-            Vector3 SamplePosition(DoubleBezierPoint point, out Vector3 myRef)
+            Vector3 SamplePosition(ExtrudePoint point, out Vector3 myRef)
             {
                 var samp = point.value.GetPointAtDistance(secondaryCurveDistance * point.value.GetLength());
                 myRef = samp.reference;
                 return samp.position;
             }
-            Vector3 InterpolateSamples(DoubleBezierPoint lowerCurve,DoubleBezierPoint upperCurve,float lowerDistance,float upperDistance,out Vector3 interpolatedReference)
+            Vector3 InterpolateSamples(ExtrudePoint lowerCurve,ExtrudePoint upperCurve,float lowerDistance,float upperDistance,out Vector3 interpolatedReference)
             {
                 float distanceBetweenSegments = upperDistance- lowerDistance;
                 float lerpVal = (primaryCurveDistance - lowerDistance) / distanceBetweenSegments;
@@ -97,7 +97,7 @@ namespace Assets.NewUI
                 var upperDistance = upper.GetDistance(primaryCurve);
                 return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference);
             }
-            DoubleBezierPoint previousCurve = availableCurves[0];
+            ExtrudePoint previousCurve = availableCurves[0];
             for (int i = 1; i < availableCurves.Count; i++)
             {
                 var currCurve = availableCurves[i];

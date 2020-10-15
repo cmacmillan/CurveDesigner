@@ -93,7 +93,7 @@ namespace Assets.NewUI
             if (isMainPositionCurve)
                 posCurve = curve.UICurve.positionCurve;
             else
-                posCurve = curve.UICurve.doubleBezierCurve._secondaryCurves[secondaryCurveIndex].positionCurve;
+                posCurve = curve.UICurve.extrudeCurve._secondaryCurves[secondaryCurveIndex].positionCurve;
             var selected = posCurve.pointGroups[finalIndex].centerPoint;
             curve.elementClickedDown.owner = selected;
         }
@@ -119,7 +119,7 @@ namespace Assets.NewUI
             var closestPoint = secondaryPositionCurveComposite.positionCurve.PointClosestToCursor;
             secondaryPositionCurve.InsertSegmentAfterIndex(closestPoint,curve.placeLockedPoints,curve.splitInsertionBehaviour);
             curve.UICurve.Initialize();
-            var newSecondaryCurve = curve.UICurve.doubleBezierCurve.GetSecondaryCompositeByBackingCurve(secondaryPositionCurve);
+            var newSecondaryCurve = curve.UICurve.extrudeCurve.GetSecondaryCompositeByBackingCurve(secondaryPositionCurve);
             var selected = newSecondaryCurve.positionCurve.pointGroups[closestPoint.segmentIndex + 1].centerPoint;
             curve.SelectOnlyPoint(selected.GUID);
             curve.elementClickedDown.owner = selected;
@@ -169,7 +169,7 @@ namespace Assets.NewUI
         public static IValueAlongCurvePointProvider GetThicknessCurve(Curve3D curve) { return curve.UICurve.thicknessCurve; }
         public static IValueAlongCurvePointProvider GetArcCurve(Curve3D curve) { return curve.UICurve.arcCurve; }
         public static IValueAlongCurvePointProvider GetColorCurve(Curve3D curve) { return curve.UICurve.colorCurve; }
-        public static IValueAlongCurvePointProvider GetDoubleBezierCurve(Curve3D curve) { return curve.UICurve.doubleBezierCurve; }
+        public static IValueAlongCurvePointProvider GetExtrudeCurve(Curve3D curve) { return curve.UICurve.extrudeCurve; }
 
         public ValueAlongCurveSplitCommand(Curve3D curve, IDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {
             _pointsProvider = pointsProvider;

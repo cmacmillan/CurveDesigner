@@ -125,7 +125,7 @@ namespace Assets.NewUI
             {EditMode.PositionCurve, "Position"},
             {EditMode.Size, "Size"},
             {EditMode.Rotation, "Rotation"},
-            {EditMode.DoubleBezier, "Double Bezier"},
+            {EditMode.Extrude, "Extrude"},
             {EditMode.Color, "Color"},
         };
         public EditMode[] editModes;
@@ -162,17 +162,13 @@ namespace Assets.NewUI
                 }
                 SamplerField("colorSampler", curve.colorSampler, curve);
             }
-            if (curve.type == CurveType.DoubleBezier)
-                EditModeSwitchButton("Double Bezier", EditMode.DoubleBezier, GetFieldRects(out _,curve),curve);
+            if (curve.type == CurveType.Extrude)
+                EditModeSwitchButton("Extrude", EditMode.Extrude, GetFieldRects(out _,curve),curve);
             if (curve.type != CurveType.Mesh && curve.type!=CurveType.NoMesh)
             {
                 Field("vertexDensity");
             }
             Field("type");
-            /*
-            if (curve.editMode == EditMode.DoubleBezier && typeBefore == CurveType.DoubleBezier && typeAfter != CurveType.DoubleBezier)
-                curve.editMode = EditMode.PositionCurve;
-            */
             EditorGUI.BeginChangeCheck();
             Field("isClosedLoop");
             if (EditorGUI.EndChangeCheck())
@@ -186,7 +182,7 @@ namespace Assets.NewUI
                 Field("meshPrimaryAxis");
                 Field("closeTilableMeshGap");
             }
-            if (curve.type == CurveType.Cylinder || curve.type == CurveType.DoubleBezier || curve.type == CurveType.HollowTube || curve.type == CurveType.Cylinder)
+            if (curve.type == CurveType.Cylinder || curve.type == CurveType.Extrude || curve.type == CurveType.HollowTube || curve.type == CurveType.Cylinder)
             {
                 Field("ringPointCount");
             }
