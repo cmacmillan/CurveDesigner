@@ -309,6 +309,12 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     private float old_samplesPerSegment = -1;
 
+    [Min(1)]
+    public int samplesForCursorCollisionCheck=15;
+    [SerializeField]
+    [HideInInspector]
+    private int old_samplesForCursorCollisionCheck;
+
     [Min(3)]
     public int ringPointCount = 8;
     [SerializeField]
@@ -381,6 +387,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
         retr |= CheckFieldChanged(normalGenerationMode, ref old_normalGenerationMode);
         retr |= CheckFieldChanged(samplesPerSegment, ref old_samplesPerSegment);
+        retr |= CheckFieldChanged(samplesForCursorCollisionCheck, ref old_samplesForCursorCollisionCheck);
 
         CheckSamplerChanged(colorSampler, ref old_constColor, ref old_colorInterpolation);
         CheckSamplerChanged(sizeSampler, ref old_constSize, ref old_sizeInterpolation);

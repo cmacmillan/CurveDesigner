@@ -218,7 +218,8 @@ namespace Assets.NewUI
             Field("showTangents");
             Field("lockToPositionZero");
             Field("placeLockedPoints");
-            Field("_settings");
+            Field("samplesForCursorCollisionCheck");
+            //Field("_settings");
             serializedObj.ApplyModifiedProperties();
         }
     }

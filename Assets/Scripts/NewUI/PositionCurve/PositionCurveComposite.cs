@@ -14,6 +14,7 @@ namespace Assets.NewUI
         private SplitterPointComposite _splitterPoint = null;
         private AddPositionPointButton _leftAddPositionPoint = null;
         private AddPositionPointButton _rightAddPositionPoint = null;
+        private Curve3D curve3d;
         public BezierCurve positionCurve;
         public TransformBlob transformBlob;
         public PointOnCurve PointClosestToCursor { get; private set; }
@@ -21,6 +22,7 @@ namespace Assets.NewUI
         {
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
+            this.curve3d = curve;
             _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,splitterPointClickCommand,Curve3DSettings.Green,this);
             _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob,this,secondaryCurveIndex);
             _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob,this,secondaryCurveIndex);
@@ -30,7 +32,11 @@ namespace Assets.NewUI
         }
         public void FindPointClosestToCursor()
         {
-            var samples = positionCurve.GetSamplePoints();
+            List<PointOnCurve> samples = new List<PointOnCurve>();
+            int numSamples = curve3d.samplesForCursorCollisionCheck;
+            var length = positionCurve.GetLength();
+            for (int i = 0; i < numSamples; i++)
+                samples.Add(positionCurve.GetPointAtDistance(length * i / (numSamples - 1)));
             foreach (var i in samples)
                 i.position = transformBlob.TransformPoint(i.position);
             int segmentIndex;

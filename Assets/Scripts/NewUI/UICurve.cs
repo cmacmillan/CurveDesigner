@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace Assets.NewUI
 {
@@ -129,7 +130,9 @@ namespace Assets.NewUI
 
         public override void Draw(List<IDraw> drawList,ClickHitData closestElementToCursor)
         {
+            Profiler.BeginSample("find closest points");
             FindClosestPoints();
+            Profiler.EndSample();
             GetNormalsTangentsDraw(drawList, _curve, this, positionCurve.transformBlob,_curve.positionCurve);
             GetCurveDraw(drawList,_curve.positionCurve,positionCurve.transformBlob,this);
             base.Draw(drawList,closestElementToCursor);
