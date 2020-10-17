@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
 
 namespace Assets.NewUI
@@ -10,6 +11,15 @@ namespace Assets.NewUI
     [System.Serializable]
     public class ExtrudePoint : SamplerPoint<BezierCurve, ExtrudePoint, ExtrudeSampler> //Gotta make sure to handle a null value
     {
+        public override void SelectEdit(Curve3D curve, List<ExtrudePoint> selectedPoints)
+        {
+            base.SelectEdit(curve, selectedPoints);
+            bool oldClosedLoop = value.isClosedLoop;
+            bool newClosedLoop = EditorGUILayout.Toggle("IsClosedLoop",oldClosedLoop);
+            value.isClosedLoop = newClosedLoop;
+            if (newClosedLoop != oldClosedLoop)
+                curve.UICurve.Initialize();
+        }
         public override BezierCurve CloneValue(BezierCurve value)
         {
             return new BezierCurve(value);
@@ -24,6 +34,17 @@ namespace Assets.NewUI
         public override void ConstantField(Rect rect)
         {
             throw new InvalidOperationException();
+        }
+        public override bool Delete(List<SelectableGUID> guids, Curve3D curve)
+        {
+            //first we try to delete the curve points
+            bool didDelete = base.Delete(guids, curve);
+            //now we loop over all the remaining points and try to delete selected points also
+            foreach (var extrudeCurve in points)
+            {
+                didDelete |= extrudeCurve.value.DeleteGuids(guids, curve);
+            }
+            return didDelete;
         }
         public override List<SelectableGUID> SelectAll(Curve3D curve)
         {
@@ -72,9 +93,14 @@ namespace Assets.NewUI
             Vector3 InterpolateSamples(ExtrudePoint lowerCurve,ExtrudePoint upperCurve,float lowerDistance,float upperDistance,out Vector3 interpolatedReference)
             {
                 float distanceBetweenSegments = upperDistance- lowerDistance;
-                float lerpVal = (primaryCurveDistance - lowerDistance) / distanceBetweenSegments;
                 Vector3 lowerPosition = SamplePosition(lowerCurve, out Vector3 lowerRef);
+                if (lowerCurve.InterpolationMode == InterpolationMode.Flat)
+                {
+                    interpolatedReference = lowerRef;
+                    return lowerPosition;
+                }
                 Vector3 upperPosition = SamplePosition(upperCurve, out Vector3 upperRef);
+                float lerpVal = (primaryCurveDistance - lowerDistance) / distanceBetweenSegments;
                 interpolatedReference = Vector3.Lerp(lowerRef, upperRef, lerpVal);
                 return Vector3.Lerp(lowerPosition, upperPosition, lerpVal);
             }

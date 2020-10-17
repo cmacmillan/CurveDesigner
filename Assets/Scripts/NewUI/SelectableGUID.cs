@@ -50,7 +50,6 @@ public struct SelectableGUID
         bool foundAPointToDelete = false;
         for (int i=0;i<selectables.Count;i++)
         {
-            int remaining = selectables.Count - i;
             var curr = selectables[i];
             if (guids.Contains(curr.GUID))
                 foundAPointToDelete = true;
@@ -130,7 +129,7 @@ public interface ISelectable
 }
 public interface ISelectEditable<T> : ISelectable
 {
-    bool SelectEdit(Curve3D curve,List<T> selectedPoints);
+    void SelectEdit(Curve3D curve,List<T> selectedPoints);
 }
 //Active elements can have stuff deleted from them and have all their elements selected
 public interface IActiveElement

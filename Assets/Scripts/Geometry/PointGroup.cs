@@ -157,7 +157,7 @@ public class PointGroup : ISelectEditable<PointGroup>
         return positionCurve.GetDistanceAtSegmentIndexAndTime(positionCurve.PointGroups.IndexOf(this), 0);
     }
 
-    public bool SelectEdit(Curve3D curve,List<PointGroup> selectedPoints)
+    public void SelectEdit(Curve3D curve,List<PointGroup> selectedPoints)
     {
         var initialLocked = isPointLocked;
         bool? isLocked = null;
@@ -178,8 +178,8 @@ public class PointGroup : ISelectEditable<PointGroup>
 
         EditorGUIUtility.SetWantsMouseJumping(1);
 
-        if (isLocked==initialLocked && initialLeft==leftTangentOffset && initialPos==positionOffset && initialRight == rightTangentOffset)
-            return false;
+        if (isLocked == initialLocked && initialLeft == leftTangentOffset && initialPos == positionOffset && initialRight == rightTangentOffset)
+            return;
 
         foreach (var target in selectedPoints)
         {
@@ -189,7 +189,6 @@ public class PointGroup : ISelectEditable<PointGroup>
             target.SetWorldPositionByIndex(PGIndex.LeftTangent,target.GetWorldPositionByIndex(PGIndex.LeftTangent,curve.lockToPositionZero)+leftTangentOffset,curve.lockToPositionZero);
             target.SetWorldPositionByIndex(PGIndex.RightTangent,target.GetWorldPositionByIndex(PGIndex.RightTangent,curve.lockToPositionZero)+rightTangentOffset,curve.lockToPositionZero);
         }
-        return true;
     }
 
     //point groups are always inside the visible curve

@@ -18,7 +18,7 @@ namespace Assets.NewUI
         public abstract T Zero();
         public abstract T MinChange(T v1, T v2);
         public abstract T MaxValue();
-        public override bool SelectEdit(Curve3D curve, List<S> selectedPoints)
+        public override void SelectEdit(Curve3D curve, List<S> selectedPoints)
         {
             T originalValue = value;
             T fieldVal = Field(owner.GetLabel(), originalValue);
@@ -32,10 +32,9 @@ namespace Assets.NewUI
             }
             base.SelectEdit(curve, selectedPoints);
             if (minChange.Equals(Zero()))
-                return false;
+                return;
             foreach (var target in selectedPoints)
                 target.value = Add(target.value,minChange);
-            return true;
         }
     }
 
@@ -75,16 +74,15 @@ namespace Assets.NewUI
             return SegmentIndex < curve.NumSegments;
         }
 
-        public virtual bool SelectEdit(Curve3D curve, List<S> selectedPoints)
+        public virtual void SelectEdit(Curve3D curve, List<S> selectedPoints)
         {
             float originalDistance = GetDistance(curve.positionCurve);
             float distanceOffset = EditorGUILayout.FloatField("Distance", originalDistance) - originalDistance;
             InterpolationMode = (InterpolationMode)EditorGUILayout.EnumPopup("Interpolation",InterpolationMode);
             if (distanceOffset == 0)
-                return false;
+                return;
             EditorGUIUtility.SetWantsMouseJumping(1);
             PointOnCurveClickCommand.ClampOffset(distanceOffset, curve,selectedPoints);
-            return true;
         }
 
         public void SetDistance(float distance,BezierCurve curve, bool shouldSort = true)
@@ -139,6 +137,7 @@ namespace Assets.NewUI
             var lastDistance = curveLength - lastPoint.GetDistance(curve);
             float endSegmentDistance = firstPoint.GetDistance(curve) + lastDistance;
             if (pointsInsideCurve[0].GetDistance(curve) >= distance)
+            {
                 if (isClosedLoop && lastPoint.InterpolationMode == InterpolationMode.Linear)
                 {
                     float lerpVal = (lastDistance + distance) / endSegmentDistance;
@@ -146,6 +145,7 @@ namespace Assets.NewUI
                 }
                 else
                     return pointsInsideCurve[0].value;
+            }
             var previous = pointsInsideCurve[0];
             for (int i = 1; i < pointsInsideCurve.Count; i++)
             {
@@ -307,17 +307,17 @@ namespace Assets.NewUI
                 i.owner = this as Q;
         }
 
-        public ISelectable GetSelectable(int index, Curve3D curve)
+        public virtual ISelectable GetSelectable(int index, Curve3D curve)
         {
             return GetPoints(curve.positionCurve)[index];
         }
 
-        public int NumSelectables(Curve3D curve)
+        public virtual int NumSelectables(Curve3D curve)
         {
             return GetPoints(curve.positionCurve).Count;
         }
 
-        public bool Delete(List<SelectableGUID> guids, Curve3D curve)
+        public virtual bool Delete(List<SelectableGUID> guids, Curve3D curve)
         {
             bool retr = SelectableGUID.Delete(ref points, guids, curve);
             if (retr)

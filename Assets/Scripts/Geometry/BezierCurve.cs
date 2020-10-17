@@ -198,10 +198,8 @@ public partial class BezierCurve : IActiveElement
                 samplerList.Add(new ISamplerPointDeleteTracker(samplerPoint,fractionAlongSegment,runIndex));
             }
         /////////////// ACTUALLY DO THE DELETE
-        bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve);
-        if (!didChange)
+        if (!DeleteGuids(guids,curve))
             return false;
-        Recalculate();
         ///////////////
         foreach (var i in samplerList)
         {
@@ -215,6 +213,14 @@ public partial class BezierCurve : IActiveElement
             isClosedLoop = beforeIsClosedLoop;
             Recalculate();
         }
+        return true;
+    }
+    public bool DeleteGuids(List<SelectableGUID> guids, Curve3D curve)
+    {
+        bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve);
+        if (!didChange)
+            return false;
+        Recalculate();
         return true;
     }
     #endregion
