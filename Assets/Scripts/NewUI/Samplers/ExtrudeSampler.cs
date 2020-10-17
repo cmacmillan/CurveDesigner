@@ -42,6 +42,7 @@ namespace Assets.NewUI
             //now we loop over all the remaining points and try to delete selected points also
             foreach (var extrudeCurve in points)
             {
+                extrudeCurve.value.DontDeleteAllTheGuids(guids);
                 didDelete |= extrudeCurve.value.DeleteGuids(guids, curve);
             }
             return didDelete;

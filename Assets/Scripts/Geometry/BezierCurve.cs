@@ -81,30 +81,7 @@ public partial class BezierCurve : IActiveElement
     }
     public bool Delete(List<SelectableGUID> guids, Curve3D curve)
     {
-        ///////Preventing removing all the points
-        int numRemaining = 0;
-        PointGroup firstDeleted = null;
-        PointGroup lastDeleted = null;
-        for (int i = 0; i < PointGroups.Count; i++)
-        {
-            var pointGroup = PointGroups[i];
-            if (!guids.Contains(pointGroup.GUID))
-            {
-                numRemaining++;
-            }
-            else
-            {
-                if (firstDeleted == null)
-                    firstDeleted = pointGroup;
-                else
-                    lastDeleted = pointGroup;
-            }
-        }
-        if (numRemaining == 0 || numRemaining == 1)//both prevent firstDeleted
-            guids.RemoveAt(guids.IndexOf(firstDeleted.GUID));
-        if (numRemaining == 0)//only 0 prevents lastdeleted also
-            guids.RemoveAt(guids.IndexOf(lastDeleted.GUID));
-        /////////
+        DontDeleteAllTheGuids(guids);
         bool beforeIsClosedLoop = isClosedLoop;
         if (!isClosedLoop)
         {
@@ -220,6 +197,31 @@ public partial class BezierCurve : IActiveElement
             Recalculate();
         }
         return true;
+    }
+    public void DontDeleteAllTheGuids(List<SelectableGUID> guids)
+    {
+        int numRemaining = 0;
+        PointGroup firstDeleted = null;
+        PointGroup lastDeleted = null;
+        for (int i = 0; i < PointGroups.Count; i++)
+        {
+            var pointGroup = PointGroups[i];
+            if (!guids.Contains(pointGroup.GUID))
+            {
+                numRemaining++;
+            }
+            else
+            {
+                if (firstDeleted == null)
+                    firstDeleted = pointGroup;
+                else
+                    lastDeleted = pointGroup;
+            }
+        }
+        if (numRemaining == 0 || numRemaining == 1)//both prevent firstDeleted
+            guids.RemoveAt(guids.IndexOf(firstDeleted.GUID));
+        if (numRemaining == 0)//only 0 prevents lastdeleted also
+            guids.RemoveAt(guids.IndexOf(lastDeleted.GUID));
     }
     public bool DeleteGuids(List<SelectableGUID> guids, Curve3D curve)
     {

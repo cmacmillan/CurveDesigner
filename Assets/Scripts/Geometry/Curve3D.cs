@@ -302,6 +302,13 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     private float old_vertexDensity = -1;
 
+    [Min(2)]
+    [Tooltip("How accuratly should the curve perform length calculations? Increase to improve accuracy, decrease to improve speed")]
+    public int samplesPerSegment = 50;
+    [SerializeField]
+    [HideInInspector]
+    private float old_samplesPerSegment = -1;
+
     [Min(3)]
     public int ringPointCount = 8;
     [SerializeField]
@@ -373,6 +380,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         retr |= CheckFieldChanged(seperateInnerOuterTextures, ref old_seperateInnerOuterTextures);
         retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
         retr |= CheckFieldChanged(normalGenerationMode, ref old_normalGenerationMode);
+        retr |= CheckFieldChanged(samplesPerSegment, ref old_samplesPerSegment);
 
         CheckSamplerChanged(colorSampler, ref old_constColor, ref old_colorInterpolation);
         CheckSamplerChanged(sizeSampler, ref old_constSize, ref old_sizeInterpolation);

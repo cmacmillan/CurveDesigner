@@ -22,7 +22,7 @@ public class Segment
         float len = 0;
         Vector3 previousPosition = owner.GetSegmentPositionAtTime(segmentIndex, 0.0f);
         AddLength(segmentIndex, 0.0f, 0, previousPosition,owner.GetSegmentTangentAtTime(segmentIndex,0.0f));
-        int numSamplesMinusOne = owner.owner.settings.samplesPerSegment - 1;
+        int numSamplesMinusOne = owner.owner.samplesPerSegment - 1;
         for (int i = 1; i <= numSamplesMinusOne; i++)//we include the end point with <=
         {
             var time = i / (float)numSamplesMinusOne;

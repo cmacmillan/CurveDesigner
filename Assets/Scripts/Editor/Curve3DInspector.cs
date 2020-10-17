@@ -197,6 +197,7 @@ public class Curve3DInspector : Editor
         curve3d.TryInitialize();
         EnsureValidEditMode();
         curve3d.BindDataToPositionCurve();
+        curve3d.samplesPerSegment = Mathf.Max(1, curve3d.samplesPerSegment);
         var windowRect = new Rect(20, 40, 400, 0);
         bool didWindowEatMouse = false;
         if (curve3d.showPointSelectionWindow)

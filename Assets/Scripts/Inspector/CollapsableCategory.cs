@@ -172,6 +172,7 @@ namespace Assets.NewUI
             EditorGUI.BeginChangeCheck();
             Field("isClosedLoop");
             Field("normalGenerationMode");
+            Field("samplesPerSegment");
             if (EditorGUI.EndChangeCheck())
             {
                 needsReinitCurve = true;
