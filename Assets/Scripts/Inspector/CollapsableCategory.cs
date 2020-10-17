@@ -171,6 +171,7 @@ namespace Assets.NewUI
             Field("type");
             EditorGUI.BeginChangeCheck();
             Field("isClosedLoop");
+            Field("normalGenerationMode");
             if (EditorGUI.EndChangeCheck())
             {
                 needsReinitCurve = true;

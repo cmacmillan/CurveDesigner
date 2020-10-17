@@ -196,6 +196,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         positionCurve.owner = this;
         positionCurve.isClosedLoop = isClosedLoop;
         positionCurve.dimensionLockMode = lockToPositionZero;
+        positionCurve.normalGenerationMode = normalGenerationMode;
     }
 
 
@@ -290,6 +291,11 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     [HideInInspector]
     private DimensionLockMode old_lockToPositionZero;
 
+    public CurveNormalGenerationMode normalGenerationMode;
+    [SerializeField]
+    [HideInInspector]
+    private CurveNormalGenerationMode old_normalGenerationMode;
+
     [Min(0)]
     public float vertexDensity = 1.0f;
     [SerializeField]
@@ -366,6 +372,7 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         retr |= CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
         retr |= CheckFieldChanged(seperateInnerOuterTextures, ref old_seperateInnerOuterTextures);
         retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
+        retr |= CheckFieldChanged(normalGenerationMode, ref old_normalGenerationMode);
 
         CheckSamplerChanged(colorSampler, ref old_constColor, ref old_colorInterpolation);
         CheckSamplerChanged(sizeSampler, ref old_constSize, ref old_sizeInterpolation);

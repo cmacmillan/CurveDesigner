@@ -35,7 +35,7 @@ public class PointOnCurve : ISegmentTime
         return position + rotatedVect * length;
     }
 
-    public void CalculateReference(PointOnCurve previousPoint, Vector3 previousReference)
+    public void CalculateReference(PointOnCurve previousPoint, Vector3 previousReference,BezierCurve curve)
     {
         if (previousPoint.position == this.position)
         {
@@ -53,8 +53,15 @@ public class PointOnCurve : ISegmentTime
             return rL - (2.0f / c2) * Vector3.Dot(v2, rL) * v2;
         }
         reference=DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, previousReference);
-        reference = Vector3.ProjectOnPlane(reference,this.tangent.normalized);
-        //reference = Vector3.ProjectOnPlane(Vector3.up,this.tangent.normalized).normalized;//TODO: this aligns with up, which has some desirable qualities. Need to revisit
+        switch (curve.normalGenerationMode)
+        {
+            case BezierCurve.CurveNormalGenerationMode.MinimumDistance:
+                reference = Vector3.ProjectOnPlane(reference,this.tangent.normalized);
+                return;
+            case BezierCurve.CurveNormalGenerationMode.BiasTowardsUp:
+                reference = Vector3.ProjectOnPlane(Vector3.up,this.tangent.normalized).normalized;
+                return;
+        }
     }
 
     public Vector3 position;

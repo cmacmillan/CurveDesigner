@@ -17,12 +17,18 @@ public partial class BezierCurve : IActiveElement
 
     public bool isCurveOutOfDate = true;
     public DimensionLockMode dimensionLockMode = DimensionLockMode.none;
+    public CurveNormalGenerationMode normalGenerationMode = CurveNormalGenerationMode.MinimumDistance;
     public Curve3D owner;
     public bool isClosedLoop;
     [System.NonSerialized]
     [HideInInspector]
     public List<Segment> segments = null;
 
+    public enum CurveNormalGenerationMode
+    {
+        MinimumDistance=0,
+        BiasTowardsUp=1,
+    }
     private Vector3 GetTangent(int index)
     {
         return (this[index + 1] - this[index]);//.normalized;
@@ -404,7 +410,7 @@ public partial class BezierCurve : IActiveElement
                 Vector3 tangent = GetSegmentTangentAtTime(segmentIndex, time);
                 var retr = new PointOnCurve(time,remainingDistance,position,segmentIndex,tangent);
                 retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (segmentIndex - 1 >= 0 ? segments[segmentIndex - 1].cummulativeLength : 0);
-                retr.CalculateReference(lowerPoint,lowerReference);
+                retr.CalculateReference(lowerPoint,lowerReference,this);
                 return retr;
             }
             remainingDistance-= segments[segmentIndex].length;
@@ -537,7 +543,7 @@ public partial class BezierCurve : IActiveElement
             for (int i = 1; i < points.Count; i++)
             {
                 var point = points[i];
-                point.CalculateReference(points[i - 1], referenceVector);
+                point.CalculateReference(points[i - 1], referenceVector,this);
                 referenceVector =  point.reference.normalized;
                 points[i].reference = referenceVector;
             }
@@ -547,7 +553,7 @@ public partial class BezierCurve : IActiveElement
             //angle difference between the final reference vector, and the first reference vector projected backwards
             Vector3 finalReferenceVector = points[points.Count - 1].reference;
             var point = points[points.Count - 1];
-            point.CalculateReference(points[0], points[0].reference);
+            point.CalculateReference(points[0], points[0].reference,this);
             Vector3 firstReferenceVectorProjectedBackwards = point.reference;
             float angleDifference = Vector3.SignedAngle(finalReferenceVector,firstReferenceVectorProjectedBackwards,points[points.Count-1].tangent);
             for (int i = 1; i < points.Count; i++)

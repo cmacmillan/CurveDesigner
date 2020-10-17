@@ -399,6 +399,7 @@ public class Curve3DInspector : Editor
                     if (curve.displayMesh == null)
                     {
                         curve.displayMesh = new Mesh();
+                        curve.displayMesh.indexFormat = IndexFormat.UInt32;
                         curve.filter.mesh = curve.displayMesh;
                     }
                     else
