@@ -449,9 +449,9 @@ public static class MeshGenerator
                 }
             }
         }
-        /*
         void CreateTubeEndPlates()
         {
+            int ActualRingPointCount = RingPointCount;
             //center point is average of ring
             int AddRingCenterVertexFromAverage(int baseIndex)
             {
@@ -460,6 +460,8 @@ public static class MeshGenerator
                     average += vertices[i+baseIndex];
                 average = average/ ActualRingPointCount;
                 vertices.Add(average);
+                uvs.Add(Vector2.zero);//WRONG TODO 
+                colors.Add(Color.white); //TODO TODO
                 return vertices.Count - 1;
             }
             int startRingBaseIndex = 0;
@@ -485,7 +487,6 @@ public static class MeshGenerator
             TrianglifyRingToCenter(startRingBaseIndex, AddRingCenterVertexFromAverage(startRingBaseIndex),true);
             TrianglifyRingToCenter(endRingBaseIndex, AddRingCenterVertexFromAverage(endRingBaseIndex),false);
         }
-        */
         switch (CurveType)
         {
             case CurveType.NoMesh:
@@ -498,12 +499,11 @@ public static class MeshGenerator
                     CreatePointsAlongCurve(TubePointCreator,sampled,1,RingPointCount);
                     CreatePointsAlongCurve(TubeFlatPlateCreator, sampled,1, 3);
                     //CreateRingPointsAlongCurve(sampled, ActualRingPointCount, true);
+                    //CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount));
                     TrianglifyLayer(true, RingPointCount,0);
                     TrianglifyLayer(false, 3,numVerts);
-                    /*
                     if (!IsClosedLoop)
                         CreateTubeEndPlates();
-                        */
                     return true;
                 }
             case CurveType.HollowTube:
@@ -556,6 +556,8 @@ public static class MeshGenerator
             case CurveType.Mesh:
                 {
                     InitLists();
+                    if (meshToTile == null)
+                        return true;
                     //we are gonna assume that the largest dimension of the bounding box is the correct direction, and that the mesh is axis aligned and it is perpendicular to the edge of the bounding box
                     var bounds = meshToTile.bounds;
                     //watch out for square meshes
@@ -634,8 +636,7 @@ public static class MeshGenerator
                             if (clampAndStretchMeshToCurve)
                                 distance = (vert.x / meshLength) * curveLength;
                             else
-                                distance = vert.x/scaler+c*(meshLength+closeTilableMeshGap)/scaler;//fast alternative
-                                //distance = GetDistanceByArea((vert.x + c * (closeTilableMeshGap + meshLength)) / secondaryDimensionLength);
+                                distance = GetDistanceByArea((vert.x + c * (closeTilableMeshGap + meshLength)) / secondaryDimensionLength);//optimize me!
                             max = Mathf.Max(max, distance);
                             if (distance > curveLength)
                             {

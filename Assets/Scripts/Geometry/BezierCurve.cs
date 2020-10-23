@@ -498,15 +498,15 @@ public partial class BezierCurve : IActiveElement
         switch (dimensionLockMode)
         {
             case DimensionLockMode.x:
-                reference = Vector3.forward;
+                reference = Vector3.right;
                 alt = Vector3.up;
                 break;
             case DimensionLockMode.y:
-                reference = Vector3.right;
+                reference = Vector3.up;
                 alt = Vector3.forward;
                 break;
             case DimensionLockMode.z:
-                reference = Vector3.up;
+                reference = Vector3.forward;
                 alt = Vector3.right;
                 break;
         }

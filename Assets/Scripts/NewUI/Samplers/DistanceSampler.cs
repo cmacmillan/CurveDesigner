@@ -78,7 +78,10 @@ namespace Assets.NewUI
         {
             float originalDistance = GetDistance(curve.positionCurve);
             float distanceOffset = EditorGUILayout.FloatField("Distance", originalDistance) - originalDistance;
-            InterpolationMode = (InterpolationMode)EditorGUILayout.EnumPopup("Interpolation",InterpolationMode);
+            InterpolationMode newInterpolation = (InterpolationMode)EditorGUILayout.EnumPopup("Interpolation",InterpolationMode);
+            if (newInterpolation != InterpolationMode)
+                foreach (var i in selectedPoints)
+                    i.InterpolationMode = newInterpolation;
             if (distanceOffset == 0)
                 return;
             EditorGUIUtility.SetWantsMouseJumping(1);

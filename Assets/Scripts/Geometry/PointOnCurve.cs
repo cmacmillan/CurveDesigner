@@ -53,6 +53,7 @@ public class PointOnCurve : ISegmentTime
             return rL - (2.0f / c2) * Vector3.Dot(v2, rL) * v2;
         }
         reference=DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, previousReference);
+        //reference=DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, Vector3.up);
         switch (curve.normalGenerationMode)
         {
             case BezierCurve.CurveNormalGenerationMode.MinimumDistance:

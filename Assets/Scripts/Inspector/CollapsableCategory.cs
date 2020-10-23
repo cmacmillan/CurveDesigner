@@ -13,9 +13,15 @@ namespace Assets.NewUI
         public abstract void Draw(Curve3D curve);
 
         protected SerializedObject serializedObj;
-        public void Field(string fieldName)
+        public void Field(string fieldName, bool isRed=false)
         {
-            EditorGUILayout.PropertyField(serializedObj.FindProperty(fieldName));
+            var property = serializedObj.FindProperty(fieldName);
+            var oldColor = GUI.color;
+            if (isRed)
+                GUI.color= Color.red;
+            EditorGUILayout.PropertyField(property);
+            if (isRed)
+                GUI.color= oldColor;
         }
         /// Shuriken field with dropdown triangle
         protected const float k_minMaxToggleWidth = 13;
@@ -179,7 +185,7 @@ namespace Assets.NewUI
             }
             if (curve.type == CurveType.Mesh)
             {
-                Field("meshToTile");
+                Field("meshToTile",curve.meshToTile==null);
                 Field("clampAndStretchMeshToCurve");
                 Field("meshPrimaryAxis");
                 Field("closeTilableMeshGap");
@@ -218,7 +224,7 @@ namespace Assets.NewUI
             Field("showTangents");
             Field("lockToPositionZero");
             Field("placeLockedPoints");
-            Field("samplesForCursorCollisionCheck");
+            //Field("samplesForCursorCollisionCheck");
             //Field("_settings");
             serializedObj.ApplyModifiedProperties();
         }
