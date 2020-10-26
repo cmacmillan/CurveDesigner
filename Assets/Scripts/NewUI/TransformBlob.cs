@@ -80,7 +80,7 @@ namespace Assets.NewUI
             float degrees = 0; 
             if (curve!=null)
             {
-                degrees = curve.rotationSampler.GetValueAtDistance(pointOnCurve.distanceFromStartOfCurve,curve.isClosedLoop,curve.positionCurve.GetLength(),curve.positionCurve);
+                degrees = curve.rotationSampler.GetValueAtDistance(pointOnCurve.distanceFromStartOfCurve,curve.positionCurve);
             }
             return Matrix4x4.Translate(pointOnCurve.position) * Matrix4x4.Rotate(Quaternion.AngleAxis(degrees,pointOnCurve.tangent)*Quaternion.LookRotation(pointOnCurve.tangent, pointOnCurve.reference));
         }

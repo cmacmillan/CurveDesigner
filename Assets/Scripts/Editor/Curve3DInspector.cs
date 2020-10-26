@@ -410,7 +410,11 @@ public class Curve3DInspector : Editor
                     }
                     curve.displayMesh.SetVertices(MeshGenerator.vertices);
                     curve.displayMesh.SetTriangles(MeshGenerator.triangles, 0);
+                    if (MeshGenerator.uvs.Count != MeshGenerator.vertices.Count)
+                        Debug.LogError($"Expected {MeshGenerator.vertices.Count} uvs, but got {MeshGenerator.uvs.Count}");
                     curve.displayMesh.SetUVs(0, MeshGenerator.uvs);
+                    if (MeshGenerator.colors.Count != MeshGenerator.vertices.Count)
+                        Debug.LogError($"Expected {MeshGenerator.vertices.Count} colors, but got {MeshGenerator.colors.Count}");
                     curve.displayMesh.SetColors(MeshGenerator.colors);
                     curve.displayMesh.RecalculateNormals();
                     curve.collider = curve.GetComponent<MeshCollider>();

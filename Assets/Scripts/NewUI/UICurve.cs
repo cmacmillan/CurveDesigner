@@ -100,7 +100,7 @@ namespace Assets.NewUI
                 var curveLength = curveToDraw.GetLength();
                 foreach (var i in points)
                 {
-                    var rotation = _curve.rotationSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.isClosedLoop, curveLength,_curve.positionCurve);
+                    var rotation = _curve.rotationSampler.GetValueAtDistance(i.distanceFromStartOfCurve, _curve.positionCurve);
                     var reference = Quaternion.AngleAxis(rotation, i.tangent) * i.reference;
                     if (_curve.showNormals)
                         drawList.Add(new LineDraw(creator, transform.TransformPoint(i.position), transform.TransformPoint(reference * visualNormalLength+ i.position), Color.yellow));

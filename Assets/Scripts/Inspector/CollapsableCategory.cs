@@ -178,7 +178,6 @@ namespace Assets.NewUI
             EditorGUI.BeginChangeCheck();
             Field("isClosedLoop");
             Field("normalGenerationMode");
-            Field("samplesPerSegment");
             if (EditorGUI.EndChangeCheck())
             {
                 needsReinitCurve = true;
@@ -226,7 +225,16 @@ namespace Assets.NewUI
             Field("placeLockedPoints");
             //Field("samplesForCursorCollisionCheck");
             //Field("_settings");
+            bool needsReinitCurve=false;
+            EditorGUI.BeginChangeCheck();
+            Field("samplesPerSegment");
+            if (EditorGUI.EndChangeCheck())
+            {
+                needsReinitCurve = true;
+            }
             serializedObj.ApplyModifiedProperties();
+            if (needsReinitCurve)
+                curve.UICurve.Initialize();
         }
     }
 }

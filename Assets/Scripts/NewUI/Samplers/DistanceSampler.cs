@@ -126,10 +126,12 @@ namespace Assets.NewUI
         }
         protected override T GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
         {
-            return GetValueAtDistance(distance, curve.isClosedLoop, curve.GetLength(),curve);
+            return GetValueAtDistance(distance,curve);
         }
-        public T GetValueAtDistance(float distance, bool isClosedLoop, float curveLength, BezierCurve curve)
+        public T GetValueAtDistance(float distance, BezierCurve curve)
         {
+            float curveLength = curve.GetLength();
+            bool isClosedLoop = curve.isClosedLoop;
             var pointsInsideCurve = GetPoints(curve);
             if (_valueType == ValueType.Constant || pointsInsideCurve.Count == 0)
             {

@@ -82,27 +82,30 @@ namespace Assets.NewUI
         }
 
         ///Secondary curve distance is a value between 0 and 1
-        public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference)
+        public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference,out Vector3 tangent)
         {
             //This needs to interpolate references smoothly
-            Vector3 SamplePosition(ExtrudePoint point, out Vector3 myRef)
+            Vector3 SamplePosition(ExtrudePoint point, out Vector3 myRef,out Vector3 myTan)
             {
                 var samp = point.value.GetPointAtDistance(secondaryCurveDistance * point.value.GetLength());
                 myRef = samp.reference;
+                myTan = samp.tangent;
                 return samp.position;
             }
-            Vector3 InterpolateSamples(ExtrudePoint lowerCurve,ExtrudePoint upperCurve,float lowerDistance,float upperDistance,out Vector3 interpolatedReference)
+            Vector3 InterpolateSamples(ExtrudePoint lowerCurve,ExtrudePoint upperCurve,float lowerDistance,float upperDistance,out Vector3 interpolatedReference,out Vector3 interpolatedTangent)
             {
                 float distanceBetweenSegments = upperDistance- lowerDistance;
-                Vector3 lowerPosition = SamplePosition(lowerCurve, out Vector3 lowerRef);
+                Vector3 lowerPosition = SamplePosition(lowerCurve, out Vector3 lowerRef,out Vector3 lowerTangent);
                 if (lowerCurve.InterpolationMode == InterpolationMode.Flat)
                 {
                     interpolatedReference = lowerRef;
+                    interpolatedTangent = lowerTangent;
                     return lowerPosition;
                 }
-                Vector3 upperPosition = SamplePosition(upperCurve, out Vector3 upperRef);
+                Vector3 upperPosition = SamplePosition(upperCurve, out Vector3 upperRef, out Vector3 upperTangent);
                 float lerpVal = (primaryCurveDistance - lowerDistance) / distanceBetweenSegments;
                 interpolatedReference = Vector3.Lerp(lowerRef, upperRef, lerpVal);
+                interpolatedTangent = Vector3.Lerp(lowerTangent, upperTangent, lerpVal);
                 return Vector3.Lerp(lowerPosition, upperPosition, lerpVal);
             }
             var availableCurves = GetPoints(primaryCurve);
@@ -110,11 +113,12 @@ namespace Assets.NewUI
             {
                 var point = primaryCurve.GetPointAtDistance(primaryCurveDistance);
                 reference = point.reference;
+                tangent = point.tangent;
                 return point.position;
             }
             float previousDistance = availableCurves[0].GetDistance(primaryCurve);
             if (availableCurves.Count==1 || (previousDistance > primaryCurveDistance && !primaryCurve.isClosedLoop))
-                return SamplePosition(availableCurves[0], out reference);
+                return SamplePosition(availableCurves[0], out reference,out tangent);
             if (previousDistance > primaryCurveDistance && primaryCurve.isClosedLoop)
 
             {
@@ -122,7 +126,7 @@ namespace Assets.NewUI
                 var upper = availableCurves[0];
                 var lowerDistance = lower.GetDistance(primaryCurve)-primaryCurve.GetLength();
                 var upperDistance = upper.GetDistance(primaryCurve);
-                return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference);
+                return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference,out tangent);
             }
             ExtrudePoint previousCurve = availableCurves[0];
             for (int i = 1; i < availableCurves.Count; i++)
@@ -130,19 +134,19 @@ namespace Assets.NewUI
                 var currCurve = availableCurves[i];
                 float currentDistance = currCurve.GetDistance(primaryCurve);
                 if (currentDistance > primaryCurveDistance)
-                    return InterpolateSamples(previousCurve,currCurve,previousDistance,currentDistance,out reference);
+                    return InterpolateSamples(previousCurve,currCurve,previousDistance,currentDistance,out reference,out tangent);
                 previousDistance = currentDistance;
                 previousCurve = currCurve;
             }
             if (!primaryCurve.isClosedLoop)
-                return SamplePosition(availableCurves[availableCurves.Count - 1], out reference);
+                return SamplePosition(availableCurves[availableCurves.Count - 1], out reference, out tangent);
             else
             {
                 var lower = availableCurves[availableCurves.Count - 1];
                 var upper = availableCurves[0];
                 var lowerDistance = lower.GetDistance(primaryCurve);
                 var upperDistance = upper.GetDistance(primaryCurve)+primaryCurve.GetLength();
-                return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference);
+                return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference,out tangent);
             }
         }
     }

@@ -25,7 +25,7 @@ namespace Assets.NewUI
             this.curve = curve;
         }
 
-        public float Offset => curve.sizeSampler.GetValueAtDistance(point.GetDistance(positionCurve),positionCurve.isClosedLoop,positionCurve.GetLength(),positionCurve);
+        public float Offset => curve.sizeSampler.GetValueAtDistance(point.GetDistance(positionCurve),positionCurve);
 
         public override IEnumerable<IComposite> GetChildren()
         {
