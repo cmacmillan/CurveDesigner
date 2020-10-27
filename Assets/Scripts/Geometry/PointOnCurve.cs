@@ -60,7 +60,26 @@ public class PointOnCurve : ISegmentTime
                 reference = Vector3.ProjectOnPlane(reference,this.tangent.normalized);
                 return;
             case BezierCurve.CurveNormalGenerationMode.BiasTowardsUp:
-                reference = Vector3.ProjectOnPlane(Vector3.up,this.tangent.normalized).normalized;
+                //up is different for different dimension lock modes
+                Vector3 up;
+                switch (curve.dimensionLockMode)
+                {
+                    case DimensionLockMode.x:
+                        up = Vector3.right;
+                        break;
+                    case DimensionLockMode.z:
+                        up = Vector3.forward;
+                        break;
+                    case DimensionLockMode.none:
+                    case DimensionLockMode.y:
+                    default:
+                        up = Vector3.up;
+                        break;
+                }
+                reference = Vector3.up;
+                //reference = Vector3.ProjectOnPlane(Vector3.up,tangent.normalized).normalized;
+                //if (Vector3.Dot(tangent,reference) < 0)
+                    //reference = -reference;
                 return;
         }
     }

@@ -396,38 +396,48 @@ public class Curve3DInspector : Editor
         {
             if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime && curve.GetMeshGenerationID()==MeshGenerator.currentlyGeneratingCurve3D)
             {
-                if (MeshGenerator.didMeshGenerationSucceed)
+                curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
+                if (curve.type != CurveType.NoMesh)
                 {
-                    if (curve.displayMesh == null)
+                    if (MeshGenerator.didMeshGenerationSucceed)
                     {
-                        curve.displayMesh = new Mesh();
-                        curve.displayMesh.indexFormat = IndexFormat.UInt32;
-                        curve.filter.mesh = curve.displayMesh;
-                    }
-                    else
-                    {
-                        curve.displayMesh.Clear();
-                    }
-                    curve.displayMesh.SetVertices(MeshGenerator.vertices);
-                    curve.displayMesh.SetTriangles(MeshGenerator.triangles, 0);
-                    if (MeshGenerator.uvs.Count != MeshGenerator.vertices.Count)
-                        Debug.LogError($"Expected {MeshGenerator.vertices.Count} uvs, but got {MeshGenerator.uvs.Count}");
-                    curve.displayMesh.SetUVs(0, MeshGenerator.uvs);
-                    if (MeshGenerator.colors.Count != MeshGenerator.vertices.Count)
-                        Debug.LogError($"Expected {MeshGenerator.vertices.Count} colors, but got {MeshGenerator.colors.Count}");
-                    curve.displayMesh.SetColors(MeshGenerator.colors);
-                    curve.displayMesh.RecalculateNormals();
-                    curve.collider = curve.GetComponent<MeshCollider>();
-                    if (curve.collider != null)
-                    {
-                        curve.collider.sharedMesh = curve.displayMesh;
+                        if (curve.displayMesh == null)
+                        {
+                            curve.displayMesh = new Mesh();
+                            curve.displayMesh.indexFormat = IndexFormat.UInt32;
+                            curve.filter.mesh = curve.displayMesh;
+                        }
+                        else
+                        {
+                            curve.displayMesh.Clear();
+                        }
+                        curve.displayMesh.SetVertices(MeshGenerator.vertices);
+                        curve.displayMesh.SetTriangles(MeshGenerator.triangles, 0);
+                        if (MeshGenerator.uvs.Count != MeshGenerator.vertices.Count)
+                            Debug.LogError($"Expected {MeshGenerator.vertices.Count} uvs, but got {MeshGenerator.uvs.Count}");
+                        curve.displayMesh.SetUVs(0, MeshGenerator.uvs);
+                        if (MeshGenerator.colors.Count != MeshGenerator.vertices.Count)
+                            Debug.LogError($"Expected {MeshGenerator.vertices.Count} colors, but got {MeshGenerator.colors.Count}");
+                        curve.displayMesh.SetColors(MeshGenerator.colors);
+                        curve.displayMesh.RecalculateNormals();
+                        if (curve.collider==null)
+                            curve.collider = curve.GetComponent<MeshCollider>();
+                        if (curve.collider != null)
+                            curve.collider.sharedMesh = curve.displayMesh;
                     }
                 }
-                curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
             }
-            if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
+            if (curve.type != CurveType.NoMesh)
             {
-                MeshGenerator.StartGenerating(curve);
+                if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
+                {
+                    MeshGenerator.StartGenerating(curve);
+                }
+            } 
+            else
+            {
+                curve.displayMesh.Clear();
+
             }
         }
         if (curve.HaveCurveSettingsChanged())

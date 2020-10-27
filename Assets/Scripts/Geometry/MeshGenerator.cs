@@ -162,6 +162,7 @@ public static class MeshGenerator
     {
         Repeat=0,
         Stretch=1,
+        SquareProjection=2,
     }
     private delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset);
     private static bool GenerateMesh()

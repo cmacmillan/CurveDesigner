@@ -511,8 +511,8 @@ public partial class BezierCurve : IActiveElement
                 break;
         }
         var retr = Vector3.ProjectOnPlane(reference,tangent).normalized;
-        if (Vector3.Dot(tangent, alt) < 0)
-            return -retr;
+        //if (Vector3.Dot(tangent, alt) < 0)
+            //return -retr;
         return retr;
     }
     /// <summary>
