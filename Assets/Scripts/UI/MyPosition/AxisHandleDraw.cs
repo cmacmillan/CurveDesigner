@@ -16,7 +16,8 @@ namespace Assets.NewUI
         private Vector3 axis;
         private Vector3 position;
         private float _distFromCamera;
-        public AxisHandleDraw(AxisHandleComposite creator,Curve3D curve,Vector3 axis,Vector3 position)
+        private float alpha;
+        public AxisHandleDraw(AxisHandleComposite creator,Curve3D curve,Vector3 axis,Vector3 position,float alpha)
         {
             creator.GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,creator.drawLineStartOffset);
             GUITools.WorldToGUISpace(creator.HandleToWorldSpace(lineEnd), out Vector2 _guiPos, out _distFromCamera);
@@ -24,6 +25,7 @@ namespace Assets.NewUI
             this.curve = curve;
             this.axis = axis;
             this.position = position;
+            this.alpha = alpha;
         }
         public IComposite Creator()
         {
@@ -40,6 +42,7 @@ namespace Assets.NewUI
         {
             if (Event.current.type != EventType.Repaint)
                 return;
+            color.a *= alpha;
             Handles.color = color;
             creator.GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,creator.drawLineStartOffset);
             Handles.DrawLine(lineStart,lineEnd);

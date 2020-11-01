@@ -16,6 +16,19 @@ public class SelectableGUIDFactory
         currentGUID++;
         return new SelectableGUID(currentGUID);
     }
+    private Dictionary<SelectableGUID, object> Objects = new Dictionary<SelectableGUID, object>();
+    public IEnumerable<T> GetSelected<T>(List<SelectableGUID> selected)  where T : class
+    {
+        foreach (var i in selected)
+        {
+            if (Objects.TryGetValue(i, out object value))
+            {
+                var casted = value as T;
+                if (casted != null)
+                    yield return casted;
+            }
+        }
+    }
 }
 //just a typed int
 [System.Serializable]

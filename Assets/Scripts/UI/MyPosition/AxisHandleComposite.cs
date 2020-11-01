@@ -12,6 +12,8 @@ namespace Assets.NewUI
         private Vector3 axis;
         private IPosition positionProvider;
         private AxisHandleClickCommand clickCommand;
+        public const float axisMaxDotProduct = .95f;
+        public const float axisStartFadeDotProduct= .9f;
         public AxisHandleComposite(IComposite parent,Curve3D curve,Vector3 axis,IPosition positionProvider,IOnPositionEdited onPositionEdited=null) : base(parent)
         {
             this.curve = curve;
@@ -19,15 +21,31 @@ namespace Assets.NewUI
             this.positionProvider = positionProvider;
             this.clickCommand = new AxisHandleClickCommand(positionProvider,axis,onPositionEdited);
         }
+        public float GetAxisDot()
+        {
+            Vector3 cameraWorldPos = SceneView.lastActiveSceneView.camera.transform.position;//should really use currently rendering scene camera rather than last active
+            float dot = Mathf.Abs(Vector3.Dot((cameraWorldPos-positionProvider.Position).normalized, axis));
+            return dot;
+        }
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
-            drawList.Add(new AxisHandleDraw(this, curve, axis,positionProvider.Position));
+            float dot = GetAxisDot();
+            float fadeWidth = axisMaxDotProduct - axisStartFadeDotProduct;
+            if (dot < axisMaxDotProduct)
+            {
+                float alpha = 1-Mathf.Clamp01((dot - axisStartFadeDotProduct) / fadeWidth);
+                drawList.Add(new AxisHandleDraw(this, curve, axis,positionProvider.Position,alpha));
+            }
         }
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
         {
-            GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,clickLineStartOffset);
-            GUITools.WorldToGUISpace(HandleToWorldSpace(lineEnd),out Vector2 guiPosition,out float screenDepth);
-            clickHits.Add(new ClickHitData(this,screenDepth,guiPosition-mousePosition));
+            var dot = GetAxisDot();
+            if (dot < axisMaxDotProduct)
+            {
+                GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize, clickLineStartOffset);
+                GUITools.WorldToGUISpace(HandleToWorldSpace(lineEnd), out Vector2 guiPosition, out float screenDepth);
+                clickHits.Add(new ClickHitData(this, screenDepth, guiPosition - mousePosition));
+            }
         }
         float coneSizeMultiplier = .2f;
         float lineLength = .6f;
@@ -82,7 +100,7 @@ namespace Assets.NewUI
         {
             float dist = HandleUtility.CalcLineTranslation(startMousePosition, mousePos, startPosition, axis);
             Vector3 worldPosition = startPosition+ axis* dist;
-            position.SetPosition(worldPosition);
+            position.SetPosition(worldPosition,selected);
             onPositionEdited?.OnPositionEdited();
         }
 

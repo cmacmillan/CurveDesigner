@@ -160,25 +160,6 @@ public class Curve3DInspector : Editor
             curve3d.selectedPoints = curve3d.ActiveElement.SelectAll(curve3d);
             Event.current.Use();
         }
-        if (Event.current.keyCode == KeyCode.Tab)
-        {
-            switch (curve3d.editMode)
-            {
-                case EditMode.PositionCurve:
-                    curve3d.editMode = EditMode.Rotation;
-                    break;
-                case EditMode.Rotation:
-                    curve3d.editMode = EditMode.Size;
-                    break;
-                case EditMode.Size:
-                    curve3d.editMode = EditMode.Color;
-                    break;
-                case EditMode.Color:
-                    curve3d.editMode = EditMode.PositionCurve;
-                    break;
-            }
-            Event.current.Use();
-        }
         SceneView.RepaintAll();
     }
 
