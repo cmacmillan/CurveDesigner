@@ -42,7 +42,7 @@ namespace Assets.NewUI
             _pointGroup = group;
             this._positionCurve = positionCurve;
             this.allCurves = allCurves;
-            var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position,transformBlob,_positionCurve);
+            var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position,transformBlob,_positionCurve,curve);
             centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,GetCenterPointClickCommand(),Curve3DSettings.Green,guid);
             centerPositionHandle = new PositionHandleComposite(this, curve, centerPointPosition,positionCurve);
             bool isCurveClosedLoop = positionCurve.isClosedLoop;
@@ -51,7 +51,7 @@ namespace Assets.NewUI
             //left tangent
             if (!isStartPoint || isCurveClosedLoop)
             {
-                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent,transformBlob,_positionCurve);
+                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent,transformBlob,_positionCurve,curve);
                 leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent,_positionCurve,_transformBlob,allCurves),Curve3DSettings.Green,guid);
                 leftTangentLine = new LineComposite(this,centerPointPosition,endPoint);
                 leftTangentPositionHandle= new PositionHandleComposite(this, curve, endPoint,positionCurve);
@@ -59,7 +59,7 @@ namespace Assets.NewUI
             //right tangent
             if (!isEndPoint || isCurveClosedLoop)
             {
-                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent,transformBlob,_positionCurve);
+                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent,transformBlob,_positionCurve,curve);
                 rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent,_positionCurve,_transformBlob,allCurves), Curve3DSettings.Green,guid);
                 rightTangentLine = new LineComposite(this,centerPointPosition, endPoint);
                 rightTangentPositionHandle= new PositionHandleComposite(this, curve, endPoint,positionCurve);

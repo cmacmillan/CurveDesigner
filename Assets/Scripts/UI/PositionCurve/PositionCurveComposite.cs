@@ -36,7 +36,7 @@ namespace Assets.NewUI
             int numSamples = curve3d.samplesForCursorCollisionCheck;
             var length = positionCurve.GetLength();
             for (int i = 0; i < numSamples; i++)
-                samples.Add(positionCurve.GetPointAtDistance(length * i / (numSamples - 1)));
+                samples.Add(positionCurve.GetPointAtDistance(length * i / (numSamples - 1),false));
             foreach (var i in samples)
                 i.position = transformBlob.TransformPoint(i.position);
             int segmentIndex;

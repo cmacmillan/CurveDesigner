@@ -20,9 +20,9 @@ namespace Assets.NewUI
             if (newClosedLoop != oldClosedLoop)
                 curve.UICurve.Initialize();
         }
-        public override BezierCurve CloneValue(BezierCurve value)
+        public override BezierCurve CloneValue(BezierCurve value,bool createNewGuids)
         {
-            return new BezierCurve(value);
+            return new BezierCurve(value,createNewGuids);
         }
     }
     [System.Serializable]
@@ -30,7 +30,7 @@ namespace Assets.NewUI
     {
         public ExtrudeSampler(string label, EditMode editMode) : base(label,editMode) { }
 
-        public ExtrudeSampler(ExtrudeSampler objToClone) : base(objToClone) { }
+        public ExtrudeSampler(ExtrudeSampler objToClone, bool createNewGuids) : base(objToClone,createNewGuids) { }
         public override void ConstantField(Rect rect)
         {
             throw new InvalidOperationException();
@@ -68,7 +68,7 @@ namespace Assets.NewUI
             {
                 float len = curve.GetLength();
                 newPoint = openPoints.OrderBy(a => curve.WrappedDistanceBetween(distance, a.GetDistance(curve))).First().value;
-                newPoint = new BezierCurve(newPoint);
+                newPoint = new BezierCurve(newPoint,true);
             }
             else
             {

@@ -19,7 +19,7 @@ namespace Assets.NewUI
             this.minValue = minValue;
             this.maxValue = maxValue;
         }
-        public FloatDistanceSampler(FloatDistanceSampler objToClone) : base(objToClone) {
+        public FloatDistanceSampler(FloatDistanceSampler objToClone, bool createNewGuids) : base(objToClone,createNewGuids) {
             this.minValue = objToClone.minValue;
             this.maxValue = objToClone.maxValue;
         }
@@ -132,7 +132,7 @@ namespace Assets.NewUI
             return v2;
         }
         public override float MaxValue() { return float.MaxValue; }
-        public override float CloneValue(float value)
+        public override float CloneValue(float value,bool createNewGuids)
         {
             return value;
         }

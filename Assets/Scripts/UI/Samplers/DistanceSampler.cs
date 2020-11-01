@@ -51,11 +51,11 @@ namespace Assets.NewUI
         private InterpolationMode _interpolationMode = InterpolationMode.Linear;
         public InterpolationMode InterpolationMode { get => _interpolationMode; set => _interpolationMode= value; }
 
-        public abstract T CloneValue(T value);
+        public abstract T CloneValue(T value,bool createNewGuids);
 
-        public void Copy(SamplerPoint<T,S,Q> objToClone, DistanceSampler<T,S,Q> newOwner)
+        public void Copy(SamplerPoint<T,S,Q> objToClone, DistanceSampler<T,S,Q> newOwner,bool createNewGuids)
         {
-            value = CloneValue(objToClone.value);
+            value = CloneValue(objToClone.value,createNewGuids);
             owner = newOwner as Q;
             segmentIndex = objToClone.segmentIndex;
             time = objToClone.time;
@@ -120,7 +120,7 @@ namespace Assets.NewUI
         public ValueDistanceSampler(string label,EditMode editMode) : base(label,editMode)
         {
         }
-        public ValueDistanceSampler(ValueDistanceSampler<T,S,Q> objToClone) : base(objToClone) {
+        public ValueDistanceSampler(ValueDistanceSampler<T,S,Q> objToClone,bool createNewGuids) : base(objToClone,createNewGuids) {
             _valueType = objToClone._valueType;
             constValue = CloneValue(objToClone.constValue);
         }
@@ -197,12 +197,12 @@ namespace Assets.NewUI
             return v1;
         }
 
-        public DistanceSampler(DistanceSampler<T,S,Q> objToClone)
+        public DistanceSampler(DistanceSampler<T,S,Q> objToClone,bool createNewGuids)
         {
             S Clone(S obj)
             {
                 var clonedPoint = new S();
-                clonedPoint.Copy(obj, this);
+                clonedPoint.Copy(obj, this,createNewGuids);
                 return clonedPoint;
             }
 
@@ -242,7 +242,7 @@ namespace Assets.NewUI
         public int InsertPointAtDistance(float distance, BezierCurve curve) {
             T interpolatedValue = GetInterpolatedValueAtDistance(distance, curve);
             var newPoint = new S();
-            newPoint.GUID = curve.owner.guidFactory.GetGUID();
+            newPoint.GUID = curve.owner.guidFactory.GetGUID(newPoint);
             newPoint.value = interpolatedValue;
             newPoint.owner = this as Q;
             var valuePoint = newPoint as ISamplerPoint;

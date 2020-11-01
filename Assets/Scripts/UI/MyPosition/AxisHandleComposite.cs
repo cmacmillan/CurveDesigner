@@ -54,8 +54,8 @@ namespace Assets.NewUI
         public float clickLineStartOffset = .2f;
 
         private Vector4 ToHomo(Vector3 v) { return new Vector4(v.x, v.y, v.z, 1); }
-        public Vector3 WorldToHandleSpace(Vector3 v) { return Handles.matrix* ToHomo(v); }
-        public Vector3 HandleToWorldSpace(Vector3 v) { return Handles.inverseMatrix* ToHomo(v); }
+        public Vector3 WorldToHandleSpace(Vector3 v) { return Handles.matrix*ToHomo(v); }
+        public Vector3 HandleToWorldSpace(Vector3 v) { return Handles.inverseMatrix*ToHomo(v); }
         public void GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,float lineStartOffset)
         {
             Vector3 position = positionProvider.Position;

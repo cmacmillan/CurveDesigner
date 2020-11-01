@@ -88,18 +88,18 @@ public static class MeshGenerator
         {
             IsBuzy = true;
             currentlyGeneratingCurve3D = curve.GetMeshGenerationID();
-            BezierCurve clonedCurve = new BezierCurve(curve.positionCurve);
+            BezierCurve clonedCurve = new BezierCurve(curve.positionCurve,false);
             lastUpdateTime = curve.lastMeshUpdateStartTime;
 
             MeshGenerator.curve = clonedCurve;
             MeshGenerator.RingPointCount = curve.ringPointCount;
             MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
-            MeshGenerator.tubeArcSampler = new FloatDistanceSampler(curve.arcOfTubeSampler);
-            MeshGenerator.sizeSampler = new FloatDistanceSampler(curve.sizeSampler);
-            MeshGenerator.rotationSampler = new FloatDistanceSampler(curve.rotationSampler);
-            MeshGenerator.colorSampler = new ColorDistanceSampler(curve.colorSampler);
-            MeshGenerator.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler);
-            MeshGenerator.thicknessSampler = new FloatDistanceSampler(curve.thicknessSampler);
+            MeshGenerator.tubeArcSampler = new FloatDistanceSampler(curve.arcOfTubeSampler,false);
+            MeshGenerator.sizeSampler = new FloatDistanceSampler(curve.sizeSampler,false);
+            MeshGenerator.rotationSampler = new FloatDistanceSampler(curve.rotationSampler,false);
+            MeshGenerator.colorSampler = new ColorDistanceSampler(curve.colorSampler,false);
+            MeshGenerator.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler,false);
+            MeshGenerator.thicknessSampler = new FloatDistanceSampler(curve.thicknessSampler,false);
             MeshGenerator.clampAndStretchMeshToCurve = curve.clampAndStretchMeshToCurve;
             MeshGenerator.IsClosedLoop = curve.isClosedLoop;
             MeshGenerator.CurveType = curve.type;

@@ -11,22 +11,33 @@ public class SelectableGUIDFactory
 {
     [SerializeField]
     private int currentGUID=0;
-    public SelectableGUID GetGUID()
+    public SelectableGUID GetGUID(ISelectable selectable)
     {
         currentGUID++;
-        return new SelectableGUID(currentGUID);
+        var newGuid = new SelectableGUID(currentGUID);
+        Objects.Add(newGuid,selectable);
+        return newGuid;
     }
-    private Dictionary<SelectableGUID, object> Objects = new Dictionary<SelectableGUID, object>();
-    public IEnumerable<T> GetSelected<T>(List<SelectableGUID> selected)  where T : class
+    [NonSerialized]
+    public Dictionary<SelectableGUID, ISelectable> Objects = new Dictionary<SelectableGUID, ISelectable>();//we need to rebuild this every time we deserialize
+    public IEnumerable<T> GetSelected<T>(List<SelectableGUID> selected)  where T : class, ISelectable
     {
         foreach (var i in selected)
         {
-            if (Objects.TryGetValue(i, out object value))
+            if (Objects.TryGetValue(i, out ISelectable value))
             {
                 var casted = value as T;
                 if (casted != null)
                     yield return casted;
             }
+        }
+    }
+    public IEnumerable<ISelectable> GetSelected(List<SelectableGUID> selected)
+    {
+        foreach (var i in selected)
+        {
+            if (Objects.TryGetValue(i, out ISelectable value))
+                yield return value;
         }
     }
 }
@@ -134,7 +145,7 @@ public static class ListSelectableGUIDExtension
 }
 
 //where need to more properly handle when we change contexts
-public interface ISelectable
+public interface ISelectable 
 {
     SelectableGUID GUID { get; }
     float GetDistance(BezierCurve positionCurve);

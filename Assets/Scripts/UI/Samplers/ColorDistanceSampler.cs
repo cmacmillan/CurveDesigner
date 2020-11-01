@@ -15,7 +15,7 @@ namespace Assets.NewUI
             constValue = Color.white;
         }
 
-        public ColorDistanceSampler(ColorDistanceSampler objToClone) : base(objToClone) { }
+        public ColorDistanceSampler(ColorDistanceSampler objToClone,bool createNewGuids) : base(objToClone,createNewGuids) { }
 
         public override void ConstantField(Rect rect)
         {
@@ -53,7 +53,7 @@ namespace Assets.NewUI
         public override Color Zero() { return Color.black; }
         public override Color MaxValue() { return Color.white; }
 
-        public override Color CloneValue(Color value) { return value; }
+        public override Color CloneValue(Color value,bool createNewGuids) { return value; }
 
         public override Color MinChange(Color v1, Color v2)
         {

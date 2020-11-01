@@ -223,7 +223,7 @@ namespace Assets.NewUI
             Field("showTangents");
             Field("lockToPositionZero");
             Field("placeLockedPoints");
-            //Field("samplesForCursorCollisionCheck");
+            Field("samplesForCursorCollisionCheck");
             //Field("_settings");
             bool needsReinitCurve=false;
             EditorGUI.BeginChangeCheck();

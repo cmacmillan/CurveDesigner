@@ -165,6 +165,25 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
     {
         foreach (var i in DistanceSamplers)
             i.RecalculateOpenCurveOnlyPoints(positionCurve);
+        //We need to rebuild the guid map
+        var dict = guidFactory.Objects;
+        dict.Clear();
+        foreach (var i in DistanceSamplers)
+            foreach (var j in i.AllPoints())
+                dict.Add(j.GUID, j);
+        foreach (var i in extrudeSampler.points)
+            foreach (var j in i.value.PointGroups)
+                dict.Add(j.GUID, j);
+        foreach (var i in positionCurve.PointGroups)
+            dict.Add(i.GUID, i);
+    }
+    public IEnumerable<T> GetSelected<T>(List<SelectableGUID> selected)  where T : class, ISelectable
+    {
+        return guidFactory.GetSelected<T>(selected);
+    }
+    public IEnumerable<ISelectable> GetSelected(List<SelectableGUID> selected)
+    {
+        return guidFactory.GetSelected(selected);
     }
 
     public FloatDistanceSampler sizeSampler;

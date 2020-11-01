@@ -22,12 +22,14 @@ namespace Assets.NewUI
         private PGIndex _type;
         private TransformBlob transformBlob;
         private BezierCurve _positionCurve;
-        public PointGroupPointPositionProvider(PointGroup group,PGIndex type, TransformBlob transformBlob, BezierCurve positionCurve)
+        private Curve3D _curve;
+        public PointGroupPointPositionProvider(PointGroup group,PGIndex type, TransformBlob transformBlob, BezierCurve positionCurve,Curve3D curve)
         {
             this.transformBlob = transformBlob;
             _group = group;
             _type = type;
             _positionCurve = positionCurve;
+            _curve = curve;
         }
         public Vector3 Position {
             get {
@@ -40,16 +42,14 @@ namespace Assets.NewUI
             //And we build the datastruct on ui rebuild?
 
 
+            var dimensionLockMode = _positionCurve.dimensionLockMode;
             Vector3 newPointPosition = transformBlob.InverseTransformPoint(position);
+            Vector3 oldPointPosition = _group.GetWorldPositionByIndex(_type,dimensionLockMode);
             Vector3 pointOffset = newPointPosition - oldPointPosition;
-            List<PointGroup> selectedPointGroups = new List<PointGroup>();
-            foreach (var i in allCurves)
-                foreach (var j in i.PointGroups)
-                    if (selected.Contains(j.GUID))
-                        selectedPointGroups.Add(j);
-            foreach (var i in selectedPointGroups)
-                i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index, dimensionLockMode) + pointOffset, dimensionLockMode);
-            //_group.SetWorldPositionByIndex(_type, ,_positionCurve.dimensionLockMode);
+            foreach (var i in _curve.GetSelected<PointGroup>(selected))
+            {
+                i.SetWorldPositionByIndex(_type, i.GetWorldPositionByIndex(_type, dimensionLockMode) + pointOffset, dimensionLockMode);
+            }
         }
     }
 }

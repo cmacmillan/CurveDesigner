@@ -66,15 +66,18 @@ public class PointGroup : ISelectEditable<PointGroup>
     public PointGroup(bool lockState,Curve3D owner)
     {
         SetPointLocked(lockState);
-        this.guid = owner.guidFactory.GetGUID();
+        this.guid = owner.guidFactory.GetGUID(this);
     }
-    public PointGroup(PointGroup clone,Curve3D curve)
+    public PointGroup(PointGroup clone,Curve3D curve,bool createNewGuids)
     {
         this.isPointLocked = clone.isPointLocked;
         this.leftTangent = clone.leftTangent;
         this.rightTangent = clone.rightTangent;
         this.position = clone.position;
-        this.guid = curve.guidFactory.GetGUID();
+        if (createNewGuids)
+            this.guid = curve.guidFactory.GetGUID(this);
+        else
+            this.guid = clone.guid;
     }
 
     public bool DoesEditAffectBothSegments(PGIndex index)

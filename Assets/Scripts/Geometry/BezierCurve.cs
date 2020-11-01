@@ -253,12 +253,12 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
     public BezierCurve() {
         PointGroups = new List<PointGroup>();
     }
-    public BezierCurve(BezierCurve curveToClone)
+    public BezierCurve(BezierCurve curveToClone,bool createNewGuids)
     {
         PointGroups = new List<PointGroup>();
         foreach (var i in curveToClone.PointGroups)
         {
-            PointGroups.Add(new PointGroup(i, curveToClone.owner));
+            PointGroups.Add(new PointGroup(i, curveToClone.owner,createNewGuids));
         }
         this.isClosedLoop = curveToClone.isClosedLoop;
         this.segments = new List<Segment>(curveToClone.segments.Count);
@@ -399,7 +399,7 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
         return segmentLen;
     }
 
-    public PointOnCurve GetPointAtDistance(float distance)
+    public PointOnCurve GetPointAtDistance(float distance,bool needsTangent=true)
     {
         distance = Mathf.Clamp(distance, 0, GetLength());
         float remainingDistance= distance;
@@ -409,7 +409,9 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
             {
                 float time = segments[segmentIndex].GetTimeAtLength(remainingDistance,out PointOnCurve lowerPoint,out Vector3 lowerReference);
                 Vector3 position = GetSegmentPositionAtTime(segmentIndex, time);
-                Vector3 tangent = GetSegmentTangentAtTime(segmentIndex, time);
+                Vector3 tangent = Vector3.zero;
+                if (needsTangent)
+                    tangent = GetSegmentTangentAtTime(segmentIndex, time);
                 var retr = new PointOnCurve(time,remainingDistance,position,segmentIndex,tangent);
                 retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (segmentIndex - 1 >= 0 ? segments[segmentIndex - 1].cummulativeLength : 0);
                 retr.CalculateReference(lowerPoint,lowerReference,this);
@@ -421,7 +423,9 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
             int finalSegmentIndex = NumSegments - 1;
             float time = 1.0f;
             Vector3 position = GetSegmentPositionAtTime(finalSegmentIndex, time);
-            Vector3 tangent = GetSegmentTangentAtTime(finalSegmentIndex, time);
+            Vector3 tangent = Vector3.zero;
+            if (needsTangent)
+                tangent = GetSegmentTangentAtTime(finalSegmentIndex, time);
             var retr = new PointOnCurve(time, segments[finalSegmentIndex].length, position, finalSegmentIndex,tangent);
             retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (finalSegmentIndex - 1 >= 0 ? segments[finalSegmentIndex - 1].cummulativeLength : 0);
             var finalSegmentSamples = segments[finalSegmentIndex].samples;

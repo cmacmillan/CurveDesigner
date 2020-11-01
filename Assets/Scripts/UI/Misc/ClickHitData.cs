@@ -9,6 +9,7 @@ namespace Assets.NewUI
     public class ClickHitData
     {
         public float distanceFromCamera;
+        public float distanceFromClick;
         public IClickable owner;
         public Vector2 offset;
         public bool hasBeenDragged=false;

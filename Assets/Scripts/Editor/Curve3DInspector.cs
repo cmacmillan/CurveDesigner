@@ -164,7 +164,7 @@ public class Curve3DInspector : Editor
     }
 
     void EnsureValidEditMode()
-    {
+    {   
         var curve3d = (target as Curve3D);
         if (curve3d.editMode == EditMode.Extrude && curve3d.type != CurveType.Extrude)
             curve3d.editMode = EditMode.PositionCurve;
@@ -362,7 +362,8 @@ public class Curve3DInspector : Editor
                 break;
             case EventType.MouseMove:
                 IMGUI();
-                HandleUtility.Repaint();
+                SceneView.lastActiveSceneView.Repaint();
+                //HandleUtility.Repaint();
                 break;
             default:
                 //Debug.Log($"{sceneCam.pixelRect} default");
@@ -432,23 +433,20 @@ public class Curve3DInspector : Editor
     {
         ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
         {
-            //Remove .ToList
-            var list = lst.ToList();
-            var smallClicks = lst.OrderBy(a => a.distanceFromCamera).ToList();
-            foreach (var i in smallClicks) 
+            List<ClickHitData> clicks = new List<ClickHitData>(lst);
+            foreach (var i in clicks)
+                i.distanceFromClick = i.owner.DistanceFromMouse(clickPosition);
+            clicks.Sort((a, b) => (int)Mathf.Sign(a.distanceFromCamera- b.distanceFromCamera));
+            foreach (var i in clicks) 
             {
-                float dist = i.owner.DistanceFromMouse(clickPosition);
+                float dist = i.distanceFromClick;
                 if (dist < smallDist)
                     return i;
             }
-            foreach (var i in list)
+            clicks.Sort((a, b) => (int)Mathf.Sign(a.distanceFromClick- b.distanceFromClick));
+            foreach (var i in clicks)
             {
-                float d = i.owner.DistanceFromMouse(clickPosition);
-            }
-            var bigClicks = lst.OrderBy(a => a.owner.DistanceFromMouse(clickPosition)).ToList();
-            foreach (var i in bigClicks)
-            {
-                float dist = i.owner.DistanceFromMouse(clickPosition);
+                float dist = i.distanceFromClick;
                 if (dist < bigDist)
                     return i;
             }
