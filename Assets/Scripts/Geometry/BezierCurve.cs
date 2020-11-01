@@ -7,7 +7,7 @@ using UnityEngine;
 
 //A class which defines a chain of 3rd order bezier curves (4 control points per segment)
 [System.Serializable]
-public partial class BezierCurve : IActiveElement
+public partial class BezierCurve : IActiveElement, IOnPositionEdited 
 {
     [SerializeField]
     [HideInInspector]
@@ -511,8 +511,6 @@ public partial class BezierCurve : IActiveElement
                 break;
         }
         var retr = Vector3.ProjectOnPlane(reference,tangent).normalized;
-        //if (Vector3.Dot(tangent, alt) < 0)
-            //return -retr;
         return retr;
     }
     /// <summary>
@@ -675,5 +673,10 @@ public partial class BezierCurve : IActiveElement
     public string GetPointName()
     {
         return "position";
+    }
+
+    public void OnPositionEdited()
+    {
+        Recalculate();
     }
 }

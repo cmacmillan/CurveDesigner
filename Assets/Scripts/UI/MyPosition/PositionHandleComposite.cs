@@ -12,12 +12,12 @@ namespace Assets.NewUI
         private AxisHandleComposite upAxis;
         private AxisHandleComposite forwardAxis;
         private IPosition positionProvider;
-        public PositionHandleComposite(IComposite parent,Curve3D curve,IPosition positionProvider) : base(parent)
+        public PositionHandleComposite(IComposite parent,Curve3D curve,IPosition positionProvider,IOnPositionEdited onPositionEdited=null) : base(parent)
         {
             this.positionProvider = positionProvider;
-            rightAxis = new AxisHandleComposite(this, curve, Vector3.right,positionProvider);
-            upAxis = new AxisHandleComposite(this, curve, Vector3.up,positionProvider);
-            forwardAxis= new AxisHandleComposite(this, curve, Vector3.forward,positionProvider);
+            rightAxis = new AxisHandleComposite(this, curve, Vector3.right,positionProvider,onPositionEdited);
+            upAxis = new AxisHandleComposite(this, curve, Vector3.up,positionProvider,onPositionEdited);
+            forwardAxis= new AxisHandleComposite(this, curve, Vector3.forward,positionProvider,onPositionEdited);
         }
         public override IEnumerable<IComposite> GetChildren()
         {

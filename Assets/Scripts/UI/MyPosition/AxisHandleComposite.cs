@@ -12,12 +12,12 @@ namespace Assets.NewUI
         private Vector3 axis;
         private IPosition positionProvider;
         private AxisHandleClickCommand clickCommand;
-        public AxisHandleComposite(IComposite parent,Curve3D curve,Vector3 axis,IPosition positionProvider) : base(parent)
+        public AxisHandleComposite(IComposite parent,Curve3D curve,Vector3 axis,IPosition positionProvider,IOnPositionEdited onPositionEdited=null) : base(parent)
         {
             this.curve = curve;
             this.axis = axis;
             this.positionProvider = positionProvider;
-            this.clickCommand = new AxisHandleClickCommand(positionProvider,axis);
+            this.clickCommand = new AxisHandleClickCommand(positionProvider,axis,onPositionEdited);
         }
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
@@ -63,10 +63,12 @@ namespace Assets.NewUI
     {
         private IPosition position;
         private Vector3 axis;
-        public AxisHandleClickCommand(IPosition position,Vector3 axis)
+        private IOnPositionEdited onPositionEdited;
+        public AxisHandleClickCommand(IPosition position,Vector3 axis,IOnPositionEdited onPositionEdited = null)
         {
             this.position = position;
             this.axis = axis;
+            this.onPositionEdited = onPositionEdited;
         }
         private Vector3 startPosition;
         private Vector2 startMousePosition;
@@ -81,10 +83,15 @@ namespace Assets.NewUI
             float dist = HandleUtility.CalcLineTranslation(startMousePosition, mousePos, startPosition, axis);
             Vector3 worldPosition = startPosition+ axis* dist;
             position.SetPosition(worldPosition);
+            onPositionEdited?.OnPositionEdited();
         }
 
         public void ClickUp(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
         {
         }
+    }
+    public interface IOnPositionEdited
+    {
+        void OnPositionEdited();
     }
 }
