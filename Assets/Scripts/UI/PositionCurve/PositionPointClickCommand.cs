@@ -60,20 +60,35 @@ namespace Assets.NewUI
                 else
                     shouldSet = false;    
             }
+            HashSet<int> indiciesToRecalculate = new HashSet<int>();
             if (shouldSet)
             {
                 var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);
                 Vector3 pointOffset = newPointPosition - oldPointPosition;
                 List<PointGroup> selectedPointGroups = new List<PointGroup>();
                 foreach (var i in allCurves)
+                {
+                    int segmentIndex = 0;
                     foreach (var j in i.PointGroups)
+                    {
                         if (selected.Contains(j.GUID))
+                        {
                             selectedPointGroups.Add(j);
+                            if (!indiciesToRecalculate.Contains(segmentIndex-1) && segmentIndex-1>0)
+                                indiciesToRecalculate.Add(segmentIndex-1);
+                            if (!indiciesToRecalculate.Contains(segmentIndex) && segmentIndex<positionCurve.NumSegments)
+                                indiciesToRecalculate.Add(segmentIndex);
+                        }
+                        segmentIndex++;
+                    }
+                }
                 foreach (var i in selectedPointGroups)
+                {
                     i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index,dimensionLockMode)+pointOffset, dimensionLockMode);
-
+                }
+                //positionCurve.Recalculate();
+                positionCurve.Recalculate(null,indiciesToRecalculate);//shouldn't this be recalcing for all the curves?
             }
-            positionCurve.Recalculate();
         }
 
         public void ClickUp(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)

@@ -67,8 +67,9 @@ namespace Assets.NewUI
         public override float DistanceFromMouse(Vector2 mouse)
         {
             GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,clickLineStartOffset);
-            float lineDist = HandleUtility.DistanceToLine(HandleToWorldSpace(lineStart),HandleToWorldSpace(lineEnd));
-            float coneDist = HandleUtility.DistanceToCircle(HandleToWorldSpace(lineEnd),handleSize*coneSizeMultiplier);
+            var worldSpaceEnd = HandleToWorldSpace(lineEnd);
+            float lineDist = HandleUtility.DistanceToLine(HandleToWorldSpace(lineStart),worldSpaceEnd);
+            float coneDist = HandleUtility.DistanceToCircle(worldSpaceEnd,handleSize*coneSizeMultiplier);
             return Mathf.Min(lineDist, coneDist);
         }
 

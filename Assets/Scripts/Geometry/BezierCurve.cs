@@ -520,14 +520,22 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
     /// <summary>
     /// must call after modifying points
     /// </summary>
-    public PointOnCurve Recalculate(PointOnCurve referenceHint = null)
+    public PointOnCurve Recalculate(PointOnCurve referenceHint = null,HashSet<int> recalculateOnlyIndicies=null)
     {
-        if (segments == null)
-            segments = new List<Segment>();
+        if (recalculateOnlyIndicies==null || segments == null)
+        {
+            if (segments == null)
+                segments = new List<Segment>();
+            else
+                segments.Clear();
+            for (int i = 0; i < NumSegments; i++)
+                segments.Add(new Segment(this, i, i == NumSegments - 1));
+        }   
         else
-            segments.Clear();
-        for (int i = 0; i < NumSegments; i++)
-            segments.Add(new Segment(this, i,i==NumSegments-1));
+        {
+            foreach (int recalculateOnlyIndex in recalculateOnlyIndicies)
+                segments[recalculateOnlyIndex].Recalculate(this,recalculateOnlyIndex,recalculateOnlyIndex==NumSegments-1);
+        }
         CalculateCummulativeLengths();
         ///Calculate reference vectors
         List<PointOnCurve> points = GetSamplePoints();
