@@ -1,4 +1,5 @@
 ﻿using Assets.NewUI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -60,23 +61,28 @@ public class PointGroup : ISelectEditable<PointGroup>
     [HideInInspector]
     [SerializeField]
     private SelectableGUID guid;
+    [HideInInspector]
+    [SerializeField]
+    public int segmentIndex;
 
-    //public BezierCurve owner;
-    //public int segmentIndex;
+    [NonSerialized]
+    public BezierCurve owner;
 
     public SelectableGUID GUID => guid;
     #endregion
-    public PointGroup(bool lockState,Curve3D owner)
+    public PointGroup(bool lockState,Curve3D curve,BezierCurve owner)
     {
         SetPointLocked(lockState);
-        this.guid = owner.guidFactory.GetGUID(this);
+        this.guid = curve.guidFactory.GetGUID(this);
+        this.owner = owner;
     }
-    public PointGroup(PointGroup clone,Curve3D curve,bool createNewGuids)
+    public PointGroup(PointGroup clone,Curve3D curve,BezierCurve newCurve,bool createNewGuids)
     {
         this.isPointLocked = clone.isPointLocked;
         this.leftTangent = clone.leftTangent;
         this.rightTangent = clone.rightTangent;
         this.position = clone.position;
+        this.owner = newCurve;
         if (createNewGuids)
             this.guid = curve.guidFactory.GetGUID(this);
         else
@@ -122,12 +128,13 @@ public class PointGroup : ISelectEditable<PointGroup>
                 return Vector3.zero;
         }
     }
-    public void SetWorldPositionByIndex(PGIndex index, Vector3 value, DimensionLockMode dimensionLockMode)
+    public void SetWorldPositionByIndex(PGIndex index, Vector3 value)
     {
+        var dimensionLockMode = owner.dimensionLockMode;
         switch (index)
         {
             case PGIndex.LeftTangent:
-                leftTangent = LockAxis(value,dimensionLockMode) - GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode);
+                leftTangent = LockAxis(value,dimensionLockMode) - GetWorldPositionByIndex(PGIndex.Position);
                 if (isPointLocked)
                     rightTangent = reflectAcrossPosition(leftTangent);
                 return;
@@ -135,7 +142,7 @@ public class PointGroup : ISelectEditable<PointGroup>
                 position = LockAxis(value, dimensionLockMode);
                 return;
             case PGIndex.RightTangent:
-                rightTangent = LockAxis(value, dimensionLockMode) - GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode);
+                rightTangent = LockAxis(value, dimensionLockMode) - GetWorldPositionByIndex(PGIndex.Position);
                 if (isPointLocked)
                     leftTangent = reflectAcrossPosition(rightTangent);
                 return;
@@ -143,8 +150,9 @@ public class PointGroup : ISelectEditable<PointGroup>
                 throw new System.ArgumentException();
         }
     }
-    public Vector3 GetWorldPositionByIndex(PGIndex index, DimensionLockMode dimensionLockMode,bool reflect = false)
+    public Vector3 GetWorldPositionByIndex(PGIndex index, bool reflect = false)
     {
+        var dimensionLockMode = owner.dimensionLockMode;
         switch (index)
         {
             case PGIndex.LeftTangent:
@@ -174,9 +182,9 @@ public class PointGroup : ISelectEditable<PointGroup>
         if (initialLocked != currentLockState)
             isLocked = currentLockState;
 
-        var initialLeft = GetWorldPositionByIndex(PGIndex.LeftTangent, curve.lockToPositionZero);
-        var initialPos = GetWorldPositionByIndex(PGIndex.Position, curve.lockToPositionZero);
-        var initialRight = GetWorldPositionByIndex(PGIndex.RightTangent, curve.lockToPositionZero);
+        var initialLeft = GetWorldPositionByIndex(PGIndex.LeftTangent);
+        var initialPos = GetWorldPositionByIndex(PGIndex.Position);
+        var initialRight = GetWorldPositionByIndex(PGIndex.RightTangent);
 
         var leftTangentOffset = EditorGUILayout.Vector3Field("Left Tangent", initialLeft-initialPos)-initialLeft+initialPos;
         var positionOffset = EditorGUILayout.Vector3Field("Position", initialPos)-initialPos;
@@ -191,9 +199,9 @@ public class PointGroup : ISelectEditable<PointGroup>
         {
             if (isLocked.HasValue)
                 target.SetPointLocked(isLocked.Value);
-            target.SetWorldPositionByIndex(PGIndex.Position,target.GetWorldPositionByIndex(PGIndex.Position,curve.lockToPositionZero)+positionOffset,curve.lockToPositionZero);
-            target.SetWorldPositionByIndex(PGIndex.LeftTangent,target.GetWorldPositionByIndex(PGIndex.LeftTangent,curve.lockToPositionZero)+leftTangentOffset,curve.lockToPositionZero);
-            target.SetWorldPositionByIndex(PGIndex.RightTangent,target.GetWorldPositionByIndex(PGIndex.RightTangent,curve.lockToPositionZero)+rightTangentOffset,curve.lockToPositionZero);
+            target.SetWorldPositionByIndex(PGIndex.Position,target.GetWorldPositionByIndex(PGIndex.Position)+positionOffset);
+            target.SetWorldPositionByIndex(PGIndex.LeftTangent,target.GetWorldPositionByIndex(PGIndex.LeftTangent)+leftTangentOffset);
+            target.SetWorldPositionByIndex(PGIndex.RightTangent,target.GetWorldPositionByIndex(PGIndex.RightTangent)+rightTangentOffset);
         }
     }
 

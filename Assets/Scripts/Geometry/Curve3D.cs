@@ -401,12 +401,22 @@ public class Curve3D : MonoBehaviour , ISerializationCallbackReceiver
         if (meshToTile!=null)
             retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
         retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
-        retr |= CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
         retr |= CheckFieldChanged(seperateInnerOuterTextures, ref old_seperateInnerOuterTextures);
         retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
         retr |= CheckFieldChanged(normalGenerationMode, ref old_normalGenerationMode);
         retr |= CheckFieldChanged(samplesPerSegment, ref old_samplesPerSegment);
         retr |= CheckFieldChanged(samplesForCursorCollisionCheck, ref old_samplesForCursorCollisionCheck);
+        bool didDimensionLockChange = CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
+        retr |= didDimensionLockChange;
+        if (didDimensionLockChange)
+        {
+            foreach (var i in positionCurve.PointGroups)
+            {
+                i.SetWorldPositionByIndex(PGIndex.LeftTangent,i.GetWorldPositionByIndex(PGIndex.LeftTangent));
+                i.SetWorldPositionByIndex(PGIndex.Position,i.GetWorldPositionByIndex(PGIndex.Position));
+                i.SetWorldPositionByIndex(PGIndex.RightTangent,i.GetWorldPositionByIndex(PGIndex.RightTangent));
+            }
+        }
 
         CheckSamplerChanged(colorSampler, ref old_constColor, ref old_colorInterpolation);
         CheckSamplerChanged(sizeSampler, ref old_constSize, ref old_sizeInterpolation);

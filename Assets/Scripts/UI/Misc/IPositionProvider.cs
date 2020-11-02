@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.NewUI
@@ -33,18 +29,28 @@ namespace Assets.NewUI
         }
         public Vector3 Position {
             get {
-                return transformBlob.TransformPoint(_group.GetWorldPositionByIndex(_type,_positionCurve.dimensionLockMode));
+                return transformBlob.TransformPoint(_group.GetWorldPositionByIndex(_type));
             }
         }
         public void SetPosition(Vector3 position,List<SelectableGUID> selected)
         {
             var dimensionLockMode = _positionCurve.dimensionLockMode;
             Vector3 newPointPosition = transformBlob.InverseTransformPoint(position);
-            Vector3 oldPointPosition = _group.GetWorldPositionByIndex(_type,dimensionLockMode);
+            Vector3 oldPointPosition = _group.GetWorldPositionByIndex(_type);
             Vector3 pointOffset = newPointPosition - oldPointPosition;
+            Dictionary<BezierCurve, SegmentIndexSet> curvesToRecalculate = new Dictionary<BezierCurve, SegmentIndexSet>();//yeesh allocations. Too lazy to use lists here tho
             foreach (var i in _curve.GetSelected<PointGroup>(selected))
             {
-                i.SetWorldPositionByIndex(_type, i.GetWorldPositionByIndex(_type, dimensionLockMode) + pointOffset, dimensionLockMode);
+                i.SetWorldPositionByIndex(_type, i.GetWorldPositionByIndex(_type) + pointOffset);
+                if (!curvesToRecalculate.ContainsKey(i.owner))
+                {
+                    curvesToRecalculate.Add(i.owner, new SegmentIndexSet(i.owner));
+                }
+                curvesToRecalculate[i.owner].Add(i.segmentIndex);
+            }
+            foreach (var i in curvesToRecalculate)
+            {
+                i.Key.Recalculate(null, i.Value);
             }
         }
     }

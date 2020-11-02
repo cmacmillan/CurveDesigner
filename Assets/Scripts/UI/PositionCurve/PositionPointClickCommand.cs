@@ -32,7 +32,7 @@ namespace Assets.NewUI
         public void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData data,List<SelectableGUID> selected)
         {
             var dimensionLockMode = positionCurve.dimensionLockMode;
-            var oldPointPosition = _group.GetWorldPositionByIndex(_index,dimensionLockMode);
+            var oldPointPosition = _group.GetWorldPositionByIndex(_index);
             Vector3 worldPos = Vector3.zero;
             bool shouldSet = true;
             if (dimensionLockMode== DimensionLockMode.none)
@@ -65,41 +65,26 @@ namespace Assets.NewUI
             {
                 var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);
                 Vector3 pointOffset = newPointPosition - oldPointPosition;
-                HashSet<int> indiciesToRecalculate = new HashSet<int>();
                 List<PointGroup> selectedPointGroups = new List<PointGroup>();
                 foreach (var currCurve in allCurves)
                 {
+                    SegmentIndexSet indiciesToRecalculate = new SegmentIndexSet(currCurve);
                     int segmentIndex = 0;
                     foreach (var j in currCurve.PointGroups)
                     {
                         if (selected.Contains(j.GUID))
                         {
                             selectedPointGroups.Add(j);
-                            if (currCurve.isClosedLoop)
-                            {
-                                int lower = SelectableGUID.mod(segmentIndex - 1, currCurve.NumSegments);
-                                int upper = SelectableGUID.mod(segmentIndex,currCurve.NumSegments);
-                                indiciesToRecalculate.Add(lower);
-                                indiciesToRecalculate.Add(upper);
-                            } 
-                            else
-                            {
-                                int lower = segmentIndex - 1;
-                                int upper = segmentIndex;
-                                if (lower>=0)
-                                    indiciesToRecalculate.Add(lower);
-                                if (upper<currCurve.NumSegments)
-                                    indiciesToRecalculate.Add(upper);
-                            }
+                            indiciesToRecalculate.Add(segmentIndex-1);
+                            indiciesToRecalculate.Add(segmentIndex);
                         }
                         segmentIndex++;
                     }
                     foreach (var i in selectedPointGroups)
                     {
-                        i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index, dimensionLockMode) + pointOffset, dimensionLockMode);
+                        i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index) + pointOffset);
                     }
                     currCurve.Recalculate(null, indiciesToRecalculate);
-                    indiciesToRecalculate.Clear();
                     selectedPointGroups.Clear();
                 }
             }

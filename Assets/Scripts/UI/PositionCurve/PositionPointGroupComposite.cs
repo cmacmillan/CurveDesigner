@@ -44,7 +44,7 @@ namespace Assets.NewUI
             this.allCurves = allCurves;
             var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position,transformBlob,_positionCurve,curve);
             centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,GetCenterPointClickCommand(),Curve3DSettings.Green,guid);
-            centerPositionHandle = new PositionHandleComposite(this, curve, centerPointPosition,positionCurve);
+            centerPositionHandle = new PositionHandleComposite(this, curve, centerPointPosition);
             bool isCurveClosedLoop = positionCurve.isClosedLoop;
             bool isStartPoint = group == positionCurve.PointGroups[0];
             bool isEndPoint = group == positionCurve.PointGroups[positionCurve.PointGroups.Count-1];
@@ -54,7 +54,7 @@ namespace Assets.NewUI
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent,transformBlob,_positionCurve,curve);
                 leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent,_positionCurve,_transformBlob,allCurves),Curve3DSettings.Green,guid);
                 leftTangentLine = new LineComposite(this,centerPointPosition,endPoint);
-                leftTangentPositionHandle= new PositionHandleComposite(this, curve, endPoint,positionCurve);
+                leftTangentPositionHandle= new PositionHandleComposite(this, curve, endPoint);
             }
             //right tangent
             if (!isEndPoint || isCurveClosedLoop)
@@ -62,7 +62,7 @@ namespace Assets.NewUI
                 var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent,transformBlob,_positionCurve,curve);
                 rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent,_positionCurve,_transformBlob,allCurves), Curve3DSettings.Green,guid);
                 rightTangentLine = new LineComposite(this,centerPointPosition, endPoint);
-                rightTangentPositionHandle= new PositionHandleComposite(this, curve, endPoint,positionCurve);
+                rightTangentPositionHandle= new PositionHandleComposite(this, curve, endPoint);
             }
         }
 

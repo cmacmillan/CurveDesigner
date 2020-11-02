@@ -7,7 +7,7 @@ using UnityEngine;
 
 //A class which defines a chain of 3rd order bezier curves (4 control points per segment)
 [System.Serializable]
-public partial class BezierCurve : IActiveElement, IOnPositionEdited 
+public partial class BezierCurve : IActiveElement, ISerializationCallbackReceiver
 {
     [SerializeField]
     [HideInInspector]
@@ -226,6 +226,7 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
     public bool DeleteGuids(List<SelectableGUID> guids, Curve3D curve)
     {
         bool didChange = SelectableGUID.Delete(ref PointGroups, guids, curve);
+        RegenSegmentIndicies();
         if (!didChange)
             return false;
         Recalculate();
@@ -258,7 +259,7 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
         PointGroups = new List<PointGroup>();
         foreach (var i in curveToClone.PointGroups)
         {
-            PointGroups.Add(new PointGroup(i, curveToClone.owner,createNewGuids));
+            PointGroups.Add(new PointGroup(i, curveToClone.owner,this,createNewGuids));
         }
         this.isClosedLoop = curveToClone.isClosedLoop;
         this.segments = new List<Segment>(curveToClone.segments.Count);
@@ -267,6 +268,7 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
         this.isCurveOutOfDate = curveToClone.isCurveOutOfDate;
         this.dimensionLockMode = curveToClone.dimensionLockMode;
         this.owner = curveToClone.owner;
+        this.RegenSegmentIndicies();
     }
 
     public enum SplitInsertionNeighborModification
@@ -278,18 +280,24 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
     #region curve manipulation
     public void Initialize()
     {
-        var pointA = new PointGroup(owner.placeLockedPoints,owner);
-        pointA.SetWorldPositionByIndex(PGIndex.Position, Vector3.zero,dimensionLockMode);
-        pointA.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(-1,0,0),dimensionLockMode);
-        pointA.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(1,0,0),dimensionLockMode);
+        var pointA = new PointGroup(owner.placeLockedPoints,owner,this);
+        pointA.SetWorldPositionByIndex(PGIndex.Position, Vector3.zero);
+        pointA.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(-1,0,0));
+        pointA.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(1,0,0));
         PointGroups.Add(pointA);
-        var pointB = new PointGroup(owner.placeLockedPoints,owner); 
-        pointB.SetWorldPositionByIndex(PGIndex.Position, new Vector3(1,1,0),dimensionLockMode);
-        pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0),dimensionLockMode);
-        pointB.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(2,1,0),dimensionLockMode);
+        var pointB = new PointGroup(owner.placeLockedPoints,owner,this); 
+        pointB.SetWorldPositionByIndex(PGIndex.Position, new Vector3(1,1,0));
+        pointB.SetWorldPositionByIndex(PGIndex.LeftTangent, new Vector3(0,1,0));
+        pointB.SetWorldPositionByIndex(PGIndex.RightTangent, new Vector3(2,1,0));
         PointGroups.Add(pointB);
+        RegenSegmentIndicies();
     }
 
+    private void RegenSegmentIndicies()
+    {
+        for (int i = 0; i < PointGroups.Count; i++)
+            PointGroups[i].segmentIndex = i;
+    }
     public SelectableGUID AppendPoint(bool isPrepend,bool lockPlacedPoint, Vector3 newPointPos)
     {
         PointGroup fromPoint = isPrepend ?PointGroups[0]:PointGroups.Last();
@@ -305,26 +313,27 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
             outTangent = PGIndex.RightTangent;
             inTangent = PGIndex.LeftTangent;
         }
-        fromPoint.SetWorldPositionByIndex(outTangent, fromPoint.GetWorldPositionByIndex(inTangent,dimensionLockMode,true), dimensionLockMode);
+        fromPoint.SetWorldPositionByIndex(outTangent, fromPoint.GetWorldPositionByIndex(inTangent,true));
 
-        PointGroup newPoint = new PointGroup(lockPlacedPoint,owner);
+        PointGroup newPoint = new PointGroup(lockPlacedPoint,owner,this);
         if (isPrepend)
             PointGroups.Insert(0, newPoint);
         else
             PointGroups.Add(newPoint);
-        newPoint.SetWorldPositionByIndex(PGIndex.Position,newPointPos, dimensionLockMode);
-        Vector3 middlePoint = (newPointPos + fromPoint.GetWorldPositionByIndex(PGIndex.Position, dimensionLockMode))/2.0f;
-        newPoint.SetWorldPositionByIndex(inTangent, middlePoint, dimensionLockMode);
-        newPoint.SetWorldPositionByIndex(outTangent, newPoint.GetWorldPositionByIndex(inTangent,dimensionLockMode,true), dimensionLockMode);
+        newPoint.SetWorldPositionByIndex(PGIndex.Position,newPointPos);
+        Vector3 middlePoint = (newPointPos + fromPoint.GetWorldPositionByIndex(PGIndex.Position))/2.0f;
+        newPoint.SetWorldPositionByIndex(inTangent, middlePoint);
+        newPoint.SetWorldPositionByIndex(outTangent, newPoint.GetWorldPositionByIndex(inTangent,true));
+        RegenSegmentIndicies();
         return newPoint.GUID;
     }
     public SelectableGUID InsertSegmentAfterIndex(ISegmentTime splitPoint,bool lockPlacedPoint,SplitInsertionNeighborModification shouldModifyNeighbors)
     {
         var prePointGroup = PointGroups[splitPoint.SegmentIndex];
         var postPointGroup = PointGroups[(splitPoint.SegmentIndex + 1)%PointGroups.Count];
-        PointGroup newPoint = new PointGroup(lockPlacedPoint,owner);
+        PointGroup newPoint = new PointGroup(lockPlacedPoint,owner,this);
         var basePosition = this.GetSegmentPositionAtTime(splitPoint.SegmentIndex, splitPoint.Time);
-        newPoint.SetWorldPositionByIndex(PGIndex.Position,basePosition,dimensionLockMode);
+        newPoint.SetWorldPositionByIndex(PGIndex.Position,basePosition);
         Vector3 leftTangent;
         Vector3 rightTangent;
         Vector3 preLeftTangent;
@@ -333,11 +342,11 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
 
         void prePointModify()
         {
-            prePointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,preLeftTangent,dimensionLockMode);
+            prePointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,preLeftTangent);
         }
         void postPointModify()
         {
-            postPointGroup.SetWorldPositionByIndex(PGIndex.LeftTangent,postRightTangent,dimensionLockMode);
+            postPointGroup.SetWorldPositionByIndex(PGIndex.LeftTangent,postRightTangent);
         }
         switch (shouldModifyNeighbors)
         {
@@ -352,30 +361,32 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
         }
 
         //use the bigger tangent, this only matters if the point is locked
-        if ((leftTangent-newPoint.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode)).magnitude<(rightTangent-newPoint.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode)).magnitude)
+        if ((leftTangent-newPoint.GetWorldPositionByIndex(PGIndex.Position)).magnitude<(rightTangent-newPoint.GetWorldPositionByIndex(PGIndex.Position)).magnitude)
         {
-            newPoint.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent,dimensionLockMode);
-            newPoint.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent,dimensionLockMode);
+            newPoint.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
+            newPoint.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent);
         }
         else
         {
-            newPoint.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent,dimensionLockMode);
-            newPoint.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent,dimensionLockMode);
+            newPoint.SetWorldPositionByIndex(PGIndex.RightTangent, rightTangent);
+            newPoint.SetWorldPositionByIndex(PGIndex.LeftTangent, leftTangent);
         }
 
         PointGroups.Insert(splitPoint.SegmentIndex+1,newPoint);
+        RegenSegmentIndicies();
         return newPoint.GUID;
     }
 
     public void AddDefaultSegment()
     {
         var finalPointGroup = PointGroups[PointGroups.Count - 1];
-        var finalPointPos = finalPointGroup.GetWorldPositionByIndex(PGIndex.Position,dimensionLockMode);
-        finalPointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,finalPointPos+new Vector3(1,0,0),dimensionLockMode);
-        var pointB = new PointGroup(owner.placeLockedPoints,owner);
-        pointB.SetWorldPositionByIndex(PGIndex.Position,finalPointPos+new Vector3(1,1,0),dimensionLockMode);
-        pointB.SetWorldPositionByIndex(PGIndex.LeftTangent,finalPointPos+new Vector3(0,1,0),dimensionLockMode);
+        var finalPointPos = finalPointGroup.GetWorldPositionByIndex(PGIndex.Position);
+        finalPointGroup.SetWorldPositionByIndex(PGIndex.RightTangent,finalPointPos+new Vector3(1,0,0));
+        var pointB = new PointGroup(owner.placeLockedPoints,owner,this);
+        pointB.SetWorldPositionByIndex(PGIndex.Position,finalPointPos+new Vector3(1,1,0));
+        pointB.SetWorldPositionByIndex(PGIndex.LeftTangent,finalPointPos+new Vector3(0,1,0));
         PointGroups.Add(pointB);
+        RegenSegmentIndicies();
         Recalculate();
     }
     #endregion
@@ -520,7 +531,7 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
     /// <summary>
     /// must call after modifying points
     /// </summary>
-    public PointOnCurve Recalculate(PointOnCurve referenceHint = null,HashSet<int> recalculateOnlyIndicies=null)
+    public PointOnCurve Recalculate(PointOnCurve referenceHint = null,SegmentIndexSet recalculateOnlyIndicies=null)
     {
         if (recalculateOnlyIndicies==null || segments == null)
         {
@@ -534,7 +545,9 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
         else
         {
             foreach (int recalculateOnlyIndex in recalculateOnlyIndicies)
-                segments[recalculateOnlyIndex].Recalculate(this,recalculateOnlyIndex,recalculateOnlyIndex==NumSegments-1);
+            {
+                segments[recalculateOnlyIndex].Recalculate(this, recalculateOnlyIndex, recalculateOnlyIndex == NumSegments - 1);
+            }
         }
         CalculateCummulativeLengths();
         ///Calculate reference vectors
@@ -610,11 +623,11 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
     {
         get
         {
-            return GetPointGroupByIndex(virtualIndex).GetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex),dimensionLockMode);
+            return GetPointGroupByIndex(virtualIndex).GetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex));
         }
         set
         {
-            GetPointGroupByIndex(virtualIndex).SetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex),value,dimensionLockMode);
+            GetPointGroupByIndex(virtualIndex).SetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex),value);
         }
     }
     public Vector3 this[int segmentVirtualIndex,int pointVirtualIndex]
@@ -690,5 +703,13 @@ public partial class BezierCurve : IActiveElement, IOnPositionEdited
     public void OnPositionEdited()
     {
         Recalculate();
+    }
+
+    public void OnBeforeSerialize() { /* Do Nothing*/ }
+
+    public void OnAfterDeserialize()
+    {
+        foreach (var i in PointGroups)
+            i.owner = this;
     }
 }

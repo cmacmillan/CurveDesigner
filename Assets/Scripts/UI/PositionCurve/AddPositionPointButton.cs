@@ -23,7 +23,7 @@ namespace Assets.NewUI
 
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
-            var centerPos = transformBlob.TransformPoint(GetPointGroup().GetWorldPositionByIndex(PGIndex.Position, positionCurve.dimensionLockMode));
+            var centerPos = transformBlob.TransformPoint(GetPointGroup().GetWorldPositionByIndex(PGIndex.Position));
             drawList.Add(new LineDraw(this, centerPos, Position, Color.white));
             base.Draw(drawList, closestElementToCursor);
         }
@@ -54,8 +54,8 @@ namespace Assets.NewUI
             {
                 PointGroup pointGroup = GetPointGroup();
                 PGIndex index = GetIndex();
-                var centerPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(PGIndex.Position, positionCurve.dimensionLockMode,true));
-                var offsetPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(index, positionCurve.dimensionLockMode,true));
+                var centerPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(PGIndex.Position,true));
+                var offsetPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(index,true));
                 GUITools.WorldToGUISpace(centerPos, out Vector2 centerGuiPos, out float centerScreenDepth);
                 GUITools.WorldToGUISpace(offsetPos, out Vector2 offsetGuiPos, out float offsetScreenDepth);
                 var diff = offsetGuiPos - centerGuiPos;
