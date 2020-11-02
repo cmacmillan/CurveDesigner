@@ -38,10 +38,6 @@ namespace Assets.NewUI
         }
         public void SetPosition(Vector3 position,List<SelectableGUID> selected)
         {
-            //we need to write a GetSelected<T>(List<SelectableGUID> selected) method
-            //And we build the datastruct on ui rebuild?
-
-
             var dimensionLockMode = _positionCurve.dimensionLockMode;
             Vector3 newPointPosition = transformBlob.InverseTransformPoint(position);
             Vector3 oldPointPosition = _group.GetWorldPositionByIndex(_type,dimensionLockMode);

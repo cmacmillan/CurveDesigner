@@ -111,6 +111,7 @@ namespace Assets.NewUI
     }
     public interface IOnPositionEdited
     {
+        //void OnPositionEdited(HashSet<int> editedSegments);
         void OnPositionEdited();
     }
 }

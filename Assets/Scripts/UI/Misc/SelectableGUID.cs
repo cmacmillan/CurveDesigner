@@ -127,7 +127,7 @@ public struct SelectableGUID
         retr.Add(Get(endIndex).GUID);
         return retr;
     }
-    static int mod(int x, int m)
+    public static int mod(int x, int m)
     {
         return (x % m + m) % m;
     }

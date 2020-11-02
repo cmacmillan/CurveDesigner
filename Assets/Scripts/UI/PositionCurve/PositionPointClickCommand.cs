@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -60,34 +61,47 @@ namespace Assets.NewUI
                 else
                     shouldSet = false;    
             }
-            HashSet<int> indiciesToRecalculate = new HashSet<int>();
             if (shouldSet)
             {
                 var newPointPosition = _transformBlob.InverseTransformPoint(worldPos);
                 Vector3 pointOffset = newPointPosition - oldPointPosition;
+                HashSet<int> indiciesToRecalculate = new HashSet<int>();
                 List<PointGroup> selectedPointGroups = new List<PointGroup>();
-                foreach (var i in allCurves)
+                foreach (var currCurve in allCurves)
                 {
                     int segmentIndex = 0;
-                    foreach (var j in i.PointGroups)
+                    foreach (var j in currCurve.PointGroups)
                     {
                         if (selected.Contains(j.GUID))
                         {
                             selectedPointGroups.Add(j);
-                            if (!indiciesToRecalculate.Contains(segmentIndex-1) && segmentIndex-1>0)
-                                indiciesToRecalculate.Add(segmentIndex-1);
-                            if (!indiciesToRecalculate.Contains(segmentIndex) && segmentIndex<positionCurve.NumSegments)
-                                indiciesToRecalculate.Add(segmentIndex);
+                            if (currCurve.isClosedLoop)
+                            {
+                                int lower = SelectableGUID.mod(segmentIndex - 1, currCurve.NumSegments);
+                                int upper = SelectableGUID.mod(segmentIndex,currCurve.NumSegments);
+                                indiciesToRecalculate.Add(lower);
+                                indiciesToRecalculate.Add(upper);
+                            } 
+                            else
+                            {
+                                int lower = segmentIndex - 1;
+                                int upper = segmentIndex;
+                                if (lower>=0)
+                                    indiciesToRecalculate.Add(lower);
+                                if (upper<currCurve.NumSegments)
+                                    indiciesToRecalculate.Add(upper);
+                            }
                         }
                         segmentIndex++;
                     }
+                    foreach (var i in selectedPointGroups)
+                    {
+                        i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index, dimensionLockMode) + pointOffset, dimensionLockMode);
+                    }
+                    currCurve.Recalculate(null, indiciesToRecalculate);
+                    indiciesToRecalculate.Clear();
+                    selectedPointGroups.Clear();
                 }
-                foreach (var i in selectedPointGroups)
-                {
-                    i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index,dimensionLockMode)+pointOffset, dimensionLockMode);
-                }
-                //positionCurve.Recalculate();
-                positionCurve.Recalculate(null,indiciesToRecalculate);//shouldn't this be recalcing for all the curves?
             }
         }
 

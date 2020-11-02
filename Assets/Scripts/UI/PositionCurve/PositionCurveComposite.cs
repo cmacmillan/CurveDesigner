@@ -33,7 +33,7 @@ namespace Assets.NewUI
         public void FindPointClosestToCursor()
         {
             List<PointOnCurve> samples = new List<PointOnCurve>();
-            int numSamples = curve3d.samplesForCursorCollisionCheck;
+            int numSamples = curve3d.samplesForCursorCollisionCheck*positionCurve.NumSegments;
             var length = positionCurve.GetLength();
             for (int i = 0; i < numSamples; i++)
                 samples.Add(positionCurve.GetPointAtDistance(length * i / (numSamples - 1),false));

@@ -61,6 +61,9 @@ public class PointGroup : ISelectEditable<PointGroup>
     [SerializeField]
     private SelectableGUID guid;
 
+    //public BezierCurve owner;
+    //public int segmentIndex;
+
     public SelectableGUID GUID => guid;
     #endregion
     public PointGroup(bool lockState,Curve3D owner)

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1683778398}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.09841844, g: 0.16645457, b: 0.3000598, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -97,7 +97,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 304c325fcd6a2134487d7de1b765664d,
+    type: 2}
   m_LightingSettings: {fileID: 4890085278179872738, guid: 0e0bb9683231ac04fb505845ac9bb42b,
     type: 2}
 --- !u!196 &4
@@ -584,8 +585,8 @@ Mesh:
       m_BitSize: 0
     m_UVInfo: 0
   m_LocalAABB:
-    m_Center: {x: -14.0160055, y: 25.227379, z: -20.070057}
-    m_Extent: {x: 42.434776, y: 31.428276, z: 8.372106}
+    m_Center: {x: 14.696325, y: 74.155655, z: -25.101963}
+    m_Extent: {x: 47.35798, y: 60.126865, z: 56.141766}
   m_MeshUsageFlags: 0
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
@@ -1836,8 +1837,9 @@ MonoBehaviour:
   graphicsMesh: {fileID: 0}
   graphicsMaterial: {fileID: 0}
   selectedPoints:
-  - id: 111316
-  shiftControlState: 0
+  - id: 541337
+  - id: 541338
+  shiftControlState: 1
   centeredStyle:
     m_Name: label
     m_Normal:
@@ -2525,7 +2527,7 @@ MonoBehaviour:
   placeLockedPoints: 1
   splitInsertionBehaviour: 0
   guidFactory:
-    currentGUID: 541327
+    currentGUID: 541349
   sizeSampler:
     points:
     - value: 0
@@ -2535,22 +2537,22 @@ MonoBehaviour:
       _guid:
         id: 494714
     - value: 0.83
-      segmentIndex: 0
-      time: 0.5012766
+      segmentIndex: 3
+      time: 0.18750225
       _interpolationMode: 0
       _guid:
         id: 514251
     - value: 0.7979463
-      segmentIndex: 0
-      time: 0.5012766
+      segmentIndex: 3
+      time: 0.18750225
       _interpolationMode: 0
       _guid:
         id: 494699
     fieldDisplayName: 
     label: Size
     editMode: 2
-    constValue: 0.39
-    _valueType: 1
+    constValue: 1.52
+    _valueType: 0
     minValue: 0
     maxValue: Infinity
   arcOfTubeSampler:
@@ -2567,7 +2569,7 @@ MonoBehaviour:
     fieldDisplayName: 
     label: Thickness
     editMode: 6
-    constValue: 0
+    constValue: 0.86
     _valueType: 0
     minValue: 0
     maxValue: Infinity
@@ -2584,19 +2586,19 @@ MonoBehaviour:
     points:
     - value: {r: 0, g: 0.4894483, b: 1, a: 1}
       segmentIndex: 0
-      time: 0.028701492
+      time: 0.02562164
       _interpolationMode: 0
       _guid:
         id: 408763
     - value: {r: 1, g: 0, b: 0, a: 1}
       segmentIndex: 0
-      time: 0.15240629
+      time: 0.2664743
       _interpolationMode: 0
       _guid:
         id: 408618
     - value: {r: 0.8712125, g: 1, b: 0, a: 1}
       segmentIndex: 0
-      time: 0.24067642
+      time: 0.70507133
       _interpolationMode: 0
       _guid:
         id: 409220
@@ -2610,15 +2612,63 @@ MonoBehaviour:
     - value:
         PointGroups:
         - isPointLocked: 1
-          leftTangent: {x: -3.0629325, y: -1.0920576, z: -0}
-          rightTangent: {x: 3.0629325, y: 1.0920576, z: 0}
-          position: {x: 1.082348, y: -4.0517235, z: 0}
+          leftTangent: {x: -16.683386, y: 13.273603, z: 0}
+          rightTangent: {x: 16.683386, y: -13.273603, z: -0}
+          position: {x: -4.56114, y: -4.0926394, z: 0}
+          guid:
+            id: 541332
+        - isPointLocked: 1
+          leftTangent: {x: -9.368017, y: -3.7752652, z: -0}
+          rightTangent: {x: 9.368017, y: 3.7752652, z: 0}
+          position: {x: 25.689276, y: -3.2326515, z: 0}
+          guid:
+            id: 541333
+        - isPointLocked: 1
+          leftTangent: {x: -1.0259781, y: 4.4118614, z: 0}
+          rightTangent: {x: 1.0259781, y: -4.4118614, z: -0}
+          position: {x: 20.835972, y: 13.8641815, z: 0}
+          guid:
+            id: 541334
+        - isPointLocked: 1
+          leftTangent: {x: 8.554668, y: 12.398235, z: 0}
+          rightTangent: {x: -8.554668, y: -12.398235, z: -0}
+          position: {x: 4.7411366, y: 5.406731, z: 0}
+          guid:
+            id: 541335
+        isCurveOutOfDate: 1
+        dimensionLockMode: 3
+        normalGenerationMode: 0
+        owner: {fileID: 1876743946}
+        isClosedLoop: 0
+      segmentIndex: 0
+      time: 0
+      _interpolationMode: 0
+      _guid:
+        id: 541336
+    - value:
+        PointGroups:
+        - isPointLocked: 1
+          leftTangent: {x: -16.683386, y: 13.273603, z: 0}
+          rightTangent: {x: 16.683386, y: -13.273603, z: -0}
+          position: {x: -4.56114, y: -4.0926394, z: 0}
           guid:
             id: 97234
         - isPointLocked: 1
-          leftTangent: {x: 3.3141274, y: -0.5448265, z: 0}
-          rightTangent: {x: -3.3141274, y: 0.5448265, z: -0}
-          position: {x: 0.9569833, y: -0.19823632, z: 0}
+          leftTangent: {x: -8.246172, y: 0.621866, z: -0}
+          rightTangent: {x: 8.246172, y: -0.621866, z: 0}
+          position: {x: 25.689371, y: -3.2327611, z: 0}
+          guid:
+            id: 541330
+        - isPointLocked: 1
+          leftTangent: {x: 4.9810905, y: -0.809206, z: 0}
+          rightTangent: {x: -4.9810905, y: 0.809206, z: -0}
+          position: {x: 21.185217, y: 31.563759, z: 0}
+          guid:
+            id: 541331
+        - isPointLocked: 1
+          leftTangent: {x: -4.395388, y: 16.041567, z: 0}
+          rightTangent: {x: 4.395388, y: -16.041567, z: -0}
+          position: {x: 1.2464528, y: 10.004887, z: 0}
           guid:
             id: 158619
         isCurveOutOfDate: 1
@@ -2626,8 +2676,8 @@ MonoBehaviour:
         normalGenerationMode: 0
         owner: {fileID: 1876743946}
         isClosedLoop: 0
-      segmentIndex: 0
-      time: 0.95343226
+      segmentIndex: 8
+      time: 0.94209635
       _interpolationMode: 0
       _guid:
         id: 97236
@@ -2639,15 +2689,93 @@ MonoBehaviour:
   positionCurve:
     PointGroups:
     - isPointLocked: 1
-      leftTangent: {x: 2.48843, y: -7.347275, z: 0.39476013}
-      rightTangent: {x: -2.48843, y: 7.347275, z: -0.39476013}
-      position: {x: 20.443619, y: 28.240562, z: -12.400028}
+      leftTangent: {x: 15.523262, y: -21.765442, z: -9.901524}
+      rightTangent: {x: -15.523262, y: 21.765442, z: 9.901524}
+      position: {x: 35.965866, y: 24.02407, z: 0.5128212}
       guid:
         id: 532214
     - isPointLocked: 1
-      leftTangent: {x: -0.5210774, y: 8.584597, z: -0.067092896}
-      rightTangent: {x: 0.5210774, y: -8.584597, z: 0.067092896}
-      position: {x: 1.5957162, y: 26.802649, z: -15.397282}
+      leftTangent: {x: 2.4056892, y: -35.8887, z: -10.10051}
+      rightTangent: {x: -2.4056892, y: 35.8887, z: 10.10051}
+      position: {x: 32.796013, y: 54.90546, z: 74.54999}
+      guid:
+        id: 541342
+    - isPointLocked: 1
+      leftTangent: {x: 2.5172882, y: -26.440044, z: 9.562901}
+      rightTangent: {x: -2.5172882, y: 26.440044, z: -9.562901}
+      position: {x: 20.300943, y: 63.35509, z: 14.640575}
+      guid:
+        id: 541343
+    - isPointLocked: 1
+      leftTangent: {x: -0.6693764, y: -26.466866, z: -9.712856}
+      rightTangent: {x: 0.6693764, y: 26.466866, z: 9.712856}
+      position: {x: 26.115389, y: 72.972824, z: 56.706966}
+      guid:
+        id: 541345
+    - isPointLocked: 1
+      leftTangent: {x: 3.1250782, y: -6.292885, z: 6.9227676}
+      rightTangent: {x: -3.1250782, y: 6.292885, z: -6.9227676}
+      position: {x: 22.950525, y: 91.450714, z: 53.016396}
+      guid:
+        id: 541349
+    - isPointLocked: 1
+      leftTangent: {x: 6.3737316, y: -38.46216, z: 3.6010704}
+      rightTangent: {x: -6.3737316, y: 38.46216, z: -3.6010704}
+      position: {x: 19.032495, y: 96.18338, z: 42.013042}
+      guid:
+        id: 541339
+    - isPointLocked: 1
+      leftTangent: {x: 3.2107582, y: -17.037971, z: 0.33866882}
+      rightTangent: {x: -3.2107582, y: 17.037971, z: -0.33866882}
+      position: {x: 18.729853, y: 123.731895, z: 61.391438}
+      guid:
+        id: 541348
+    - isPointLocked: 1
+      leftTangent: {x: 1.8391972, y: -18.659805, z: 8.695118}
+      rightTangent: {x: -1.8391972, y: 18.659805, z: -8.695118}
+      position: {x: 12.599131, y: 131.93535, z: 37.73746}
+      guid:
+        id: 541346
+    - isPointLocked: 1
+      leftTangent: {x: 0.3499298, y: -27.958748, z: -3.3017712}
+      rightTangent: {x: -0.3499298, y: 27.958748, z: 3.3017712}
+      position: {x: 9.568079, y: 102.17823, z: 6.8918266}
+      guid:
+        id: 541344
+    - isPointLocked: 1
+      leftTangent: {x: 3.0229492, y: -19.650421, z: 10.210777}
+      rightTangent: {x: -3.0229492, y: 19.650421, z: -10.210777}
+      position: {x: 7.456705, y: 138.46262, z: 16.312641}
+      guid:
+        id: 541340
+    - isPointLocked: 1
+      leftTangent: {x: 12.789734, y: -21.749214, z: 11.963531}
+      rightTangent: {x: -12.789734, y: 21.749214, z: -11.963531}
+      position: {x: -2.5866148, y: 104.695274, z: -6.4690065}
+      guid:
+        id: 541337
+    - isPointLocked: 1
+      leftTangent: {x: -1.135149, y: -9.488968, z: -3.9129868}
+      rightTangent: {x: 1.135149, y: 9.488968, z: 3.9129868}
+      position: {x: -4.7618923, y: 89.171, z: 20.797642}
+      guid:
+        id: 541347
+    - isPointLocked: 1
+      leftTangent: {x: 2.848566, y: -15.612091, z: 9.532188}
+      rightTangent: {x: -2.848566, y: 15.612091, z: -9.532188}
+      position: {x: -7.530615, y: 66.748314, z: -3.1706276}
+      guid:
+        id: 541341
+    - isPointLocked: 1
+      leftTangent: {x: 3.1538696, y: 18.49205, z: 16.96426}
+      rightTangent: {x: -3.1538696, y: -18.49205, z: -16.96426}
+      position: {x: -19.574484, y: 78.11929, z: -48.709126}
+      guid:
+        id: 541338
+    - isPointLocked: 1
+      leftTangent: {x: 16.146347, y: -13.059555, z: 22.36438}
+      rightTangent: {x: -16.146347, y: 13.059555, z: -22.36438}
+      position: {x: -26.915276, y: 35.208115, z: -39.684708}
       guid:
         id: 111316
     isCurveOutOfDate: 1
@@ -2655,7 +2783,7 @@ MonoBehaviour:
     normalGenerationMode: 0
     owner: {fileID: 1876743946}
     isClosedLoop: 0
-  showPositionHandles: 0
+  showPositionHandles: 1
   showPointSelectionWindow: 1
   showNormals: 0
   showTangents: 0
@@ -2665,12 +2793,12 @@ MonoBehaviour:
   filter: {fileID: 1876743947}
   displayMesh: {fileID: 833551855}
   isInitialized: 1
-  old_constSize: 0.39
+  old_constSize: 1.52
   old_constRotation: 0
   old_constColor: {r: 1, g: 1, b: 1, a: 1}
   old_constArcOfTube: 360
-  old_constThickness: 0
-  old_sizeInterpolation: 1
+  old_constThickness: 0.86
+  old_sizeInterpolation: 0
   old_rotationInterpolation: 0
   old_colorInterpolation: 1
   old_arcOfTubeInterpolation: 0
@@ -2687,10 +2815,10 @@ MonoBehaviour:
   old_vertexDensity: 13.8
   samplesPerSegment: 50
   old_samplesPerSegment: 50
-  samplesForCursorCollisionCheck: 15
-  old_samplesForCursorCollisionCheck: 15
-  ringPointCount: 6
-  old_ringPointCount: 6
+  samplesForCursorCollisionCheck: 4
+  old_samplesForCursorCollisionCheck: 4
+  ringPointCount: 50
+  old_ringPointCount: 50
   type: 3
   old_type: 3
   closeTilableMeshGap: 0
