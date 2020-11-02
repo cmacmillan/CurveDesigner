@@ -75,7 +75,6 @@ namespace Assets.NewUI
                         if (selected.Contains(j.GUID))
                         {
                             selectedPointGroups.Add(j);
-                            indiciesToRecalculate.Add(segmentIndex-1);
                             indiciesToRecalculate.Add(segmentIndex);
                         }
                         segmentIndex++;
