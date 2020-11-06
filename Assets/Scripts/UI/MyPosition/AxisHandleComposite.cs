@@ -1,10 +1,8 @@
-﻿using Assets.NewUI;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Assets.NewUI
+namespace ChaseMacMillan.CurveDesigner
 {
     public class AxisHandleComposite : IClickable
     {

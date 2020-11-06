@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Assets.NewUI
+namespace ChaseMacMillan.CurveDesigner
 {
     public enum DrawMode
     {

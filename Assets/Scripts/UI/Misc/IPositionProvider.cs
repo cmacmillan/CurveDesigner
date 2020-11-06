@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.NewUI
+namespace ChaseMacMillan.CurveDesigner
 {
     public interface IPosition : IPositionSetter, IPositionProvider { }
     public interface IPositionSetter

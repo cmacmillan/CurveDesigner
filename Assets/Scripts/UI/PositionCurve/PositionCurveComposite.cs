@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System.Collections.Generic;
 
-namespace Assets.NewUI
+namespace ChaseMacMillan.CurveDesigner
 {
     public class PositionCurveComposite : IComposite, IWindowDrawer
     {

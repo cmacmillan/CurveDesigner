@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-public enum MeshPrimaryAxis
+﻿namespace ChaseMacMillan.CurveDesigner
 {
-    auto,
-    x,
-    y,
-    z
+    public enum MeshPrimaryAxis
+    {
+        auto,
+        x,
+        y,
+        z
+    }
 }

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
-namespace Assets.NewUI
+namespace ChaseMacMillan.CurveDesigner
 {
     [System.Serializable]
     public class ExtrudePoint : SamplerPoint<BezierCurve, ExtrudePoint, ExtrudeSampler> //Gotta make sure to handle a null value
