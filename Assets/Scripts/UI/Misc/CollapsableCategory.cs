@@ -161,7 +161,7 @@ namespace ChaseMacMillan.CurveDesigner
                 {
                     SamplerField("arcOfTubeSampler", curve.arcOfTubeSampler,curve);
                 }
-                if (curve.type != CurveType.Mesh)
+                if (curve.type != CurveType.Mesh && curve.type!=CurveType.Cylinder)
                 {
                     SamplerField("thicknessSampler",curve.thicknessSampler,curve);
                 }

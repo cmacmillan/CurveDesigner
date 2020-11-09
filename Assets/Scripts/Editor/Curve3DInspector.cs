@@ -174,6 +174,7 @@ namespace ChaseMacMillan.CurveDesigner
             var curve3d = (target as Curve3D);
             curve3d.TryInitStyles();
             curve3d.TryInitialize();
+            curve3d.CacheAverageSize();
             EnsureValidEditMode();
             curve3d.BindDataToPositionCurve();
             curve3d.samplesPerSegment = Mathf.Max(1, curve3d.samplesPerSegment);
@@ -392,7 +393,9 @@ namespace ChaseMacMillan.CurveDesigner
                                 curve.displayMesh.Clear();
                             }
                             curve.displayMesh.SetVertices(MeshGenerator.vertices);
-                            curve.displayMesh.SetTriangles(MeshGenerator.triangles, 0);
+                            curve.displayMesh.subMeshCount = MeshGenerator.submeshCount;
+                            for (int i=0;i<MeshGenerator.submeshCount;i++)
+                                curve.displayMesh.SetTriangles(MeshGenerator.submeshes[i], i);
                             if (MeshGenerator.uvs.Count != MeshGenerator.vertices.Count)
                                 Debug.LogError($"Expected {MeshGenerator.vertices.Count} uvs, but got {MeshGenerator.uvs.Count}");
                             curve.displayMesh.SetUVs(0, MeshGenerator.uvs);

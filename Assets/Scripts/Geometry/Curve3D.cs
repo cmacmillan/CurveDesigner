@@ -327,7 +327,7 @@ namespace ChaseMacMillan.CurveDesigner
         private float old_samplesPerSegment = -1;
 
         [Min(1)]
-        public int samplesForCursorCollisionCheck = 15;
+        public int samplesForCursorCollisionCheck = 6;
         [SerializeField]
         [HideInInspector]
         private int old_samplesForCursorCollisionCheck;
@@ -362,6 +362,16 @@ namespace ChaseMacMillan.CurveDesigner
         [SerializeField]
         [HideInInspector]
         private MeshPrimaryAxis old_meshPrimaryAxis;
+
+        //need to serialize this stuff
+        public TextureLayer capTextureLayer;
+
+        public TextureLayer flatTextureLayer;
+        public TextureLayer alternateFlatTextureLayer;
+
+        public TextureLayer tubeTextureLayer;
+        public TextureLayer alternateTubeTextureLayer;
+        
 
         /*
         public Texture2D displacementTexture = null;
@@ -493,7 +503,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             float avg = 0;
             var points = sizeSampler.GetPoints(this.positionCurve);
-            if (points.Count == 0)
+            if (points.Count == 0 || sizeSampler.ValueType == ValueType.Constant)
             {
                 averageSize = sizeSampler.constValue;
             }
@@ -558,6 +568,13 @@ namespace ChaseMacMillan.CurveDesigner
             for (int i = 0; i < editModes.Length; i++)
                 editModes[i] = (EditMode)baseEditModes.GetValue(i);
         }
+    }
+    [System.Serializable]
+    public class TextureLayer
+    {
+        public Material material;
+        //Probably also need a texturing mode?
+        //And maybe a secondary stretch mode or something
     }
     public enum ValueType
     {
