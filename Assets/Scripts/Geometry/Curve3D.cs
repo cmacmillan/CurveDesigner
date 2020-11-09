@@ -363,15 +363,30 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private MeshPrimaryAxis old_meshPrimaryAxis;
 
-        //need to serialize this stuff
         public TextureLayer capTextureLayer;
+        [SerializeField]
+        [HideInInspector]
+        private TextureLayer old_capTextureLayer;
 
         public TextureLayer flatTextureLayer;
+        [SerializeField]
+        [HideInInspector]
+        private TextureLayer old_flatTextureLayer;
+
         public TextureLayer alternateFlatTextureLayer;
+        [SerializeField]
+        [HideInInspector]
+        private TextureLayer old_alternateFlatTextureLayer;
 
         public TextureLayer tubeTextureLayer;
+        [SerializeField]
+        [HideInInspector]
+        private TextureLayer old_tubeTextureLayer;
+
         public TextureLayer alternateTubeTextureLayer;
-        
+        [SerializeField]
+        [HideInInspector]
+        private TextureLayer old_alternateTubeTextureLayer;
 
         /*
         public Texture2D displacementTexture = null;
@@ -391,6 +406,13 @@ namespace ChaseMacMillan.CurveDesigner
                 return true;
             }
             return false;
+        }
+        public bool CheckTextureLayerChanged(TextureLayer curr, ref TextureLayer old)
+        {
+            bool changed = curr.material != old.material || curr.settings.textureGenMode != old.settings.textureGenMode;
+            if (changed)
+                old = curr;
+            return changed;
         }
 
         public bool HaveCurveSettingsChanged()
@@ -414,6 +436,13 @@ namespace ChaseMacMillan.CurveDesigner
             retr |= CheckFieldChanged(normalGenerationMode, ref old_normalGenerationMode);
             retr |= CheckFieldChanged(samplesPerSegment, ref old_samplesPerSegment);
             retr |= CheckFieldChanged(samplesForCursorCollisionCheck, ref old_samplesForCursorCollisionCheck);
+
+            retr |= CheckTextureLayerChanged(capTextureLayer, ref old_capTextureLayer);
+            retr |= CheckTextureLayerChanged(flatTextureLayer, ref old_flatTextureLayer);
+            retr |= CheckTextureLayerChanged(alternateFlatTextureLayer, ref old_alternateFlatTextureLayer);
+            retr |= CheckTextureLayerChanged(tubeTextureLayer, ref old_tubeTextureLayer);
+            retr |= CheckTextureLayerChanged(alternateTubeTextureLayer, ref old_alternateTubeTextureLayer);
+
             bool didDimensionLockChange = CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
             retr |= didDimensionLockChange;
             if (didDimensionLockChange)
@@ -570,11 +599,23 @@ namespace ChaseMacMillan.CurveDesigner
         }
     }
     [System.Serializable]
-    public class TextureLayer
+    public struct TextureLayer
     {
         public Material material;
-        //Probably also need a texturing mode?
-        //And maybe a secondary stretch mode or something
+        public TextureLayerSettings settings;
+    }
+    [System.Serializable]
+    public struct TextureLayerSettings
+    {
+        public TextureGenerationMode textureGenMode;
+    }
+    public enum TextureGenerationMode
+    {
+        Tile = 0,
+        Stretch = 1,
+        TileAndSlice=2,
+        CircleCap=3,
+        CrossSection=4,
     }
     public enum ValueType
     {
