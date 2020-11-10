@@ -388,16 +388,6 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private TextureLayer old_alternateTubeTextureLayer;
 
-        /*
-        public Texture2D displacementTexture = null;
-        [SerializeField]
-        [HideInInspector]
-        private Texture2D old_displacementTexture=null;
-        [SerializeField]
-        [HideInInspector]
-        public Color32[] displacementTextureColors = null;
-        */
-
         private bool CheckFieldChanged<T>(T field, ref T oldField)
         {
             if (!field.Equals(oldField))
