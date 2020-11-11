@@ -399,7 +399,9 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public bool CheckTextureLayerChanged(TextureLayer curr, ref TextureLayer old)
         {
-            bool changed = curr.material != old.material || curr.settings.textureGenMode != old.settings.textureGenMode;
+            bool changed = curr.material != old.material || 
+                           curr.settings.textureGenMode != old.settings.textureGenMode ||
+                           curr.settings.stretchDirection != old.settings.stretchDirection;
             if (changed)
                 old = curr;
             return changed;
@@ -598,6 +600,12 @@ namespace ChaseMacMillan.CurveDesigner
     public struct TextureLayerSettings
     {
         public TextureGenerationMode textureGenMode;
+        public TextureStretchDirection stretchDirection;
+    }
+    public enum TextureStretchDirection
+    {
+        x=0,
+        y=1,
     }
     public enum TextureGenerationMode
     {
