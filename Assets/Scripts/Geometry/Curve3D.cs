@@ -363,27 +363,27 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private MeshPrimaryAxis old_meshPrimaryAxis;
 
-        public TextureLayer capTextureLayer;
+        public TextureLayer capTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_capTextureLayer;
 
-        public TextureLayer flatTextureLayer;
+        public TextureLayer flatTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_flatTextureLayer;
 
-        public TextureLayer alternateFlatTextureLayer;
+        public TextureLayer alternateFlatTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_alternateFlatTextureLayer;
 
-        public TextureLayer tubeTextureLayer;
+        public TextureLayer tubeTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_tubeTextureLayer;
 
-        public TextureLayer alternateTubeTextureLayer;
+        public TextureLayer alternateTubeTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_alternateTubeTextureLayer;
@@ -401,7 +401,8 @@ namespace ChaseMacMillan.CurveDesigner
         {
             bool changed = curr.material != old.material || 
                            curr.settings.textureGenMode != old.settings.textureGenMode ||
-                           curr.settings.stretchDirection != old.settings.stretchDirection;
+                           curr.settings.stretchDirection != old.settings.stretchDirection ||
+                           curr.settings.scale != old.settings.scale;
             if (changed)
                 old = curr;
             return changed;
@@ -593,6 +594,11 @@ namespace ChaseMacMillan.CurveDesigner
     [System.Serializable]
     public struct TextureLayer
     {
+        public TextureLayer(Material m)
+        {
+            material = m;
+            settings = new TextureLayerSettings() { scale = 1, stretchDirection = TextureStretchDirection.x, textureGenMode = TextureGenerationMode.TileLengthTileWidth };
+        }
         public Material material;
         public TextureLayerSettings settings;
     }
@@ -601,6 +607,7 @@ namespace ChaseMacMillan.CurveDesigner
     {
         public TextureGenerationMode textureGenMode;
         public TextureStretchDirection stretchDirection;
+        public float scale;
     }
     public enum TextureStretchDirection
     {
@@ -610,10 +617,10 @@ namespace ChaseMacMillan.CurveDesigner
     public enum TextureGenerationMode
     {
         TileLengthStretchWidth = 0,
-        StretchLengthStretchWidth = 1,
-        TitleLengthTileWidth = 2,
+        StretchLengthStretchWidth = 1,//Scale not relevant for this one
+        TileLengthTileWidth = 2,
         CircleCap=3,
-        CrossSection=4,
+        CrossSection=4,//Scale not relevant
     }
     public enum ValueType
     {
