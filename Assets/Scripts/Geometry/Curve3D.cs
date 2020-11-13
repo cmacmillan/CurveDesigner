@@ -609,9 +609,9 @@ namespace ChaseMacMillan.CurveDesigner
     }
     public enum TextureGenerationMode
     {
-        Tile = 0,
-        Stretch = 1,
-        TileAndSlice=2,
+        TileLengthStretchWidth = 0,
+        StretchLengthStretchWidth = 1,
+        TitleLengthTileWidth = 2,
         CircleCap=3,
         CrossSection=4,
     }

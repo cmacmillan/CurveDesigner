@@ -375,10 +375,10 @@ namespace ChaseMacMillan.CurveDesigner
 
                     switch (texGenMode)
                     {
-                        case TextureGenerationMode.Tile:
-                        case TextureGenerationMode.Stretch:
+                        case TextureGenerationMode.TileLengthStretchWidth:
+                        case TextureGenerationMode.StretchLengthStretchWidth:
                             float stretchFactor=1;
-                            if (texGenMode == TextureGenerationMode.Tile)
+                            if (texGenMode == TextureGenerationMode.TileLengthStretchWidth)
                             {
                                 float length = 0;
                                 for (int i = ring1Base; i < ring1Base + pointsPerRing - 1; i++)
@@ -386,7 +386,7 @@ namespace ChaseMacMillan.CurveDesigner
                                 float thickness = GetThicknessAtDistance(point.distanceFromStartOfCurve);
                                 stretchFactor = length / thickness;
                             }
-                            else if (texGenMode == TextureGenerationMode.Stretch)
+                            else if (texGenMode == TextureGenerationMode.StretchLengthStretchWidth)
                             {
                                 stretchFactor = 1;
                             }
@@ -444,12 +444,14 @@ namespace ChaseMacMillan.CurveDesigner
             }
             void TileUVCreator(int pointsPerRing, float uvx, PointOnCurve currentPoint, float size,TextureStretchDirection stretchDirection)
             {
-                if (stretchDirection == TextureStretchDirection.x)
-                    for (int point = 0; point < pointsPerRing; point++)
-                        uvs.Add(new Vector2(uvx, point / (float)(pointsPerRing - 1)));
-                else if (stretchDirection == TextureStretchDirection.y)
-                    for (int point = 0; point < pointsPerRing; point++)
-                        uvs.Add(new Vector2(point / (float)(pointsPerRing - 1),uvx));
+                for (int point = 0; point < pointsPerRing; point++)
+                {
+                    float uvy = point / (float)(pointsPerRing - 1);
+                    if (stretchDirection == TextureStretchDirection.x)
+                        uvs.Add(new Vector2(uvx, uvy));
+                    else if (stretchDirection == TextureStretchDirection.y)
+                        uvs.Add(new Vector2(uvy, uvx));
+                }
             }
             void StretchUVCreator(int pointsPerRing, float uvx, PointOnCurve currentPoint, float size,TextureStretchDirection stretchDirection)
             {
@@ -473,13 +475,41 @@ namespace ChaseMacMillan.CurveDesigner
                     uvs.Add(new Vector2(x + .5f, y + .5f));
                 }
             }
+            List<float> tileLengthTileWidthUVCreatorBuffer = new List<float>();
+            void TileLengthTileWidthUVCreator(int pointsPerRing, float uvx, PointOnCurve currentPoint, float size,TextureStretchDirection stretchDirection)
+            {
+                tileLengthTileWidthUVCreatorBuffer.Clear();
+                //the texture should move away fromt the middle
+                Vector3 prev = Vector3.zero;
+                float dist = 0;
+                int startIndex = vertices.Count - pointsPerRing;
+                for (int point = 0; point < pointsPerRing; point++)
+                {
+                    Vector3 pos = vertices[point + startIndex];
+                    if (point > 0)
+                    {
+                        dist += Vector3.Distance(pos, prev);
+                    }
+                    prev = pos;
+                    tileLengthTileWidthUVCreatorBuffer.Add(dist);
+                }
+                for (int point = 0; point < pointsPerRing; point++)
+                {
+                    float x = tileLengthTileWidthUVCreatorBuffer[point] - dist / 2;
+                    float y = currentPoint.distanceFromStartOfCurve;
+                    if (stretchDirection == TextureStretchDirection.x)
+                        uvs.Add(new Vector2(x,y));
+                    else if (stretchDirection == TextureStretchDirection.y)
+                        uvs.Add(new Vector2(y,x));
+                }
+            }
             UVCreator GetUVCreator(TextureGenerationMode texGenMode)
             {
                 switch (texGenMode)
                 {
-                    case TextureGenerationMode.Tile:
+                    case TextureGenerationMode.TileLengthStretchWidth:
                         return TileUVCreator;
-                    case TextureGenerationMode.Stretch:
+                    case TextureGenerationMode.StretchLengthStretchWidth:
                         return StretchUVCreator;
                     case TextureGenerationMode.CrossSection:
                         switch (CurveType)
@@ -489,6 +519,8 @@ namespace ChaseMacMillan.CurveDesigner
                             default:
                                 throw new System.ArgumentException($"'{texGenMode}' not supported for curve type '{CurveType}'");
                         }
+                    case TextureGenerationMode.TitleLengthTileWidth:
+                        return TileLengthTileWidthUVCreator;
                     default:
                         throw new System.ArgumentException($"'{texGenMode}' Not Supported");
                 }
