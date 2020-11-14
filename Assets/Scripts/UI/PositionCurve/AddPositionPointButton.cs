@@ -53,7 +53,9 @@ namespace ChaseMacMillan.CurveDesigner
                 var centerPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(PGIndex.Position,true));
                 var offsetPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(index,true));
                 GUITools.WorldToGUISpace(centerPos, out Vector2 centerGuiPos, out float centerScreenDepth);
-                GUITools.WorldToGUISpace(offsetPos, out Vector2 offsetGuiPos, out float offsetScreenDepth);
+                bool needFlip = !GUITools.WorldToGUISpace(offsetPos, out Vector2 offsetGuiPos, out float offsetScreenDepth);
+                if (needFlip)
+                    offsetGuiPos = 2 * centerGuiPos - offsetGuiPos;
                 var diff = offsetGuiPos - centerGuiPos;
                 var direction = diff.normalized*guiOffsetPixelAmount;
                 var factor = direction.magnitude / diff.magnitude;

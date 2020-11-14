@@ -498,8 +498,8 @@ namespace ChaseMacMillan.CurveDesigner
                 }
                 for (int point = 0; point < pointsPerRing; point++)
                 {
-                    float x = textureScale*(tileLengthTileWidthUVCreatorBuffer[point] - dist / 2);
-                    float y = textureScale*(currentPoint.distanceFromStartOfCurve);
+                    float x = textureScale * currentPoint.distanceFromStartOfCurve/size;
+                    float y = textureScale*(tileLengthTileWidthUVCreatorBuffer[point] - dist / 2)/size;
                     if (stretchDirection == TextureStretchDirection.x)
                         uvs.Add(new Vector2(x,y));
                     else if (stretchDirection == TextureStretchDirection.y)
@@ -532,7 +532,7 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 UVCreator uvCreator = GetUVCreator(textureLayer.textureGenMode);
                 TextureStretchDirection stretchDirection = textureLayer.stretchDirection;
-                float textureScale = textureLayer.scale;
+                float textureScale = 1.0f/textureLayer.scale;
                 float uvx = 0;
                 float previousLength = -1;
                 for (int i = 0; i < points.Count; i++)

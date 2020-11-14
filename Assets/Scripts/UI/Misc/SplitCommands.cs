@@ -72,7 +72,7 @@ namespace ChaseMacMillan.CurveDesigner
         public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selectedPoints)
         {
             var pointGuid = curveToModify.AppendPoint(isPrepend,curve.placeLockedPoints,transformBlob.InverseTransformPoint(button.Position));
-            int bumpAboveIndex = isPrepend ? 1 : curveToModify.PointGroups.Count-2;
+            int bumpAboveIndex = isPrepend ? 0 : curveToModify.PointGroups.Count-2;
             if (isMainPositionCurve)//secondary position curves don't have samplers that need to be bumped
             {
                 foreach (var sampler in curve.DistanceSamplers)

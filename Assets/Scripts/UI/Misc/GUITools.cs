@@ -22,7 +22,8 @@ namespace ChaseMacMillan.CurveDesigner
             screenDepth = screen_pos.z;
             if (screen_pos.z < 0)
             {
-                guiPosition = Vector2.zero;
+                //guiPosition = Vector2.zero;
+                guiPosition = ScreenSpaceToGuiSpace(screen_pos);
                 return false;
             }
             guiPosition = ScreenSpaceToGuiSpace(screen_pos);
