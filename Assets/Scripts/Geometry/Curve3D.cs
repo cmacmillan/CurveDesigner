@@ -298,11 +298,6 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private bool old_clampAndStretchMeshToCurve;
 
-        public bool seperateInnerOuterTextures;
-        [SerializeField]
-        [HideInInspector]
-        private bool old_seperateInnerOuterTextures;
-
         public DimensionLockMode lockToPositionZero;
         [SerializeField]
         [HideInInspector]
@@ -363,35 +358,26 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private MeshPrimaryAxis old_meshPrimaryAxis;
 
-        public TextureLayer capTextureLayer = new TextureLayer(null);
+        public TextureLayer mainTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
-        private TextureLayer old_capTextureLayer;
+        private TextureLayer old_mainTextureLayer = new TextureLayer(null);
 
-        public TextureLayer flatTextureLayer = new TextureLayer(null);
+        public TextureLayer backTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
-        private TextureLayer old_flatTextureLayer;
+        private TextureLayer old_backTextureLayer = new TextureLayer(null);
 
-        public TextureLayer alternateFlatTextureLayer = new TextureLayer(null);
+        public TextureLayer endTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
-        private TextureLayer old_alternateFlatTextureLayer;
-
-        public TextureLayer tubeTextureLayer = new TextureLayer(null);
-        [SerializeField]
-        [HideInInspector]
-        private TextureLayer old_tubeTextureLayer;
-
-        public TextureLayer alternateTubeTextureLayer = new TextureLayer(null);
-        [SerializeField]
-        [HideInInspector]
-        private TextureLayer old_alternateTubeTextureLayer;
+        private TextureLayer old_endTextureLayer = new TextureLayer(null);
 
         public TextureLayer edgeTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
-        private TextureLayer old_edgeTextureLayer;
+        private TextureLayer old_edgeTextureLayer = new TextureLayer(null);
+
 
         private bool CheckFieldChanged<T>(T field, ref T oldField)
         {
@@ -429,17 +415,14 @@ namespace ChaseMacMillan.CurveDesigner
             if (meshToTile != null)
                 retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
             retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
-            retr |= CheckFieldChanged(seperateInnerOuterTextures, ref old_seperateInnerOuterTextures);
             retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
             retr |= CheckFieldChanged(normalGenerationMode, ref old_normalGenerationMode);
             retr |= CheckFieldChanged(samplesPerSegment, ref old_samplesPerSegment);
             retr |= CheckFieldChanged(samplesForCursorCollisionCheck, ref old_samplesForCursorCollisionCheck);
 
-            retr |= CheckTextureLayerChanged(capTextureLayer, ref old_capTextureLayer);
-            retr |= CheckTextureLayerChanged(flatTextureLayer, ref old_flatTextureLayer);
-            retr |= CheckTextureLayerChanged(alternateFlatTextureLayer, ref old_alternateFlatTextureLayer);
-            retr |= CheckTextureLayerChanged(tubeTextureLayer, ref old_tubeTextureLayer);
-            retr |= CheckTextureLayerChanged(alternateTubeTextureLayer, ref old_alternateTubeTextureLayer);
+            retr |= CheckTextureLayerChanged(mainTextureLayer, ref old_mainTextureLayer);
+            retr |= CheckTextureLayerChanged(backTextureLayer, ref old_backTextureLayer);
+            retr |= CheckTextureLayerChanged(endTextureLayer, ref old_endTextureLayer);
             retr |= CheckTextureLayerChanged(edgeTextureLayer, ref old_edgeTextureLayer);
 
             bool didDimensionLockChange = CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
@@ -595,7 +578,7 @@ namespace ChaseMacMillan.CurveDesigner
         public TextureLayer(Material m)
         {
             material = m;
-            settings = new TextureLayerSettings() { scale = 1, stretchDirection = TextureStretchDirection.x, textureGenMode = TextureGenerationMode.TileLengthTileWidth };
+            settings = new TextureLayerSettings() { scale = 1, stretchDirection = TextureStretchDirection.x, textureGenMode = TextureGenerationMode.Tile };
         }
         public Material material;
         public TextureLayerSettings settings;
@@ -615,10 +598,8 @@ namespace ChaseMacMillan.CurveDesigner
     public enum TextureGenerationMode
     {
         TileLengthStretchWidth = 0,
-        StretchLengthStretchWidth = 1,//Scale not relevant for this one
-        TileLengthTileWidth = 2,
-        CircleCap=3,
-        CrossSection=4,//Scale not relevant
+        Stretch = 1,//Scale not relevant for this one
+        Tile = 2,
     }
     public enum ValueType
     {

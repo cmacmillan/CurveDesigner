@@ -205,13 +205,11 @@ namespace ChaseMacMillan.CurveDesigner
         {
             serializedObj = new SerializedObject(curve);
             //GUILayout.Label("textures");
-            Field("seperateInnerOuterTextures");
-            Field("capTextureLayer");
-            Field("flatTextureLayer");
-            Field("alternateFlatTextureLayer");
-            Field("tubeTextureLayer");
-            Field("alternateTubeTextureLayer");
+            Field("mainTextureLayer");
+            Field("backTextureLayer");
+            Field("endTextureLayer");
             Field("edgeTextureLayer");
+
             serializedObj.ApplyModifiedProperties();
         }
     }
