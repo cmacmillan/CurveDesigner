@@ -388,6 +388,11 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private TextureLayer old_alternateTubeTextureLayer;
 
+        public TextureLayer edgeTextureLayer = new TextureLayer(null);
+        [SerializeField]
+        [HideInInspector]
+        private TextureLayer old_edgeTextureLayer;
+
         private bool CheckFieldChanged<T>(T field, ref T oldField)
         {
             if (!field.Equals(oldField))
@@ -435,6 +440,7 @@ namespace ChaseMacMillan.CurveDesigner
             retr |= CheckTextureLayerChanged(alternateFlatTextureLayer, ref old_alternateFlatTextureLayer);
             retr |= CheckTextureLayerChanged(tubeTextureLayer, ref old_tubeTextureLayer);
             retr |= CheckTextureLayerChanged(alternateTubeTextureLayer, ref old_alternateTubeTextureLayer);
+            retr |= CheckTextureLayerChanged(edgeTextureLayer, ref old_edgeTextureLayer);
 
             bool didDimensionLockChange = CheckFieldChanged(lockToPositionZero, ref old_lockToPositionZero);
             retr |= didDimensionLockChange;
@@ -455,14 +461,6 @@ namespace ChaseMacMillan.CurveDesigner
             CheckSamplerChanged(thicknessSampler, ref old_constThickness, ref old_thicknessInterpolation);
 
             retr |= CheckClosedLoopToggled();
-            /*
-            if (displacementTexture != old_displacementTexture)
-            {
-                old_displacementTexture = displacementTexture;
-                displacementTextureColors = displacementTexture?.GetPixels32();
-                retr = true;
-            }
-            */
 
             return retr;
         }

@@ -71,6 +71,7 @@ namespace ChaseMacMillan.CurveDesigner
         public static TextureLayerSettings alternateFlatTextureLayer;
         public static TextureLayerSettings tubeTextureLayer;
         public static TextureLayerSettings alternateTubeTextureLayer;
+        public static TextureLayerSettings edgeTextureLayer;
 
         public static int RingPointCount = 2;
         public static int EdgePointCount = 20;
@@ -117,6 +118,7 @@ namespace ChaseMacMillan.CurveDesigner
                 MeshGenerator.alternateFlatTextureLayer = curve.alternateFlatTextureLayer.settings;
                 MeshGenerator.tubeTextureLayer = curve.tubeTextureLayer.settings;
                 MeshGenerator.alternateTubeTextureLayer= curve.alternateTubeTextureLayer.settings;
+                MeshGenerator.edgeTextureLayer = curve.edgeTextureLayer.settings;
 
                 MeshGenerator.IsClosedLoop = curve.isClosedLoop;
                 MeshGenerator.CurveType = curve.type;
@@ -273,7 +275,7 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                 }
             }
-            void CreateEdgeVertsTrisAndUvs(List<EdgePointInfo> edgePointInfos, int submeshIndex, bool flip = false)
+            void CreateEdgeVertsTrisAndUvs(List<EdgePointInfo> edgePointInfos, int submeshIndex, TextureLayerSettings textureLayer,bool flip = false)
             {
                 int prevs1p1 = -1;
                 int prevs1p2 = -1;
@@ -283,6 +285,8 @@ namespace ChaseMacMillan.CurveDesigner
                 int s1p2 = -1;
                 int s2p1 = -1;
                 int s2p2 = -1;
+
+                UVCreator uvCreator = GetUVCreator(textureLayer.textureGenMode);
 
                 for (int i = 0; i < edgePointInfos.Count; i++)
                 {
@@ -696,7 +700,7 @@ namespace ChaseMacMillan.CurveDesigner
                         CreatePointsAlongCurve(TubePointCreator, sampled, -.5f, RingPointCount, out float farUVX,alternateTubeTextureLayer);
                         TrianglifyLayer(true, RingPointCount, 0,useSubmeshes?0:0);
                         TrianglifyLayer(false, RingPointCount, numVerts / 2,useSubmeshes?1:0);
-                        CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount),useSubmeshes?2:0);
+                        CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount),useSubmeshes?2:0,edgeTextureLayer);
                         if (!IsClosedLoop)
                             CreateEndPlates(TubePointCreator, farUVX, RingPointCount,useSubmeshes?3:0,capTextureLayer.textureGenMode);
                         return true;
@@ -711,7 +715,7 @@ namespace ChaseMacMillan.CurveDesigner
                         CreatePointsAlongCurve(RectanglePointCreator, sampled, -.5f, pointsPerFace, out float farUVX,alternateFlatTextureLayer);
                         TrianglifyLayer(true, pointsPerFace, 0,useSubmeshes?0:0);
                         TrianglifyLayer(false, pointsPerFace, numVerts / 2,useSubmeshes?1:0);
-                        CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointsPerFace),useSubmeshes?2:0);
+                        CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointsPerFace),useSubmeshes?2:0,edgeTextureLayer);
                         if (!IsClosedLoop)
                             CreateEndPlates(RectanglePointCreator, farUVX, pointsPerFace,useSubmeshes?3:0,capTextureLayer.textureGenMode);
                         return true;
@@ -728,7 +732,7 @@ namespace ChaseMacMillan.CurveDesigner
                         CreatePointsAlongCurve(ExtrudePointCreator, sampled, -.5f, pointCount, out float farUVX,alternateFlatTextureLayer);
                         TrianglifyLayer(true, pointCount, numVerts / 2,useSubmeshes?0:0);
                         TrianglifyLayer(false, pointCount, 0,useSubmeshes?1:0);
-                        CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount), useSubmeshes?2:0,true);
+                        CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount), useSubmeshes?2:0,edgeTextureLayer,true);
                         if (!IsClosedLoop)
                             CreateEndPlates(ExtrudePointCreator, farUVX, pointCount, useSubmeshes?3:0,capTextureLayer.textureGenMode,true);
                         return true;

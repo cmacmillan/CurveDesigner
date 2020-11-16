@@ -211,6 +211,7 @@ namespace ChaseMacMillan.CurveDesigner
             Field("alternateFlatTextureLayer");
             Field("tubeTextureLayer");
             Field("alternateTubeTextureLayer");
+            Field("edgeTextureLayer");
             serializedObj.ApplyModifiedProperties();
         }
     }

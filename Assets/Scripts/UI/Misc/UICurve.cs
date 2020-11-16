@@ -77,8 +77,11 @@ namespace ChaseMacMillan.CurveDesigner
             extrudeCurve = new ExtrudeCurveComposite(this, _curve.extrudeSampler, _curve,positionCurve);
             BakeBlobs();
             _curve.RequestMeshUpdate();
-            positionCurve.FindPointClosestToCursor();
-            extrudeCurve.FindClosestPointsToCursor();
+            if (Event.current != null)
+            {
+                positionCurve.FindPointClosestToCursor();
+                extrudeCurve.FindClosestPointsToCursor();
+            }
         }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
