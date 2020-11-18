@@ -185,7 +185,6 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 
-        private delegate void UVCreator(int pointsPerRing,float uvx,PointOnCurve currentPoint,float size,TextureStretchDirection stretchDirection,float textureScale);
         private delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset);
         private static bool GenerateMesh()
         {
@@ -284,8 +283,6 @@ namespace ChaseMacMillan.CurveDesigner
                 int s2p1 = -1;
                 int s2p2 = -1;
 
-                UVCreator uvCreator = GetUVCreator(textureLayer.textureGenMode);
-
                 for (int i = 0; i < edgePointInfos.Count; i++)
                 {
                     var curr = edgePointInfos[i];
@@ -359,67 +356,86 @@ namespace ChaseMacMillan.CurveDesigner
                 }
                 return retr;
             }
-            void CreateEndPlates(PointCreator pointCreator, float farUVx, int pointsPerRing, int submeshIndex, TextureGenerationMode texGenMode,bool flip = false)
+            void CreateUvBand(TextureLayerSettings settings,float uvx, int pointsPerBand,float distFromStart)
             {
-                void Partial_CreateEndPlates(bool isStartPlate)
+                switch (settings.textureGenMode)
                 {
-                    PointOnCurve point;
-                    if (isStartPlate)
-                        point = sampled[0];
-                    else
-                        point = sampled.Last();
-
-                    int ring1Base = vertices.Count;
-                    CreateRing(pointCreator, pointsPerRing, .5f, point,out _);
-
-                    int ring2Base = vertices.Count;
-                    CreateRing(pointCreator, pointsPerRing, -.5f, point,out _);
-
-                    switch (texGenMode)
-                    {
-                        case TextureGenerationMode.TileLengthStretchWidth:
-                        case TextureGenerationMode.Stretch:
-                            float stretchFactor=1;
-                            if (texGenMode == TextureGenerationMode.TileLengthStretchWidth)
-                            {
-                                float length = 0;
-                                for (int i = ring1Base; i < ring1Base + pointsPerRing - 1; i++)
-                                    length += Vector3.Distance(vertices[i], vertices[i + 1]);
-                                float thickness = GetThicknessAtDistance(point.distanceFromStartOfCurve);
-                                stretchFactor = length / thickness;
-                            }
-                            else if (texGenMode == TextureGenerationMode.Stretch)
-                            {
-                                stretchFactor = 1;
-                            }
-                            float mul = stretchFactor / (pointsPerRing - 1);
-                            for (int i = 0; i < pointsPerRing; i++)
-                                uvs.Add(new Vector2(i * mul, 0));
-                            for (int i = 0; i < pointsPerRing; i++)
-                                uvs.Add(new Vector2(i * mul, 1));
-                            break;
-                    }
-
-                    bool side = isStartPlate;
-                    if (flip)
-                        side = !side;
-
-                    for (int i = 0; i < pointsPerRing - 1; i++)
-                    {
-                        int side1 = ring1Base + i;
-                        int side2 = ring2Base + i;
-                        if (side)
-                            DrawQuad(side1 + 1, side1, side2 + 1, side2,submeshIndex);
-                        else
-                            DrawQuad(side1, side1 + 1, side2, side2 + 1,submeshIndex);
-                    }
+                    case TextureGenerationMode.Stretch://doesn't support stretch direction
+                        for (int i=0;i<pointsPerBand;i++)
+                            uvs.Add(new Vector2(distFromStart/ curveLength, i/ (float)(i- 1)));
+                        break;
+                    case TextureGenerationMode.Tile:
+                        float scaledUvx = settings.scale * uvx;
+                        for (int i= 0; i< pointsPerBand; i++)
+                        {
+                            float uvy = settings.scale * i/ (float)(pointsPerBand- 1);
+                            if (settings.stretchDirection == TextureStretchDirection.x)
+                                uvs.Add(new Vector2(scaledUvx, uvy));
+                            else if (settings.stretchDirection == TextureStretchDirection.y)
+                                uvs.Add(new Vector2(uvy, scaledUvx));
+                        }
+                        break;
+                    default:
+                        throw new NotImplementedException($"TextureGenerationMode '{settings.textureGenMode}' is not yet supported");
                 }
-                Partial_CreateEndPlates(true);
-                Partial_CreateEndPlates(false);
             }
-            void CreateCylinderEndPlate(PointCreator pointCreator, bool isStartPlate, float farUVx, int pointsPerRing)
+            void CreateEndPlate(bool isStartPlate, float distanceFromStart,PointCreator pointCreator, int pointsPerRing, int submeshIndex, TextureLayerSettings settings, bool flip = false)
             {
-                throw new NotImplementedException();
+                PointOnCurve point;
+                if (isStartPlate)
+                    point = sampled[0];
+                else
+                    point = sampled.Last();
+
+                int ring1Base = vertices.Count;
+                CreateRing(pointCreator, pointsPerRing, .5f, point, out _);
+
+                int ring2Base = vertices.Count;
+                CreateRing(pointCreator, pointsPerRing, -.5f, point, out _);
+
+                bool side = isStartPlate;
+                if (flip)
+                    side = !side;
+
+                ///Reorders verts and colors so they'll work with the existing uv generation code
+                List<Vector3> pos = new List<Vector3>();
+                List<Color> color = new List<Color>();
+                for (int i = 0; i < pointsPerRing; i++)
+                {
+                    pos.Add(vertices[ring1Base+i]);
+                    pos.Add(vertices[ring2Base+i]);
+                    color.Add(colors[ring1Base+i]);
+                    color.Add(colors[ring2Base+i]);
+                }
+                for (int i = 0; i < pointsPerRing*2; i++)
+                {
+                    vertices[ring1Base + i] = pos[i];
+                    colors[ring1Base + i] = color[i];
+                }
+                //done reordering
+                
+
+                Vector3 previousCenter = Vector3.zero;
+                float uvx = 0;
+                float thickness = Vector3.Distance(vertices[ring1Base], vertices[ring1Base+1]);
+                for (int i = 0; i < pointsPerRing; i++)
+                {
+                    var centerPoint = (vertices[ring1Base + 2*i] + vertices[ring1Base+1 + 2*i]) / 2;
+                    if (i > 0)
+                    {
+                        uvx += Vector3.Distance(previousCenter, centerPoint);
+                    }
+                    previousCenter = centerPoint;
+                    CreateUvBand(settings, uvx/thickness, 2, distanceFromStart);
+                }
+
+                for (int i = ring1Base; i < ring1Base+2*(pointsPerRing - 1); i += 2)
+                {
+                    if (side)
+                        DrawQuad(i, i + 1, i + 2, i + 3, submeshIndex);
+                    else 
+                        DrawQuad(i+2, i + 3, i, i + 1, submeshIndex);
+                }
             }
             float CreateRing(PointCreator pointCreator, int pointsPerRing, float offset, PointOnCurve currentPoint,out float size)
             {
@@ -444,70 +460,8 @@ namespace ChaseMacMillan.CurveDesigner
                 outRotation = rotationSampler.GetValueAtDistance(distance, curve);
                 outColor = GetColorAtDistance(distance);
             }
-            void TileUVCreator(int pointsPerRing, float uvx, PointOnCurve currentPoint, float size,TextureStretchDirection stretchDirection,float textureScale)
+            void CreatePointsAlongCurve(PointCreator pointCreator, List<PointOnCurve> points, float offset, int pointsPerRing, TextureLayerSettings textureLayer)
             {
-                uvx = textureScale * uvx;
-                for (int point = 0; point < pointsPerRing; point++)
-                {
-                    float uvy = textureScale*point / (float)(pointsPerRing - 1);
-                    if (stretchDirection == TextureStretchDirection.x)
-                        uvs.Add(new Vector2(uvx, uvy));
-                    else if (stretchDirection == TextureStretchDirection.y)
-                        uvs.Add(new Vector2(uvy, uvx));
-                }
-            }
-            void StretchUVCreator(int pointsPerRing, float uvx, PointOnCurve currentPoint, float size,TextureStretchDirection stretchDirection,float textureScale)
-            {
-                for (int point = 0; point < pointsPerRing; point++)
-                {
-                    uvs.Add(new Vector2(currentPoint.distanceFromStartOfCurve / curveLength, point / (float)(pointsPerRing - 1)));
-                }
-            }
-            List<float> tileLengthTileWidthUVCreatorBuffer = new List<float>();
-            void TileLengthTileWidthUVCreator(int pointsPerRing, float uvx, PointOnCurve currentPoint, float size,TextureStretchDirection stretchDirection,float textureScale)
-            {
-                tileLengthTileWidthUVCreatorBuffer.Clear();
-                //the texture should move away fromt the middle
-                Vector3 prev = Vector3.zero;
-                float dist = 0;
-                int startIndex = vertices.Count - pointsPerRing;
-                for (int point = 0; point < pointsPerRing; point++)
-                {
-                    Vector3 pos = vertices[point + startIndex];
-                    if (point > 0)
-                    {
-                        dist += Vector3.Distance(pos, prev);
-                    }
-                    prev = pos;
-                    tileLengthTileWidthUVCreatorBuffer.Add(dist);
-                }
-                for (int point = 0; point < pointsPerRing; point++)
-                {
-                    float x = textureScale * currentPoint.distanceFromStartOfCurve/size;
-                    float y = textureScale*(tileLengthTileWidthUVCreatorBuffer[point] - dist / 2)/size;
-                    if (stretchDirection == TextureStretchDirection.x)
-                        uvs.Add(new Vector2(x,y));
-                    else if (stretchDirection == TextureStretchDirection.y)
-                        uvs.Add(new Vector2(y,x));
-                }
-            }
-            UVCreator GetUVCreator(TextureGenerationMode texGenMode)
-            {
-                switch (texGenMode)
-                {
-                    case TextureGenerationMode.TileLengthStretchWidth:
-                        return TileUVCreator;
-                    case TextureGenerationMode.Stretch:
-                        return StretchUVCreator;
-                    case TextureGenerationMode.Tile:
-                        return TileLengthTileWidthUVCreator;
-                    default:
-                        throw new System.ArgumentException($"'{texGenMode}' Not Supported");
-                }
-            }
-            void CreatePointsAlongCurve(PointCreator pointCreator, List<PointOnCurve> points, float offset, int pointsPerRing, out float farEndUV, TextureLayerSettings textureLayer)
-            {
-                UVCreator uvCreator = GetUVCreator(textureLayer.textureGenMode);
                 TextureStretchDirection stretchDirection = textureLayer.stretchDirection;
                 float textureScale = 1.0f/textureLayer.scale;
                 float uvx = 0;
@@ -524,9 +478,8 @@ namespace ChaseMacMillan.CurveDesigner
                         uvx += (currentDistanceAlongCurve - previousDistanceAlongCurve) / averageLength;
                     }
                     previousLength = currentLength;
-                    uvCreator.Invoke(pointsPerRing, uvx, currentPoint,size,stretchDirection,textureScale);
+                    CreateUvBand(textureLayer, uvx, pointsPerRing,currentPoint.distanceFromStartOfCurve);
                 }
-                farEndUV = uvx;
             }
             Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
             {
@@ -575,7 +528,7 @@ namespace ChaseMacMillan.CurveDesigner
                 InitOrClear(ref uvs);
                 InitOrClear(ref colors);
             }
-            void CreateTubeEndPlates(float uvAtEnd,int submeshIndex)
+            void CreateTubeEndPlates(int submeshIndex)
             {
 
                 int ActualRingPointCount = RingPointCount;
@@ -653,15 +606,18 @@ namespace ChaseMacMillan.CurveDesigner
                         numVerts = RingPointCount * sampled.Count;
                         InitLists();
                         InitSubmeshes(useSubmeshes ? (!IsClosedLoop?3:2) : 1);
-                        CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, out _, mainTextureLayer);
-                        CreatePointsAlongCurve(TubeFlatPlateCreator, sampled, 0, 3, out float uvAtEnd,backTextureLayer);
+                        CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer);
+                        CreatePointsAlongCurve(TubeFlatPlateCreator, sampled, 0, 3, backTextureLayer);
                         //CreateRingPointsAlongCurve(sampled, ActualRingPointCount, true);
                         //CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount));
                         //make a thing which creates points at each end using createpointsalongcurve and then uv those
                         TrianglifyLayer(true, RingPointCount, 0,useSubmeshes?0:0);
                         TrianglifyLayer(false, 3, numVerts,useSubmeshes?1:0);
                         if (!IsClosedLoop)
-                            CreateTubeEndPlates(uvAtEnd,useSubmeshes?2:0);
+                        {
+                            int submeshIndex = useSubmeshes ? 2 : 0;
+                            CreateTubeEndPlates(submeshIndex);
+                        }
                         return true;
                     }
                 case CurveType.HollowTube:
@@ -669,13 +625,17 @@ namespace ChaseMacMillan.CurveDesigner
                         numVerts = RingPointCount * sampled.Count * 2;
                         InitLists();
                         InitSubmeshes(useSubmeshes ? (!IsClosedLoop?4:3) : 1);
-                        CreatePointsAlongCurve(TubePointCreator, sampled, .5f, RingPointCount, out _,mainTextureLayer);
-                        CreatePointsAlongCurve(TubePointCreator, sampled, -.5f, RingPointCount, out float farUVX,backTextureLayer);
+                        CreatePointsAlongCurve(TubePointCreator, sampled, .5f, RingPointCount, mainTextureLayer);
+                        CreatePointsAlongCurve(TubePointCreator, sampled, -.5f, RingPointCount,backTextureLayer);
                         TrianglifyLayer(true, RingPointCount, 0,useSubmeshes?0:0);
                         TrianglifyLayer(false, RingPointCount, numVerts / 2,useSubmeshes?1:0);
                         CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount),useSubmeshes?2:0,edgeTextureLayer);
                         if (!IsClosedLoop)
-                            CreateEndPlates(TubePointCreator, farUVX, RingPointCount,useSubmeshes?3:0,endTextureLayer.textureGenMode);
+                        {
+                            int submeshIndex = useSubmeshes ? 3 : 0;
+                            CreateEndPlate(true, 0,                  TubePointCreator, RingPointCount, submeshIndex, endTextureLayer);
+                            CreateEndPlate(false, curve.GetLength(), TubePointCreator, RingPointCount, submeshIndex, endTextureLayer);
+                        }
                         return true;
                     }
                 case CurveType.Flat:
@@ -684,13 +644,17 @@ namespace ChaseMacMillan.CurveDesigner
                         numVerts = 2 * pointsPerFace * sampled.Count;
                         InitLists();
                         InitSubmeshes(useSubmeshes ? (!IsClosedLoop?4:3) : 1);
-                        CreatePointsAlongCurve(RectanglePointCreator, sampled, .5f, pointsPerFace, out _,mainTextureLayer);
-                        CreatePointsAlongCurve(RectanglePointCreator, sampled, -.5f, pointsPerFace, out float farUVX,backTextureLayer);
+                        CreatePointsAlongCurve(RectanglePointCreator, sampled, .5f, pointsPerFace, mainTextureLayer);
+                        CreatePointsAlongCurve(RectanglePointCreator, sampled, -.5f, pointsPerFace, backTextureLayer);
                         TrianglifyLayer(true, pointsPerFace, 0,useSubmeshes?0:0);
                         TrianglifyLayer(false, pointsPerFace, numVerts / 2,useSubmeshes?1:0);
                         CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointsPerFace),useSubmeshes?2:0,edgeTextureLayer);
                         if (!IsClosedLoop)
-                            CreateEndPlates(RectanglePointCreator, farUVX, pointsPerFace,useSubmeshes?3:0,endTextureLayer.textureGenMode);
+                        {
+                            int submeshIndex = useSubmeshes ? 3 : 0;
+                            CreateEndPlate(true, 0,                  RectanglePointCreator, RingPointCount, submeshIndex, endTextureLayer);
+                            CreateEndPlate(false, curve.GetLength(), RectanglePointCreator, RingPointCount, submeshIndex, endTextureLayer);
+                        }
                         return true;
                     }
                 case CurveType.Extrude:
@@ -701,13 +665,17 @@ namespace ChaseMacMillan.CurveDesigner
                         numVerts = 2 * pointCount * sampled.Count;
                         InitSubmeshes(useSubmeshes ? (!IsClosedLoop?4:3) : 1);
                         InitLists();
-                        CreatePointsAlongCurve(ExtrudePointCreator, sampled, .5f, pointCount, out _, mainTextureLayer);
-                        CreatePointsAlongCurve(ExtrudePointCreator, sampled, -.5f, pointCount, out float farUVX,backTextureLayer);
+                        CreatePointsAlongCurve(ExtrudePointCreator, sampled, .5f, pointCount, mainTextureLayer);
+                        CreatePointsAlongCurve(ExtrudePointCreator, sampled, -.5f, pointCount, backTextureLayer);
                         TrianglifyLayer(true, pointCount, numVerts / 2,useSubmeshes?0:0);
                         TrianglifyLayer(false, pointCount, 0,useSubmeshes?1:0);
                         CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount), useSubmeshes?2:0,edgeTextureLayer,true);
                         if (!IsClosedLoop)
-                            CreateEndPlates(ExtrudePointCreator, farUVX, pointCount, useSubmeshes?3:0,endTextureLayer.textureGenMode,true);
+                        {
+                            int submeshIndex = useSubmeshes ? 3 : 0;
+                            CreateEndPlate(true, 0,                  ExtrudePointCreator, RingPointCount, submeshIndex, endTextureLayer,true);
+                            CreateEndPlate(false, curve.GetLength(), ExtrudePointCreator, RingPointCount, submeshIndex, endTextureLayer,true);
+                        }
                         return true;
                     }
                 case CurveType.Mesh:

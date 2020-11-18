@@ -378,7 +378,6 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private TextureLayer old_edgeTextureLayer = new TextureLayer(null);
 
-
         private bool CheckFieldChanged<T>(T field, ref T oldField)
         {
             if (!field.Equals(oldField))
