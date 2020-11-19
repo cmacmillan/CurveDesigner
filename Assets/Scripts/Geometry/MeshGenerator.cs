@@ -356,27 +356,34 @@ namespace ChaseMacMillan.CurveDesigner
                 }
                 return retr;
             }
-            void CreateUvBand(TextureLayerSettings settings,float uvx, int pointsPerBand,float distFromStart)
+            void CreateUVS(TextureLayerSettings settings,List<float> distsFromStart, List<float> thicknesses, int pointsPerBand)
             {
-                switch (settings.textureGenMode)
+                int numBands = distsFromStart.Count;
+                float surfaceLength = distsFromStart.Last();
+                for (int bandIndex = 0; bandIndex < numBands; bandIndex++)
                 {
-                    case TextureGenerationMode.Stretch://doesn't support stretch direction
-                        for (int i=0;i<pointsPerBand;i++)
-                            uvs.Add(new Vector2(distFromStart/ curveLength, i/ (float)(i- 1)));
-                        break;
-                    case TextureGenerationMode.Tile:
-                        float scaledUvx = settings.scale * uvx;
-                        for (int i= 0; i< pointsPerBand; i++)
-                        {
-                            float uvy = settings.scale * i/ (float)(pointsPerBand- 1);
-                            if (settings.stretchDirection == TextureStretchDirection.x)
-                                uvs.Add(new Vector2(scaledUvx, uvy));
-                            else if (settings.stretchDirection == TextureStretchDirection.y)
-                                uvs.Add(new Vector2(uvy, scaledUvx));
-                        }
-                        break;
-                    default:
-                        throw new NotImplementedException($"TextureGenerationMode '{settings.textureGenMode}' is not yet supported");
+                    var thickness = thicknesses[bandIndex];
+                    var distFromStart = distsFromStart[bandIndex];
+                    switch (settings.textureGenMode)
+                    {
+                        case TextureGenerationMode.Stretch://doesn't support stretch direction
+                            for (int i = 0; i < pointsPerBand; i++)
+                                uvs.Add(new Vector2(distFromStart / surfaceLength, i / (float)(i - 1)));
+                            break;
+                        case TextureGenerationMode.Tile:
+                            float scaledUvx = settings.scale * uvx;
+                            for (int i = 0; i < pointsPerBand; i++)
+                            {
+                                float uvy = settings.scale * i / (float)(pointsPerBand - 1);
+                                if (settings.stretchDirection == TextureStretchDirection.x)
+                                    uvs.Add(new Vector2(scaledUvx, uvy));
+                                else if (settings.stretchDirection == TextureStretchDirection.y)
+                                    uvs.Add(new Vector2(uvy, scaledUvx));
+                            }
+                            break;
+                        default:
+                            throw new NotImplementedException($"TextureGenerationMode '{settings.textureGenMode}' is not yet supported");
+                    }
                 }
             }
             void CreateEndPlate(bool isStartPlate, float distanceFromStart,PointCreator pointCreator, int pointsPerRing, int submeshIndex, TextureLayerSettings settings, bool flip = false)
@@ -416,18 +423,22 @@ namespace ChaseMacMillan.CurveDesigner
                 
 
                 Vector3 previousCenter = Vector3.zero;
-                float uvx = 0;
-                float thickness = Vector3.Distance(vertices[ring1Base], vertices[ring1Base+1]);
+                float dist = 0;
+                List<float> distancesFromStart = new List<float>();
+                List<float> thicknesses = new List<float>();
+                float thickness = Vector3.Distance(vertices[ring1Base],vertices[ring1Base+1]);
                 for (int i = 0; i < pointsPerRing; i++)
                 {
                     var centerPoint = (vertices[ring1Base + 2*i] + vertices[ring1Base+1 + 2*i]) / 2;
                     if (i > 0)
                     {
-                        uvx += Vector3.Distance(previousCenter, centerPoint);
+                        dist += Vector3.Distance(previousCenter, centerPoint);
                     }
                     previousCenter = centerPoint;
-                    CreateUvBand(settings, uvx/thickness, 2, distanceFromStart);
+                    distancesFromStart.Add(dist);
+                    thicknesses.Add(thickness);
                 }
+                CreateUVS(settings, distancesFromStart, thicknesses, 2);
 
                 for (int i = ring1Base; i < ring1Base+2*(pointsPerRing - 1); i += 2)
                 {
@@ -464,22 +475,16 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 TextureStretchDirection stretchDirection = textureLayer.stretchDirection;
                 float textureScale = 1.0f/textureLayer.scale;
-                float uvx = 0;
-                float previousLength = -1;
+                List<float> distsFromStart = new List<float>();
+                List<float> thickness = new List<float>();
                 for (int i = 0; i < points.Count; i++)
                 {
                     PointOnCurve currentPoint = points[i];
                     float currentLength = CreateRing(pointCreator, pointsPerRing, offset, currentPoint,out float size);
-                    if (i > 0)
-                    {
-                        float previousDistanceAlongCurve = points[i - 1].distanceFromStartOfCurve;
-                        float currentDistanceAlongCurve = currentPoint.distanceFromStartOfCurve;
-                        float averageLength = (previousLength + currentLength) / 2.0f;
-                        uvx += (currentDistanceAlongCurve - previousDistanceAlongCurve) / averageLength;
-                    }
-                    previousLength = currentLength;
-                    CreateUvBand(textureLayer, uvx, pointsPerRing,currentPoint.distanceFromStartOfCurve);
+                    distsFromStart.Add(currentPoint.distanceFromStartOfCurve);
+                    thickness.Add(currentLength);
                 }
+                CreateUVS(textureLayer, distsFromStart, thickness, pointsPerRing);
             }
             Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
             {
