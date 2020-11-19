@@ -360,6 +360,7 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 int numBands = distsFromStart.Count;
                 float surfaceLength = distsFromStart.Last();
+                float tileUVX = 0;
                 for (int bandIndex = 0; bandIndex < numBands; bandIndex++)
                 {
                     var thickness = thicknesses[bandIndex];
@@ -371,7 +372,17 @@ namespace ChaseMacMillan.CurveDesigner
                                 uvs.Add(new Vector2(distFromStart / surfaceLength, i / (float)(i - 1)));
                             break;
                         case TextureGenerationMode.Tile:
-                            float scaledUvx = settings.scale * uvx;
+                            if (bandIndex>0)
+                            {
+                                float prevLength = distsFromStart[bandIndex - 1];
+                                float currLength = distsFromStart[bandIndex];
+                                float xDelta = currLength - prevLength;
+                                float prevY = thicknesses[bandIndex - 1];
+                                float currY = thicknesses[bandIndex];
+                                float avgY = (prevY + currY) / 2;
+                                tileUVX += xDelta / avgY;
+                            }
+                            float scaledUvx = settings.scale * tileUVX;
                             for (int i = 0; i < pointsPerBand; i++)
                             {
                                 float uvy = settings.scale * i / (float)(pointsPerBand - 1);
