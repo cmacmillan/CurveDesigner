@@ -28,7 +28,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public IClickCommand GetCenterPointClickCommand()
         {
-            return new PositionPointClickCommand(_pointGroup, PGIndex.Position,_positionCurve,_transformBlob,allCurves);
+            return new PositionPointClickCommand(_pointGroup, PointGroupIndex.Position,_positionCurve,_transformBlob,allCurves);
         }
         public PositionPointGroupComposite(IComposite parent, PointGroup group, TransformBlob transformBlob, BezierCurve positionCurve,SelectableGUID guid,List<BezierCurve> allCurves,Curve3D curve) : base(parent)
         {
@@ -37,8 +37,8 @@ namespace ChaseMacMillan.CurveDesigner
             _pointGroup = group;
             this._positionCurve = positionCurve;
             this.allCurves = allCurves;
-            var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PGIndex.Position,transformBlob,_positionCurve,curve);
-            centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,GetCenterPointClickCommand(),Curve3DSettings.Green,guid);
+            var centerPointPosition = new PointGroupPointPositionProvider(_pointGroup, PointGroupIndex.Position,transformBlob,_positionCurve,curve);
+            centerPoint = new PointComposite(this,centerPointPosition,PointTextureType.circle,GetCenterPointClickCommand(),CurveUIStatic.Green,guid);
             centerPositionHandle = new PositionHandleComposite(this, curve, centerPointPosition);
             bool isCurveClosedLoop = positionCurve.isClosedLoop;
             bool isStartPoint = group == positionCurve.PointGroups[0];
@@ -46,16 +46,16 @@ namespace ChaseMacMillan.CurveDesigner
             //left tangent
             if (!isStartPoint || isCurveClosedLoop)
             {
-                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.LeftTangent,transformBlob,_positionCurve,curve);
-                leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.LeftTangent,_positionCurve,_transformBlob,allCurves),Curve3DSettings.Green,guid);
+                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PointGroupIndex.LeftTangent,transformBlob,_positionCurve,curve);
+                leftTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PointGroupIndex.LeftTangent,_positionCurve,_transformBlob,allCurves),CurveUIStatic.Green,guid);
                 leftTangentLine = new LineComposite(this,centerPointPosition,endPoint);
                 leftTangentPositionHandle= new PositionHandleComposite(this, curve, endPoint);
             }
             //right tangent
             if (!isEndPoint || isCurveClosedLoop)
             {
-                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PGIndex.RightTangent,transformBlob,_positionCurve,curve);
-                rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PGIndex.RightTangent,_positionCurve,_transformBlob,allCurves), Curve3DSettings.Green,guid);
+                var endPoint = new PointGroupPointPositionProvider(_pointGroup, PointGroupIndex.RightTangent,transformBlob,_positionCurve,curve);
+                rightTangentPoint = new PointComposite(this,endPoint,PointTextureType.square,new PositionPointClickCommand(group,PointGroupIndex.RightTangent,_positionCurve,_transformBlob,allCurves), CurveUIStatic.Green,guid);
                 rightTangentLine = new LineComposite(this,centerPointPosition, endPoint);
                 rightTangentPositionHandle= new PositionHandleComposite(this, curve, endPoint);
             }

@@ -9,7 +9,7 @@ namespace ChaseMacMillan.CurveDesigner
         private List<SizeCircleComposite> points = new List<SizeCircleComposite>();
         public SizeCurveComposite(IComposite parent,FloatDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
-            _splitterPoint = new SplitterPointComposite(this, positionCurveComposite.transformBlob, PointTextureType.circle,new ValueAlongCurveSplitCommand(curve,distanceSampler,ValueAlongCurveSplitCommand.GetSizeCurve), Curve3DSettings.Green,positionCurveComposite);
+            _splitterPoint = new SplitterPointComposite(this, positionCurveComposite.transformBlob, PointTextureType.circle,new ValueAlongCurveSplitCommand(curve,distanceSampler,ValueAlongCurveSplitCommand.GetSizeCurve), CurveUIStatic.Green,positionCurveComposite);
             _distanceSampler = distanceSampler;
             foreach (var i in distanceSampler.GetPoints(curve.positionCurve))
                 points.Add(new SizeCircleComposite(this,i,curve.positionCurve,curve,positionCurveComposite,_distanceSampler));

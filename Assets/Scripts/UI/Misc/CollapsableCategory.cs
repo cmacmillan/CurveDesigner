@@ -42,9 +42,9 @@ namespace ChaseMacMillan.CurveDesigner
             return GUILayoutUtility.GetRect(0, height, curve.controlRectStyle, layoutOptions);
         }
 
-        public void EditModeSwitchButton(string label, EditMode mode, Rect rect,Curve3D curve)
+        public void EditModeSwitchButton(string label, Curve3DEditMode mode, Rect rect,Curve3D curve)
         {
-            EditMode thisEditMode = mode;
+            Curve3DEditMode thisEditMode = mode;
             bool isSelected = curve.editMode == thisEditMode;
             GUI.Label(new Rect(rect.position, new Vector2(EditorGUIUtility.labelWidth, rect.height)), label, EditorStyles.label);
             rect.xMin += EditorGUIUtility.labelWidth;
@@ -66,16 +66,13 @@ namespace ChaseMacMillan.CurveDesigner
         {
             Rect rect = GetFieldRects(out Rect popupRect,curve);
 
-            ValueType state = sampler.ValueType;
-
-            switch (state)
+            if (sampler.UseKeyframes)
             {
-                case ValueType.Constant:
-                    sampler.ConstantField(rect);
-                    break;
-                case ValueType.Keyframes:
-                    EditModeSwitchButton(sampler.GetLabel(), sampler.GetEditMode(), rect,curve);
-                    break;
+                EditModeSwitchButton(sampler.GetLabel(), sampler.GetEditMode(), rect, curve);
+            }
+            else
+            {
+                sampler.ConstantField(rect);
             }
 
             // PopUp minmaxState menu
@@ -83,65 +80,64 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 GUIContent[] texts =        {   EditorGUIUtility.TrTextContent("Constant"),
                                                 EditorGUIUtility.TrTextContent("Curve") };
-                ValueType[] states = {  ValueType.Constant,
-                                        ValueType.Keyframes};
+                var currentState = sampler.UseKeyframes;
+                bool[] states = {  false,
+                                    true};
                 GenericMenu menu = new GenericMenu();
                 for (int i = 0; i < texts.Length; ++i)
                 {
-                    menu.AddItem(texts[i], state == states[i], SelectValueTypeState, new SelectValueTypeStateTuple(sampler, states[i], curve));
+                    menu.AddItem(texts[i], currentState== states[i], SelectUseKeyframes, new UseKeyframesDropdownTuple(sampler, states[i], curve));
                 }
                 menu.DropDown(popupRect);
                 Event.current.Use();
             }
         }
 
-        private class SelectValueTypeStateTuple
+        private class UseKeyframesDropdownTuple
         {
             public IValueSampler sampler;
-            public ValueType mode;
+            public bool useKeyframes = false;
             public Curve3D curve;
-            public SelectValueTypeStateTuple(IValueSampler sampler, ValueType mode, Curve3D curve)
+            public UseKeyframesDropdownTuple(IValueSampler sampler, bool useKeyframes, Curve3D curve)
             {
                 this.sampler = sampler;
-                this.mode = mode;
+                this.useKeyframes = useKeyframes;
                 this.curve = curve;
             }
         }
-        void SelectValueTypeState(object arg)
+        void SelectUseKeyframes(object arg)
         {
-            var tuple = arg as SelectValueTypeStateTuple;
+            var tuple = arg as UseKeyframesDropdownTuple;
             if (tuple != null)
             {
-                tuple.sampler.ValueType = tuple.mode;
-                if (tuple.mode == ValueType.Constant && tuple.curve.editMode == tuple.sampler.GetEditMode())
-                {
-                    tuple.curve.editMode = EditMode.PositionCurve;//default to position
-                }
-                if (tuple.mode == ValueType.Keyframes)
+                tuple.sampler.UseKeyframes = tuple.useKeyframes;
+                if (tuple.useKeyframes)
                     tuple.curve.editMode = tuple.sampler.GetEditMode();
+                else if (tuple.curve.editMode == tuple.sampler.GetEditMode())
+                    tuple.curve.editMode = Curve3DEditMode.PositionCurve;//default to position
                 HandleUtility.Repaint();
             }
         }
     }
     public class MainCollapsableCategory : CollapsableCategory
     {
-        public Dictionary<EditMode, string> editmodeNameMap = new Dictionary<EditMode, string>()
+        public Dictionary<Curve3DEditMode, string> editmodeNameMap = new Dictionary<Curve3DEditMode, string>()
         {
-            {EditMode.PositionCurve, "Position"},
-            {EditMode.Size, "Size"},
-            {EditMode.Rotation, "Rotation"},
-            {EditMode.Extrude, "Extrude"},
-            {EditMode.Color, "Color"},
+            {Curve3DEditMode.PositionCurve, "Position"},
+            {Curve3DEditMode.Size, "Size"},
+            {Curve3DEditMode.Rotation, "Rotation"},
+            {Curve3DEditMode.Extrude, "Extrude"},
+            {Curve3DEditMode.Color, "Color"},
         };
-        public EditMode[] editModes;
+        public Curve3DEditMode[] editModes;
         public MainCollapsableCategory()
         {
             isExpanded = true;
-            var baseEditModes = System.Enum.GetValues(typeof(EditMode));
-            var baseEditModeNames = System.Enum.GetNames(typeof(EditMode));
-            editModes = new EditMode[baseEditModes.Length];
+            var baseEditModes = System.Enum.GetValues(typeof(Curve3DEditMode));
+            var baseEditModeNames = System.Enum.GetNames(typeof(Curve3DEditMode));
+            editModes = new Curve3DEditMode[baseEditModes.Length];
             for (int i = 0; i < editModes.Length; i++)
-                editModes[i] = (EditMode)baseEditModes.GetValue(i);
+                editModes[i] = (Curve3DEditMode)baseEditModes.GetValue(i);
         }
 
         public override string GetName(Curve3D curve) { return curve.name; }
@@ -152,24 +148,24 @@ namespace ChaseMacMillan.CurveDesigner
             serializedObj = new SerializedObject(curve);
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             bool needsReinitCurve = false;
-            EditModeSwitchButton("Position", EditMode.PositionCurve,GetFieldRects(out _,curve),curve);
-            if (curve.type!= CurveType.NoMesh)
+            EditModeSwitchButton("Position", Curve3DEditMode.PositionCurve,GetFieldRects(out _,curve),curve);
+            if (curve.type!= MeshGenerationMode.NoMesh)
             {
                 SamplerField("sizeSampler", curve.sizeSampler,curve);
                 SamplerField("rotationSampler", curve.rotationSampler,curve);
-                if (curve.type == CurveType.Cylinder || curve.type == CurveType.HollowTube)
+                if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.HollowTube)
                 {
                     SamplerField("arcOfTubeSampler", curve.arcOfTubeSampler,curve);
                 }
-                if (curve.type != CurveType.Mesh && curve.type!=CurveType.Cylinder)
+                if (curve.type != MeshGenerationMode.Mesh && curve.type!=MeshGenerationMode.Cylinder)
                 {
                     SamplerField("thicknessSampler",curve.thicknessSampler,curve);
                 }
                 SamplerField("colorSampler", curve.colorSampler, curve);
             }
-            if (curve.type == CurveType.Extrude)
-                EditModeSwitchButton("Extrude", EditMode.Extrude, GetFieldRects(out _,curve),curve);
-            if (curve.type != CurveType.Mesh && curve.type!=CurveType.NoMesh)
+            if (curve.type == MeshGenerationMode.Extrude)
+                EditModeSwitchButton("Extrude", Curve3DEditMode.Extrude, GetFieldRects(out _,curve),curve);
+            if (curve.type != MeshGenerationMode.Mesh && curve.type!=MeshGenerationMode.NoMesh)
             {
                 Field("vertexDensity");
             }
@@ -181,14 +177,14 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 needsReinitCurve = true;
             }
-            if (curve.type == CurveType.Mesh)
+            if (curve.type == MeshGenerationMode.Mesh)
             {
                 Field("meshToTile",curve.meshToTile==null);
                 Field("clampAndStretchMeshToCurve");
                 Field("meshPrimaryAxis");
                 Field("closeTilableMeshGap");
             }
-            if (curve.type == CurveType.Cylinder || curve.type == CurveType.Extrude || curve.type == CurveType.HollowTube || curve.type == CurveType.Cylinder)
+            if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.Extrude || curve.type == MeshGenerationMode.HollowTube || curve.type == MeshGenerationMode.Cylinder)
             {
                 Field("ringPointCount");
             }

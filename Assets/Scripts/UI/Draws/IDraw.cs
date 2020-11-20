@@ -2,19 +2,6 @@
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public enum DrawMode
-    {
-        unknown=0,
-        normal=1,
-        hovered=2,
-        clicked=3,
-    }
-    public enum SelectionState
-    {
-        unselected=0,
-        primarySelected=1,
-        secondarySelected=2,
-    }
     public static class DrawModeExtensionMethods
     {
         private static readonly Color primarySelectedColor = new Color(1,.9f,.32f);//yellowish
@@ -56,12 +43,6 @@ namespace ChaseMacMillan.CurveDesigner
             return retr;
         }
     }
-    public enum PointTextureType {
-        circle = 0,
-        square = 1,
-        diamond = 2,
-        plus = 3,
-    }
     public interface IDraw
     {
         void Draw(DrawMode mode,SelectionState selectionState);
@@ -71,12 +52,5 @@ namespace ChaseMacMillan.CurveDesigner
     public interface IIMGUI
     {
         void Event();
-    }
-    public enum IDrawSortLayers
-    {
-        Points = 0,
-        Circles = 500,
-        Lines = 1000,
-        Curves = 2000,
     }
 }

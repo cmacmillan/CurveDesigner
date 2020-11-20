@@ -30,14 +30,14 @@ namespace ChaseMacMillan.CurveDesigner
 
         public float DistFromCamera()
         {
-            return _distanceToPoint + (int)IDrawSortLayers.Lines;
+            return _distanceToPoint + (int)DrawSortLayers.Lines;
         }
 
         public void Draw(DrawMode mode,SelectionState selectionState)
         {
             Color beforeColor = Handles.color;
             Handles.color = color;
-            Handles.DrawAAPolyLine(CurveSegmentDraw.GetLineTextureByType(LineTextureType.Default), new Vector3[] { _startPoint, _endPoint});
+            Handles.DrawAAPolyLine(CurveUIStatic.defaultLineTexture, new Vector3[] { _startPoint, _endPoint});
             Handles.color = beforeColor;
         }
     }

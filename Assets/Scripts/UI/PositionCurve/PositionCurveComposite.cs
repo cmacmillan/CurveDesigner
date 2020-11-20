@@ -17,7 +17,7 @@ namespace ChaseMacMillan.CurveDesigner
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
             this.curve3d = curve;
-            _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,splitterPointClickCommand,Curve3DSettings.Green,this);
+            _splitterPoint = new SplitterPointComposite(this,transformBlob,PointTextureType.circle,splitterPointClickCommand,CurveUIStatic.Green,this);
             _leftAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, true,transformBlob,this,secondaryCurveIndex);
             _rightAddPositionPoint = new AddPositionPointButton(this, curve, positionCurve, false,transformBlob,this,secondaryCurveIndex);
             pointGroups = new List<PositionPointGroupComposite>();

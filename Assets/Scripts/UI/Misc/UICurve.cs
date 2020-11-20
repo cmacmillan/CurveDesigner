@@ -20,19 +20,19 @@ namespace ChaseMacMillan.CurveDesigner
         {
             switch (_curve.editMode)
             {
-                case EditMode.Extrude:
+                case Curve3DEditMode.Extrude:
                     return extrudeCurve;
-                case EditMode.PositionCurve:
+                case Curve3DEditMode.PositionCurve:
                     return positionCurve;
-                case EditMode.Rotation:
+                case Curve3DEditMode.Rotation:
                     return rotationCurve;
-                case EditMode.Size:
+                case Curve3DEditMode.Size:
                     return sizeCurve;
-                case EditMode.Color:
+                case Curve3DEditMode.Color:
                     return colorCurve;
-                case EditMode.Thickness:
+                case Curve3DEditMode.Thickness:
                     return thicknessCurve;
-                case EditMode.Arc:
+                case Curve3DEditMode.Arc:
                     return arcCurve;
                 default:
                     throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");
@@ -117,14 +117,14 @@ namespace ChaseMacMillan.CurveDesigner
                 var point2 = transform.TransformPoint(curve[i, 3]);
                 var tangent1 = transform.TransformPoint(curve[i, 1]);
                 var tangent2 = transform.TransformPoint(curve[i, 2]);
-                drawList.Add(new CurveSegmentDraw(owner, point1, point2, tangent1, tangent2, LineTextureType.Default, new Color(.6f, .6f, .6f)));
+                drawList.Add(new CurveSegmentDraw(owner, point1, point2, tangent1, tangent2, new Color(.6f, .6f, .6f)));
             }
         }
 
         void FindClosestPoints()
         {
             positionCurve.FindPointClosestToCursor();
-            if (_curve.type == CurveType.Extrude)
+            if (_curve.type == MeshGenerationMode.Extrude)
                 extrudeCurve.FindClosestPointsToCursor();
         }
 
@@ -142,25 +142,25 @@ namespace ChaseMacMillan.CurveDesigner
         {
             switch (_curve.editMode)
             {
-                case EditMode.PositionCurve:
+                case Curve3DEditMode.PositionCurve:
                     yield return positionCurve;
                     break;
-                case EditMode.Size:
+                case Curve3DEditMode.Size:
                     yield return sizeCurve;
                     break;
-                case EditMode.Rotation:
+                case Curve3DEditMode.Rotation:
                     yield return rotationCurve;
                     break;
-                case EditMode.Extrude:
+                case Curve3DEditMode.Extrude:
                     yield return extrudeCurve;
                     break;
-                case EditMode.Color:
+                case Curve3DEditMode.Color:
                     yield return colorCurve;
                     break;
-                case EditMode.Thickness:
+                case Curve3DEditMode.Thickness:
                     yield return thicknessCurve;
                     break;
-                case EditMode.Arc:
+                case Curve3DEditMode.Arc:
                     yield return arcCurve;
                     break;
                 default:

@@ -27,7 +27,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public float DistFromCamera()
         {
-            return _distanceToPoint + (int)IDrawSortLayers.Circles;
+            return _distanceToPoint + (int)DrawSortLayers.Circles;
         }
 
         public void Draw(DrawMode mode,SelectionState selectionState)
@@ -66,7 +66,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public float DistFromCamera()
         {
-            return _distanceToPoint + (int)IDrawSortLayers.Circles;
+            return _distanceToPoint + (int)DrawSortLayers.Circles;
         }
 
         public void Draw(DrawMode mode,SelectionState selectionState)

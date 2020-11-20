@@ -25,7 +25,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public float DistFromCamera()
         {
-            return _distFromCamera+(int)IDrawSortLayers.Points;
+            return _distFromCamera+(int)DrawSortLayers.Points;
         }
 
         public void Draw(DrawMode mode,SelectionState selectionState)
@@ -50,13 +50,13 @@ namespace ChaseMacMillan.CurveDesigner
             switch (type)
             {
                 case PointTextureType.circle:
-                    return Curve3DSettings.circleTexture;
+                    return CurveUIStatic.circleTexture;
                 case PointTextureType.square:
-                    return Curve3DSettings.squareTexture;
+                    return CurveUIStatic.squareTexture;
                 case PointTextureType.diamond:
-                    return Curve3DSettings.diamondTexture;
+                    return CurveUIStatic.diamondTexture;
                 case PointTextureType.plus:
-                    return Curve3DSettings.plusTexture;
+                    return CurveUIStatic.plusTexture;
                 default:
                     throw new KeyNotFoundException();
             }

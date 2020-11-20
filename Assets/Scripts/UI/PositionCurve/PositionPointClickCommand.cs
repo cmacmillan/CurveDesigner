@@ -6,11 +6,11 @@ namespace ChaseMacMillan.CurveDesigner
     public class PositionPointClickCommand : IClickCommand
     {
         private PointGroup _group;
-        private PGIndex _index;
+        private PointGroupIndex _index;
         private BezierCurve positionCurve;
         private List<BezierCurve> allCurves;
         private TransformBlob _transformBlob;
-        public PositionPointClickCommand(PointGroup group,PGIndex indexType,BezierCurve curve,TransformBlob transformBlob,List<BezierCurve> otherCurves)
+        public PositionPointClickCommand(PointGroup group,PointGroupIndex indexType,BezierCurve curve,TransformBlob transformBlob,List<BezierCurve> otherCurves)
         {
             this._group = group;
             this._index = indexType;

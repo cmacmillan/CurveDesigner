@@ -19,7 +19,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
-            var centerPos = transformBlob.TransformPoint(GetPointGroup().GetWorldPositionByIndex(PGIndex.Position));
+            var centerPos = transformBlob.TransformPoint(GetPointGroup().GetWorldPositionByIndex(PointGroupIndex.Position));
             drawList.Add(new LineDraw(this, centerPos, Position, Color.white));
             base.Draw(drawList, closestElementToCursor);
         }
@@ -36,21 +36,21 @@ namespace ChaseMacMillan.CurveDesigner
             else 
                 return positionCurve.PointGroups.Last();
         }
-        private PGIndex GetIndex()
+        private PointGroupIndex GetIndex()
         {
             //backwards, then we reflect
             if (isPrepend)
-                return PGIndex.RightTangent;
+                return PointGroupIndex.RightTangent;
             else
-                return PGIndex.LeftTangent;
+                return PointGroupIndex.LeftTangent;
         }
         public Vector3 Position
         {
             get
             {
                 PointGroup pointGroup = GetPointGroup();
-                PGIndex index = GetIndex();
-                var centerPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(PGIndex.Position,true));
+                PointGroupIndex index = GetIndex();
+                var centerPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(PointGroupIndex.Position,true));
                 var offsetPos = transformBlob.TransformPoint(pointGroup.GetWorldPositionByIndex(index,true));
                 GUITools.WorldToGUISpace(centerPos, out Vector2 centerGuiPos, out float centerScreenDepth);
                 bool needFlip = !GUITools.WorldToGUISpace(offsetPos, out Vector2 offsetGuiPos, out float offsetScreenDepth);

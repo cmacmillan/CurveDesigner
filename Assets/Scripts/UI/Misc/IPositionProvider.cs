@@ -15,11 +15,11 @@ namespace ChaseMacMillan.CurveDesigner
     public class PointGroupPointPositionProvider : IPosition
     {
         private PointGroup _group;
-        private PGIndex _type;
+        private PointGroupIndex _type;
         private TransformBlob transformBlob;
         private BezierCurve _positionCurve;
         private Curve3D _curve;
-        public PointGroupPointPositionProvider(PointGroup group,PGIndex type, TransformBlob transformBlob, BezierCurve positionCurve,Curve3D curve)
+        public PointGroupPointPositionProvider(PointGroup group,PointGroupIndex type, TransformBlob transformBlob, BezierCurve positionCurve,Curve3D curve)
         {
             this.transformBlob = transformBlob;
             _group = group;

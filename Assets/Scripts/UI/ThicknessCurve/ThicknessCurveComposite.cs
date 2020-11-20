@@ -9,7 +9,7 @@ namespace ChaseMacMillan.CurveDesigner
         private List<ThicknessPointComposite> points = new List<ThicknessPointComposite>();
         public ThicknessCurveComposite(IComposite parent, FloatDistanceSampler distanceSampler, Curve3D curve, PositionCurveComposite positionCurveComposite) : base(parent)
         {
-            _splitterPoint = new SplitterPointComposite(this, positionCurveComposite.transformBlob, PointTextureType.circle, new ValueAlongCurveSplitCommand(curve, distanceSampler, ValueAlongCurveSplitCommand.GetThicknessCurve), Curve3DSettings.Green, positionCurveComposite);
+            _splitterPoint = new SplitterPointComposite(this, positionCurveComposite.transformBlob, PointTextureType.circle, new ValueAlongCurveSplitCommand(curve, distanceSampler, ValueAlongCurveSplitCommand.GetThicknessCurve), CurveUIStatic.Green, positionCurveComposite);
             _distanceSampler = distanceSampler;
             foreach (var i in distanceSampler.GetPoints(curve.positionCurve))
                 points.Add(new ThicknessPointComposite(this, i, curve.positionCurve, curve, positionCurveComposite, _distanceSampler));
