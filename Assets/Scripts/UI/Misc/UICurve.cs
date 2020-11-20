@@ -6,7 +6,7 @@ using UnityEngine.Profiling;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class UICurve : IComposite
+    public class UICurve : Composite
     {
         public PositionCurveComposite positionCurve;
         public SizeCurveComposite sizeCurve;
@@ -43,7 +43,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public override SelectableGUID GUID => SelectableGUID.Null;
 
-        public UICurve(IComposite parent,Curve3D curve) : base(parent)
+        public UICurve(Composite parent,Curve3D curve) : base(parent)
         {
             Undo.undoRedoPerformed -= Initialize;
             Undo.undoRedoPerformed += Initialize;
@@ -90,7 +90,7 @@ namespace ChaseMacMillan.CurveDesigner
             base.Click(mousePosition, clickHits);
         }
 
-        public static void GetNormalsTangentsDraw(List<IDraw> drawList,Curve3D _curve,IComposite creator,TransformBlob transform,BezierCurve curveToDraw)
+        public static void GetNormalsTangentsDraw(List<IDraw> drawList,Curve3D _curve,Composite creator,TransformBlob transform,BezierCurve curveToDraw)
         {
             if (_curve.showNormals || _curve.showTangents)
             {
@@ -109,7 +109,7 @@ namespace ChaseMacMillan.CurveDesigner
                 }
             }
         }
-        public static void GetCurveDraw(List<IDraw> drawList,BezierCurve curve, TransformBlob transform, IComposite owner)
+        public static void GetCurveDraw(List<IDraw> drawList,BezierCurve curve, TransformBlob transform, Composite owner)
         {
             for (int i = 0; i < curve.NumSegments; i++)
             {
@@ -138,7 +138,7 @@ namespace ChaseMacMillan.CurveDesigner
             base.Draw(drawList,closestElementToCursor);
         }
 
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             switch (_curve.editMode)
             {

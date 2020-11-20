@@ -8,9 +8,9 @@ namespace ChaseMacMillan.CurveDesigner
         private Vector3 _startPoint;
         private Vector3 _endPoint;
         private float _distanceToPoint;
-        private IComposite _creator;
+        private Composite _creator;
         private Color color;
-        public LineDraw(IComposite creator,Vector3 startPoint,Vector3 endPoint,Color? color=null)
+        public LineDraw(Composite creator,Vector3 startPoint,Vector3 endPoint,Color? color=null)
         {
             this._creator = creator;
             this._startPoint = startPoint;
@@ -23,7 +23,7 @@ namespace ChaseMacMillan.CurveDesigner
                 this.color = Color.white;
         }
 
-        public IComposite Creator()
+        public Composite Creator()
         {
             return _creator;
         }

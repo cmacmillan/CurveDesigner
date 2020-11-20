@@ -21,7 +21,7 @@ namespace ChaseMacMillan.CurveDesigner
             this.position = position;
             this.alpha = alpha;
         }
-        public IComposite Creator()
+        public Composite Creator()
         {
             return creator;
         }

@@ -2,7 +2,7 @@
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class PositionPointGroupComposite : IComposite
+    public class PositionPointGroupComposite : Composite
     {
         private PointGroup _pointGroup;
 
@@ -30,7 +30,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             return new PositionPointClickCommand(_pointGroup, PointGroupIndex.Position,_positionCurve,_transformBlob,allCurves);
         }
-        public PositionPointGroupComposite(IComposite parent, PointGroup group, TransformBlob transformBlob, BezierCurve positionCurve,SelectableGUID guid,List<BezierCurve> allCurves,Curve3D curve) : base(parent)
+        public PositionPointGroupComposite(Composite parent, PointGroup group, TransformBlob transformBlob, BezierCurve positionCurve,SelectableGUID guid,List<BezierCurve> allCurves,Curve3D curve) : base(parent)
         {
             this._transformBlob = transformBlob;
             this.curve = curve;
@@ -61,7 +61,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             bool isSelected = curve.selectedPoints.Contains(GUID)&&curve.showPositionHandles;
             if (leftTangentPoint != null)

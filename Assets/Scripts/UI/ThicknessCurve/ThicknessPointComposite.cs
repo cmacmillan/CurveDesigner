@@ -2,17 +2,13 @@
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public interface IOffsetProvider
-    {
-        float Offset { get; }
-    }
-    public class ThicknessPointComposite : IComposite, IOffsetProvider 
+    public class ThicknessPointComposite : Composite, IOffsetProvider 
     {
         public SizeCircleComposite sizeCircle;
         private Curve3D curve;
         private FloatSamplerPoint point;
         private BezierCurve positionCurve;
-        public ThicknessPointComposite(IComposite parent,FloatSamplerPoint point,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatDistanceSampler sampler) : base(parent)
+        public ThicknessPointComposite(Composite parent,FloatSamplerPoint point,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatDistanceSampler sampler) : base(parent)
         {
             sizeCircle = new SizeCircleComposite(this, point, positionCurve, curve, positionCurveComposite,sampler,this);
             this.positionCurve = positionCurve;
@@ -22,7 +18,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public float Offset => curve.sizeSampler.GetValueAtDistance(point.GetDistance(positionCurve),positionCurve);
 
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return sizeCircle;
         }

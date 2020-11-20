@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class RotationCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
+    public class RotationCurveComposite : Composite, IValueAlongCurvePointProvider, IWindowDrawer
     {
         private FloatDistanceSampler _distanceSampler;
         private List<RotationPointComposite> _points = new List<RotationPointComposite>();
         private SplitterPointComposite _splitterPoint = null;
-        public RotationCurveComposite(IComposite parent,FloatDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public RotationCurveComposite(Composite parent,FloatDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _distanceSampler = distanceSampler;
             var blueColor = new Color(0,.8f,1.0f);
@@ -22,14 +22,14 @@ namespace ChaseMacMillan.CurveDesigner
             WindowDrawer.Draw(curve.rotationSampler.GetPoints(curve.positionCurve), curve);
         }
 
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return _splitterPoint;
             foreach (var i in _points)
                 yield return i;
         }
 
-        public IClickable GetPointAtIndex(int index)
+        public Clickable GetPointAtIndex(int index)
         {
             return _points[index].centerPoint.point;
         }

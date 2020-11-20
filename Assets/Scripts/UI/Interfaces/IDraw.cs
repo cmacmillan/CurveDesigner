@@ -1,7 +1,13 @@
 ﻿using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
-{
+{ 
+    public interface IDraw
+    {
+        void Draw(DrawMode mode,SelectionState selectionState);
+        float DistFromCamera();
+        Composite Creator();
+    } 
     public static class DrawModeExtensionMethods
     {
         private static readonly Color primarySelectedColor = new Color(1,.9f,.32f);//yellowish
@@ -42,15 +48,5 @@ namespace ChaseMacMillan.CurveDesigner
             retr.a = color.a;
             return retr;
         }
-    }
-    public interface IDraw
-    {
-        void Draw(DrawMode mode,SelectionState selectionState);
-        float DistFromCamera();
-        IComposite Creator();
-    } 
-    public interface IIMGUI
-    {
-        void Event();
     }
 }

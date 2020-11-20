@@ -151,10 +151,6 @@ namespace ChaseMacMillan.CurveDesigner
             _curve.elementClickedDown.owner = selected;
         }
     }
-    public interface IValueAlongCurvePointProvider
-    {
-        IClickable GetPointAtIndex(int index);
-    }
     public class ValueAlongCurveSplitCommand: SplitCommand
     {
         private IDistanceSampler _sampler;

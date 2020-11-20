@@ -2,7 +2,7 @@
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class PositionCurveComposite : IComposite, IWindowDrawer
+    public class PositionCurveComposite : Composite, IWindowDrawer
     {
         public List<PositionPointGroupComposite> pointGroups = null;
         private SplitterPointComposite _splitterPoint = null;
@@ -12,7 +12,7 @@ namespace ChaseMacMillan.CurveDesigner
         public BezierCurve positionCurve;
         public TransformBlob transformBlob;
         public PointOnCurve PointClosestToCursor { get; private set; }
-        public PositionCurveComposite(IComposite parent,Curve3D curve,BezierCurve positionCurve,IClickCommand splitterPointClickCommand, TransformBlob transformBlob,List<BezierCurve> allCurves,int secondaryCurveIndex) : base(parent)
+        public PositionCurveComposite(Composite parent,Curve3D curve,BezierCurve positionCurve,IClickCommand splitterPointClickCommand, TransformBlob transformBlob,List<BezierCurve> allCurves,int secondaryCurveIndex) : base(parent)
         {
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
@@ -41,7 +41,7 @@ namespace ChaseMacMillan.CurveDesigner
             float distance = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);
             PointClosestToCursor = positionCurve.GetPointAtDistance(distance);
         }
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return _splitterPoint;
             if (!positionCurve.isClosedLoop)

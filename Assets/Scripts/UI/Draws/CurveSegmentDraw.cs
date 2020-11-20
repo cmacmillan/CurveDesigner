@@ -13,8 +13,8 @@ namespace ChaseMacMillan.CurveDesigner
         private Color _color;
         private float _width;
         private float _distanceToPoint;
-        private IComposite _creator;
-        public CurveSegmentDraw(IComposite creator,Vector3 startPoint, Vector3 endPoint, Vector3 startTangent, Vector3 endTangent,Color lineColor,float width=5)
+        private Composite _creator;
+        public CurveSegmentDraw(Composite creator,Vector3 startPoint, Vector3 endPoint, Vector3 startTangent, Vector3 endTangent,Color lineColor,float width=5)
         {
             this._creator = creator;
             this._startPoint = startPoint;
@@ -37,7 +37,7 @@ namespace ChaseMacMillan.CurveDesigner
             Handles.DrawBezier(_startPoint,_endPoint,_startTangent,_endTangent,_color,CurveUIStatic.defaultLineTexture,_width);
         }
 
-        public IComposite Creator()
+        public Composite Creator()
         {
             return _creator;
         }

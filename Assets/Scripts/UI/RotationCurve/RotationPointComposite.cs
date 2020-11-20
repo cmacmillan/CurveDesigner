@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class RotationPointComposite : IComposite, IPositionProvider
+    public class RotationPointComposite : Composite, IPositionProvider
     {
         public FloatSamplerPoint _point;
         public PointAlongCurveComposite centerPoint;
@@ -11,7 +11,7 @@ namespace ChaseMacMillan.CurveDesigner
         public Curve3D _curve;
         public override SelectableGUID GUID => _point.GUID;
 
-        public RotationPointComposite(IComposite parent,FloatSamplerPoint value,Curve3D curve,FloatDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
+        public RotationPointComposite(Composite parent,FloatSamplerPoint value,Curve3D curve,FloatDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
             _point = value;
             _curve = curve;
@@ -27,7 +27,7 @@ namespace ChaseMacMillan.CurveDesigner
             base.Draw(drawList, closestElementToCursor);
         }
 
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return centerPoint;
             yield return _rotationHandlePoint;

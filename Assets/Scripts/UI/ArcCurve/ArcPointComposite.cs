@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class ArcPointComposite : IComposite
+    public class ArcPointComposite : Composite
     {
         private Curve3D _curve;
         private FloatSamplerPoint _point;
@@ -13,7 +13,7 @@ namespace ChaseMacMillan.CurveDesigner
         private ArcPointPositionProvider _leftPosition;
         private ArcPointPositionProvider _rightPosition;
         public override SelectableGUID GUID => _point.GUID;
-        public ArcPointComposite(IComposite parent,FloatSamplerPoint point,Curve3D curve,FloatDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
+        public ArcPointComposite(Composite parent,FloatSamplerPoint point,Curve3D curve,FloatDistanceSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
             _curve = curve;
             _point = point;
@@ -27,7 +27,7 @@ namespace ChaseMacMillan.CurveDesigner
             var rightClickCommand = new ArcPointClickCommand(this,point,sampler,curve,false);
             _rightHandlePoint= new PointComposite(this,_rightPosition,PointTextureType.diamond,rightClickCommand, color,_point.GUID);
         }
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return centerPoint;
             yield return _leftHandlePoint;

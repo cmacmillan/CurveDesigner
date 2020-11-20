@@ -430,7 +430,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
         private const float smallDist = 5;
         private const float bigDist = 20;
-        ClickHitData GetClosestElementToCursor(IComposite root, Vector2 clickPosition)
+        ClickHitData GetClosestElementToCursor(Composite root, Vector2 clickPosition)
         {
             ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
             {

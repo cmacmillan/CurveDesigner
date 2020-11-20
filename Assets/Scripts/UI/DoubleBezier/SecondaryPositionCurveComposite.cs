@@ -2,13 +2,13 @@
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class SecondaryPositionCurveComposite : IComposite
+    public class SecondaryPositionCurveComposite : Composite
     {
         public PositionCurveComposite positionCurve;
         public PointAlongCurveComposite centerPoint;
         private Curve3D _curve;
         public TransformBlob transformBlob;
-        public SecondaryPositionCurveComposite(IComposite parent,Curve3D curve, ExtrudePoint secondaryBezierCurve,IDistanceSampler sampler,List<BezierCurve> allCurves,int secondaryCurveIndex) : base (parent)
+        public SecondaryPositionCurveComposite(Composite parent,Curve3D curve, ExtrudePoint secondaryBezierCurve,IDistanceSampler sampler,List<BezierCurve> allCurves,int secondaryCurveIndex) : base (parent)
         {
             this._curve = curve; 
             transformBlob = new TransformBlob(curve.transform,null,curve);
@@ -16,7 +16,7 @@ namespace ChaseMacMillan.CurveDesigner
             centerPoint = new PointAlongCurveComposite(this, secondaryBezierCurve, curve.UICurve.positionCurve, UnityEngine.Color.green,secondaryBezierCurve.GUID,sampler);
             transformBlob._additionalTransform = new DynamicMatrix4x4(centerPoint);//works because transform blob is immutable
         }
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return positionCurve;
             yield return centerPoint;

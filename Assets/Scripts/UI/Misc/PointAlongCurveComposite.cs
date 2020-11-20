@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class PointAlongCurveComposite : IComposite, IPositionProvider, IPointOnCurveProvider
+    public class PointAlongCurveComposite : Composite, IPositionProvider, IPointOnCurveProvider
     {
         public ISamplerPoint value;
         public PointComposite point;
         private BezierCurve _positionCurve;
 
-        public PointAlongCurveComposite(IComposite parent,ISamplerPoint value,PositionCurveComposite positionCurve,Color color,SelectableGUID guid,IDistanceSampler sampler) : base(parent)
+        public PointAlongCurveComposite(Composite parent,ISamplerPoint value,PositionCurveComposite positionCurve,Color color,SelectableGUID guid,IDistanceSampler sampler) : base(parent)
         {
             this.value = value;
             point = new PointComposite(this, this, PointTextureType.square, new PointOnCurveClickCommand(value, positionCurve,sampler),color,guid);
@@ -36,7 +36,7 @@ namespace ChaseMacMillan.CurveDesigner
             reference = point.reference;
         }
 
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return point;
         }

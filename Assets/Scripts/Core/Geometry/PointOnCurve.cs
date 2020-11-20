@@ -94,9 +94,4 @@ namespace ChaseMacMillan.CurveDesigner
 
         public float Time { get { return time; } }
     }
-    public interface ISegmentTime
-    {
-        int SegmentIndex { get; }
-        float Time { get; }
-    }
 }

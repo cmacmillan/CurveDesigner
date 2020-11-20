@@ -141,26 +141,4 @@ namespace ChaseMacMillan.CurveDesigner
             return retr;
         }
     }
-
-    //where need to more properly handle when we change contexts
-    public interface ISelectable
-    {
-        SelectableGUID GUID { get; }
-        float GetDistance(BezierCurve positionCurve);
-        bool IsInsideVisibleCurve(BezierCurve curve);
-    }
-    public interface ISelectEditable<T> : ISelectable
-    {
-        void SelectEdit(Curve3D curve, List<T> selectedPoints);
-    }
-    //Active elements can have stuff deleted from them and have all their elements selected
-    public interface IActiveElement
-    {
-        string GetPointName();
-        ISelectable GetSelectable(int index, Curve3D curve);
-        int NumSelectables(Curve3D curve);
-        bool Delete(List<SelectableGUID> guids, Curve3D curve);
-        List<SelectableGUID> SelectAll(Curve3D curve);
-    }
-
 }

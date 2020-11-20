@@ -58,10 +58,6 @@ namespace ChaseMacMillan.CurveDesigner
             return retr;
         }
     }
-    public interface IPointOnCurveProvider
-    {
-        PointOnCurve PointOnCurve { get; }
-    }
     public class DynamicMatrix4x4
     {
         private IPointOnCurveProvider point;

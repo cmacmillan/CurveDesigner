@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class ColorCurveComposite : IComposite, IWindowDrawer, IValueAlongCurvePointProvider
+    public class ColorCurveComposite : Composite, IWindowDrawer, IValueAlongCurvePointProvider
     {
         private ColorDistanceSampler sampler;
         private Curve3D curve;
         private List<EditColorComposite> colorPoints = new List<EditColorComposite>();
         private SplitterPointComposite splitterPoint;
-        public ColorCurveComposite(IComposite parent,ColorDistanceSampler sampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public ColorCurveComposite(Composite parent,ColorDistanceSampler sampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             this.sampler = sampler;
             this.curve = curve;
@@ -24,14 +24,14 @@ namespace ChaseMacMillan.CurveDesigner
             WindowDrawer.Draw(sampler.GetPoints(curve.positionCurve),curve);
         }
 
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return splitterPoint;
             foreach (var i in colorPoints)
                 yield return i;
         }
 
-        public IClickable GetPointAtIndex(int index)
+        public Clickable GetPointAtIndex(int index)
         {
             return colorPoints[index].centerPoint.point;
         }

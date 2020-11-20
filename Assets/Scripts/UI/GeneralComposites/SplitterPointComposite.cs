@@ -3,19 +3,19 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class SplitterPointComposite : IComposite, IPositionProvider
+    public class SplitterPointComposite : Composite, IPositionProvider
     {
         private PointComposite _point;
         private TransformBlob _transformBlob;
         private const float _maxSplitClickDistance = 10;
         private PositionCurveComposite _positionCurveComposite;
-        public SplitterPointComposite(IComposite parent,TransformBlob transformBlob,PointTextureType textureType,IClickCommand clickCommand,Color color,PositionCurveComposite positionCurveComposite) : base (parent)
+        public SplitterPointComposite(Composite parent,TransformBlob transformBlob,PointTextureType textureType,IClickCommand clickCommand,Color color,PositionCurveComposite positionCurveComposite) : base (parent)
         {
             _positionCurveComposite = positionCurveComposite;
             _transformBlob = transformBlob;
             _point = new PointComposite(this,this,textureType,clickCommand,color,SelectableGUID.Null,true);
         }
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return _point;
         }

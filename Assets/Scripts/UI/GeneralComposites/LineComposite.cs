@@ -2,11 +2,11 @@
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class LineComposite : IComposite
+    public class LineComposite : Composite
     {
         private IPositionProvider _start;
         private IPositionProvider _end;
-        public LineComposite(IComposite parent, IPositionProvider start, IPositionProvider end) : base(parent)
+        public LineComposite(Composite parent, IPositionProvider start, IPositionProvider end) : base(parent)
         {
             this._start = start;
             this._end = end;

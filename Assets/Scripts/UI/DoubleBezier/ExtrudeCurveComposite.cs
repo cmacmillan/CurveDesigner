@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class ExtrudeCurveComposite : IComposite, IValueAlongCurvePointProvider, IWindowDrawer
+    public class ExtrudeCurveComposite : Composite, IValueAlongCurvePointProvider, IWindowDrawer
     {
         private ExtrudeSampler _extrudeSampler;
         public List<SecondaryPositionCurveComposite> _secondaryCurves;
         private SplitterPointComposite _splitterPoint;
-        public ExtrudeCurveComposite(IComposite parent,ExtrudeSampler extrudeSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public ExtrudeCurveComposite(Composite parent,ExtrudeSampler extrudeSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _extrudeSampler = extrudeSampler;
             _secondaryCurves = new List<SecondaryPositionCurveComposite>();
@@ -36,11 +36,11 @@ namespace ChaseMacMillan.CurveDesigner
                     return i;
             throw new KeyNotFoundException();
         }
-        public IClickable GetPointAtIndex(int index)
+        public Clickable GetPointAtIndex(int index)
         {
             return _secondaryCurves[index].centerPoint.point;
         }
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return _splitterPoint;
             foreach (var i in _secondaryCurves)

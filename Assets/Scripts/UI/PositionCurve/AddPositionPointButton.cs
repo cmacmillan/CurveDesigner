@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class AddPositionPointButton : IComposite, IPositionProvider
+    public class AddPositionPointButton : Composite, IPositionProvider
     {
         private PointComposite PlusButtonPoint;
         private bool isPrepend;
         private BezierCurve positionCurve;
         private TransformBlob transformBlob;
-        public AddPositionPointButton(IComposite parent,Curve3D curve,BezierCurve positionCurve,bool isPrepend,TransformBlob transformBlob,PositionCurveComposite curveComposite,int secondaryCurveIndex) : base(parent)
+        public AddPositionPointButton(Composite parent,Curve3D curve,BezierCurve positionCurve,bool isPrepend,TransformBlob transformBlob,PositionCurveComposite curveComposite,int secondaryCurveIndex) : base(parent)
         {
             this.transformBlob = transformBlob;
             this.positionCurve = positionCurve;
@@ -23,7 +23,7 @@ namespace ChaseMacMillan.CurveDesigner
             drawList.Add(new LineDraw(this, centerPos, Position, Color.white));
             base.Draw(drawList, closestElementToCursor);
         }
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return PlusButtonPoint;
         }

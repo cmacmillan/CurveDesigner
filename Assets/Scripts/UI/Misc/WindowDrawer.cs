@@ -3,10 +3,6 @@ using UnityEditor;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public interface IWindowDrawer
-    {
-        void DrawWindow(Curve3D curve);
-    }
     public static class WindowDrawer
     {
         public static void Draw<T>(IEnumerable<T> selectables,Curve3D curve) where T : class, ISelectEditable<T>

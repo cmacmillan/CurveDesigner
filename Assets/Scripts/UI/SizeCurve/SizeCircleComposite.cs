@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class SizeCircleComposite : IComposite
+    public class SizeCircleComposite : Composite
     {
         private BezierCurve _positionCurve;
         private List<PointComposite> ringPoints = new List<PointComposite>();
@@ -18,7 +18,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public override SelectableGUID GUID => value.GUID;
 
-        public SizeCircleComposite(IComposite parent,FloatSamplerPoint value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatDistanceSampler _sampler,IOffsetProvider offset = null) : base(parent)
+        public SizeCircleComposite(Composite parent,FloatSamplerPoint value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatDistanceSampler _sampler,IOffsetProvider offset = null) : base(parent)
         {
             this._sampler = _sampler;
             this.value = value;
@@ -46,7 +46,7 @@ namespace ChaseMacMillan.CurveDesigner
             base.Draw(drawList, closestElementToCursor);
         }
 
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return linePoint;
             foreach (var i in ringPoints)

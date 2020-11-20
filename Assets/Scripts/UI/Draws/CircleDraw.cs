@@ -5,13 +5,13 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public class CircleDraw : IDraw
     {
-        private IComposite _creator;
+        private Composite _creator;
         private Color _color;
         private Vector3 _center;
         private Vector3 _forward;
         private float _radius;
         private float _distanceToPoint;
-        public CircleDraw(IComposite creator,Color color,Vector3 center, Vector3 forward,float radius)
+        public CircleDraw(Composite creator,Color color,Vector3 center, Vector3 forward,float radius)
         {
             _creator = creator;
             _color = color;
@@ -20,7 +20,7 @@ namespace ChaseMacMillan.CurveDesigner
             _radius = radius;
             _distanceToPoint = GUITools.CameraDistanceToPoint(center);
         }
-        public IComposite Creator()
+        public Composite Creator()
         {
             return _creator;
         }
@@ -40,7 +40,7 @@ namespace ChaseMacMillan.CurveDesigner
     }
     public class ArcDraw : IDraw
     {
-        private IComposite _creator;
+        private Composite _creator;
         private Color _color;
         private Vector3 _center;
         private Vector3 _forward;
@@ -48,7 +48,7 @@ namespace ChaseMacMillan.CurveDesigner
         private float _radius;
         private float _arc;
         private float _distanceToPoint;
-        public ArcDraw(IComposite creator,Color color,Vector3 center, Vector3 forward,float radius,float arc,Vector3 reference)
+        public ArcDraw(Composite creator,Color color,Vector3 center, Vector3 forward,float radius,float arc,Vector3 reference)
         {
             _creator = creator;
             _color = color;
@@ -59,7 +59,7 @@ namespace ChaseMacMillan.CurveDesigner
             _arc = arc;
             _distanceToPoint = GUITools.CameraDistanceToPoint(center);
         }
-        public IComposite Creator()
+        public Composite Creator()
         {
             return _creator;
         }

@@ -11,10 +11,10 @@ namespace ChaseMacMillan.CurveDesigner
         int _size;
         PointTextureType type;
         Color _color;
-        IComposite _creator;
+        Composite _creator;
         bool hideIfNotHovered;
         
-        public PointDraw(IComposite creator,Vector3 position,PointTextureType type,Color color,int size = 5,bool hideIfNotHovered=false)
+        public PointDraw(Composite creator,Vector3 position,PointTextureType type,Color color,int size = 5,bool hideIfNotHovered=false)
         {
             GUITools.WorldToGUISpace(position, out _guiPos, out _distFromCamera);
             this._color = color;
@@ -62,7 +62,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 
-        public IComposite Creator()
+        public Composite Creator()
         {
             return _creator;
         }

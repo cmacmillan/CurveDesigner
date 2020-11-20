@@ -344,30 +344,4 @@ namespace ChaseMacMillan.CurveDesigner
 
         public abstract void ConstantField(Rect rect);
     }
-    public interface ISamplerPoint : ISelectable
-    {
-        float Time { get; set; }
-        int SegmentIndex { get; set; }
-        void SetDistance(float distance,BezierCurve curve,bool shouldSort=true);
-        KeyframeInterpolationMode InterpolationMode { get; set; } 
-    }
-    public interface IDistanceSampler : IActiveElement
-    {
-        void ConstantField(Rect rect);
-        string GetLabel();
-        Curve3DEditMode GetEditMode();
-        IEnumerable<ISamplerPoint> GetPoints(BezierCurve curve);
-        IEnumerable<ISamplerPoint> AllPoints();
-        void RecalculateOpenCurveOnlyPoints(BezierCurve curve);
-        void Sort(BezierCurve curve);
-        int InsertPointAtDistance(float distance,BezierCurve curve);
-    }
-    public interface IValueSampler<T> : IValueSampler
-    {
-        T ConstValue { get; set; }
-    }
-    public interface IValueSampler : IDistanceSampler
-    {
-        bool UseKeyframes { get; set; }
-    }
 }

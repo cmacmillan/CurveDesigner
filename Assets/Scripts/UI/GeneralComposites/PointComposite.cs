@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class PointComposite : IClickable
+    public class PointComposite : Clickable
     {
         private IPositionProvider _position;
         private PointTextureType _pointTexture;
@@ -13,7 +13,7 @@ namespace ChaseMacMillan.CurveDesigner
         private int size;
         private bool hideIfNotHovered;
 
-        public PointComposite(IComposite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color, SelectableGUID guid, bool hideIfNotHovered = false,int size=5) : base(parent)
+        public PointComposite(Composite parent, IPositionProvider positionProvider, PointTextureType textureType, IClickCommand clickAction, Color color, SelectableGUID guid, bool hideIfNotHovered = false,int size=5) : base(parent)
         {
             this._position = positionProvider;
             this._pointTexture = textureType;

@@ -4,21 +4,21 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class EditColorComposite : IClickable
+    public class EditColorComposite : Clickable
     {
         public PointAlongCurveComposite centerPoint;
         private ColorSamplerPoint _point;
         private Curve3D _curve;
         private DoNothingClickCommand clickCommand;
         public override SelectableGUID GUID => _point.GUID;
-        public EditColorComposite(IComposite parent,ColorSamplerPoint point,ColorDistanceSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent)
+        public EditColorComposite(Composite parent,ColorSamplerPoint point,ColorDistanceSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent)
         {
             _curve = curve;
             _point = point;
             clickCommand = new DoNothingClickCommand();
             centerPoint = new PointAlongCurveComposite(this,point,positionCurveComposite,color,point.GUID,sampler);
         }
-        public override IEnumerable<IComposite> GetChildren()
+        public override IEnumerable<Composite> GetChildren()
         {
             yield return centerPoint;
         }
@@ -94,7 +94,7 @@ namespace ChaseMacMillan.CurveDesigner
             GUITools.WorldToGUISpace(creator.centerPoint.Position, out Vector2 _guiPos, out _distFromCamera);
         }
 
-        public IComposite Creator()
+        public Composite Creator()
         {
             return creator;
         }

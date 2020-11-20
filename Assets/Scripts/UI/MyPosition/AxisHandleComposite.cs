@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class AxisHandleComposite : IClickable
+    public class AxisHandleComposite : Clickable
     {
         private Curve3D curve;
         private Vector3 axis;
@@ -12,7 +12,7 @@ namespace ChaseMacMillan.CurveDesigner
         private AxisHandleClickCommand clickCommand;
         public const float axisMaxDotProduct = .95f;
         public const float axisStartFadeDotProduct= .9f;
-        public AxisHandleComposite(IComposite parent,Curve3D curve,Vector3 axis,IPosition positionProvider) : base(parent)
+        public AxisHandleComposite(Composite parent,Curve3D curve,Vector3 axis,IPosition positionProvider) : base(parent)
         {
             this.curve = curve;
             this.axis = axis;
