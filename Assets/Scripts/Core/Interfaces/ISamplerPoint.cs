@@ -1,6 +1,6 @@
 ﻿namespace ChaseMacMillan.CurveDesigner
 {
-    public interface ISamplerPoint : ISelectable
+    public interface ISamplerPoint
     {
         float Time { get; set; }
         int SegmentIndex { get; set; }

@@ -3,6 +3,10 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
+    public interface IDistanceSampler<T> : IDistanceSampler
+    {
+        T CloneValue(T val,bool shouldCreateGuids);
+    }
     public interface IDistanceSampler : IActiveElement
     {
         void ConstantField(Rect rect);
