@@ -31,7 +31,7 @@ namespace ChaseMacMillan.CurveDesigner
         private List<CurveItem> modifications = new List<CurveItem>();
         private List<ISamplerPoint> points = new List<ISamplerPoint>();
         private BezierCurve curve;
-        public ModificationTracker(BezierCurve curve, IDistanceSampler distanceSampler)
+        public ModificationTracker(BezierCurve curve, ISampler distanceSampler)
         {
             this.curve = curve;
             foreach (var i in distanceSampler.AllPoints())
@@ -153,7 +153,7 @@ namespace ChaseMacMillan.CurveDesigner
     }
     public class ValueAlongCurveSplitCommand: SplitCommand
     {
-        private IDistanceSampler _sampler;
+        private ISampler _sampler;
         private Func<Curve3D,IValueAlongCurvePointProvider> _pointsProvider;
 
         public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
@@ -163,7 +163,7 @@ namespace ChaseMacMillan.CurveDesigner
         public static IValueAlongCurvePointProvider GetColorCurve(Curve3D curve) { return curve.UICurve.colorCurve; }
         public static IValueAlongCurvePointProvider GetExtrudeCurve(Curve3D curve) { return curve.UICurve.extrudeCurve; }
 
-        public ValueAlongCurveSplitCommand(Curve3D curve, IDistanceSampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {
+        public ValueAlongCurveSplitCommand(Curve3D curve, ISampler sampler,Func<Curve3D,IValueAlongCurvePointProvider> pointsProvider) : base(curve) {
             _pointsProvider = pointsProvider;
             _sampler = sampler;
             _curve = curve;

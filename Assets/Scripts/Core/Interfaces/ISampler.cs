@@ -3,13 +3,12 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public interface IDistanceSampler<T> : IDistanceSampler
+    public interface ISampler<T> : ISampler
     {
         T CloneValue(T val,bool shouldCreateGuids);
     }
-    public interface IDistanceSampler : IActiveElement
+    public interface ISampler : IActiveElement
     {
-        void ConstantField(Rect rect);
         string GetLabel();
         Curve3DEditMode GetEditMode();
         IEnumerable<ISamplerPoint> GetPoints(BezierCurve curve);

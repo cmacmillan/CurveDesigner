@@ -9,7 +9,7 @@ namespace ChaseMacMillan.CurveDesigner
         public PointComposite point;
         private BezierCurve _positionCurve;
 
-        public PointAlongCurveComposite(Composite parent,ISamplerPoint value,PositionCurveComposite positionCurve,Color color,SelectableGUID guid,IDistanceSampler sampler) : base(parent)
+        public PointAlongCurveComposite(Composite parent,ISamplerPoint value,PositionCurveComposite positionCurve,Color color,SelectableGUID guid,ISampler sampler) : base(parent)
         {
             this.value = value;
             point = new PointComposite(this, this, PointTextureType.square, new PointOnCurveClickCommand(value, positionCurve,sampler),color,guid);

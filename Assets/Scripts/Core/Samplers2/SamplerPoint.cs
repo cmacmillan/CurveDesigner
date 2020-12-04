@@ -17,7 +17,11 @@ namespace ChaseMacMillan.CurveDesigner
         public float Time { get => time; set => time = value; }
         public int SegmentIndex { get => segmentIndex; set => segmentIndex = value; }
 
-        public SamplerPoint(SamplerPoint<T> other, IDistanceSampler<T> owner, bool createNewGuids,Curve3D curve)
+        public SamplerPoint(Sampler<T> owner,Curve3D curve) {
+            this.owner = owner;
+            GUID = curve.guidFactory.GetGUID(this);
+        }
+        public SamplerPoint(SamplerPoint<T> other, ISampler<T> owner, bool createNewGuids,Curve3D curve)
         {
             value = owner.CloneValue(other.value,createNewGuids);
             segmentIndex = other.segmentIndex;

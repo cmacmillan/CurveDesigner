@@ -173,7 +173,7 @@ namespace ChaseMacMillan.CurveDesigner
     }
 
     [System.Serializable]
-    public abstract class DistanceSampler<T,S,Q> : ISerializationCallbackReceiver, IDistanceSampler where Q : DistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
+    public abstract class DistanceSampler<T,S,Q> : ISerializationCallbackReceiver, ISampler where Q : DistanceSampler<T,S,Q> where S : SamplerPoint<T,S,Q>, new()
     {
         public List<S> points = new List<S>();
 
@@ -230,7 +230,7 @@ namespace ChaseMacMillan.CurveDesigner
             return points;
         }
 
-        IEnumerable<ISamplerPoint> IDistanceSampler.GetPoints(BezierCurve curve)
+        IEnumerable<ISamplerPoint> ISampler.GetPoints(BezierCurve curve)
         {
             return points;
         }

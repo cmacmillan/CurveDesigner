@@ -8,7 +8,7 @@ namespace ChaseMacMillan.CurveDesigner
     [RequireComponent(typeof(MeshFilter))]
     public class Curve3D : MonoBehaviour, ISerializationCallbackReceiver
     {
-        public IEnumerable<IDistanceSampler> DistanceSamplers
+        public IEnumerable<ISampler> DistanceSamplers
         {
             get
             {

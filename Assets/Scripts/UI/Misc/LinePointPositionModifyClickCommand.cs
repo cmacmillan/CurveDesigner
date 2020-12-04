@@ -7,9 +7,9 @@ namespace ChaseMacMillan.CurveDesigner
     {
         private ISamplerPoint _point;
         private PositionCurveComposite _positionCurve;
-        private IDistanceSampler sampler;
+        private ISampler sampler;
 
-        public PointOnCurveClickCommand(ISamplerPoint point,PositionCurveComposite positionCurve,IDistanceSampler sampler)
+        public PointOnCurveClickCommand(ISamplerPoint point,PositionCurveComposite positionCurve,ISampler sampler)
         {
             this.sampler = sampler;
             _point = point;

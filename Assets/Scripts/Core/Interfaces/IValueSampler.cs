@@ -1,11 +1,14 @@
-﻿namespace ChaseMacMillan.CurveDesigner
+﻿using UnityEngine;
+
+namespace ChaseMacMillan.CurveDesigner
 {
     public interface IValueSampler<T> : IValueSampler
     {
         T ConstValue { get; set; }
     }
-    public interface IValueSampler : IDistanceSampler
+    public interface IValueSampler : ISampler
     {
         bool UseKeyframes { get; set; }
+        void ConstantField(Rect rect);
     }
 }

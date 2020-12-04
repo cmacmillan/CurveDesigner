@@ -18,6 +18,7 @@ namespace ChaseMacMillan.CurveDesigner
         public T ConstValue { get => constValue; set => constValue = value; }
 
         public abstract T Lerp(T val1, T val2, float lerp);
+        public abstract void ConstantField(Rect rect);
         public ValueSampler(string label,Curve3DEditMode editMode) : base(label,editMode)
         {
         }

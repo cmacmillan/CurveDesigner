@@ -11,7 +11,7 @@ namespace ChaseMacMillan.CurveDesigner
     /// <para>You can sample at any distance along the curve and will recieve a value calculated by interpolating between the two adjacent points</para>
     /// </summary>
     /// <typeparam name="T">The type of points in the Sampler</typeparam>
-    public abstract class Sampler<T> : ISerializationCallbackReceiver, IDistanceSampler<T>
+    public abstract class Sampler<T> : ISerializationCallbackReceiver, ISampler<T>
     {
         public List<SamplerPoint<T>> points = new List<SamplerPoint<T>>();
 
@@ -42,7 +42,6 @@ namespace ChaseMacMillan.CurveDesigner
                 points_openCurveOnly.Add(new SamplerPoint<T>(i,this,createNewGuids,curve));
         }
         protected abstract T GetInterpolatedValueAtDistance(float distance, BezierCurve curve);
-        public abstract void ConstantField(Rect rect);
         public virtual T CloneValue(T val, bool shouldCreateGuids)
         {
             return val;
@@ -75,17 +74,15 @@ namespace ChaseMacMillan.CurveDesigner
             return points;
         }
 
-        IEnumerable<ISamplerPoint> IDistanceSampler.GetPoints(BezierCurve curve)
+        IEnumerable<ISamplerPoint> ISampler.GetPoints(BezierCurve curve)
         {
             return points;
         }
 
         public int InsertPointAtDistance(float distance, BezierCurve curve) {
             T interpolatedValue = GetInterpolatedValueAtDistance(distance, curve);
-            var newPoint = new SamplerPoint<T>();
-            newPoint.GUID = curve.owner.guidFactory.GetGUID(newPoint);
+            var newPoint = new SamplerPoint<T>(this,curve.owner);
             newPoint.value = interpolatedValue;
-            newPoint.owner = this;
             var valuePoint = newPoint as ISamplerPoint;
             if (valuePoint != null && TryGetPointBelowDistance(distance, curve, out SamplerPoint<T> point))
                 valuePoint.InterpolationMode = point.InterpolationMode;
