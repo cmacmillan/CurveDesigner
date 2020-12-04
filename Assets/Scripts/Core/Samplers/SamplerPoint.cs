@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 
 namespace ChaseMacMillan.CurveDesigner
 {
@@ -29,8 +30,6 @@ namespace ChaseMacMillan.CurveDesigner
             interpolationMode = other.interpolationMode;
             if (createNewGuids)
                 guid = curve.guidFactory.GetGUID(this);
-            else
-                guid = other.guid;
         }
 
         public void SetDistance(float distance, BezierCurve curve, bool shouldSort = true)
@@ -54,7 +53,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public void SelectEdit(Curve3D curve, List<SamplerPoint<T>> selectedPoints)
         {
-            throw new NotImplementedException();
+            owner.SelectEdit(curve, selectedPoints,selectedPoints[0]);
         }
     }
 }
