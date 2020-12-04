@@ -72,6 +72,8 @@ namespace ChaseMacMillan.CurveDesigner
             this.owner = newCurve;
             if (createNewGuids)
                 this.guid = curve.guidFactory.GetGUID(this);
+            else 
+                this.guid = SelectableGUID.Null;
         }
 
         public bool DoesEditAffectBothSegments(PointGroupIndex index)

@@ -4,6 +4,7 @@ using UnityEditor;
 
 namespace ChaseMacMillan.CurveDesigner
 {
+    [System.Serializable]//Despite this class being generic, it can still serialize when inside a list
     public sealed class SamplerPoint<T> : ISelectEditable<SamplerPoint<T>>, ISamplerPoint
     {
         public T value;
@@ -30,6 +31,8 @@ namespace ChaseMacMillan.CurveDesigner
             interpolationMode = other.interpolationMode;
             if (createNewGuids)
                 guid = curve.guidFactory.GetGUID(this);
+            else
+                guid = SelectableGUID.Null;
         }
 
         public void SetDistance(float distance, BezierCurve curve, bool shouldSort = true)
