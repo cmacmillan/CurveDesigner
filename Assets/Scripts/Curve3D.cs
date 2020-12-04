@@ -177,11 +177,11 @@ namespace ChaseMacMillan.CurveDesigner
             return guidFactory.GetSelected(selected);
         }
 
-        public FloatDistanceSampler sizeSampler;
-        public FloatDistanceSampler arcOfTubeSampler;
-        public FloatDistanceSampler thicknessSampler;
-        public FloatDistanceSampler rotationSampler;
-        public ColorDistanceSampler colorSampler;
+        public FloatSampler sizeSampler;
+        public FloatSampler arcOfTubeSampler;
+        public FloatSampler thicknessSampler;
+        public FloatSampler rotationSampler;
+        public ColorSampler colorSampler;
         public ExtrudeSampler extrudeSampler;
 
         public void RequestMeshUpdate()
@@ -454,11 +454,11 @@ namespace ChaseMacMillan.CurveDesigner
         public void Clear()
         {
             filter = GetComponent<MeshFilter>();
-            sizeSampler = new FloatDistanceSampler("Size", 1, Curve3DEditMode.Size, 0);
-            rotationSampler = new FloatDistanceSampler("Rotation", 0, Curve3DEditMode.Rotation);
-            arcOfTubeSampler = new FloatDistanceSampler("Arc", 180, Curve3DEditMode.Arc, 0, 360);
-            thicknessSampler = new FloatDistanceSampler("Thickness", .1f, Curve3DEditMode.Thickness, 0);
-            colorSampler = new ColorDistanceSampler("Color", Curve3DEditMode.Color);
+            sizeSampler = new FloatSampler("Size", 1, Curve3DEditMode.Size, 0);
+            rotationSampler = new FloatSampler("Rotation", 0, Curve3DEditMode.Rotation);
+            arcOfTubeSampler = new FloatSampler("Arc", 180, Curve3DEditMode.Arc, 0, 360);
+            thicknessSampler = new FloatSampler("Thickness", .1f, Curve3DEditMode.Thickness, 0);
+            colorSampler = new ColorSampler("Color", Curve3DEditMode.Color);
             extrudeSampler = new ExtrudeSampler("Extrude", Curve3DEditMode.Extrude);
             positionCurve = new BezierCurve();
             positionCurve.owner = this;

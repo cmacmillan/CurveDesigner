@@ -4,10 +4,10 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public class ThicknessCurveComposite : Composite, IValueAlongCurvePointProvider, IWindowDrawer
     {
-        private FloatDistanceSampler _distanceSampler;
+        private FloatSampler _distanceSampler;
         private SplitterPointComposite _splitterPoint = null;
         private List<ThicknessPointComposite> points = new List<ThicknessPointComposite>();
-        public ThicknessCurveComposite(Composite parent, FloatDistanceSampler distanceSampler, Curve3D curve, PositionCurveComposite positionCurveComposite) : base(parent)
+        public ThicknessCurveComposite(Composite parent, FloatSampler distanceSampler, Curve3D curve, PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _splitterPoint = new SplitterPointComposite(this, positionCurveComposite.transformBlob, PointTextureType.circle, new ValueAlongCurveSplitCommand(curve, distanceSampler, ValueAlongCurveSplitCommand.GetThicknessCurve), CurveUIStatic.Green, positionCurveComposite);
             _distanceSampler = distanceSampler;

@@ -60,11 +60,11 @@ namespace ChaseMacMillan.CurveDesigner
         public static bool useSubmeshes = true;
 
         public static ExtrudeSampler extrudeSampler;
-        public static FloatDistanceSampler sizeSampler;
-        public static FloatDistanceSampler rotationSampler;
-        public static ColorDistanceSampler colorSampler;
-        public static FloatDistanceSampler tubeArcSampler;
-        public static FloatDistanceSampler thicknessSampler;
+        public static FloatSampler sizeSampler;
+        public static FloatSampler rotationSampler;
+        public static ColorSampler colorSampler;
+        public static FloatSampler tubeArcSampler;
+        public static FloatSampler thicknessSampler;
 
         public static TextureLayerSettings mainTextureLayer;
         public static TextureLayerSettings backTextureLayer;
@@ -103,12 +103,12 @@ namespace ChaseMacMillan.CurveDesigner
                 MeshGenerator.curve = clonedCurve;
                 MeshGenerator.RingPointCount = curve.ringPointCount;
                 MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
-                MeshGenerator.tubeArcSampler = new FloatDistanceSampler(curve.arcOfTubeSampler, false);
-                MeshGenerator.sizeSampler = new FloatDistanceSampler(curve.sizeSampler, false);
-                MeshGenerator.rotationSampler = new FloatDistanceSampler(curve.rotationSampler, false);
-                MeshGenerator.colorSampler = new ColorDistanceSampler(curve.colorSampler, false);
-                MeshGenerator.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler, false);
-                MeshGenerator.thicknessSampler = new FloatDistanceSampler(curve.thicknessSampler, false);
+                MeshGenerator.tubeArcSampler = new FloatSampler(curve.arcOfTubeSampler, false,null);
+                MeshGenerator.sizeSampler = new FloatSampler(curve.sizeSampler, false,null);
+                MeshGenerator.rotationSampler = new FloatSampler(curve.rotationSampler, false,null);
+                MeshGenerator.colorSampler = new ColorSampler(curve.colorSampler, false,null);
+                MeshGenerator.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler, false,null);
+                MeshGenerator.thicknessSampler = new FloatSampler(curve.thicknessSampler, false,null);
                 MeshGenerator.clampAndStretchMeshToCurve = curve.clampAndStretchMeshToCurve;
 
                 MeshGenerator.mainTextureLayer = curve.mainTextureLayer.settings;

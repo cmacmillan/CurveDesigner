@@ -8,7 +8,7 @@ namespace ChaseMacMillan.CurveDesigner
         public PointAlongCurveComposite centerPoint;
         private Curve3D _curve;
         public TransformBlob transformBlob;
-        public SecondaryPositionCurveComposite(Composite parent,Curve3D curve, ExtrudePoint secondaryBezierCurve,ISampler sampler,List<BezierCurve> allCurves,int secondaryCurveIndex) : base (parent)
+        public SecondaryPositionCurveComposite(Composite parent,Curve3D curve, SamplerPoint<BezierCurve> secondaryBezierCurve,ISampler sampler,List<BezierCurve> allCurves,int secondaryCurveIndex) : base (parent)
         {
             this._curve = curve; 
             transformBlob = new TransformBlob(curve.transform,null,curve);

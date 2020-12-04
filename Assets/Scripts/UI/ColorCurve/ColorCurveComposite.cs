@@ -5,11 +5,11 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public class ColorCurveComposite : Composite, IWindowDrawer, IValueAlongCurvePointProvider
     {
-        private ColorDistanceSampler sampler;
+        private ColorSampler sampler;
         private Curve3D curve;
         private List<EditColorComposite> colorPoints = new List<EditColorComposite>();
         private SplitterPointComposite splitterPoint;
-        public ColorCurveComposite(Composite parent,ColorDistanceSampler sampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public ColorCurveComposite(Composite parent,ColorSampler sampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             this.sampler = sampler;
             this.curve = curve;

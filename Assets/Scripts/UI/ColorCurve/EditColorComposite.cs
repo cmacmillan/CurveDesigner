@@ -7,11 +7,11 @@ namespace ChaseMacMillan.CurveDesigner
     public class EditColorComposite : Clickable
     {
         public PointAlongCurveComposite centerPoint;
-        private ColorSamplerPoint _point;
+        private SamplerPoint<Color> _point;
         private Curve3D _curve;
         private DoNothingClickCommand clickCommand;
         public override SelectableGUID GUID => _point.GUID;
-        public EditColorComposite(Composite parent,ColorSamplerPoint point,ColorDistanceSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent)
+        public EditColorComposite(Composite parent,SamplerPoint<Color> point,ColorSampler sampler,Color color,PositionCurveComposite positionCurveComposite,Curve3D curve) : base(parent)
         {
             _curve = curve;
             _point = point;

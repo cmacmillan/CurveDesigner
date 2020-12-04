@@ -5,10 +5,10 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public class RotationCurveComposite : Composite, IValueAlongCurvePointProvider, IWindowDrawer
     {
-        private FloatDistanceSampler _distanceSampler;
+        private FloatSampler _distanceSampler;
         private List<RotationPointComposite> _points = new List<RotationPointComposite>();
         private SplitterPointComposite _splitterPoint = null;
-        public RotationCurveComposite(Composite parent,FloatDistanceSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
+        public RotationCurveComposite(Composite parent,FloatSampler distanceSampler,Curve3D curve,PositionCurveComposite positionCurveComposite) : base(parent)
         {
             _distanceSampler = distanceSampler;
             var blueColor = new Color(0,.8f,1.0f);

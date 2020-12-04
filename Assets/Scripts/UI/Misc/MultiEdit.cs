@@ -16,11 +16,11 @@ namespace ChaseMacMillan.CurveDesigner
             this.leftTangentOffset = leftTangentOffset;
         }
     }
-    public class FloatDistanceSamplerOffsetModification
+    public class FloatSamplerOffsetModification
     {
         private float distanceAlongCurveOffset;
         private float valueOffset;
-        public FloatDistanceSamplerOffsetModification(float distanceAlongCurveOffset,float valueOffset)
+        public FloatSamplerOffsetModification(float distanceAlongCurveOffset,float valueOffset)
         {
             this.distanceAlongCurveOffset = distanceAlongCurveOffset;
             this.valueOffset = valueOffset;

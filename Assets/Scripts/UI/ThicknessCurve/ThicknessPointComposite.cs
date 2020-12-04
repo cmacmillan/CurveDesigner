@@ -6,9 +6,9 @@ namespace ChaseMacMillan.CurveDesigner
     {
         public SizeCircleComposite sizeCircle;
         private Curve3D curve;
-        private FloatSamplerPoint point;
+        private SamplerPoint<float> point;
         private BezierCurve positionCurve;
-        public ThicknessPointComposite(Composite parent,FloatSamplerPoint point,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatDistanceSampler sampler) : base(parent)
+        public ThicknessPointComposite(Composite parent,SamplerPoint<float> point,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatSampler sampler) : base(parent)
         {
             sizeCircle = new SizeCircleComposite(this, point, positionCurve, curve, positionCurveComposite,sampler,this);
             this.positionCurve = positionCurve;
