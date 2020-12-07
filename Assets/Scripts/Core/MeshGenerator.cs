@@ -499,6 +499,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
             Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
             {
+                totalPointCount -= 1;
                 float progress = currentIndex / (float)totalPointCount;
                 var relativePos = extrudeSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference, out Vector3 tangent);//*size;
                 var rotationMat = Quaternion.AngleAxis(rotation, point.tangent);
