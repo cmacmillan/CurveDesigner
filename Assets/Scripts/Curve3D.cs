@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 namespace ChaseMacMillan.CurveDesigner
 {
     [RequireComponent(typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer))]
     public class Curve3D : MonoBehaviour, ISerializationCallbackReceiver
     {
         public IEnumerable<ISampler> DistanceSamplers
@@ -119,6 +120,9 @@ namespace ChaseMacMillan.CurveDesigner
             initialHeaderStyle = "ShurikenEmitterTitle";
             nonInitialHeaderStyle = "ShurikenModuleTitle";
 
+            shurikenCustomDataWindow = new GUIStyle(GUI.skin.window);
+            shurikenCustomDataWindow.font = UnityEditor.EditorStyles.miniFont;
+
             if (controlRectStyle == null)
                 controlRectStyle = new GUIStyle { margin = new RectOffset(0, 0, 2, 2) };
 
@@ -136,6 +140,7 @@ namespace ChaseMacMillan.CurveDesigner
         public GUIStyle mixedToggleStyle;
         public GUIStyle initialHeaderStyle;
         public GUIStyle nonInitialHeaderStyle;
+        public GUIStyle shurikenCustomDataWindow;
         public GUIStyle dropdownStyle;
         #endregion
 
@@ -237,7 +242,27 @@ namespace ChaseMacMillan.CurveDesigner
         }
 
         public MeshCollider collider;
-        public MeshFilter filter;
+        public MeshFilter Filter { 
+            get
+            {
+                if (_filter == null)
+                    _filter = GetComponent<MeshFilter>();
+                return _filter;
+            } 
+        }
+        public MeshRenderer Renderer
+        {
+            get
+            {
+                if (_renderer == null)
+                    _renderer = GetComponent<MeshRenderer>();
+                return _renderer;
+            }
+        }
+        [SerializeField]
+        private MeshFilter _filter;
+        [SerializeField]
+        private MeshRenderer _renderer;
         [FormerlySerializedAs("mesh")]
         public Mesh displayMesh;
         [SerializeField]
@@ -453,7 +478,6 @@ namespace ChaseMacMillan.CurveDesigner
         [ContextMenu("Clear")]
         public void Clear()
         {
-            filter = GetComponent<MeshFilter>();
             sizeSampler = new FloatSampler("Size", 1, Curve3DEditMode.Size, 0);
             rotationSampler = new FloatSampler("Rotation", 0, Curve3DEditMode.Rotation);
             arcOfTubeSampler = new FloatSampler("Arc", 180, Curve3DEditMode.Arc, 0, 360);

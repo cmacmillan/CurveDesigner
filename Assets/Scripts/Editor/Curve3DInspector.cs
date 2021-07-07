@@ -386,7 +386,7 @@ namespace ChaseMacMillan.CurveDesigner
                             {
                                 curve.displayMesh = new Mesh();
                                 curve.displayMesh.indexFormat = IndexFormat.UInt32;
-                                curve.filter.mesh = curve.displayMesh;
+                                curve.Filter.mesh = curve.displayMesh;
                             }
                             else
                             {

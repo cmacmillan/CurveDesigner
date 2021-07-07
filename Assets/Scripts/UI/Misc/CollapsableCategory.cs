@@ -148,6 +148,7 @@ namespace ChaseMacMillan.CurveDesigner
             serializedObj = new SerializedObject(curve);
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             bool needsReinitCurve = false;
+            Field("type");
             EditModeSwitchButton("Position", Curve3DEditMode.PositionCurve,GetFieldRects(out _,curve),curve);
             if (curve.type!= MeshGenerationMode.NoMesh)
             {
@@ -169,7 +170,6 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 Field("vertexDensity");
             }
-            Field("type");
             EditorGUI.BeginChangeCheck();
             Field("isClosedLoop");
             Field("normalGenerationMode");
@@ -197,14 +197,30 @@ namespace ChaseMacMillan.CurveDesigner
     {
         public override string GetName(Curve3D curve) { return "Textures"; }
 
+        protected const int kSingleLineHeight = 13;
+        private void TextureField(string propName,string name,Curve3D curve,TextureLayer layer,List<Material> mats)
+        {
+            GUILayout.Space(2);
+            GUILayout.BeginVertical(name, curve.shurikenCustomDataWindow);
+            Field($"{propName}.material");
+            Field($"{propName}.settings.textureGenMode");
+            Field($"{propName}.settings.stretchDirection");
+            Field($"{propName}.settings.scale");
+            GUILayout.EndVertical();
+            mats.Add(layer.material);
+        }
         public override void Draw(Curve3D curve)
         {
+            if (curve.type == MeshGenerationMode.NoMesh || curve.type == MeshGenerationMode.Mesh)
+                return;
             serializedObj = new SerializedObject(curve);
-            //GUILayout.Label("textures");
-            Field("mainTextureLayer");
-            Field("backTextureLayer");
-            Field("endTextureLayer");
-            Field("edgeTextureLayer");
+            List<Material> mats = new List<Material>();
+            TextureField("mainTextureLayer","Front",curve,curve.mainTextureLayer,mats);
+            TextureField("backTextureLayer","Back",curve,curve.backTextureLayer,mats);
+            if (curve.type == MeshGenerationMode.HollowTube || curve.type == MeshGenerationMode.Extrude || curve.type == MeshGenerationMode.Flat)
+                TextureField("edgeTextureLayer","Edge",curve,curve.edgeTextureLayer,mats);
+            TextureField("endTextureLayer","End",curve,curve.endTextureLayer,mats);
+            curve.Renderer.materials = mats.ToArray();
 
             serializedObj.ApplyModifiedProperties();
         }
