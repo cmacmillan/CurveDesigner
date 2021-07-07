@@ -75,10 +75,7 @@ namespace ChaseMacMillan.CurveDesigner
                             up = Vector3.up;
                             break;
                     }
-                    reference = Vector3.up;
-                    //reference = Vector3.ProjectOnPlane(Vector3.up,tangent.normalized).normalized;
-                    //if (Vector3.Dot(tangent,reference) < 0)
-                    //reference = -reference;
+                    reference = Vector3.ProjectOnPlane(up, this.tangent.normalized);
                     return;
             }
         }
