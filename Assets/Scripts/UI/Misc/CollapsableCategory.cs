@@ -198,30 +198,29 @@ namespace ChaseMacMillan.CurveDesigner
         public override string GetName(Curve3D curve) { return "Textures"; }
 
         protected const int kSingleLineHeight = 13;
-        private void TextureField(string propName,string name,Curve3D curve,TextureLayer layer,List<Material> mats)
+        private void TextureField(string propName,string name,Curve3D curve,TextureLayer layer)
         {
             GUILayout.Space(2);
             GUILayout.BeginVertical(name, curve.shurikenCustomDataWindow);
             Field($"{propName}.material");
             Field($"{propName}.settings.textureGenMode");
-            Field($"{propName}.settings.stretchDirection");
+            Field($"{propName}.settings.textureDirection");
             Field($"{propName}.settings.scale");
             GUILayout.EndVertical();
-            mats.Add(layer.material);
         }
         public override void Draw(Curve3D curve)
         {
             if (curve.type == MeshGenerationMode.NoMesh || curve.type == MeshGenerationMode.Mesh)
                 return;
             serializedObj = new SerializedObject(curve);
-            List<Material> mats = new List<Material>();
-            TextureField("mainTextureLayer","Front",curve,curve.mainTextureLayer,mats);
-            TextureField("backTextureLayer","Back",curve,curve.backTextureLayer,mats);
-            if (curve.type == MeshGenerationMode.HollowTube || curve.type == MeshGenerationMode.Extrude || curve.type == MeshGenerationMode.Flat)
-                TextureField("edgeTextureLayer","Edge",curve,curve.edgeTextureLayer,mats);
-            TextureField("endTextureLayer","End",curve,curve.endTextureLayer,mats);
-            curve.Renderer.materials = mats.ToArray();
-
+            if (curve.ShouldUseMainTextureLayer())
+                TextureField("mainTextureLayer","Front",curve,curve.mainTextureLayer);
+            if (curve.ShouldUseBackTextureLayer())
+                TextureField("backTextureLayer","Back",curve,curve.backTextureLayer);
+            if (curve.ShouldUseEdgeTextureLayer())
+                TextureField("edgeTextureLayer","Edge",curve,curve.edgeTextureLayer);
+            if (curve.ShouldUseEndTextureLayer())
+                TextureField("endTextureLayer","End",curve,curve.endTextureLayer);
             serializedObj.ApplyModifiedProperties();
         }
     }

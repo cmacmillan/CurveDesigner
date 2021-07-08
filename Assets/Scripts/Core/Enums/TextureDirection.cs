@@ -1,6 +1,6 @@
 ﻿namespace ChaseMacMillan.CurveDesigner
 {
-    public enum TextureStretchDirection
+    public enum TextureDirection
     {
         x=0,
         y=1,

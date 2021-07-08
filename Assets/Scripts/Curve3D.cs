@@ -376,25 +376,32 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private MeshPrimaryAxis old_meshPrimaryAxis;
 
+        public bool ShouldUseMainTextureLayer() { return type != MeshGenerationMode.NoMesh && type != MeshGenerationMode.Mesh; }
+
         public TextureLayer mainTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_mainTextureLayer = new TextureLayer(null);
+        public bool ShouldUseBackTextureLayer() { return type != MeshGenerationMode.NoMesh && type != MeshGenerationMode.Mesh; }
 
         public TextureLayer backTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_backTextureLayer = new TextureLayer(null);
+        public bool ShouldUseEndTextureLayer() { return !isClosedLoop; }
 
         public TextureLayer endTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_endTextureLayer = new TextureLayer(null);
 
+        public bool ShouldUseEdgeTextureLayer() { return type == MeshGenerationMode.HollowTube || type == MeshGenerationMode.Extrude || type == MeshGenerationMode.Flat; }
+
         public TextureLayer edgeTextureLayer = new TextureLayer(null);
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_edgeTextureLayer = new TextureLayer(null);
+
 
         private bool CheckFieldChanged<T>(T field, ref T oldField)
         {
@@ -409,7 +416,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             bool changed = curr.material != old.material || 
                            curr.settings.textureGenMode != old.settings.textureGenMode ||
-                           curr.settings.stretchDirection != old.settings.stretchDirection ||
+                           curr.settings.textureDirection != old.settings.textureDirection ||
                            curr.settings.scale != old.settings.scale;
             if (changed)
                 old = curr;
@@ -518,6 +525,20 @@ namespace ChaseMacMillan.CurveDesigner
             foreach (var i in rotationSampler.GetPoints(this.positionCurve))
                 previousRotations.Add(i.value);
         }
+
+        public void UpdateMaterials()
+        {
+            List<Material> mats = new List<Material>();
+            if (ShouldUseMainTextureLayer())
+                mats.Add(mainTextureLayer.material);
+            if (ShouldUseBackTextureLayer())
+                mats.Add(backTextureLayer.material);
+            if (ShouldUseEdgeTextureLayer())
+                mats.Add(edgeTextureLayer.material);
+            if (ShouldUseEndTextureLayer())
+                mats.Add(endTextureLayer.material);
+            Renderer.materials = mats.ToArray();
+        }
         public void CacheAverageSize()
         {
             float avg = 0;
@@ -594,7 +615,7 @@ namespace ChaseMacMillan.CurveDesigner
         public TextureLayer(Material m)
         {
             material = m;
-            settings = new TextureLayerSettings() { scale = 1, stretchDirection = TextureStretchDirection.x, textureGenMode = TextureGenerationMode.Tile };
+            settings = new TextureLayerSettings() { scale = 1, textureDirection = TextureDirection.x, textureGenMode = TextureGenerationMode.Tile };
         }
         public Material material;
         public TextureLayerSettings settings;
@@ -603,7 +624,7 @@ namespace ChaseMacMillan.CurveDesigner
     public struct TextureLayerSettings
     {
         public TextureGenerationMode textureGenMode;
-        public TextureStretchDirection stretchDirection;
+        public TextureDirection textureDirection;
         public float scale;
     }
 }

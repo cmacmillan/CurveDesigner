@@ -356,7 +356,7 @@ namespace ChaseMacMillan.CurveDesigner
                 }
                 return retr;
             }
-            void CreateUVS(TextureLayerSettings settings,List<float> distsFromStart, List<float> thicknesses, int pointsPerBand)
+            void CreateUVS(TextureLayerSettings settings,List<float> distsFromStart, List<float> thicknesses, int pointsPerBand,Vector3? up=null, Vector3? right=null,Vector3? center=null)
             {
                 int numBands = distsFromStart.Count;
                 float surfaceLength = distsFromStart.Last();
@@ -367,9 +367,17 @@ namespace ChaseMacMillan.CurveDesigner
                     var distFromStart = distsFromStart[bandIndex];
                     switch (settings.textureGenMode)
                     {
-                        case TextureGenerationMode.Stretch://doesn't support stretch direction
-                            for (int i = 0; i < pointsPerBand; i++)
-                                uvs.Add(new Vector2(distFromStart / surfaceLength, i / (float)(i - 1)));
+                        case TextureGenerationMode.Stretch://doesn't yet support stretch direction, but should
+                            if (settings.textureDirection == TextureDirection.x)
+                            {
+                                for (int i = 0; i < pointsPerBand; i++)
+                                    uvs.Add(new Vector2(distFromStart / surfaceLength, i/(float)(pointsPerBand-1)));
+                            } 
+                            else
+                            {
+                                for (int i = 0; i < pointsPerBand; i++)
+                                    uvs.Add(new Vector2(i/(float)(pointsPerBand-1),distFromStart / surfaceLength));
+                            }
                             break;
                         case TextureGenerationMode.Tile:
                             if (bandIndex>0)
@@ -386,10 +394,23 @@ namespace ChaseMacMillan.CurveDesigner
                             for (int i = 0; i < pointsPerBand; i++)
                             {
                                 float uvy = settings.scale * i / (float)(pointsPerBand - 1);
-                                if (settings.stretchDirection == TextureStretchDirection.x)
+                                if (settings.textureDirection == TextureDirection.x)
                                     uvs.Add(new Vector2(scaledUvx, uvy));
-                                else if (settings.stretchDirection == TextureStretchDirection.y)
+                                else if (settings.textureDirection == TextureDirection.y)
                                     uvs.Add(new Vector2(uvy, scaledUvx));
+                            }
+                            break;
+                        case TextureGenerationMode.Flat:
+                            if (right.HasValue && center.HasValue && up.HasValue)
+                            {
+                                for (int i = 0; i < pointsPerBand; i++)
+                                {
+                                    uvs.Add(GetFlatUV(vertices[uvs.Count]-center.Value, settings, right.Value, up.Value));
+                                }
+                            }
+                            else
+                            {
+                                throw new NotImplementedException($"Flat TexGenMode not supported for this texture layer");
                             }
                             break;
                         default:
@@ -449,7 +470,12 @@ namespace ChaseMacMillan.CurveDesigner
                     distancesFromStart.Add(dist);
                     thicknesses.Add(thickness);
                 }
-                CreateUVS(settings, distancesFromStart, thicknesses, 2);
+                Vector3 up = point.reference;
+                Vector3 right = Vector3.Cross(up, point.tangent);
+                float diameter = GetSizeAtDistance(point.distanceFromStartOfCurve)*2;
+                up /= diameter;
+                right /= diameter;
+                CreateUVS(settings, distancesFromStart, thicknesses, 2,up,right,point.position);
 
                 for (int i = ring1Base; i < ring1Base+2*(pointsPerRing - 1); i += 2)
                 {
@@ -484,7 +510,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
             void CreatePointsAlongCurve(PointCreator pointCreator, List<PointOnCurve> points, float offset, int pointsPerRing, TextureLayerSettings textureLayer)
             {
-                TextureStretchDirection stretchDirection = textureLayer.stretchDirection;
+                TextureDirection stretchDirection = textureLayer.textureDirection;
                 float textureScale = 1.0f/textureLayer.scale;
                 List<float> distsFromStart = new List<float>();
                 List<float> thickness = new List<float>();
@@ -545,6 +571,19 @@ namespace ChaseMacMillan.CurveDesigner
                 InitOrClear(ref uvs);
                 InitOrClear(ref colors);
             }
+            /*
+                var up = point.reference;
+                var right = Vector3.Cross(up, point.tangent);
+            */
+            Vector2 GetFlatUV(Vector3 relative,TextureLayerSettings settings,Vector3 right, Vector3 up)
+            {
+                var x = Vector3.Dot(relative, right);
+                var y = Vector3.Dot(relative, up);
+                if (settings.textureDirection == TextureDirection.x)
+                    return new Vector2(x + .5f, y + .5f);
+                else
+                    return new Vector2(y + .5f, x + .5f);
+            }
             void CreateTubeEndPlates(int submeshIndex)
             {
 
@@ -566,13 +605,6 @@ namespace ChaseMacMillan.CurveDesigner
                     var right = Vector3.Cross(up,point.tangent);
                     up /= diameter;
                     right /= diameter;
-                    Vector2 GetUV(Vector3 pos)
-                    {
-                        var relative = pos - point.position;
-                        var x = Vector3.Dot(relative, right);
-                        var y = Vector3.Dot(relative, up);
-                        return new Vector2(x+.5f,y+.5f);
-                    }
                     Vector3 average = Vector3.zero;
                     for (int i = baseOffset; i < baseOffset + ActualRingPointCount; i++)
                     {
@@ -580,12 +612,12 @@ namespace ChaseMacMillan.CurveDesigner
                         average += vert;
                         vertices.Add(vert);
                         colors.Add(color);
-                        uvs.Add(GetUV(vert));
+                        uvs.Add(GetFlatUV(vert-point.position,endTextureLayer,right,up));
                     }
                     average = average / ActualRingPointCount;
                     vertices.Add(average);
                     colors.Add(color);
-                    uvs.Add(GetUV(average));
+                    uvs.Add(GetFlatUV(average-point.position,endTextureLayer,right,up));
                 }
                 AddPlate(startRingBaseIndex,0);
                 AddPlate(endRingBaseIndex,curveLength);

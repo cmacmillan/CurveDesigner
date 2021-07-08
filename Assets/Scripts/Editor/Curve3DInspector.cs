@@ -175,6 +175,7 @@ namespace ChaseMacMillan.CurveDesigner
             curve3d.TryInitStyles();
             curve3d.TryInitialize();
             curve3d.CacheAverageSize();
+            curve3d.UpdateMaterials();
             EnsureValidEditMode();
             curve3d.BindDataToPositionCurve();
             curve3d.samplesPerSegment = Mathf.Max(1, curve3d.samplesPerSegment);
