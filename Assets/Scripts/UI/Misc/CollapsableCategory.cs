@@ -184,9 +184,13 @@ namespace ChaseMacMillan.CurveDesigner
                 Field("meshPrimaryAxis");
                 Field("closeTilableMeshGap");
             }
-            if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.Extrude || curve.type == MeshGenerationMode.HollowTube || curve.type == MeshGenerationMode.Cylinder)
+            if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.HollowTube)
             {
                 Field("ringPointCount");
+            }
+            if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.Flat || curve.type == MeshGenerationMode.Extrude)
+            {
+                Field("flatPointCount");
             }
             serializedObj.ApplyModifiedProperties();
             if (needsReinitCurve)

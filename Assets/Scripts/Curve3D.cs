@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -327,7 +328,7 @@ namespace ChaseMacMillan.CurveDesigner
         private CurveNormalGenerationMode old_normalGenerationMode;
 
         [Min(0)]
-        public float vertexDensity = 1.0f;
+        public float vertexDensity = 40.0f;
         [SerializeField]
         [HideInInspector]
         private float old_vertexDensity = -1;
@@ -344,6 +345,12 @@ namespace ChaseMacMillan.CurveDesigner
         [SerializeField]
         [HideInInspector]
         private int old_samplesForCursorCollisionCheck;
+
+        [Min(3)]
+        public int flatPointCount = 3;
+        [SerializeField]
+        [HideInInspector]
+        private int old_flatPointCount = -1;
 
         [Min(3)]
         public int ringPointCount = 8;
@@ -433,6 +440,7 @@ namespace ChaseMacMillan.CurveDesigner
                 retr |= CheckFieldChanged(sampler.UseKeyframes, ref oldInterpolation);
             }
             retr |= CheckFieldChanged(ringPointCount, ref old_ringPointCount);
+            retr |= CheckFieldChanged(flatPointCount, ref old_flatPointCount);
             retr |= CheckFieldChanged(vertexDensity, ref old_vertexDensity);
             retr |= CheckFieldChanged(type, ref old_type);
             retr |= CheckFieldChanged(closeTilableMeshGap, ref old_closeTilableMeshGap);
@@ -485,10 +493,10 @@ namespace ChaseMacMillan.CurveDesigner
         [ContextMenu("Clear")]
         public void Clear()
         {
-            sizeSampler = new FloatSampler("Size", 1, Curve3DEditMode.Size, 0);
+            sizeSampler = new FloatSampler("Size", .2f, Curve3DEditMode.Size, 0);
             rotationSampler = new FloatSampler("Rotation", 0, Curve3DEditMode.Rotation);
             arcOfTubeSampler = new FloatSampler("Arc", 180, Curve3DEditMode.Arc, 0, 360);
-            thicknessSampler = new FloatSampler("Thickness", .1f, Curve3DEditMode.Thickness, 0);
+            thicknessSampler = new FloatSampler("Thickness", .05f, Curve3DEditMode.Thickness, 0);
             colorSampler = new ColorSampler("Color", Curve3DEditMode.Color);
             extrudeSampler = new ExtrudeSampler("Extrude", Curve3DEditMode.Extrude);
             positionCurve = new BezierCurve();
@@ -502,6 +510,11 @@ namespace ChaseMacMillan.CurveDesigner
         {
             if (!isInitialized)
             {
+                var mat = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+                mainTextureLayer.material = mat;
+                backTextureLayer.material = mat;
+                edgeTextureLayer.material = mat;
+                endTextureLayer.material = mat;
                 isInitialized = true;
                 Clear();
             }

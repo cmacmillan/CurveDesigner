@@ -72,6 +72,7 @@ namespace ChaseMacMillan.CurveDesigner
         public static TextureLayerSettings endTextureLayer;
 
         public static int RingPointCount = 2;
+        public static int FlatPointCount = 2;
         public static int EdgePointCount = 20;
         public static float VertexSampleDistance = 1.0f;
 
@@ -102,6 +103,7 @@ namespace ChaseMacMillan.CurveDesigner
 
                 MeshGenerator.curve = clonedCurve;
                 MeshGenerator.RingPointCount = curve.ringPointCount;
+                MeshGenerator.FlatPointCount= curve.flatPointCount;
                 MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
                 MeshGenerator.tubeArcSampler = new FloatSampler(curve.arcOfTubeSampler, false,null);
                 MeshGenerator.sizeSampler = new FloatSampler(curve.sizeSampler, false,null);
@@ -410,7 +412,20 @@ namespace ChaseMacMillan.CurveDesigner
                             }
                             else
                             {
-                                throw new NotImplementedException($"Flat TexGenMode not supported for this texture layer");
+                                if (settings.textureDirection == TextureDirection.x)
+                                {
+                                    for (int i = 0; i < pointsPerBand; i++)
+                                    {
+                                        uvs.Add(new Vector2(settings.scale*distFromStart/surfaceLength,settings.scale*thickness*Mathf.Lerp(-.25f,.25f,i/(float)pointsPerBand)));
+                                    }
+                                } 
+                                else
+                                {
+                                    for (int i = 0; i < pointsPerBand; i++)
+                                    {
+                                        uvs.Add(new Vector2(settings.scale*thickness*Mathf.Lerp(-.25f,.25f,i/(float)pointsPerBand),settings.scale*distFromStart/surfaceLength));
+                                    }
+                                }
                             }
                             break;
                         default:
@@ -577,8 +592,8 @@ namespace ChaseMacMillan.CurveDesigner
             */
             Vector2 GetFlatUV(Vector3 relative,TextureLayerSettings settings,Vector3 right, Vector3 up)
             {
-                var x = Vector3.Dot(relative, right);
-                var y = Vector3.Dot(relative, up);
+                var x = Vector3.Dot(relative, right)*settings.scale;
+                var y = Vector3.Dot(relative, up)*settings.scale;
                 if (settings.textureDirection == TextureDirection.x)
                     return new Vector2(x + .5f, y + .5f);
                 else
@@ -656,12 +671,12 @@ namespace ChaseMacMillan.CurveDesigner
                         InitLists();
                         InitSubmeshes(useSubmeshes ? (!IsClosedLoop?3:2) : 1);
                         CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer);
-                        CreatePointsAlongCurve(TubeFlatPlateCreator, sampled, 0, 3, backTextureLayer);
+                        CreatePointsAlongCurve(TubeFlatPlateCreator, sampled, 0, FlatPointCount, backTextureLayer);
                         //CreateRingPointsAlongCurve(sampled, ActualRingPointCount, true);
                         //CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount));
                         //make a thing which creates points at each end using createpointsalongcurve and then uv those
                         TrianglifyLayer(true, RingPointCount, 0,useSubmeshes?0:0);
-                        TrianglifyLayer(false, 3, numVerts,useSubmeshes?1:0);
+                        TrianglifyLayer(false, FlatPointCount, numVerts,useSubmeshes?1:0);
                         if (!IsClosedLoop)
                         {
                             int submeshIndex = useSubmeshes ? 2 : 0;
@@ -689,7 +704,7 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                 case MeshGenerationMode.Flat:
                     {
-                        int pointsPerFace = RingPointCount;
+                        int pointsPerFace = FlatPointCount;
                         numVerts = 2 * pointsPerFace * sampled.Count;
                         InitLists();
                         InitSubmeshes(useSubmeshes ? (!IsClosedLoop?4:3) : 1);
@@ -710,7 +725,7 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         List<Vector3> backSideBuffer = new List<Vector3>();
                         extrudeSampler.RecalculateOpenCurveOnlyPoints(curve);
-                        int pointCount = RingPointCount;
+                        int pointCount = FlatPointCount;
                         numVerts = 2 * pointCount * sampled.Count;
                         InitSubmeshes(useSubmeshes ? (!IsClosedLoop?4:3) : 1);
                         InitLists();
@@ -722,8 +737,8 @@ namespace ChaseMacMillan.CurveDesigner
                         if (!IsClosedLoop)
                         {
                             int submeshIndex = useSubmeshes ? 3 : 0;
-                            CreateEndPlate(true, 0,                  ExtrudePointCreator, RingPointCount, submeshIndex, endTextureLayer,.5f,-.5f,true);
-                            CreateEndPlate(false, curve.GetLength(), ExtrudePointCreator, RingPointCount, submeshIndex, endTextureLayer,.5f,-.5f,true);
+                            CreateEndPlate(true, 0,                  ExtrudePointCreator, pointCount, submeshIndex, endTextureLayer,.5f,-.5f,true);
+                            CreateEndPlate(false, curve.GetLength(), ExtrudePointCreator, pointCount, submeshIndex, endTextureLayer,.5f,-.5f,true);
                         }
                         return true;
                     }
