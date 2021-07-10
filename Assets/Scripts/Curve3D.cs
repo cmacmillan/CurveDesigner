@@ -51,6 +51,7 @@ namespace ChaseMacMillan.CurveDesigner
         public CollapsableCategory[] collapsableCategories =
         {
         new MainCollapsableCategory(),
+        new MeshGenerationCollapsableCategory(),
         new TexturesCollapsableCategory(),
         new PreferencesCollapsableCategory(),
     };

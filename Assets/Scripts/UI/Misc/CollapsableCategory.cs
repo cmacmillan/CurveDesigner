@@ -149,6 +149,12 @@ namespace ChaseMacMillan.CurveDesigner
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             bool needsReinitCurve = false;
             Field("type");
+            EditorGUI.BeginChangeCheck();
+            Field("isClosedLoop");
+            if (EditorGUI.EndChangeCheck())
+            {
+                needsReinitCurve = true;
+            }
             EditModeSwitchButton("Position", Curve3DEditMode.PositionCurve,GetFieldRects(out _,curve),curve);
             if (curve.type!= MeshGenerationMode.NoMesh)
             {
@@ -166,23 +172,30 @@ namespace ChaseMacMillan.CurveDesigner
             }
             if (curve.type == MeshGenerationMode.Extrude)
                 EditModeSwitchButton("Extrude", Curve3DEditMode.Extrude, GetFieldRects(out _,curve),curve);
-            if (curve.type != MeshGenerationMode.Mesh && curve.type!=MeshGenerationMode.NoMesh)
-            {
-                Field("vertexDensity");
-            }
-            EditorGUI.BeginChangeCheck();
-            Field("isClosedLoop");
-            Field("normalGenerationMode");
-            if (EditorGUI.EndChangeCheck())
-            {
-                needsReinitCurve = true;
-            }
             if (curve.type == MeshGenerationMode.Mesh)
             {
                 Field("meshToTile",curve.meshToTile==null);
                 Field("clampAndStretchMeshToCurve");
                 Field("meshPrimaryAxis");
                 Field("closeTilableMeshGap");
+            }
+            serializedObj.ApplyModifiedProperties();
+            if (needsReinitCurve)
+                curve.UICurve.Initialize();
+        }
+    }
+    public class MeshGenerationCollapsableCategory : CollapsableCategory
+    {
+        public override string GetName(Curve3D curve) { return "Mesh Generation"; }
+        public override void Draw(Curve3D curve)
+        {
+            if (curve.type == MeshGenerationMode.NoMesh)
+                return;
+            serializedObj = new SerializedObject(curve);
+            bool needsReinitCurve = false;
+            if (curve.type != MeshGenerationMode.Mesh && curve.type!=MeshGenerationMode.NoMesh)
+            {
+                Field("vertexDensity");
             }
             if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.HollowTube)
             {
@@ -192,6 +205,11 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 Field("flatPointCount");
             }
+            Field("lockToPositionZero");
+            EditorGUI.BeginChangeCheck();
+            Field("normalGenerationMode");
+            if (EditorGUI.EndChangeCheck())
+                needsReinitCurve = true;
             serializedObj.ApplyModifiedProperties();
             if (needsReinitCurve)
                 curve.UICurve.Initialize();
@@ -239,7 +257,6 @@ namespace ChaseMacMillan.CurveDesigner
             Field("showPositionHandles");
             Field("showNormals");
             Field("showTangents");
-            Field("lockToPositionZero");
             Field("placeLockedPoints");
             Field("samplesForCursorCollisionCheck");
             //Field("_settings");
