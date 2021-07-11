@@ -228,17 +228,24 @@ namespace ChaseMacMillan.CurveDesigner
             Vector4 row2;
         }
 
-        public static Vector3 GetClosestPointBetweenTwoLines(Vector3 line1Point, Vector3 line1Slope, Vector3 line2Point, Vector3 line2Slope)
+        public static bool GetClosestPointBetweenTwoLines(Vector3 line1Point, Vector3 line1Slope, Vector3 line2Point, Vector3 line2Slope, out Vector3 result)
         {
             if (line1Slope == Vector3.zero || line2Slope == Vector3.zero)
-                throw new ArgumentException();
+            {
+                result = Vector3.zero;
+                return false;
+            }
             Vector3 slope = Vector3.Cross(line1Slope,line2Slope);
             if (slope == Vector3.zero)
-                throw new ArgumentException();
+            {
+                result = Vector3.zero;
+                return false;
+            }
             Vector3 f = line1Point - line2Point;
             Matrix3x4 matrix = new Matrix3x4(line1Slope,slope,-line2Slope,f);
             matrix.RowReduce();
-            return matrix[2, 3] * line2Slope + line2Point;
+            result = matrix[2, 3] * line2Slope + line2Point;
+            return true;
         }
     }
 }

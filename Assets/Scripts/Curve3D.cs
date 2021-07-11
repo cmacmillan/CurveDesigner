@@ -56,8 +56,6 @@ namespace ChaseMacMillan.CurveDesigner
         new PreferencesCollapsableCategory(),
     };
 
-        public Mesh graphicsMesh;
-        public Material graphicsMaterial;
         [NonSerialized]
         public Matrix4x4 clipSpaceToWorldSpace;
         [NonSerialized]
@@ -65,14 +63,6 @@ namespace ChaseMacMillan.CurveDesigner
         //sorted from most recent to oldest
         public List<SelectableGUID> selectedPoints = new List<SelectableGUID>();
         public ClickShiftControlState shiftControlState = ClickShiftControlState.none;
-
-        private int meshGenerationId = -1;
-        public int GetMeshGenerationID()
-        {
-            if (meshGenerationId == -1)
-                meshGenerationId = MeshGenerator.GetCurve3DID();
-            return meshGenerationId;
-        }
 
         public void DeselectAllPoints()
         {
@@ -102,10 +92,6 @@ namespace ChaseMacMillan.CurveDesigner
 
         [NonSerialized]
         public EditModeCategories editModeCategories = new EditModeCategories();
-
-        //public Mesh testMesh;
-        //public Material testMat;
-        //public CommandBuffer commandBuffer;
 
         #region guistyles
         private bool stylesInitialized = false;
@@ -261,12 +247,16 @@ namespace ChaseMacMillan.CurveDesigner
                 return _renderer;
             }
         }
+
         [SerializeField]
         private MeshFilter _filter;
         [SerializeField]
         private MeshRenderer _renderer;
-        [FormerlySerializedAs("mesh")]
+
         public Mesh displayMesh;
+
+        public int meshCreatorId;
+
         [SerializeField]
         [HideInInspector]
         private bool isInitialized = false;

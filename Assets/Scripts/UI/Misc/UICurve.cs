@@ -135,7 +135,9 @@ namespace ChaseMacMillan.CurveDesigner
             Profiler.EndSample();
             GetNormalsTangentsDraw(drawList, _curve, this, positionCurve.transformBlob,_curve.positionCurve);
             GetCurveDraw(drawList,_curve.positionCurve,positionCurve.transformBlob,this);
+            Profiler.BeginSample("draw ui curve");
             base.Draw(drawList,closestElementToCursor);
+            Profiler.EndSample();
         }
 
         public override IEnumerable<Composite> GetChildren()

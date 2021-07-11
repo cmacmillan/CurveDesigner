@@ -40,15 +40,6 @@ namespace ChaseMacMillan.CurveDesigner
         public static List<List<int>> submeshes;
         public static int submeshCount = 0;
 
-        public static int currentlyGeneratingCurve3D = -1;
-
-        private static int _currentCurve3Did = 0;
-        public static int GetCurve3DID()
-        {
-            _currentCurve3Did++;
-            return _currentCurve3Did;
-        }
-
         public static bool IsBuzy = false;
 
         public static DateTime lastUpdateTime;
@@ -57,7 +48,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         //public static Color32[] displacementColors;
 
-        public static bool useSubmeshes = true;
+        public const bool useSubmeshes = true;
 
         public static ExtrudeSampler extrudeSampler;
         public static FloatSampler sizeSampler;
@@ -83,6 +74,8 @@ namespace ChaseMacMillan.CurveDesigner
         public static float closeTilableMeshGap;
         public static MeshPrimaryAxis meshPrimaryAxis;
 
+        public static int currentlyGeneratingForCurveId;
+
         private struct EdgePointInfo
         {
             public float distanceAlongCurve;
@@ -97,11 +90,11 @@ namespace ChaseMacMillan.CurveDesigner
             if (!IsBuzy)
             {
                 IsBuzy = true;
-                currentlyGeneratingCurve3D = curve.GetMeshGenerationID();
                 BezierCurve clonedCurve = new BezierCurve(curve.positionCurve, false);
                 lastUpdateTime = curve.lastMeshUpdateStartTime;
 
                 MeshGenerator.curve = clonedCurve;
+                MeshGenerator.currentlyGeneratingForCurveId = curve.GetInstanceID();
                 MeshGenerator.RingPointCount = curve.ringPointCount;
                 MeshGenerator.FlatPointCount = curve.flatPointCount;
                 MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
@@ -193,6 +186,25 @@ namespace ChaseMacMillan.CurveDesigner
             //Debug.Log("started thread");
             int numVerts;
             float curveLength = curve.GetLength();
+            bool shouldHollowTubeGenerateEdges = false;
+            if (CurveType == MeshGenerationMode.HollowTube)
+            {
+                if (!tubeArcSampler.UseKeyframes && tubeArcSampler.constValue != 360)
+                {
+                    shouldHollowTubeGenerateEdges = true; 
+                } 
+                else
+                {
+                    foreach (var i in tubeArcSampler.points) 
+                    {
+                        if (i.value != 360)
+                        {
+                            shouldHollowTubeGenerateEdges = true;
+                            break;
+                        }
+                    }
+                }
+            }
             var sampled = curve.GetPointsWithSpacing(VertexSampleDistance);
             sizeSampler.RecalculateOpenCurveOnlyPoints(curve);
             if (IsClosedLoop)
@@ -445,14 +457,14 @@ namespace ChaseMacMillan.CurveDesigner
                                 {
                                     for (int i = 0; i < pointsPerBand; i++)
                                     {
-                                        uvs.Add(new Vector2(settings.scale * distFromStart / surfaceLength, settings.scale * thickness * Mathf.Lerp(-.25f, .25f, i / (float)pointsPerBand)));
+                                        uvs.Add(new Vector2(settings.scale * distFromStart, settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / (float)pointsPerBand)));
                                     }
                                 }
                                 else
                                 {
                                     for (int i = 0; i < pointsPerBand; i++)
                                     {
-                                        uvs.Add(new Vector2(settings.scale * thickness * Mathf.Lerp(-.25f, .25f, i / (float)pointsPerBand), settings.scale * distFromStart / surfaceLength));
+                                        uvs.Add(new Vector2(settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / (float)pointsPerBand), settings.scale * distFromStart));
                                     }
                                 }
                             }
@@ -719,7 +731,8 @@ namespace ChaseMacMillan.CurveDesigner
                         CreatePointsAlongCurve(TubePointCreator, sampled, -1, RingPointCount, backTextureLayer);
                         TrianglifyLayer(true, RingPointCount, 0, useSubmeshes ? 0 : 0);
                         TrianglifyLayer(false, RingPointCount, numVerts / 2, useSubmeshes ? 1 : 0);
-                        CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount), useSubmeshes ? 2 : 0, edgeTextureLayer);
+                        if (shouldHollowTubeGenerateEdges)
+                            CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount), useSubmeshes ? 2 : 0, edgeTextureLayer);
                         if (!IsClosedLoop)
                         {
                             int submeshIndex = useSubmeshes ? 3 : 0;
@@ -757,8 +770,8 @@ namespace ChaseMacMillan.CurveDesigner
                         InitLists();
                         CreatePointsAlongCurve(ExtrudePointCreator, sampled, .5f, pointCount, mainTextureLayer);
                         CreatePointsAlongCurve(ExtrudePointCreator, sampled, -.5f, pointCount, backTextureLayer);
-                        TrianglifyLayer(true, pointCount, numVerts / 2, useSubmeshes ? 0 : 0);
-                        TrianglifyLayer(false, pointCount, 0, useSubmeshes ? 1 : 0);
+                        TrianglifyLayer(true, pointCount, numVerts / 2, useSubmeshes ? 1 : 0);
+                        TrianglifyLayer(false, pointCount, 0, useSubmeshes ? 0 : 0);
                         CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount), useSubmeshes ? 2 : 0, edgeTextureLayer, true);
                         if (!IsClosedLoop)
                         {

@@ -1,5 +1,10 @@
 Creative Commons textures from ambientCG.com licensed under CC0 1.0 Universal
 Bark1 - ambientCG.com/a/Bark001
 Wood031_2K - ambientCG.com/a/Wood031
+Concrete007 - ambientCG.com/a/Concrete007
+Road007 - ambientCG.com/a/Road007
+Wood057 - ambientCG.com/a/Wood057
+Chipboard001 - ambientCG.com/a/Chipboard001
+WoodChips002 - ambientCG.com/a/WoodChips002
 
 All other works are original

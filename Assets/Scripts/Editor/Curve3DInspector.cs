@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
 namespace ChaseMacMillan.CurveDesigner
@@ -220,7 +221,11 @@ namespace ChaseMacMillan.CurveDesigner
             var eventType = Event.current.GetTypeForControl(controlID);
             ClickHitData closestElementToCursor = null;
             if (elementClickedDown == null && !didWindowEatMouse)
+            {
+                Profiler.BeginSample("GetClosestElementToCursor");
                 closestElementToCursor = GetClosestElementToCursor(curveEditor, MousePos);
+                Profiler.EndSample();
+            }
             void DrawLoop(bool imguiEvent)
             {
                 List<IDraw> draws = new List<IDraw>();
@@ -271,6 +276,7 @@ namespace ChaseMacMillan.CurveDesigner
             void IMGUI() { DrawLoop(true); }
             //Regardless of event, you must call either Draw or IMGUI(), to make sure that imgui stuff gets all the events
             var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
+            Profiler.BeginSample("Event Loop");
             switch (eventType)
             {
                 case EventType.KeyDown:
@@ -371,20 +377,23 @@ namespace ChaseMacMillan.CurveDesigner
                     break;
             }
             curve3d.CopyRotations();
+            Profiler.EndSample();
         }
         private void UpdateMesh(Curve3D curve)
         {
             if (!MeshGenerator.IsBuzy)
             {
-                if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime && curve.GetMeshGenerationID() == MeshGenerator.currentlyGeneratingCurve3D)
+                if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime && curve.GetInstanceID() == MeshGenerator.currentlyGeneratingForCurveId)
                 {
                     curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
                     if (curve.type != MeshGenerationMode.NoMesh)
                     {
                         if (MeshGenerator.didMeshGenerationSucceed)
                         {
-                            if (curve.displayMesh == null)
+                            int creatorId = curve.GetInstanceID();
+                            if (curve.displayMesh == null || creatorId!=curve.meshCreatorId)
                             {
+                                curve.meshCreatorId = creatorId;
                                 curve.displayMesh = new Mesh();
                                 curve.displayMesh.indexFormat = IndexFormat.UInt32;
                                 curve.Filter.mesh = curve.displayMesh;
@@ -436,8 +445,10 @@ namespace ChaseMacMillan.CurveDesigner
             ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
             {
                 List<ClickHitData> clicks = new List<ClickHitData>(lst);
+                Profiler.BeginSample("DistanceFromMouse");
                 foreach (var i in clicks)
                     i.distanceFromClick = i.owner.DistanceFromMouse(clickPosition);
+                Profiler.EndSample();
                 clicks.Sort((a, b) => (int)Mathf.Sign(a.distanceFromCamera - b.distanceFromCamera));
                 foreach (var i in clicks)
                 {
@@ -455,7 +466,9 @@ namespace ChaseMacMillan.CurveDesigner
                 return null;
             }
             List<ClickHitData> hits = new List<ClickHitData>();
+            Profiler.BeginSample("Click");
             root.Click(clickPosition, hits);
+            Profiler.EndSample();
             var highPriority = hits.Where(a => !a.isLowPriority);
             var high = GetFrom(highPriority);
             if (high != null)
