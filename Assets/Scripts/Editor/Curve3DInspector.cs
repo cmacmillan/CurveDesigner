@@ -60,7 +60,7 @@ namespace ChaseMacMillan.CurveDesigner
                     Rect headerRect = GUILayoutUtility.GetRect(width, headerHeight);
                     int iconSize = 21;
                     Rect iconRect = new Rect(headerRect.x + 4, headerRect.y + 2, iconSize, iconSize);
-                    if (curr.isExpanded)
+                    if (curr.IsExpanded(curve3d))
                     {
                         using (new EditorGUI.DisabledScope(isDisabled))
                         {
@@ -82,7 +82,7 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                     GUIContent headerLabel = new GUIContent();
                     headerLabel.text = curr.GetName(curve3d);
-                    curr.isExpanded = GUI.Toggle(headerRect, curr.isExpanded, headerLabel, headerStyle);
+                    curr.SetIsExpanded(curve3d,GUI.Toggle(headerRect, curr.IsExpanded(curve3d), headerLabel, headerStyle));
                     GUILayout.Space(1);
                 }
                 GUILayout.Space(-1);
@@ -90,6 +90,8 @@ namespace ChaseMacMillan.CurveDesigner
             EditorGUILayout.EndVertical();
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndVertical();
+
+            curve3d.ReadMaterialsFromRenderer();
 
             Undo.RecordObject(curve3d, "curve");
 
@@ -107,6 +109,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             bool isWideMode = EditorGUIUtility.wideMode;
             float initialLabelWidth = EditorGUIUtility.labelWidth;
+
             EditorGUIUtility.wideMode = true;
             EditorGUIUtility.labelWidth = 90;
             var curve = (target as Curve3D);
@@ -137,6 +140,10 @@ namespace ChaseMacMillan.CurveDesigner
                         curve.Recalculate();
                     }
                 }
+            }
+            else
+            {
+                Debug.LogError("No ui curve!");
             }
             EditorGUIUtility.wideMode = isWideMode;
             EditorGUIUtility.labelWidth = initialLabelWidth;
@@ -176,7 +183,7 @@ namespace ChaseMacMillan.CurveDesigner
             curve3d.TryInitStyles();
             curve3d.TryInitialize();
             curve3d.CacheAverageSize();
-            curve3d.UpdateMaterials();
+            //curve3d.UpdateMaterials();
             EnsureValidEditMode();
             curve3d.BindDataToPositionCurve();
             curve3d.samplesPerSegment = Mathf.Max(1, curve3d.samplesPerSegment);

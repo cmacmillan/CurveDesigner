@@ -7,7 +7,8 @@ namespace ChaseMacMillan.CurveDesigner
     //Abstract classes can't be serialized, but we could make this serializable by adding a concrete root class, saving that, and casting back to the abstract class when we wanna serialize it
     public abstract class CollapsableCategory
     {
-        public bool isExpanded;
+        public abstract bool IsExpanded(Curve3D curve);
+        public abstract void SetIsExpanded(Curve3D curve,bool value);
         public abstract string GetName(Curve3D curve);
         public abstract void Draw(Curve3D curve);
 
@@ -132,7 +133,6 @@ namespace ChaseMacMillan.CurveDesigner
         public Curve3DEditMode[] editModes;
         public MainCollapsableCategory()
         {
-            isExpanded = true;
             var baseEditModes = System.Enum.GetValues(typeof(Curve3DEditMode));
             var baseEditModeNames = System.Enum.GetNames(typeof(Curve3DEditMode));
             editModes = new Curve3DEditMode[baseEditModes.Length];
@@ -142,13 +142,17 @@ namespace ChaseMacMillan.CurveDesigner
 
         public override string GetName(Curve3D curve) { return curve.name; }
 
-
         public override void Draw(Curve3D curve)
         {
             serializedObj = new SerializedObject(curve);
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             bool needsReinitCurve = false;
+            EditorGUI.BeginChangeCheck();
             Field("type");
+            if (EditorGUI.EndChangeCheck())
+            {
+                curve.OnCurveTypeChanged();
+            }
             EditorGUI.BeginChangeCheck();
             Field("isClosedLoop");
             if (EditorGUI.EndChangeCheck())
@@ -183,6 +187,16 @@ namespace ChaseMacMillan.CurveDesigner
             if (needsReinitCurve)
                 curve.UICurve.Initialize();
         }
+
+        public override bool IsExpanded(Curve3D curve)
+        {
+            return curve.mainCategoryExpanded;
+        }
+
+        public override void SetIsExpanded(Curve3D curve, bool value)
+        {
+            curve.mainCategoryExpanded = value;
+        }
     }
     public class MeshGenerationCollapsableCategory : CollapsableCategory
     {
@@ -214,6 +228,16 @@ namespace ChaseMacMillan.CurveDesigner
             if (needsReinitCurve)
                 curve.UICurve.Initialize();
         }
+
+        public override bool IsExpanded(Curve3D curve)
+        {
+            return curve.meshGenerationCategoryExpanded;
+        }
+
+        public override void SetIsExpanded(Curve3D curve, bool value)
+        {
+            curve.meshGenerationCategoryExpanded = value;
+        }
     }
     public class TexturesCollapsableCategory : CollapsableCategory
     {
@@ -235,6 +259,7 @@ namespace ChaseMacMillan.CurveDesigner
             if (curve.type == MeshGenerationMode.NoMesh || curve.type == MeshGenerationMode.Mesh)
                 return;
             serializedObj = new SerializedObject(curve);
+            EditorGUI.BeginChangeCheck();
             if (curve.ShouldUseMainTextureLayer())
                 TextureField("mainTextureLayer","Front",curve,curve.mainTextureLayer);
             if (curve.ShouldUseBackTextureLayer())
@@ -244,6 +269,20 @@ namespace ChaseMacMillan.CurveDesigner
             if (curve.ShouldUseEndTextureLayer())
                 TextureField("endTextureLayer","End",curve,curve.endTextureLayer);
             serializedObj.ApplyModifiedProperties();
+            if (EditorGUI.EndChangeCheck())
+            {
+                curve.WriteMaterialsToRenderer();
+            }
+        }
+
+        public override bool IsExpanded(Curve3D curve)
+        {
+            return curve.textureCategoryExpanded;
+        }
+
+        public override void SetIsExpanded(Curve3D curve, bool value)
+        {
+            curve.textureCategoryExpanded = value;
         }
     }
     public class PreferencesCollapsableCategory : CollapsableCategory
@@ -270,6 +309,16 @@ namespace ChaseMacMillan.CurveDesigner
             serializedObj.ApplyModifiedProperties();
             if (needsReinitCurve)
                 curve.UICurve.Initialize();
+        }
+
+        public override bool IsExpanded(Curve3D curve)
+        {
+            return curve.preferencesCategoryExpanded;
+        }
+
+        public override void SetIsExpanded(Curve3D curve, bool value)
+        {
+            curve.preferencesCategoryExpanded = value;
         }
     }
 }

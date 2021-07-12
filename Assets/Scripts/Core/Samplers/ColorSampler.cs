@@ -18,13 +18,15 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public override void SelectEdit(Curve3D curve, List<SamplerPoint<Color>> selectedPoints, SamplerPoint<Color> mainPoint)
         {
-            var originalValue = mainPoint.value;
-            var label = new GUIContent();
-            label.text = GetLabel();
-            var newColor = EditorGUILayout.ColorField(label, originalValue,showEyedropper:false,showAlpha:true,hdr:false);
+            if (selectedPoints.Count==1)
+            {
+                var originalValue = mainPoint.value;
+                var label = new GUIContent();
+                label.text = GetLabel();
+                var newColor = EditorGUILayout.ColorField(label, originalValue, showEyedropper: false, showAlpha: true, hdr: false);
+                selectedPoints[0].value = newColor;
+            }
             base.SelectEdit(curve, selectedPoints, mainPoint);
-            foreach (var target in selectedPoints)
-                target.value = newColor;
         }
 
         public override Color Lerp(Color val1, Color val2, float lerp)

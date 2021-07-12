@@ -867,7 +867,6 @@ namespace ChaseMacMillan.CurveDesigner
                             {
                                 var vert = meshToTile.verts[i];
                                 float distance;
-                                float scaler = 120;
                                 if (clampAndStretchMeshToCurve)
                                     distance = (vert.x / meshLength) * curveLength;
                                 else

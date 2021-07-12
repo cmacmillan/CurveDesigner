@@ -213,6 +213,11 @@ namespace ChaseMacMillan.CurveDesigner
         public bool showNormals = false;
         public bool showTangents = false;
 
+        public bool mainCategoryExpanded = true;
+        public bool meshGenerationCategoryExpanded = false;
+        public bool textureCategoryExpanded = false;
+        public bool preferencesCategoryExpanded = false;
+
         public Curve3DEditMode editMode = Curve3DEditMode.PositionCurve;
 
         [SerializeField]
@@ -420,7 +425,10 @@ namespace ChaseMacMillan.CurveDesigner
                 old = curr;
             return changed;
         }
-
+        public void OnCurveTypeChanged()
+        {
+            WriteMaterialsToRenderer();
+        }
         public bool HaveCurveSettingsChanged()
         {
             bool retr = false;
@@ -530,7 +538,20 @@ namespace ChaseMacMillan.CurveDesigner
                 previousRotations.Add(i.value);
         }
 
-        public void UpdateMaterials()
+        public void ReadMaterialsFromRenderer()
+        {
+            int index = 0;
+            var mats = Renderer.sharedMaterials;
+            if (ShouldUseMainTextureLayer() && index < mats.Length)
+                mainTextureLayer.material = mats[index++];
+            if (ShouldUseBackTextureLayer() && index<mats.Length)
+                backTextureLayer.material = mats[index++];
+            if (ShouldUseEdgeTextureLayer() && index<mats.Length)
+                edgeTextureLayer.material = mats[index++];
+            if (ShouldUseEndTextureLayer() && index<mats.Length)
+                endTextureLayer.material = mats[index++];
+        }
+        public void WriteMaterialsToRenderer()
         {
             List<Material> mats = new List<Material>();
             if (ShouldUseMainTextureLayer())
@@ -541,7 +562,7 @@ namespace ChaseMacMillan.CurveDesigner
                 mats.Add(edgeTextureLayer.material);
             if (ShouldUseEndTextureLayer())
                 mats.Add(endTextureLayer.material);
-            Renderer.materials = mats.ToArray();
+            Renderer.sharedMaterials = mats.ToArray();
         }
         public void CacheAverageSize()
         {
