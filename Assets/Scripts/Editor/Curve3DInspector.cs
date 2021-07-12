@@ -177,6 +177,8 @@ namespace ChaseMacMillan.CurveDesigner
             if (curve3d.editMode == Curve3DEditMode.Arc && curve3d.type != MeshGenerationMode.Cylinder && curve3d.type != MeshGenerationMode.HollowTube)
                 curve3d.editMode = Curve3DEditMode.PositionCurve;
         }
+
+            ClickHitData closestElementToCursor = null;
         private void OnSceneGUI()
         {
             var curve3d = (target as Curve3D);
@@ -226,8 +228,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
             int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
             var eventType = Event.current.GetTypeForControl(controlID);
-            ClickHitData closestElementToCursor = null;
-            if (elementClickedDown == null && !didWindowEatMouse)
+            if (elementClickedDown == null && !didWindowEatMouse && eventType == EventType.Layout)
             {
                 Profiler.BeginSample("GetClosestElementToCursor");
                 closestElementToCursor = GetClosestElementToCursor(curveEditor, MousePos);
@@ -281,6 +282,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
             void Draw() { DrawLoop(false); }
             void IMGUI() { DrawLoop(true); }
+            //void IMGUI() { return; }
             //Regardless of event, you must call either Draw or IMGUI(), to make sure that imgui stuff gets all the events
             var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
             Profiler.BeginSample("Event Loop");
@@ -449,7 +451,7 @@ namespace ChaseMacMillan.CurveDesigner
         private const float bigDist = 20;
         ClickHitData GetClosestElementToCursor(Composite root, Vector2 clickPosition)
         {
-            ClickHitData GetFrom(IEnumerable<ClickHitData> lst)
+            ClickHitData GetFrom(List<ClickHitData> lst)
             {
                 List<ClickHitData> clicks = new List<ClickHitData>(lst);
                 Profiler.BeginSample("DistanceFromMouse");
@@ -476,12 +478,19 @@ namespace ChaseMacMillan.CurveDesigner
             Profiler.BeginSample("Click");
             root.Click(clickPosition, hits);
             Profiler.EndSample();
-            var highPriority = hits.Where(a => !a.isLowPriority);
-            var high = GetFrom(highPriority);
+            List<ClickHitData> highPriorityHits = new List<ClickHitData>();
+            List<ClickHitData> lowPriorityHits = new List<ClickHitData>();
+            foreach (var i in hits)
+            {
+                if (i.isLowPriority)
+                    lowPriorityHits.Add(i);
+                else
+                    highPriorityHits.Add(i);
+            }
+            var high = GetFrom(highPriorityHits);
             if (high != null)
                 return high;
-            var lowPriority = hits.Where(a => a.isLowPriority);
-            var low = GetFrom(lowPriority);
+            var low = GetFrom(lowPriorityHits);
             return low;
         }
     }
