@@ -179,6 +179,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
 
             ClickHitData closestElementToCursor = null;
+        List<IDraw> cachedDraws = new List<IDraw>();
         private void OnSceneGUI()
         {
             var curve3d = (target as Curve3D);
@@ -234,14 +235,17 @@ namespace ChaseMacMillan.CurveDesigner
                 closestElementToCursor = GetClosestElementToCursor(curveEditor, MousePos);
                 Profiler.EndSample();
             }
+            if (!didWindowEatMouse && eventType == EventType.Layout)
+            {
+                cachedDraws.Clear();
+                curveEditor.Draw(cachedDraws, closestElementToCursor);
+            }
             void DrawLoop(bool imguiEvent)
             {
-                List<IDraw> draws = new List<IDraw>();
-                curveEditor.Draw(draws, closestElementToCursor);
-                draws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
+                cachedDraws.Sort((a, b) => (int)(Mathf.Sign(b.DistFromCamera() - a.DistFromCamera())));
                 var selected = curve3d.selectedPoints;
                 var currentEventType = Event.current.type;
-                foreach (var draw in draws)
+                foreach (var draw in cachedDraws)
                     if (draw.DistFromCamera() > 0)
                     {
                         if (imguiEvent)
