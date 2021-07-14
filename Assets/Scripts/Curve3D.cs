@@ -147,19 +147,32 @@ namespace ChaseMacMillan.CurveDesigner
 
         public void OnAfterDeserialize()
         {
-            foreach (var i in DistanceSamplers)
-                i.RecalculateOpenCurveOnlyPoints(positionCurve);
-            //We need to rebuild the guid map
-            var dict = guidFactory.Objects;
-            dict.Clear();
-            foreach (var i in DistanceSamplers)
-                foreach (var j in i.AllPoints())
-                    dict.Add(j.GUID, j);
-            foreach (var i in extrudeSampler.points)
-                foreach (var j in i.value.PointGroups)
-                    dict.Add(j.GUID, j);
-            foreach (var i in positionCurve.PointGroups)
-                dict.Add(i.GUID, i);
+            try
+            {
+                foreach (var i in DistanceSamplers)
+                    i.RecalculateOpenCurveOnlyPoints(positionCurve);
+                //We need to rebuild the guid map
+                var dict = guidFactory.Objects;
+                dict.Clear();
+                foreach (var i in DistanceSamplers)
+                    foreach (var j in i.AllPoints())
+                    {
+                        dict.Add(j.GUID, j);
+                    }
+                foreach (var i in extrudeSampler.points)
+                    foreach (var j in i.value.PointGroups)
+                    {
+                        dict.Add(j.GUID, j);
+                    }
+                foreach (var i in positionCurve.PointGroups)
+                    dict.Add(i.GUID, i);
+            } 
+            catch (ArgumentException e)
+            {
+                //This catches a weird issue
+                //Where if you undo, OnAfterDeserialization gets called multiple times, and the first few times the points haven't been full deserialized
+                //Which leads to an ArgumentException for trying to insert a guid multiple times
+            }
         }
         public IEnumerable<T> GetSelected<T>(List<SelectableGUID> selected) where T : class, ISelectable
         {

@@ -11,7 +11,7 @@ namespace ChaseMacMillan.CurveDesigner
     /// <para>You can sample at any distance along the curve and will recieve a value calculated by interpolating between the two adjacent points</para>
     /// </summary>
     /// <typeparam name="T">The type of points in the Sampler</typeparam>
-    public abstract class Sampler<T> : ISerializationCallbackReceiver, ISampler<T>
+    public abstract class Sampler<T> : ISampler<T>,ISerializationCallbackReceiver
     {
         public List<SamplerPoint<T>> points = new List<SamplerPoint<T>>();
 
@@ -142,7 +142,7 @@ namespace ChaseMacMillan.CurveDesigner
             RecalculateOpenCurveOnlyPoints(curve);
         }
 
-        public void OnBeforeSerialize() { /*Do Nothing*/ }
+        public void OnBeforeSerialize() {}
 
         public void OnAfterDeserialize()
         {
