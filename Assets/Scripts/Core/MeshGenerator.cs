@@ -7,74 +7,10 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public static class MeshGenerator
     {
-        public class ThreadMesh
-        {
-            public ThreadMesh(Mesh meshToCopy)
-            {
-                tris = meshToCopy.triangles;
-                verts = meshToCopy.vertices;
-                uv = meshToCopy.uv;
-                normals = meshToCopy.normals;
-                bounds = meshToCopy.bounds;
-            }
-            public void WriteToMesh(Mesh meshToWriteTo)
-            {
-                meshToWriteTo.vertices = verts;
-                meshToWriteTo.triangles = tris;
-                meshToWriteTo.normals = normals;
-                meshToWriteTo.uv = uv;
-            }
-            public int[] tris;
-            public Vector3[] verts;
-            public Vector3[] normals;
-            public Vector2[] uv;
-            public Bounds bounds;
-            //currently only supports uv0
-        }
-
         public static bool didMeshGenerationSucceed;
 
-        public static List<Vector3> vertices;
-        public static List<Vector2> uvs;
-        public static List<Color32> colors;
-        public static List<List<int>> submeshes;
-        public static int submeshCount = 0;
-
-        public static bool IsBuzy = false;
-
-        public static DateTime lastUpdateTime;
-
-        public static BezierCurve curve;
-
-        //public static Color32[] displacementColors;
 
         public const bool useSubmeshes = true;
-
-        public static ExtrudeSampler extrudeSampler;
-        public static FloatSampler sizeSampler;
-        public static FloatSampler rotationSampler;
-        public static ColorSampler colorSampler;
-        public static FloatSampler tubeArcSampler;
-        public static FloatSampler thicknessSampler;
-
-        public static TextureLayerSettings mainTextureLayer;
-        public static TextureLayerSettings backTextureLayer;
-        public static TextureLayerSettings edgeTextureLayer;
-        public static TextureLayerSettings endTextureLayer;
-
-        public static int RingPointCount = 2;
-        public static int FlatPointCount = 2;
-        public static int EdgePointCount = 20;
-        public static float VertexSampleDistance = 1.0f;
-
-        public static bool clampAndStretchMeshToCurve = true;
-        public static bool IsClosedLoop = false;
-        public static MeshGenerationMode CurveType;
-        public static ThreadMesh meshToTile;
-        public static float closeTilableMeshGap;
-        public static MeshPrimaryAxis meshPrimaryAxis;
-
-        public static int currentlyGeneratingForCurveId;
 
         private struct EdgePointInfo
         {
@@ -84,106 +20,43 @@ namespace ChaseMacMillan.CurveDesigner
             public Vector3 side2Point1;
             public Vector3 side2Point2;
         }
-
-        public static void StartGenerating(Curve3D curve)
-        {
-            if (!IsBuzy)
-            {
-                IsBuzy = true;
-                BezierCurve clonedCurve = new BezierCurve(curve.positionCurve, false);
-                lastUpdateTime = curve.lastMeshUpdateStartTime;
-
-                MeshGenerator.curve = clonedCurve;
-                MeshGenerator.currentlyGeneratingForCurveId = curve.GetInstanceID();
-                MeshGenerator.RingPointCount = curve.ringPointCount;
-                MeshGenerator.FlatPointCount = curve.flatPointCount;
-                MeshGenerator.VertexSampleDistance = curve.GetVertexDensityDistance();
-                MeshGenerator.tubeArcSampler = new FloatSampler(curve.arcOfTubeSampler, false, null);
-                MeshGenerator.sizeSampler = new FloatSampler(curve.sizeSampler, false, null);
-                MeshGenerator.rotationSampler = new FloatSampler(curve.rotationSampler, false, null);
-                MeshGenerator.colorSampler = new ColorSampler(curve.colorSampler, false, null);
-                MeshGenerator.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler, false, null);
-                MeshGenerator.thicknessSampler = new FloatSampler(curve.thicknessSampler, false, null);
-                MeshGenerator.clampAndStretchMeshToCurve = curve.clampAndStretchMeshToCurve;
-
-                MeshGenerator.mainTextureLayer = curve.mainTextureLayer.settings;
-                MeshGenerator.backTextureLayer = curve.backTextureLayer.settings;
-                MeshGenerator.edgeTextureLayer = curve.edgeTextureLayer.settings;
-                MeshGenerator.endTextureLayer = curve.endTextureLayer.settings;
-
-                MeshGenerator.edgeTextureLayer = curve.edgeTextureLayer.settings;
-
-                MeshGenerator.IsClosedLoop = curve.isClosedLoop;
-                MeshGenerator.CurveType = curve.type;
-                MeshGenerator.meshToTile = curve.meshToTile == null ? null : new ThreadMesh(curve.meshToTile);
-                MeshGenerator.closeTilableMeshGap = curve.closeTilableMeshGap;
-                MeshGenerator.meshPrimaryAxis = curve.meshPrimaryAxis;
-
-                /*
-                if (curve.displacementTextureColors!=null)
-                {
-                    int len = curve.displacementTextureColors.Length;
-                    MeshGenerator.displacementColors = new Color32[len];
-                    Array.Copy(curve.displacementTextureColors, MeshGenerator.displacementColors, len);
-                } 
-                else
-                {
-                    MeshGenerator.displacementColors = null;
-                }
-                */
-
-                Thread thread = new Thread(TryFinallyGenerateMesh);
-                thread.Start();
-            }
-        }
         private static Vector3 NormalTangent(Vector3 forwardVector, Vector3 previous)
         {
             return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
         }
-        private static void InitOrClear<T>(ref List<T> list, int capacity = -1)
-        {
-            if (list == null)
-            {
-                if (capacity <= 0)
-                    list = new List<T>();
-                else
-                    list = new List<T>(capacity);
-            }
-            else
-            {
-                list.Clear();
-                if (capacity > list.Capacity)
-                    list.Capacity = capacity;
-            }
-        }
-        private static void InitSubmeshes(int numSubmeshes)
-        {
-            submeshCount = numSubmeshes;
-            if (submeshes == null)
-                submeshes = new List<List<int>>();
-            for (int i = submeshes.Count; i < numSubmeshes; i++)
-                submeshes.Add(new List<int>());
-            foreach (var i in submeshes)
-                i.Clear();
-        }
-        private static void TryFinallyGenerateMesh()
-        {
-            try
-            {
-                didMeshGenerationSucceed = false;
-                if (GenerateMesh())
-                    didMeshGenerationSucceed = true;
-            }
-            finally
-            {
-                IsBuzy = false;
-            }
-        }
 
         private delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset);
-        private static bool GenerateMesh()
+        public static MeshGeneratorOutput GenerateMesh(MeshGeneratorData data)
         {
-            //Debug.Log("started thread");
+            ExtrudeSampler extrudeSampler = data.extrudeSampler;
+            FloatSampler sizeSampler = data.sizeSampler;
+            FloatSampler rotationSampler = data.rotationSampler;
+            ColorSampler colorSampler = data.colorSampler;
+            FloatSampler tubeArcSampler = data.tubeArcSampler;
+            FloatSampler thicknessSampler = data.thicknessSampler;
+            BezierCurve curve = data.curve;
+            TextureLayerSettings mainTextureLayer = data.mainTextureLayer;
+            TextureLayerSettings backTextureLayer = data.backTextureLayer;
+            TextureLayerSettings edgeTextureLayer = data.edgeTextureLayer;
+            TextureLayerSettings endTextureLayer = data.endTextureLayer;
+            int RingPointCount = data.RingPointCount;
+            int FlatPointCount = data.FlatPointCount;
+            int EdgePointCount = data.EdgePointCount;
+            float VertexSampleDistance = data.VertexSampleDistance;
+            bool clampAndStretchMeshToCurve = data.clampAndStretchMeshToCurve;
+            bool IsClosedLoop = data.IsClosedLoop;
+            MeshGenerationMode CurveType = data.CurveType;
+            ThreadMesh meshToTile = data.meshToTile;
+            float closeTilableMeshGap = data.closeTilableMeshGap;
+            MeshPrimaryAxis meshPrimaryAxis = data.meshPrimaryAxis;
+            //public int currentlyGeneratingForCurveId;
+
+            MeshGeneratorOutput output = new MeshGeneratorOutput();
+            List<List<int>> submeshes = output.submeshes;
+            List<Vector3> vertices = output.vertices;
+            List<Vector2> uvs = output.uvs;
+            List<Color32> colors = output.colors;
+
             float curveLength = curve.GetLength();
             bool shouldTubeGenerateEdges = false;
             if (CurveType == MeshGenerationMode.HollowTube || CurveType == MeshGenerationMode.Cylinder)
@@ -534,13 +407,13 @@ namespace ChaseMacMillan.CurveDesigner
                 CreateUVS(settings, distancesFromStart, thicknesses, 2, up, right, point.position);
 
                 int end = 2 * (pointsPerRing - (wrapAround ? 0 : 1));
-                int mod = pointsPerRing*2;
+                int mod = pointsPerRing * 2;
                 for (int i = 0; i < end; i += 2)
                 {
                     if (side)
-                        DrawQuad(i%mod + ring1Base, (i + 1)%mod + ring1Base, (i + 2)%mod + ring1Base, (i + 3)%mod + ring1Base, submeshIndex);
+                        DrawQuad(i % mod + ring1Base, (i + 1) % mod + ring1Base, (i + 2) % mod + ring1Base, (i + 3) % mod + ring1Base, submeshIndex);
                     else
-                        DrawQuad((i + 2)%mod + ring1Base, (i + 3)%mod + ring1Base, i%mod + ring1Base, (i + 1)%mod + ring1Base, submeshIndex);
+                        DrawQuad((i + 2) % mod + ring1Base, (i + 3) % mod + ring1Base, i % mod + ring1Base, (i + 1) % mod + ring1Base, submeshIndex);
                 }
             }
             float CreateRing(PointCreator pointCreator, int pointsPerRing, float offset, PointOnCurve currentPoint, bool wrapAround, out float size)
@@ -623,12 +496,6 @@ namespace ChaseMacMillan.CurveDesigner
                 Vector3 lineEnd = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset);
                 return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
             }
-            void InitLists()
-            {
-                InitOrClear(ref vertices);
-                InitOrClear(ref uvs);
-                InitOrClear(ref colors);
-            }
             /*
                 var up = point.reference;
                 var right = Vector3.Cross(up, point.tangent);
@@ -706,14 +573,12 @@ namespace ChaseMacMillan.CurveDesigner
             switch (CurveType)
             {
                 case MeshGenerationMode.NoMesh:
-                    InitLists();
-                    return true;
+                    return output;
                 case MeshGenerationMode.Cylinder:
                     {
                         RingPointCount -= (shouldTubeGenerateEdges ? 0 : 1);
                         int numMainLayerVerts = RingPointCount * sampled.Count;
-                        InitLists();
-                        InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 3 : 2) : 1);
+                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 3 : 2) : 1);
                         CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer, !shouldTubeGenerateEdges);
                         if (shouldTubeGenerateEdges)
                             CreatePointsAlongCurve(TubeFlatPlateCreator, sampled, 0, FlatPointCount, backTextureLayer, false);
@@ -725,14 +590,13 @@ namespace ChaseMacMillan.CurveDesigner
                             int submeshIndex = useSubmeshes ? 2 : 0;
                             CreateTubeEndPlates(submeshIndex);
                         }
-                        return true;
+                        return output;
                     }
                 case MeshGenerationMode.HollowTube:
                     {
                         RingPointCount -= (shouldTubeGenerateEdges ? 0 : 1);
                         int numMainLayerVerts = RingPointCount * sampled.Count * 2;
-                        InitLists();
-                        InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
+                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
                         CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer, !shouldTubeGenerateEdges);
                         CreatePointsAlongCurve(TubePointCreator, sampled, -1, RingPointCount, backTextureLayer, !shouldTubeGenerateEdges);
                         TrianglifyLayer(true, RingPointCount, 0, useSubmeshes ? 0 : 0, !shouldTubeGenerateEdges);
@@ -745,14 +609,13 @@ namespace ChaseMacMillan.CurveDesigner
                             CreateEndPlate(true, 0, TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, !shouldTubeGenerateEdges, 0, -1);
                             CreateEndPlate(false, curve.GetLength(), TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, !shouldTubeGenerateEdges, 0, -1);
                         }
-                        return true;
+                        return output;
                     }
                 case MeshGenerationMode.Flat:
                     {
                         int pointsPerFace = FlatPointCount;
                         int numMainLayerVerts = 2 * pointsPerFace * sampled.Count;
-                        InitLists();
-                        InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
+                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
                         CreatePointsAlongCurve(RectanglePointCreator, sampled, .5f, pointsPerFace, mainTextureLayer, false);
                         CreatePointsAlongCurve(RectanglePointCreator, sampled, -.5f, pointsPerFace, backTextureLayer, false);
                         TrianglifyLayer(true, pointsPerFace, 0, useSubmeshes ? 0 : 0, false);
@@ -764,7 +627,7 @@ namespace ChaseMacMillan.CurveDesigner
                             CreateEndPlate(true, 0, RectanglePointCreator, RingPointCount, submeshIndex, endTextureLayer, false, .5f, -.5f);
                             CreateEndPlate(false, curve.GetLength(), RectanglePointCreator, RingPointCount, submeshIndex, endTextureLayer, false, .5f, -.5f);
                         }
-                        return true;
+                        return output;
                     }
                 case MeshGenerationMode.Extrude:
                     {
@@ -772,8 +635,7 @@ namespace ChaseMacMillan.CurveDesigner
                         extrudeSampler.RecalculateOpenCurveOnlyPoints(curve);
                         int pointCount = FlatPointCount;
                         int numMainLayerVerts = 2 * pointCount * sampled.Count;
-                        InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
-                        InitLists();
+                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
                         CreatePointsAlongCurve(ExtrudePointCreator, sampled, .5f, pointCount, mainTextureLayer, false);
                         CreatePointsAlongCurve(ExtrudePointCreator, sampled, -.5f, pointCount, backTextureLayer, false);
                         TrianglifyLayer(true, pointCount, numMainLayerVerts / 2, useSubmeshes ? 1 : 0, false);
@@ -785,14 +647,13 @@ namespace ChaseMacMillan.CurveDesigner
                             CreateEndPlate(true, 0, ExtrudePointCreator, pointCount, submeshIndex, endTextureLayer, false, .5f, -.5f, true);
                             CreateEndPlate(false, curve.GetLength(), ExtrudePointCreator, pointCount, submeshIndex, endTextureLayer, false, .5f, -.5f, true);
                         }
-                        return true;
+                        return output;
                     }
                 case MeshGenerationMode.Mesh:
                     {
-                        InitLists();
-                        InitSubmeshes(1);
+                        output.InitSubmeshes(1);
                         if (meshToTile == null)
-                            return true;
+                            return output;
                         //we are gonna assume that the largest dimension of the bounding box is the correct direction, and that the mesh is axis aligned and it is perpendicular to the edge of the bounding box
                         var bounds = meshToTile.bounds;
                         //watch out for square meshes
@@ -914,7 +775,7 @@ namespace ChaseMacMillan.CurveDesigner
                         if (vertexBaseOffset >= 65535)
                         {
                             Debug.LogError("Too many verticies, unable to correctly model mesh");
-                            return false;
+                            throw new ArgumentException();
                         }
                         ///end temp
                         for (int i = 0; i < submeshes[0].Count; i += 3)
@@ -923,10 +784,10 @@ namespace ChaseMacMillan.CurveDesigner
                             submeshes[0][i] = submeshes[0][i + 2];
                             submeshes[0][i + 2] = swap;
                         }
-                        return true;
+                        return output;
                     }
                 default:
-                    return false;
+                    throw new NotImplementedException();
             }
         }
     }

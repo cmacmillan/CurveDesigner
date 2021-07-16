@@ -195,6 +195,9 @@ namespace ChaseMacMillan.CurveDesigner
             lastMeshUpdateStartTime = DateTime.Now;
         }
 
+        [NonSerialized]
+        public int meshDispatchID=0;//incremented when requesting a mesh update
+
         [HideInInspector]
         public float averageSize;
         [HideInInspector]
