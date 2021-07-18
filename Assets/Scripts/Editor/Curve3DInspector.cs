@@ -103,7 +103,7 @@ namespace ChaseMacMillan.CurveDesigner
                     HandleKeys(curve3d);
                     break;
             }
-            UpdateMesh(curve3d);
+            curve3d.UpdateMesh();
         }
 
         private void WindowFunc(int id)
@@ -220,7 +220,7 @@ namespace ChaseMacMillan.CurveDesigner
                 curve3d.UICurve._curve = curve3d;
             }
             curve3d.UICurve.BakeBlobs();
-            UpdateMesh(curve3d);
+            curve3d.UpdateMesh();
             var curveEditor = curve3d.UICurve;
             //var MousePos = new Vector2(480.9996f,312.9997f);//Event.current.mousePosition;
             var MousePos = Event.current.mousePosition;
@@ -392,65 +392,6 @@ namespace ChaseMacMillan.CurveDesigner
             }
             curve3d.CopyRotations();
             Profiler.EndSample();
-        }
-        private void UpdateMesh(Curve3D curve)
-        {
-            if (!MeshGenerator.IsBuzy)
-            {
-                if (curve.lastMeshUpdateEndTime != MeshGenerator.lastUpdateTime && curve.GetInstanceID() == MeshGenerator.currentlyGeneratingForCurveId)
-                {
-                    curve.lastMeshUpdateEndTime = MeshGenerator.lastUpdateTime;
-                    if (curve.type != MeshGenerationMode.NoMesh)
-                    {
-                        if (MeshGenerator.didMeshGenerationSucceed)
-                        {
-                            int creatorId = curve.GetInstanceID();
-                            if (curve.displayMesh == null || creatorId!=curve.meshCreatorId)
-                            {
-                                curve.meshCreatorId = creatorId;
-                                curve.displayMesh = new Mesh();
-                                curve.displayMesh.indexFormat = IndexFormat.UInt32;
-                                curve.Filter.mesh = curve.displayMesh;
-                            }
-                            else
-                            {
-                                curve.displayMesh.Clear();
-                            }
-                            curve.displayMesh.SetVertices(MeshGenerator.vertices);
-                            curve.displayMesh.subMeshCount = MeshGenerator.submeshCount;
-                            for (int i=0;i<MeshGenerator.submeshCount;i++)
-                                curve.displayMesh.SetTriangles(MeshGenerator.submeshes[i], i);
-                            if (MeshGenerator.uvs.Count != MeshGenerator.vertices.Count)
-                                Debug.LogError($"Expected {MeshGenerator.vertices.Count} uvs, but got {MeshGenerator.uvs.Count}");
-                            curve.displayMesh.SetUVs(0, MeshGenerator.uvs);
-                            if (MeshGenerator.colors.Count != MeshGenerator.vertices.Count)
-                                Debug.LogError($"Expected {MeshGenerator.vertices.Count} colors, but got {MeshGenerator.colors.Count}");
-                            curve.displayMesh.SetColors(MeshGenerator.colors);
-                            curve.displayMesh.RecalculateNormals();
-                            if (curve.collider == null)
-                                curve.collider = curve.GetComponent<MeshCollider>();
-                            if (curve.collider != null)
-                                curve.collider.sharedMesh = curve.displayMesh;
-                        }
-                    }
-                }
-                if (curve.type != MeshGenerationMode.NoMesh)
-                {
-                    if (curve.lastMeshUpdateStartTime != MeshGenerator.lastUpdateTime)
-                    {
-                        MeshGenerator.StartGenerating(curve);
-                    }
-                }
-                else
-                {
-                    curve.displayMesh.Clear();
-
-                }
-            }
-            if (curve.HaveCurveSettingsChanged())
-            {
-                curve.RequestMeshUpdate();
-            }
         }
         private const float smallDist = 5;
         private const float bigDist = 20;

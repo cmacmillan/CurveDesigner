@@ -51,8 +51,8 @@ namespace ChaseMacMillan.CurveDesigner
             MeshPrimaryAxis meshPrimaryAxis = data.meshPrimaryAxis;
             //public int currentlyGeneratingForCurveId;
 
-            MeshGeneratorOutput output = new MeshGeneratorOutput();
-            List<List<int>> submeshes = output.submeshes;
+            MeshGeneratorOutput output = new MeshGeneratorOutput(data.meshDispatchID);
+            List<List<int>> submeshes = null;
             List<Vector3> vertices = output.vertices;
             List<Vector2> uvs = output.uvs;
             List<Color32> colors = output.colors;
@@ -578,7 +578,7 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         RingPointCount -= (shouldTubeGenerateEdges ? 0 : 1);
                         int numMainLayerVerts = RingPointCount * sampled.Count;
-                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 3 : 2) : 1);
+                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 3 : 2) : 1,out submeshes);
                         CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer, !shouldTubeGenerateEdges);
                         if (shouldTubeGenerateEdges)
                             CreatePointsAlongCurve(TubeFlatPlateCreator, sampled, 0, FlatPointCount, backTextureLayer, false);
@@ -596,7 +596,7 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         RingPointCount -= (shouldTubeGenerateEdges ? 0 : 1);
                         int numMainLayerVerts = RingPointCount * sampled.Count * 2;
-                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
+                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1,out submeshes);
                         CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer, !shouldTubeGenerateEdges);
                         CreatePointsAlongCurve(TubePointCreator, sampled, -1, RingPointCount, backTextureLayer, !shouldTubeGenerateEdges);
                         TrianglifyLayer(true, RingPointCount, 0, useSubmeshes ? 0 : 0, !shouldTubeGenerateEdges);
@@ -615,7 +615,7 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         int pointsPerFace = FlatPointCount;
                         int numMainLayerVerts = 2 * pointsPerFace * sampled.Count;
-                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
+                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1,out submeshes);
                         CreatePointsAlongCurve(RectanglePointCreator, sampled, .5f, pointsPerFace, mainTextureLayer, false);
                         CreatePointsAlongCurve(RectanglePointCreator, sampled, -.5f, pointsPerFace, backTextureLayer, false);
                         TrianglifyLayer(true, pointsPerFace, 0, useSubmeshes ? 0 : 0, false);
@@ -635,7 +635,7 @@ namespace ChaseMacMillan.CurveDesigner
                         extrudeSampler.RecalculateOpenCurveOnlyPoints(curve);
                         int pointCount = FlatPointCount;
                         int numMainLayerVerts = 2 * pointCount * sampled.Count;
-                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1);
+                        output.InitSubmeshes(useSubmeshes ? (!IsClosedLoop ? 4 : 3) : 1,out submeshes);
                         CreatePointsAlongCurve(ExtrudePointCreator, sampled, .5f, pointCount, mainTextureLayer, false);
                         CreatePointsAlongCurve(ExtrudePointCreator, sampled, -.5f, pointCount, backTextureLayer, false);
                         TrianglifyLayer(true, pointCount, numMainLayerVerts / 2, useSubmeshes ? 1 : 0, false);
@@ -651,7 +651,7 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                 case MeshGenerationMode.Mesh:
                     {
-                        output.InitSubmeshes(1);
+                        output.InitSubmeshes(1,out submeshes);
                         if (meshToTile == null)
                             return output;
                         //we are gonna assume that the largest dimension of the bounding box is the correct direction, and that the mesh is axis aligned and it is perpendicular to the edge of the bounding box

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 
 namespace ChaseMacMillan.CurveDesigner
@@ -190,22 +191,13 @@ namespace ChaseMacMillan.CurveDesigner
         public ColorSampler colorSampler;
         public ExtrudeSampler extrudeSampler;
 
-        public void RequestMeshUpdate()
-        {
-            lastMeshUpdateStartTime = DateTime.Now;
-        }
-
         [NonSerialized]
         public int meshDispatchID=0;//incremented when requesting a mesh update
+        [NonSerialized]
+        private bool isWaitingForMeshResults = false;
 
         [HideInInspector]
         public float averageSize;
-        [HideInInspector]
-        [NonSerialized]
-        public DateTime lastMeshUpdateStartTime;
-        [NonSerialized]
-        [HideInInspector]
-        public DateTime lastMeshUpdateEndTime;
         [HideInInspector]
         public List<float> previousRotations = new List<float>();
         [HideInInspector]
@@ -275,8 +267,7 @@ namespace ChaseMacMillan.CurveDesigner
         private MeshRenderer _renderer;
 
         public Mesh displayMesh;
-
-        public int meshCreatorId;
+        public int displayMeshCreatorId=-1;
 
         [SerializeField]
         [HideInInspector]
@@ -530,6 +521,7 @@ namespace ChaseMacMillan.CurveDesigner
                 backTextureLayer.material = mat;
                 edgeTextureLayer.material = mat;
                 endTextureLayer.material = mat;
+                WriteMaterialsToRenderer();
                 isInitialized = true;
                 Clear();
             }
@@ -566,6 +558,62 @@ namespace ChaseMacMillan.CurveDesigner
                 edgeTextureLayer.material = mats[index++];
             if (ShouldUseEndTextureLayer() && index<mats.Length)
                 endTextureLayer.material = mats[index++];
+        }
+        public void RequestMeshUpdate()
+        {
+            if (!isWaitingForMeshResults)
+            {
+                MeshGeneratorThreadManager.AddMeshGenerationRequest(this);
+                isWaitingForMeshResults = true;
+            }
+        }
+        public void UpdateMesh()
+        {
+            if (HaveCurveSettingsChanged())
+            {
+                RequestMeshUpdate();
+            }
+            if (MeshGeneratorThreadManager.GetMeshResults(this,out MeshGeneratorOutput output))
+            {
+                isWaitingForMeshResults = false;
+                if (output == null)//an error happened, but we are still done
+                    return;
+                if (output.meshDispatchId < meshDispatchID)
+                    return;
+                if (type == MeshGenerationMode.NoMesh)
+                {
+                    displayMesh.Clear();
+                }
+                else
+                {
+                    if (displayMesh == null || displayMeshCreatorId!=GetInstanceID())
+                    {
+                        displayMesh = new Mesh();
+                        displayMesh.indexFormat = IndexFormat.UInt32;
+                        Filter.mesh = displayMesh;
+                        displayMeshCreatorId = GetInstanceID();
+                    }
+                    else
+                    {
+                        displayMesh.Clear();
+                    }
+                    displayMesh.SetVertices(output.vertices);
+                    displayMesh.subMeshCount = output.submeshCount;
+                    for (int i = 0; i < output.submeshCount; i++)
+                        displayMesh.SetTriangles(output.submeshes[i], i);
+                    if (output.uvs.Count != output.vertices.Count)
+                        Debug.LogError($"Expected {output.vertices.Count} uvs, but got {output.uvs.Count}");
+                    displayMesh.SetUVs(0, output.uvs);
+                    if (output.colors.Count != output.vertices.Count)
+                        Debug.LogError($"Expected {output.vertices.Count} colors, but got {output.colors.Count}");
+                    displayMesh.SetColors(output.colors);
+                    displayMesh.RecalculateNormals();
+                    if (collider == null)
+                        collider = GetComponent<MeshCollider>();
+                    if (collider != null)
+                        collider.sharedMesh = displayMesh;
+                }
+            }
         }
         public void WriteMaterialsToRenderer()
         {

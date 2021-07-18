@@ -9,9 +9,21 @@ namespace ChaseMacMillan.CurveDesigner
     public static class MeshGeneratorThreadManager
     {
         private static Thread meshGenerationThread;
-        private static object locker;
-        private static ConcurrentQueue<MeshGeneratorData> generationQueue;
-        private static ConcurrentDictionary<int, MeshGeneratorOutput> resultDict;
+        private static readonly object locker = new object();
+        private static readonly ConcurrentQueue<MeshGeneratorData> generationQueue = new ConcurrentQueue<MeshGeneratorData>();
+        private static readonly ConcurrentDictionary<int, MeshGeneratorOutput> resultDict = new ConcurrentDictionary<int, MeshGeneratorOutput>();
+
+        public static bool GetMeshResults(Curve3D curve,out MeshGeneratorOutput output)
+        {
+            if (resultDict.TryRemove(curve.GetInstanceID(),out output))
+            {
+                return true;
+            } 
+            else
+            {
+                return false;
+            }
+        }
         public static void AddMeshGenerationRequest(Curve3D curve)
         {
             bool isFirstRun = false;
@@ -19,8 +31,6 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 isFirstRun = true;
                 meshGenerationThread = new Thread(ThreadLoop);
-                locker = new object();
-                generationQueue = new ConcurrentQueue<MeshGeneratorData>();
             }
 
             curve.meshDispatchID++;
@@ -53,13 +63,25 @@ namespace ChaseMacMillan.CurveDesigner
             if (isFirstRun)
                 meshGenerationThread.Start();
             else
-                Monitor.PulseAll(locker);
+            {
+                lock (locker)
+                {
+                    Monitor.PulseAll(locker);
+                }
+            }
         }
         public static void ThreadLoop()
         {
             while (true)
             {
-                if (generationQueue.TryDequeue(out MeshGeneratorData nextData))
+                MeshGeneratorData nextData;
+                bool didDequeue;
+                lock (locker)
+                {
+                    while (generationQueue.Count == 0) Monitor.Wait(locker);
+                    didDequeue = generationQueue.TryDequeue(out nextData);
+                }
+                if (didDequeue)
                 {
                     try
                     {
@@ -68,32 +90,33 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                     catch (Exception e)
                     {
+                        Debug.LogException(e);
                         resultDict.TryAdd(nextData.currentlyGeneratingForCurveId, null);//a null in the dictionary means something went wrong
                     }
-                }
-                else
-                {
-                    Monitor.Wait(locker);
                 }
             }
         }
     }
     public class MeshGeneratorOutput
     {
+        public MeshGeneratorOutput(int meshDispatchId)
+        {
+            this.meshDispatchId = meshDispatchId;
+        }
+        public int meshDispatchId;
         public List<Vector3> vertices = new List<Vector3>();
         public List<Vector2> uvs = new List<Vector2>();
         public List<Color32> colors = new List<Color32>();
         public List<List<int>> submeshes;
         public int submeshCount = 0;
-        public void InitSubmeshes(int numSubmeshes)
+        public void InitSubmeshes(int numSubmeshes, out List<List<int>> localSubmeshRef)
         {
             submeshCount = numSubmeshes;
             if (submeshes == null)
                 submeshes = new List<List<int>>();
             for (int i = submeshes.Count; i < numSubmeshes; i++)
                 submeshes.Add(new List<int>());
-            foreach (var i in submeshes)
-                i.Clear();
+            localSubmeshRef = submeshes;
         }
     }
     public class MeshGeneratorData
