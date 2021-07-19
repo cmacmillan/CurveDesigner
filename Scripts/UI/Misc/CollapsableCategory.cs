@@ -256,7 +256,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public override void Draw(Curve3D curve)
         {
-            if (curve.type == MeshGenerationMode.NoMesh || curve.type == MeshGenerationMode.Mesh)
+            if (curve.type == MeshGenerationMode.NoMesh)
                 return;
             serializedObj = new SerializedObject(curve);
             EditorGUI.BeginChangeCheck();

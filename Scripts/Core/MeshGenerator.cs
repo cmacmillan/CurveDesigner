@@ -772,11 +772,6 @@ namespace ChaseMacMillan.CurveDesigner
                             c++;
                             f = max;
                         }
-                        if (vertexBaseOffset >= 65535)
-                        {
-                            Debug.LogError("Too many verticies, unable to correctly model mesh");
-                            throw new ArgumentException();
-                        }
                         ///end temp
                         for (int i = 0; i < submeshes[0].Count; i += 3)
                         {

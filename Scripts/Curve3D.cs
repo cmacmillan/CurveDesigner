@@ -386,7 +386,7 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private MeshPrimaryAxis old_meshPrimaryAxis;
 
-        public bool ShouldUseMainTextureLayer() { return type != MeshGenerationMode.NoMesh && type != MeshGenerationMode.Mesh; }
+        public bool ShouldUseMainTextureLayer() { return type != MeshGenerationMode.NoMesh; }
 
         public TextureLayer mainTextureLayer = new TextureLayer(null);
         [SerializeField]

@@ -57,8 +57,10 @@ namespace ChaseMacMillan.CurveDesigner
         public float GetDistanceByAreaUnderInverseCurve(float targetAreaUnderCurve, bool isClosedLoop, float curveLength, BezierCurve curve)
         {
             var pointsInsideCurve = GetPoints(curve);
-            if (pointsInsideCurve.Count == 0)
-                return targetAreaUnderCurve / constValue;
+            if (pointsInsideCurve.Count == 0 || !UseKeyframes)
+            {
+                return targetAreaUnderCurve*constValue;
+            }
             var previousPoint = pointsInsideCurve[0];
             var previousDistance = previousPoint.GetDistance(curve);
             float areaUnderCurve = 0;
