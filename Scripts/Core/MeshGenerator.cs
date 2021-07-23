@@ -61,9 +61,10 @@ namespace ChaseMacMillan.CurveDesigner
             bool shouldTubeGenerateEdges = false;
             if (CurveType == MeshGenerationMode.HollowTube || CurveType == MeshGenerationMode.Cylinder)
             {
-                if (!tubeArcSampler.UseKeyframes && tubeArcSampler.constValue != 360)
+                if (!tubeArcSampler.UseKeyframes)
                 {
-                    shouldTubeGenerateEdges = true;
+                    if (tubeArcSampler.constValue != 360)
+                        shouldTubeGenerateEdges = true;
                 }
                 else
                 {
