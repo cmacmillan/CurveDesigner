@@ -607,7 +607,10 @@ namespace ChaseMacMillan.CurveDesigner
                     if (output.colors.Count != output.vertices.Count)
                         Debug.LogError($"Expected {output.vertices.Count} colors, but got {output.colors.Count}");
                     displayMesh.SetColors(output.colors);
-                    displayMesh.RecalculateNormals();
+                    if (output.autoRecalculateNormals)
+                        displayMesh.RecalculateNormals();
+                    else
+                        displayMesh.SetNormals(output.normals);
                     if (collider == null)
                         collider = GetComponent<MeshCollider>();
                     if (collider != null)

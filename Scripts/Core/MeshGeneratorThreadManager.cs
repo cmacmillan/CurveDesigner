@@ -107,6 +107,8 @@ namespace ChaseMacMillan.CurveDesigner
         public List<Vector3> vertices = new List<Vector3>();
         public List<Vector2> uvs = new List<Vector2>();
         public List<Color32> colors = new List<Color32>();
+        public List<Vector3> normals = new List<Vector3>();
+        public bool autoRecalculateNormals = false;
         public List<List<int>> submeshes;
         public int submeshCount = 0;
         public void InitSubmeshes(int numSubmeshes, out List<List<int>> localSubmeshRef)
