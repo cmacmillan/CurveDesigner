@@ -147,11 +147,12 @@ namespace ChaseMacMillan.CurveDesigner
             serializedObj = new SerializedObject(curve);
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             bool needsReinitCurve = false;
+            bool changedCurveType = false;
             EditorGUI.BeginChangeCheck();
             Field("type");
             if (EditorGUI.EndChangeCheck())
             {
-                curve.OnCurveTypeChanged();
+                changedCurveType = true;
             }
             EditorGUI.BeginChangeCheck();
             Field("isClosedLoop");
@@ -184,6 +185,8 @@ namespace ChaseMacMillan.CurveDesigner
                 Field("closeTilableMeshGap");
             }
             serializedObj.ApplyModifiedProperties();
+            if (changedCurveType)
+                curve.OnCurveTypeChanged();
             if (needsReinitCurve)
                 curve.UICurve.Initialize();
         }
