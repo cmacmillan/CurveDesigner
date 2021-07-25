@@ -95,6 +95,7 @@ namespace ChaseMacMillan.CurveDesigner
             curve3d.ReadMaterialsFromRenderer();
 
             Undo.RecordObject(curve3d, "curve");
+            Undo.RecordObject(curve3d.Renderer, "curveRenderer");
 
             int controlID = GUIUtility.GetControlID(_CurveHint, FocusType.Passive);
             switch (Event.current.GetTypeForControl(controlID))
@@ -204,6 +205,7 @@ namespace ChaseMacMillan.CurveDesigner
             if (curve3d.previousRotations.Count != rotationPoints.Count)
                 curve3d.CopyRotations();
             Undo.RecordObject(curve3d, "curve");
+            Undo.RecordObject(curve3d.Renderer, "curveRenderer");
             ClickHitData elementClickedDown = curve3d.elementClickedDown;
             CurveUIStatic.circleTexture = curve3d.settings.circleIcon;
             CurveUIStatic.plusTexture = curve3d.settings.plusButton;
