@@ -17,7 +17,8 @@ namespace ChaseMacMillan.CurveDesigner
         MonoScript script;
         private void OnEnable()
         {
-            script = MonoScript.FromMonoBehaviour((Curve3D)target);
+            if (target!=null)
+                script = MonoScript.FromMonoBehaviour((Curve3D)target);
         }
 
         public override void OnInspectorGUI()

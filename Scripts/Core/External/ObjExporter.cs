@@ -5,6 +5,7 @@ using System.Text;
 
 namespace ChaseMacMillan.CurveDesigner
 {
+    ///This is from https://wiki.unity3d.com/index.php/ExportOBJ
     public static class ObjMeshExporter
     {
         public static void DoExport(GameObject gameObject, bool makeSubmeshes)

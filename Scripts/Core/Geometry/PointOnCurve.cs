@@ -5,6 +5,16 @@ namespace ChaseMacMillan.CurveDesigner
     [System.Serializable]
     public class PointOnCurve : ISegmentTime
     {
+        public int segmentIndex;
+        public float time;
+        public Vector3 tangent;
+        public Vector3 reference;
+        public Vector3 position;
+        /// <summary>
+        /// Distance from start of segment
+        /// </summary>
+        public float distanceFromStartOfSegment;
+        public float distanceFromStartOfCurve;
         public PointOnCurve(PointOnCurve pointToClone)
         {
             this.time = pointToClone.time;
@@ -23,10 +33,6 @@ namespace ChaseMacMillan.CurveDesigner
             this.segmentIndex = segmentIndex;
             this.tangent = tangent;
         }
-        public int segmentIndex;
-        public float time;
-        public Vector3 tangent;
-        public Vector3 reference;
 
         public Vector3 GetRingPoint(float angle, float length)
         {
@@ -78,13 +84,6 @@ namespace ChaseMacMillan.CurveDesigner
                     return;
             }
         }
-
-        public Vector3 position;
-        /// <summary>
-        /// Distance from start of segment
-        /// </summary>
-        public float distanceFromStartOfSegment;
-        public float distanceFromStartOfCurve;
 
         public int SegmentIndex { get { return segmentIndex; } }
 
