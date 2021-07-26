@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-
 namespace ChaseMacMillan.CurveDesigner
 {
     //This is just a simple interface for interacting with curves. The meat of this class is in Curve3DCore.cs
