@@ -21,9 +21,11 @@ namespace ChaseMacMillan.CurveDesigner
         //The 'reference' or 'normal' vector is the vector that is perpendicular to the tangent at a particular point
         //Can be thought of as pointing away from the curve
         //Affected by curve rotation
-        public Vector3 GetReferenceAtDistanceAlongCurve(float distance)
+        public Vector3 GetReferenceAtDistanceAlongCurve(float distance,bool applyRotation=true)
         {
-            return positionCurve.GetPointAtDistance(distance,true).reference;
+            float angle = GetRotationAtDistanceAlongCurve(distance);
+            var point = positionCurve.GetPointAtDistance(distance, true);
+            return Quaternion.AngleAxis(angle,point.tangent)*point.reference;
         }
 
         public PointOnCurve GetPointAtDistanceAlongCurve(float distance)
