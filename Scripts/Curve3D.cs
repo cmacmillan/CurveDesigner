@@ -25,7 +25,10 @@ namespace ChaseMacMillan.CurveDesigner
         {
             float angle = GetRotationAtDistanceAlongCurve(distance);
             var point = positionCurve.GetPointAtDistance(distance, true);
-            return Quaternion.AngleAxis(angle,point.tangent)*point.reference;
+            if (applyRotation)
+                return Quaternion.AngleAxis(angle, point.tangent) * point.reference;
+            else
+                return point.reference;
         }
 
         public PointOnCurve GetPointAtDistanceAlongCurve(float distance)
