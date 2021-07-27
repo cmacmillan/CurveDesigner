@@ -20,6 +20,10 @@ namespace ChaseMacMillan.CurveDesigner
             if (target!=null)
                 script = MonoScript.FromMonoBehaviour((Curve3D)target);
         }
+        private void OnDisable()
+        {
+            Tools.hidden = false;
+        }
 
         public override void OnInspectorGUI()
         {
@@ -393,6 +397,7 @@ namespace ChaseMacMillan.CurveDesigner
                     IMGUI();
                     break;
             }
+            Tools.hidden = closestElementToCursor != null && (GUIUtility.hotControl==controlID || GUIUtility.hotControl==0);
             curve3d.CopyRotations();
             Profiler.EndSample();
         }

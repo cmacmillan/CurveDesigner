@@ -338,7 +338,7 @@ namespace ChaseMacMillan.CurveDesigner
         private float old_samplesPerSegment = -1;
 
         [Min(1)]
-        public int samplesForCursorCollisionCheck = 6;
+        public int samplesForCursorCollisionCheck = 12;
         [SerializeField]
         [HideInInspector]
         private int old_samplesForCursorCollisionCheck;
