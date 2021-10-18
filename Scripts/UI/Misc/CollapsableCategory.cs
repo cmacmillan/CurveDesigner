@@ -163,7 +163,10 @@ namespace ChaseMacMillan.CurveDesigner
             EditModeSwitchButton("Position", Curve3DEditMode.PositionCurve,GetFieldRects(out _,curve),curve);
             if (curve.type!= MeshGenerationMode.NoMesh)
             {
-                SamplerField("sizeSampler", curve.sizeSampler,curve);
+                if (curve.type!= MeshGenerationMode.Extrude)
+                {
+                    SamplerField("sizeSampler", curve.sizeSampler, curve);
+                }
                 SamplerField("rotationSampler", curve.rotationSampler,curve);
                 if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.HollowTube)
                 {

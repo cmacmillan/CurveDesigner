@@ -57,32 +57,45 @@ namespace ChaseMacMillan.CurveDesigner
                 float c2 = Vector3.Dot(v2, v2);
                 return rL - (2.0f / c2) * Vector3.Dot(v2, rL) * v2;
             }
+            if (curve.dimensionLockMode!= DimensionLockMode.none)
+            {
+                Vector3 up;
+                switch (curve.dimensionLockMode)
+                {
+                    case DimensionLockMode.x:
+                        up = Vector3.right;
+                        break;
+                    case DimensionLockMode.z:
+                        up = Vector3.forward;
+                        break;
+                    case DimensionLockMode.none:
+                    case DimensionLockMode.y:
+                    default:
+                        up = Vector3.up;
+                        break;
+                }
+                reference = Vector3.ProjectOnPlane(up, this.tangent.normalized);
+                return;
+            }
+            Vector3 dir;
             switch (curve.normalGenerationMode)
             {
                 case CurveNormalGenerationMode.MinimumDistance:
                     reference = DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, previousReference);
                     reference = Vector3.ProjectOnPlane(reference, this.tangent.normalized);
                     return;
+                case CurveNormalGenerationMode.BiasTowardsForward:
+                    dir = Vector3.forward;
+                    break;
+                case CurveNormalGenerationMode.BiasTowardsRight:
+                    dir = Vector3.right;
+                    break;
+                default:
                 case CurveNormalGenerationMode.BiasTowardsUp:
-                    //up is different for different dimension lock modes
-                    Vector3 up;
-                    switch (curve.dimensionLockMode)
-                    {
-                        case DimensionLockMode.x:
-                            up = Vector3.right;
-                            break;
-                        case DimensionLockMode.z:
-                            up = Vector3.forward;
-                            break;
-                        case DimensionLockMode.none:
-                        case DimensionLockMode.y:
-                        default:
-                            up = Vector3.up;
-                            break;
-                    }
-                    reference = Vector3.ProjectOnPlane(up, this.tangent.normalized);
-                    return;
+                    dir = Vector3.up;
+                    break;
             }
+            reference = Vector3.ProjectOnPlane(dir, this.tangent.normalized);
         }
 
         public int SegmentIndex { get { return segmentIndex; } }

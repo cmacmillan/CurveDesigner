@@ -495,21 +495,33 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public Vector3 GetDefaultReferenceVector(Vector3 tangent)
         {
-            Vector3 reference = Vector3.up;
-            Vector3 alt = Vector3.right;
+            Vector3 reference;
             switch (dimensionLockMode)
             {
                 case DimensionLockMode.x:
                     reference = Vector3.right;
-                    alt = Vector3.up;
                     break;
                 case DimensionLockMode.y:
                     reference = Vector3.up;
-                    alt = Vector3.forward;
                     break;
                 case DimensionLockMode.z:
                     reference = Vector3.forward;
-                    alt = Vector3.right;
+                    break;
+                default:
+                    switch (normalGenerationMode)
+                    {
+                        case CurveNormalGenerationMode.BiasTowardsForward:
+                            reference = Vector3.forward;
+                            break;
+                        case CurveNormalGenerationMode.BiasTowardsRight:
+                            reference = Vector3.right;
+                            break;
+                        case CurveNormalGenerationMode.BiasTowardsUp:
+                        case CurveNormalGenerationMode.MinimumDistance:
+                        default:
+                            reference = Vector3.up;
+                            break;
+                    }
                     break;
             }
             var retr = Vector3.ProjectOnPlane(reference, tangent).normalized;
