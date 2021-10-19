@@ -291,6 +291,36 @@ namespace ChaseMacMillan.CurveDesigner
             curve.textureCategoryExpanded = value;
         }
     }
+    public class AdvancedCollapsableCategory : CollapsableCategory
+    {
+        public override string GetName(Curve3D curve) { return "Advanced"; }
+        public override void Draw(Curve3D curve)
+        {
+            EditorGUILayout.HelpBox("Modifying these settings may negatively affect your performance", MessageType.Info);
+            serializedObj = new SerializedObject(curve);
+            Field("samplesForCursorCollisionCheck");
+            bool needsReinitCurve=false;
+            EditorGUI.BeginChangeCheck();
+            Field("samplesPerSegment");
+            if (EditorGUI.EndChangeCheck())
+            {
+                needsReinitCurve = true;
+            }
+            serializedObj.ApplyModifiedProperties();
+            if (needsReinitCurve)
+                curve.UICurve.Initialize();
+        }
+
+        public override bool IsExpanded(Curve3D curve)
+        {
+            return curve.advancedCategoryExpanded;
+        }
+
+        public override void SetIsExpanded(Curve3D curve, bool value)
+        {
+            curve.advancedCategoryExpanded= value;
+        }
+    }
     public class PreferencesCollapsableCategory : CollapsableCategory
     {
         public override string GetName(Curve3D curve) { return "Preferences"; }
@@ -303,18 +333,7 @@ namespace ChaseMacMillan.CurveDesigner
             Field("showNormals");
             Field("showTangents");
             Field("placeLockedPoints");
-            Field("samplesForCursorCollisionCheck");
-            //Field("_settings");
-            bool needsReinitCurve=false;
-            EditorGUI.BeginChangeCheck();
-            Field("samplesPerSegment");
-            if (EditorGUI.EndChangeCheck())
-            {
-                needsReinitCurve = true;
-            }
             serializedObj.ApplyModifiedProperties();
-            if (needsReinitCurve)
-                curve.UICurve.Initialize();
         }
 
         public override bool IsExpanded(Curve3D curve)
