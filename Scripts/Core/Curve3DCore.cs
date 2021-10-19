@@ -210,7 +210,7 @@ namespace ChaseMacMillan.CurveDesigner
         [NonSerialized]
         public UICurve UICurve = null;
 
-        public bool showPositionHandles = false;
+        public bool showPositionHandles = true;
         public bool showPointSelectionWindow = true;
         public bool showNormals = false;
         public bool showTangents = false;
