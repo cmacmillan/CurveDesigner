@@ -23,8 +23,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Specular:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _Glossiness: 0.5
+    - _Glossiness: 0
     - _Metallic: 0
+    - _Specularity: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
