@@ -465,9 +465,9 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 foreach (var i in positionCurve.PointGroups)
                 {
-                    i.SetWorldPositionByIndex(PointGroupIndex.LeftTangent, i.GetWorldPositionByIndex(PointGroupIndex.LeftTangent));
-                    i.SetWorldPositionByIndex(PointGroupIndex.Position, i.GetWorldPositionByIndex(PointGroupIndex.Position));
-                    i.SetWorldPositionByIndex(PointGroupIndex.RightTangent, i.GetWorldPositionByIndex(PointGroupIndex.RightTangent));
+                    i.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, i.GetLocalPositionByIndex(PointGroupIndex.LeftTangent));
+                    i.SetLocalPositionByIndex(PointGroupIndex.Position, i.GetLocalPositionByIndex(PointGroupIndex.Position));
+                    i.SetLocalPositionByIndex(PointGroupIndex.RightTangent, i.GetLocalPositionByIndex(PointGroupIndex.RightTangent));
                 }
             }
 
@@ -563,12 +563,13 @@ namespace ChaseMacMillan.CurveDesigner
                 isWaitingForMeshResults = true;
             }
         }
-        public void UpdateMesh()
+        public void UpdateMesh(bool checkIfSettingsChanged=true)
         {
-            if (HaveCurveSettingsChanged())
+            if (checkIfSettingsChanged && HaveCurveSettingsChanged())
             {
                 RequestMeshUpdate();
             }
+            //we only update the mesh if the thread manager has results for us
             if (MeshGeneratorThreadManager.GetMeshResults(this,out MeshGeneratorOutput output))
             {
                 isWaitingForMeshResults = false;

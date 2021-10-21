@@ -27,7 +27,7 @@ namespace ChaseMacMillan.CurveDesigner
         public void ClickDrag(Vector2 mousePos,Curve3D curve,ClickHitData data,List<SelectableGUID> selected)
         {
             var dimensionLockMode = positionCurve.dimensionLockMode;
-            var oldPointPosition = _group.GetWorldPositionByIndex(_index);
+            var oldPointPosition = _group.GetLocalPositionByIndex(_index);
             Vector3 worldPos = Vector3.zero;
             bool shouldSet = true;
             if (dimensionLockMode== DimensionLockMode.none)
@@ -76,7 +76,7 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                     foreach (var i in selectedPointGroups)
                     {
-                        i.SetWorldPositionByIndex(_index, i.GetWorldPositionByIndex(_index) + pointOffset);
+                        i.SetLocalPositionByIndex(_index, i.GetLocalPositionByIndex(_index) + pointOffset);
                     }
                     currCurve.Recalculate(null, indiciesToRecalculate);
                     selectedPointGroups.Clear();

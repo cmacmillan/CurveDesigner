@@ -268,14 +268,14 @@ namespace ChaseMacMillan.CurveDesigner
         public void Initialize()
         {
             var pointA = new PointGroup(owner.placeLockedPoints, owner, this);
-            pointA.SetWorldPositionByIndex(PointGroupIndex.Position, Vector3.zero);
-            pointA.SetWorldPositionByIndex(PointGroupIndex.LeftTangent, new Vector3(-1, 0, 0));
-            pointA.SetWorldPositionByIndex(PointGroupIndex.RightTangent, new Vector3(1, 0, 0));
+            pointA.SetLocalPositionByIndex(PointGroupIndex.Position, Vector3.zero);
+            pointA.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, new Vector3(-1, 0, 0));
+            pointA.SetLocalPositionByIndex(PointGroupIndex.RightTangent, new Vector3(1, 0, 0));
             PointGroups.Add(pointA);
             var pointB = new PointGroup(owner.placeLockedPoints, owner, this);
-            pointB.SetWorldPositionByIndex(PointGroupIndex.Position, new Vector3(1, 1, 0));
-            pointB.SetWorldPositionByIndex(PointGroupIndex.LeftTangent, new Vector3(0, 1, 0));
-            pointB.SetWorldPositionByIndex(PointGroupIndex.RightTangent, new Vector3(2, 1, 0));
+            pointB.SetLocalPositionByIndex(PointGroupIndex.Position, new Vector3(1, 1, 0));
+            pointB.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, new Vector3(0, 1, 0));
+            pointB.SetLocalPositionByIndex(PointGroupIndex.RightTangent, new Vector3(2, 1, 0));
             PointGroups.Add(pointB);
             RegenSegmentIndicies();
         }
@@ -300,17 +300,17 @@ namespace ChaseMacMillan.CurveDesigner
                 outTangent = PointGroupIndex.RightTangent;
                 inTangent = PointGroupIndex.LeftTangent;
             }
-            fromPoint.SetWorldPositionByIndex(outTangent, fromPoint.GetWorldPositionByIndex(inTangent, true));
+            fromPoint.SetLocalPositionByIndex(outTangent, fromPoint.GetLocalPositionByIndex(inTangent, true));
 
             PointGroup newPoint = new PointGroup(lockPlacedPoint, owner, this);
             if (isPrepend)
                 PointGroups.Insert(0, newPoint);
             else
                 PointGroups.Add(newPoint);
-            newPoint.SetWorldPositionByIndex(PointGroupIndex.Position, newPointPos);
-            Vector3 middlePoint = (newPointPos + fromPoint.GetWorldPositionByIndex(PointGroupIndex.Position)) / 2.0f;
-            newPoint.SetWorldPositionByIndex(inTangent, middlePoint);
-            newPoint.SetWorldPositionByIndex(outTangent, newPoint.GetWorldPositionByIndex(inTangent, true));
+            newPoint.SetLocalPositionByIndex(PointGroupIndex.Position, newPointPos);
+            Vector3 middlePoint = (newPointPos + fromPoint.GetLocalPositionByIndex(PointGroupIndex.Position)) / 2.0f;
+            newPoint.SetLocalPositionByIndex(inTangent, middlePoint);
+            newPoint.SetLocalPositionByIndex(outTangent, newPoint.GetLocalPositionByIndex(inTangent, true));
             RegenSegmentIndicies();
             return newPoint.GUID;
         }
@@ -320,7 +320,7 @@ namespace ChaseMacMillan.CurveDesigner
             var postPointGroup = PointGroups[(splitPoint.SegmentIndex + 1) % PointGroups.Count];
             PointGroup newPoint = new PointGroup(lockPlacedPoint, owner, this);
             var basePosition = this.GetSegmentPositionAtTime(splitPoint.SegmentIndex, splitPoint.Time);
-            newPoint.SetWorldPositionByIndex(PointGroupIndex.Position, basePosition);
+            newPoint.SetLocalPositionByIndex(PointGroupIndex.Position, basePosition);
             Vector3 leftTangent;
             Vector3 rightTangent;
             Vector3 preLeftTangent;
@@ -329,11 +329,11 @@ namespace ChaseMacMillan.CurveDesigner
 
             void prePointModify()
             {
-                prePointGroup.SetWorldPositionByIndex(PointGroupIndex.RightTangent, preLeftTangent);
+                prePointGroup.SetLocalPositionByIndex(PointGroupIndex.RightTangent, preLeftTangent);
             }
             void postPointModify()
             {
-                postPointGroup.SetWorldPositionByIndex(PointGroupIndex.LeftTangent, postRightTangent);
+                postPointGroup.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, postRightTangent);
             }
             switch (shouldModifyNeighbors)
             {
@@ -348,15 +348,15 @@ namespace ChaseMacMillan.CurveDesigner
             }
 
             //use the bigger tangent, this only matters if the point is locked
-            if ((leftTangent - newPoint.GetWorldPositionByIndex(PointGroupIndex.Position)).magnitude < (rightTangent - newPoint.GetWorldPositionByIndex(PointGroupIndex.Position)).magnitude)
+            if ((leftTangent - newPoint.GetLocalPositionByIndex(PointGroupIndex.Position)).magnitude < (rightTangent - newPoint.GetLocalPositionByIndex(PointGroupIndex.Position)).magnitude)
             {
-                newPoint.SetWorldPositionByIndex(PointGroupIndex.LeftTangent, leftTangent);
-                newPoint.SetWorldPositionByIndex(PointGroupIndex.RightTangent, rightTangent);
+                newPoint.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, leftTangent);
+                newPoint.SetLocalPositionByIndex(PointGroupIndex.RightTangent, rightTangent);
             }
             else
             {
-                newPoint.SetWorldPositionByIndex(PointGroupIndex.RightTangent, rightTangent);
-                newPoint.SetWorldPositionByIndex(PointGroupIndex.LeftTangent, leftTangent);
+                newPoint.SetLocalPositionByIndex(PointGroupIndex.RightTangent, rightTangent);
+                newPoint.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, leftTangent);
             }
 
             PointGroups.Insert(splitPoint.SegmentIndex + 1, newPoint);
@@ -367,11 +367,11 @@ namespace ChaseMacMillan.CurveDesigner
         public void AddDefaultSegment()
         {
             var finalPointGroup = PointGroups[PointGroups.Count - 1];
-            var finalPointPos = finalPointGroup.GetWorldPositionByIndex(PointGroupIndex.Position);
-            finalPointGroup.SetWorldPositionByIndex(PointGroupIndex.RightTangent, finalPointPos + new Vector3(1, 0, 0));
+            var finalPointPos = finalPointGroup.GetLocalPositionByIndex(PointGroupIndex.Position);
+            finalPointGroup.SetLocalPositionByIndex(PointGroupIndex.RightTangent, finalPointPos + new Vector3(1, 0, 0));
             var pointB = new PointGroup(owner.placeLockedPoints, owner, this);
-            pointB.SetWorldPositionByIndex(PointGroupIndex.Position, finalPointPos + new Vector3(1, 1, 0));
-            pointB.SetWorldPositionByIndex(PointGroupIndex.LeftTangent, finalPointPos + new Vector3(0, 1, 0));
+            pointB.SetLocalPositionByIndex(PointGroupIndex.Position, finalPointPos + new Vector3(1, 1, 0));
+            pointB.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, finalPointPos + new Vector3(0, 1, 0));
             PointGroups.Add(pointB);
             RegenSegmentIndicies();
             Recalculate();
@@ -622,11 +622,11 @@ namespace ChaseMacMillan.CurveDesigner
         {
             get
             {
-                return GetPointGroupByIndex(virtualIndex).GetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex));
+                return GetPointGroupByIndex(virtualIndex).GetLocalPositionByIndex(GetPointTypeByIndex(virtualIndex));
             }
             set
             {
-                GetPointGroupByIndex(virtualIndex).SetWorldPositionByIndex(GetPointTypeByIndex(virtualIndex), value);
+                GetPointGroupByIndex(virtualIndex).SetLocalPositionByIndex(GetPointTypeByIndex(virtualIndex), value);
             }
         }
         public Vector3 this[int segmentVirtualIndex, int pointVirtualIndex]

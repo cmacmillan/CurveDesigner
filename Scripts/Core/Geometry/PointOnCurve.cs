@@ -15,6 +15,13 @@ namespace ChaseMacMillan.CurveDesigner
         /// </summary>
         public float distanceFromStartOfSegment;
         public float distanceFromStartOfCurve;
+        //PointOnCurves are stored in local space, so if you want to perform world space calculations with them you'll need to call this first to transform them
+        public void FromLocalToWorld(Transform t)
+        {
+            tangent = t.TransformDirection(tangent);
+            reference = t.TransformDirection(reference);
+            position = t.TransformPoint(position);
+        }
         public PointOnCurve(PointOnCurve pointToClone)
         {
             this.time = pointToClone.time;
