@@ -19,7 +19,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public override void Draw(List<IDraw> drawList, ClickHitData closestElementToCursor)
         {
-            var centerPos = transformBlob.TransformPoint(GetPointGroup().GetLocalPositionByIndex(PointGroupIndex.Position));
+            var centerPos = transformBlob.TransformPoint(GetPointGroup().GetPositionLocal(PointGroupIndex.Position));
             drawList.Add(new LineDraw(this, centerPos, Position, Color.white));
             base.Draw(drawList, closestElementToCursor);
         }
@@ -50,8 +50,8 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 PointGroup pointGroup = GetPointGroup();
                 PointGroupIndex index = GetIndex();
-                var centerPos = transformBlob.TransformPoint(pointGroup.GetLocalPositionByIndex(PointGroupIndex.Position,true));
-                var offsetPos = transformBlob.TransformPoint(pointGroup.GetLocalPositionByIndex(index,true));
+                var centerPos = transformBlob.TransformPoint(pointGroup.GetPositionLocal(PointGroupIndex.Position,true));
+                var offsetPos = transformBlob.TransformPoint(pointGroup.GetPositionLocal(index,true));
                 GUITools.WorldToGUISpace(centerPos, out Vector2 centerGuiPos, out float centerScreenDepth);
                 bool needFlip = !GUITools.WorldToGUISpace(offsetPos, out Vector2 offsetGuiPos, out float offsetScreenDepth);
                 if (needFlip)

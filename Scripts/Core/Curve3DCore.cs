@@ -377,6 +377,17 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private bool old_isClosedLoop;
 
+        public bool automaticTangents = false;
+        [SerializeField]
+        [HideInInspector]
+        private bool old_automaticTangents;
+
+        [Range(.001f,1)]
+        public float automaticTangentSmoothing = 1.0f;
+        [SerializeField]
+        [HideInInspector]
+        private float old_automaticTangentSmoothing;
+
         public MeshPrimaryAxis meshPrimaryAxis = MeshPrimaryAxis.auto;
         [SerializeField]
         [HideInInspector]
@@ -407,7 +418,6 @@ namespace ChaseMacMillan.CurveDesigner
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_edgeTextureLayer = new TextureLayer(null);
-
 
         private bool CheckFieldChanged<T>(T field, ref T oldField)
         {
@@ -465,9 +475,9 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 foreach (var i in positionCurve.PointGroups)
                 {
-                    i.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, i.GetLocalPositionByIndex(PointGroupIndex.LeftTangent));
-                    i.SetLocalPositionByIndex(PointGroupIndex.Position, i.GetLocalPositionByIndex(PointGroupIndex.Position));
-                    i.SetLocalPositionByIndex(PointGroupIndex.RightTangent, i.GetLocalPositionByIndex(PointGroupIndex.RightTangent));
+                    i.SetPositionLocal(PointGroupIndex.LeftTangent, i.GetPositionLocal(PointGroupIndex.LeftTangent));
+                    i.SetPositionLocal(PointGroupIndex.Position, i.GetPositionLocal(PointGroupIndex.Position));
+                    i.SetPositionLocal(PointGroupIndex.RightTangent, i.GetPositionLocal(PointGroupIndex.RightTangent));
                 }
             }
 
@@ -477,19 +487,28 @@ namespace ChaseMacMillan.CurveDesigner
             CheckSamplerChanged(arcOfTubeSampler, ref old_constArcOfTube, ref old_arcOfTubeUseKeyframes);
             CheckSamplerChanged(thicknessSampler, ref old_constThickness, ref old_thicknessUseKeyframes);
 
-            retr |= CheckClosedLoopToggled();
+            if (CheckFieldChanged(automaticTangentSmoothing, ref old_automaticTangentSmoothing))
+            {
+                positionCurve.Recalculate();
+                UICurve.Initialize();
+                retr = true;
+            }
 
-            return retr;
-        }
-        public bool CheckClosedLoopToggled()
-        {
+            if (CheckFieldChanged(automaticTangents, ref old_automaticTangents))
+            {
+                positionCurve.Recalculate();
+                UICurve.Initialize();
+                retr = true;
+            }
+
             if (CheckFieldChanged(isClosedLoop, ref old_isClosedLoop))
             {
                 positionCurve.Recalculate();
                 UICurve.Initialize();
-                return true;
+                retr = true;
             }
-            return false;
+
+            return retr;
         }
 
         [ContextMenu("Clear")]
@@ -655,13 +674,6 @@ namespace ChaseMacMillan.CurveDesigner
             return Mathf.Min(_densityToDistanceDistanceMax, 10.0f / density);
         }
         public float GetVertexDensityDistance() { return DensityToDistance(vertexDensity); }
-        private const float normalValueLengthDivisor = 2.0f;
-        private const float normalGapSizeMultiplier = 2.0f;
-        public float VisualNormalsLength()
-        {
-            return positionCurve.GetLength() / 30;
-        }
-        public float GetNormalDensityDistance() { return VisualNormalsLength() * normalGapSizeMultiplier; }
     }
     public class EditModeCategories
     {

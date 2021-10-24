@@ -19,24 +19,24 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public Vector3 Position {
             get {
-                return transformBlob.TransformPoint(_group.GetLocalPositionByIndex(_type));
+                return transformBlob.TransformPoint(_group.GetPositionLocal(_type));
             }
         }
         public void SetPosition(Vector3 position,List<SelectableGUID> selected)
         {
             var dimensionLockMode = _positionCurve.dimensionLockMode;
             Vector3 newPointPosition = transformBlob.InverseTransformPoint(position);
-            Vector3 oldPointPosition = _group.GetLocalPositionByIndex(_type);
+            Vector3 oldPointPosition = _group.GetPositionLocal(_type);
             Vector3 pointOffset = newPointPosition - oldPointPosition;
-            Dictionary<BezierCurve, SegmentIndexSet> curvesToRecalculate = new Dictionary<BezierCurve, SegmentIndexSet>();//yeesh allocations. Too lazy to use lists here tho
+            Dictionary<BezierCurve, HashSet<int>> curvesToRecalculate = new Dictionary<BezierCurve, HashSet<int>>();//yeesh allocations. Too lazy to use lists here tho
             foreach (var i in _curve.GetSelected<PointGroup>(selected))
             {
-                i.SetLocalPositionByIndex(_type, i.GetLocalPositionByIndex(_type) + pointOffset);
+                i.SetPositionLocal(_type, i.GetPositionLocal(_type) + pointOffset);
                 if (!curvesToRecalculate.ContainsKey(i.owner))
                 {
-                    curvesToRecalculate.Add(i.owner, new SegmentIndexSet(i.owner));
+                    curvesToRecalculate.Add(i.owner, new HashSet<int>());
                 }
-                curvesToRecalculate[i.owner].Add(i.segmentIndex);
+                PositionPointClickCommand.AddIndexToRecalculate(curvesToRecalculate[i.owner], i.segmentIndex, i.owner, i.owner.owner.automaticTangents);
             }
             foreach (var i in curvesToRecalculate)
             {

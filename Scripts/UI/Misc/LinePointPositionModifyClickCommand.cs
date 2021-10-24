@@ -38,7 +38,7 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 var startingDistance = i.GetDistance(curve.positionCurve);
                 if (curve.isClosedLoop)
-                    i.SetDistance(mod(startingDistance+change,length),curve.positionCurve);
+                    i.SetDistance(Utils.ModFloat(startingDistance+change,length),curve.positionCurve);
                 else
                     i.SetDistance(startingDistance+change,curve.positionCurve);
             }
@@ -55,10 +55,6 @@ namespace ChaseMacMillan.CurveDesigner
             ClampOffset(change, curve,points);
         }
 
-        static float mod(float x, float m)
-        {
-            return (x % m + m) % m;
-        }
 
         public void ClickDown(Vector2 mousePos,Curve3D curve,List<SelectableGUID> selected)
         {

@@ -156,6 +156,11 @@ namespace ChaseMacMillan.CurveDesigner
             }
             EditorGUI.BeginChangeCheck();
             Field("isClosedLoop");
+            Field("automaticTangents");
+            if (curve.automaticTangents)
+            {
+                Field("automaticTangentSmoothing");
+            }
             if (EditorGUI.EndChangeCheck())
             {
                 needsReinitCurve = true;

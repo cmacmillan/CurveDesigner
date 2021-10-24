@@ -120,14 +120,10 @@ namespace ChaseMacMillan.CurveDesigner
                 awayFromDistance = (curveConnectingPoints.GetLength() - startDistance) + endDistance;
             if (curveConnectingPoints.isClosedLoop && awayFromDistance < directlyTowardsDistance)
                 sign *= -1;
-            for (int i = startIndex; i != endIndex; i = mod(i + sign, count))
+            for (int i = startIndex; i != endIndex; i = Utils.ModInt(i + sign, count))
                 retr.Add(Get(i).GUID);
             retr.Add(Get(endIndex).GUID);
             return retr;
-        }
-        public static int mod(int x, int m)
-        {
-            return (x % m + m) % m;
         }
     }
     public static class ListSelectableGUIDExtension

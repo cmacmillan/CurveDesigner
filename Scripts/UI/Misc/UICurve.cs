@@ -94,9 +94,9 @@ namespace ChaseMacMillan.CurveDesigner
         {
             if (_curve.showNormals || _curve.showTangents)
             {
-                float sampleDist = _curve.GetNormalDensityDistance();
+                float sampleDist = _curve.GetVertexDensityDistance();
                 List<PointOnCurve> points = curveToDraw.GetPointsWithSpacing(sampleDist);
-                var visualNormalLength = _curve.VisualNormalsLength();
+                var visualNormalLength = sampleDist * .5f;
                 var curveLength = curveToDraw.GetLength();
                 foreach (var i in points)
                 {

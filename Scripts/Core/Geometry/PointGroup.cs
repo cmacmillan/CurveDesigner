@@ -30,18 +30,21 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         [SerializeField]
         private bool isPointLocked = false;
-        /// <summary>
-        /// The right tangent in space relative to central point. Points towards the end of the curve
-        /// </summary>
-        [HideInInspector]
-        [SerializeField]
-        private Vector3 leftTangent;
+
         /// <summary>
         /// The left tangent in space relative to central point. Points towards the start of the curve
         /// </summary>
         [HideInInspector]
         [SerializeField]
+        private Vector3 leftTangent;
+
+        /// <summary>
+        /// The right tangent in space relative to central point. Points towards the end of the curve
+        /// </summary>
+        [HideInInspector]
+        [SerializeField]
         private Vector3 rightTangent;
+
         [HideInInspector]
         [SerializeField]
         private Vector3 position;
@@ -114,13 +117,13 @@ namespace ChaseMacMillan.CurveDesigner
                     return Vector3.zero;
             }
         }
-        public void SetLocalPositionByIndex(PointGroupIndex index, Vector3 value)
+        public void SetPositionLocal(PointGroupIndex index, Vector3 value)
         {
             var dimensionLockMode = owner.dimensionLockMode;
             switch (index)
             {
                 case PointGroupIndex.LeftTangent:
-                    leftTangent = LockAxis(value, dimensionLockMode) - GetLocalPositionByIndex(PointGroupIndex.Position);
+                    leftTangent = LockAxis(value, dimensionLockMode) - GetPositionLocal(PointGroupIndex.Position);
                     if (isPointLocked)
                         rightTangent = reflectAcrossPosition(leftTangent);
                     return;
@@ -128,7 +131,7 @@ namespace ChaseMacMillan.CurveDesigner
                     position = LockAxis(value, dimensionLockMode);
                     return;
                 case PointGroupIndex.RightTangent:
-                    rightTangent = LockAxis(value, dimensionLockMode) - GetLocalPositionByIndex(PointGroupIndex.Position);
+                    rightTangent = LockAxis(value, dimensionLockMode) - GetPositionLocal(PointGroupIndex.Position);
                     if (isPointLocked)
                         leftTangent = reflectAcrossPosition(rightTangent);
                     return;
@@ -136,7 +139,7 @@ namespace ChaseMacMillan.CurveDesigner
                     throw new System.ArgumentException();
             }
         }
-        public Vector3 GetLocalPositionByIndex(PointGroupIndex index, bool reflect = false)
+        public Vector3 GetPositionLocal(PointGroupIndex index, bool reflect = false)
         {
             var dimensionLockMode = owner.dimensionLockMode;
             switch (index)
@@ -168,9 +171,9 @@ namespace ChaseMacMillan.CurveDesigner
             if (initialLocked != currentLockState)
                 isLocked = currentLockState;
 
-            var initialLeft = GetLocalPositionByIndex(PointGroupIndex.LeftTangent);
-            var initialPos = GetLocalPositionByIndex(PointGroupIndex.Position);
-            var initialRight = GetLocalPositionByIndex(PointGroupIndex.RightTangent);
+            var initialLeft = GetPositionLocal(PointGroupIndex.LeftTangent);
+            var initialPos = GetPositionLocal(PointGroupIndex.Position);
+            var initialRight = GetPositionLocal(PointGroupIndex.RightTangent);
 
             var leftTangentOffset = EditorGUILayout.Vector3Field("Left Tangent", initialLeft - initialPos) - initialLeft + initialPos;
             var positionOffset = EditorGUILayout.Vector3Field("Position", initialPos) - initialPos;
@@ -185,9 +188,9 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 if (isLocked.HasValue)
                     target.SetPointLocked(isLocked.Value);
-                target.SetLocalPositionByIndex(PointGroupIndex.Position, target.GetLocalPositionByIndex(PointGroupIndex.Position) + positionOffset);
-                target.SetLocalPositionByIndex(PointGroupIndex.LeftTangent, target.GetLocalPositionByIndex(PointGroupIndex.LeftTangent) + leftTangentOffset);
-                target.SetLocalPositionByIndex(PointGroupIndex.RightTangent, target.GetLocalPositionByIndex(PointGroupIndex.RightTangent) + rightTangentOffset);
+                target.SetPositionLocal(PointGroupIndex.Position, target.GetPositionLocal(PointGroupIndex.Position) + positionOffset);
+                target.SetPositionLocal(PointGroupIndex.LeftTangent, target.GetPositionLocal(PointGroupIndex.LeftTangent) + leftTangentOffset);
+                target.SetPositionLocal(PointGroupIndex.RightTangent, target.GetPositionLocal(PointGroupIndex.RightTangent) + rightTangentOffset);
             }
         }
 
