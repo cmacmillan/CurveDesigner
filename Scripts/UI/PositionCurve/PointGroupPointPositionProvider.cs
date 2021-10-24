@@ -36,7 +36,7 @@ namespace ChaseMacMillan.CurveDesigner
                 {
                     curvesToRecalculate.Add(i.owner, new HashSet<int>());
                 }
-                PositionPointClickCommand.AddIndexToRecalculate(curvesToRecalculate[i.owner], i.segmentIndex, i.owner, i.owner.owner.automaticTangents);
+                PositionPointClickCommand.AddIndexToRecalculate(curvesToRecalculate[i.owner], i.segmentIndex, i.owner, i.owner.automaticTangents);
             }
             foreach (var i in curvesToRecalculate)
             {

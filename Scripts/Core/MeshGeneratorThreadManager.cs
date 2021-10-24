@@ -52,7 +52,7 @@ namespace ChaseMacMillan.CurveDesigner
             data.edgeTextureLayer = curve.edgeTextureLayer.settings;
             data.endTextureLayer = curve.endTextureLayer.settings;
             data.edgeTextureLayer = curve.edgeTextureLayer.settings;
-            data.IsClosedLoop = curve.isClosedLoop;
+            data.IsClosedLoop = curve.IsClosedLoop;
             data.CurveType = curve.type;
             data.meshToTile = curve.meshToTile == null ? null : new ThreadMesh(curve.meshToTile);
             data.closeTilableMeshGap = curve.closeTilableMeshGap;

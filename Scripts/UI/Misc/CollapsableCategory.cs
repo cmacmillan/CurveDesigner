@@ -155,11 +155,11 @@ namespace ChaseMacMillan.CurveDesigner
                 changedCurveType = true;
             }
             EditorGUI.BeginChangeCheck();
-            Field("isClosedLoop");
-            Field("automaticTangents");
-            if (curve.automaticTangents)
+            Field("positionCurve.isClosedLoop");
+            Field("positionCurve.automaticTangents");
+            if (curve.positionCurve.automaticTangents)
             {
-                Field("automaticTangentSmoothing");
+                Field("positionCurve.automaticTangentSmoothing");
             }
             if (EditorGUI.EndChangeCheck())
             {

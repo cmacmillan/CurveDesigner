@@ -18,7 +18,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public static void ClampOffset(float change,Curve3D curve, IEnumerable<ISamplerPoint> selectedPoints)
         {
-            if (!curve.isClosedLoop)
+            if (!curve.IsClosedLoop)
             {
                 float minDist = float.MaxValue;
                 float maxDist = 0;
@@ -37,7 +37,7 @@ namespace ChaseMacMillan.CurveDesigner
             foreach (var i in selectedPoints)
             {
                 var startingDistance = i.GetDistance(curve.positionCurve);
-                if (curve.isClosedLoop)
+                if (curve.IsClosedLoop)
                     i.SetDistance(Utils.ModFloat(startingDistance+change,length),curve.positionCurve);
                 else
                     i.SetDistance(startingDistance+change,curve.positionCurve);

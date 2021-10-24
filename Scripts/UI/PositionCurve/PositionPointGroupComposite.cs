@@ -64,7 +64,7 @@ namespace ChaseMacMillan.CurveDesigner
         public override IEnumerable<Composite> GetChildren()
         {
             bool isSelected = curve.selectedPoints.Contains(GUID)&&curve.showPositionHandles;
-            if (leftTangentPoint != null)
+            if (leftTangentPoint != null && !_positionCurve.automaticTangents)
             {
                 yield return leftTangentPoint;
                 yield return leftTangentLine;
@@ -74,7 +74,7 @@ namespace ChaseMacMillan.CurveDesigner
             yield return centerPoint;
             if (isSelected)
                 yield return centerPositionHandle;
-            if (rightTangentPoint != null)
+            if (rightTangentPoint != null && !_positionCurve.automaticTangents)
             {
                 yield return rightTangentPoint;
                 yield return rightTangentLine;

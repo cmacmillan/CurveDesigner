@@ -70,7 +70,7 @@ namespace ChaseMacMillan.CurveDesigner
                         if (selected.Contains(j.GUID))
                         {
                             selectedPointGroups.Add(j);
-                            AddIndexToRecalculate(indiciesToRecalculate, segmentIndex, currCurve, curve.automaticTangents);
+                            AddIndexToRecalculate(indiciesToRecalculate, segmentIndex, currCurve, currCurve.automaticTangents);
                         }
                         segmentIndex++;
                     }

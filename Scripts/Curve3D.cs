@@ -4,7 +4,7 @@ namespace ChaseMacMillan.CurveDesigner
     //This is just a simple interface for interacting with curves. The meat of Curve3D is in Curve3DCore.cs
     public partial class Curve3D : MonoBehaviour, ISerializationCallbackReceiver
     {
-        public bool IsClosedLoop => this.isClosedLoop;
+        public bool IsClosedLoop => positionCurve.isClosedLoop;
         public float CurveLength => this.positionCurve.GetLength();
 
         //The position in 3d space at a particular distance along the curve. This function is useful if you need an object to follow along a curve

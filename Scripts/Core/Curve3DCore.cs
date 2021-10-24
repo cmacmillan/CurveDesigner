@@ -200,7 +200,6 @@ namespace ChaseMacMillan.CurveDesigner
         public void BindDataToPositionCurve()
         {
             positionCurve.owner = this;
-            positionCurve.isClosedLoop = isClosedLoop;
             positionCurve.dimensionLockMode = lockToPositionZero;
             positionCurve.normalGenerationMode = normalGenerationMode;
         }
@@ -372,18 +371,14 @@ namespace ChaseMacMillan.CurveDesigner
         [SerializeField]
         private Mesh old_meshToTile = null;
 
-        public bool isClosedLoop = false;
         [SerializeField]
         [HideInInspector]
-        private bool old_isClosedLoop;
+        private bool old_isClosedLoop=false;
 
-        public bool automaticTangents = false;
         [SerializeField]
         [HideInInspector]
         private bool old_automaticTangents;
 
-        [Range(.001f,1)]
-        public float automaticTangentSmoothing = 1.0f;
         [SerializeField]
         [HideInInspector]
         private float old_automaticTangentSmoothing;
@@ -405,7 +400,7 @@ namespace ChaseMacMillan.CurveDesigner
         [SerializeField]
         [HideInInspector]
         private TextureLayer old_backTextureLayer = new TextureLayer(null);
-        public bool ShouldUseEndTextureLayer() { return !isClosedLoop; }
+        public bool ShouldUseEndTextureLayer() { return !positionCurve.isClosedLoop; }
 
         public TextureLayer endTextureLayer = new TextureLayer(null);
         [SerializeField]
@@ -487,21 +482,21 @@ namespace ChaseMacMillan.CurveDesigner
             CheckSamplerChanged(arcOfTubeSampler, ref old_constArcOfTube, ref old_arcOfTubeUseKeyframes);
             CheckSamplerChanged(thicknessSampler, ref old_constThickness, ref old_thicknessUseKeyframes);
 
-            if (CheckFieldChanged(automaticTangentSmoothing, ref old_automaticTangentSmoothing))
+            if (CheckFieldChanged(positionCurve.automaticTangentSmoothing, ref old_automaticTangentSmoothing))
             {
                 positionCurve.Recalculate();
                 UICurve.Initialize();
                 retr = true;
             }
 
-            if (CheckFieldChanged(automaticTangents, ref old_automaticTangents))
+            if (CheckFieldChanged(positionCurve.automaticTangents, ref old_automaticTangents))
             {
                 positionCurve.Recalculate();
                 UICurve.Initialize();
                 retr = true;
             }
 
-            if (CheckFieldChanged(isClosedLoop, ref old_isClosedLoop))
+            if (CheckFieldChanged(positionCurve.isClosedLoop, ref old_isClosedLoop))
             {
                 positionCurve.Recalculate();
                 UICurve.Initialize();

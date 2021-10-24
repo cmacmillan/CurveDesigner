@@ -20,9 +20,20 @@ namespace ChaseMacMillan.CurveDesigner
         {
             base.SelectEdit(curve, selectedPoints, mainPoint);
             bool oldClosedLoop = mainPoint.value.isClosedLoop;
+            bool oldAutomaticTangents = mainPoint.value.automaticTangents;
+            float oldTangentSmoothing = mainPoint.value.automaticTangentSmoothing;
             bool newClosedLoop = EditorGUILayout.Toggle("IsClosedLoop",oldClosedLoop);
+            bool newAutomaticTangents = EditorGUILayout.Toggle("AutoTangents",oldAutomaticTangents);
             mainPoint.value.isClosedLoop = newClosedLoop;
-            if (newClosedLoop != oldClosedLoop)
+            mainPoint.value.automaticTangents = newAutomaticTangents;
+            bool didSmoothingChange = false;
+            if (oldAutomaticTangents)
+            {
+                float newTangentSmoothing = EditorGUILayout.Slider("AutoTangents",oldTangentSmoothing,BezierCurve.tangentSmoothingMin,1);
+                didSmoothingChange = newTangentSmoothing != oldTangentSmoothing;
+                mainPoint.value.automaticTangentSmoothing = newTangentSmoothing;
+            }
+            if (newClosedLoop != oldClosedLoop || newAutomaticTangents != oldAutomaticTangents || didSmoothingChange)
                 curve.UICurve.Initialize();
         }
         public override bool Delete(List<SelectableGUID> guids, Curve3D curve)

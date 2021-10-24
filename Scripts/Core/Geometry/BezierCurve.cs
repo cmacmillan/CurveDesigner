@@ -17,7 +17,11 @@ namespace ChaseMacMillan.CurveDesigner
         public DimensionLockMode dimensionLockMode = DimensionLockMode.none;
         public CurveNormalGenerationMode normalGenerationMode = CurveNormalGenerationMode.MinimumDistance;
         public Curve3D owner;
-        public bool isClosedLoop;
+        public bool isClosedLoop=false;
+        public bool automaticTangents = false;
+        public const float tangentSmoothingMin = .001f;
+        [Range(tangentSmoothingMin,1)]
+        public float automaticTangentSmoothing = .35f;
         [System.NonSerialized]
         [HideInInspector]
         public List<Segment> segments = null;
@@ -255,6 +259,8 @@ namespace ChaseMacMillan.CurveDesigner
                 PointGroups.Add(new PointGroup(i, curveToClone.owner, this, createNewGuids));
             }
             this.isClosedLoop = curveToClone.isClosedLoop;
+            this.automaticTangents = curveToClone.automaticTangents;
+            this.automaticTangentSmoothing = curveToClone.automaticTangentSmoothing;
             this.segments = new List<Segment>(curveToClone.segments.Count);
             foreach (var i in curveToClone.segments)
                 segments.Add(new Segment(i));
@@ -532,7 +538,7 @@ namespace ChaseMacMillan.CurveDesigner
         /// </summary>
         public PointOnCurve Recalculate(PointOnCurve referenceHint = null, HashSet<int> recalculateOnlyIndicies = null)
         {
-            if (owner.automaticTangents)
+            if (automaticTangents)
             {
                 int startIndex =0;
                 int endIndex=PointGroups.Count;
@@ -545,7 +551,7 @@ namespace ChaseMacMillan.CurveDesigner
                         PointGroups[0].SetPointLocked(true);//automatic tangents should lock all tangents
                         Vector3 firstPointStartPos = PointGroups[0].GetPositionLocal(PointGroupIndex.Position);
                         Vector3 firstPointVect = PointGroups[1].GetPositionLocal(PointGroupIndex.Position) - firstPointStartPos;
-                        PointGroups[0].SetPositionLocal(PointGroupIndex.RightTangent, firstPointStartPos + firstPointVect * owner.automaticTangentSmoothing);
+                        PointGroups[0].SetPositionLocal(PointGroupIndex.RightTangent, firstPointStartPos + firstPointVect * automaticTangentSmoothing);
                     }
 
                     if (recalculateOnlyIndicies==null || recalculateOnlyIndicies.Contains(PointGroups.Count-2))
@@ -553,7 +559,7 @@ namespace ChaseMacMillan.CurveDesigner
                         PointGroups[PointGroups.Count - 1].SetPointLocked(true);
                         Vector3 lastPointStartPos = PointGroups[PointGroups.Count - 1].GetPositionLocal(PointGroupIndex.Position);
                         Vector3 lastPointVect = PointGroups[PointGroups.Count - 2].GetPositionLocal(PointGroupIndex.Position) - lastPointStartPos;
-                        PointGroups[PointGroups.Count - 1].SetPositionLocal(PointGroupIndex.LeftTangent, lastPointStartPos + lastPointVect * owner.automaticTangentSmoothing);
+                        PointGroups[PointGroups.Count - 1].SetPositionLocal(PointGroupIndex.LeftTangent, lastPointStartPos + lastPointVect * automaticTangentSmoothing);
                     }
                 }
                 for (int i = startIndex; i < endIndex; i++)
@@ -569,7 +575,7 @@ namespace ChaseMacMillan.CurveDesigner
                         Vector3 nextOffset = nextPos - thisPos;
                         Vector3 avgDirection = (reflectedPrevOffset.normalized + nextOffset.normalized).normalized;
                         float minLength = Mathf.Sqrt(Mathf.Min(reflectedPrevOffset.sqrMagnitude, nextOffset.sqrMagnitude));
-                        PointGroups[i].SetPositionLocal(PointGroupIndex.RightTangent, thisPos + avgDirection * minLength * owner.automaticTangentSmoothing);
+                        PointGroups[i].SetPositionLocal(PointGroupIndex.RightTangent, thisPos + avgDirection * minLength * automaticTangentSmoothing);
                     }
                 }
             }
