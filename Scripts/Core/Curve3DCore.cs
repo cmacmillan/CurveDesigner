@@ -514,11 +514,11 @@ namespace ChaseMacMillan.CurveDesigner
             arcOfTubeSampler = new FloatSampler("Arc", 180, Curve3DEditMode.Arc, 0, 360);
             thicknessSampler = new FloatSampler("Thickness", .05f, Curve3DEditMode.Thickness, 0);
             colorSampler = new ColorSampler("Color", Curve3DEditMode.Color);
-            extrudeSampler = new ExtrudeSampler("Extrude", Curve3DEditMode.Extrude);
             positionCurve = new BezierCurve();
             positionCurve.owner = this;
             positionCurve.Initialize();
-            positionCurve.isCurveOutOfDate = true;
+            positionCurve.Recalculate();
+            extrudeSampler = new ExtrudeSampler("Extrude", Curve3DEditMode.Extrude,positionCurve);
             UICurve = new UICurve(null, this);
             UICurve.Initialize();
         }

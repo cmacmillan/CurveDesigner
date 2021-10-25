@@ -13,7 +13,6 @@ namespace ChaseMacMillan.CurveDesigner
         public int NumControlPoints { get { return isClosedLoop ? PointGroups.Count * 3 : PointGroups.Count * 3 - 2; } }
         public int NumSegments { get { return isClosedLoop ? PointGroups.Count : PointGroups.Count - 1; } }
 
-        public bool isCurveOutOfDate = true;
         public DimensionLockMode dimensionLockMode = DimensionLockMode.none;
         public CurveNormalGenerationMode normalGenerationMode = CurveNormalGenerationMode.MinimumDistance;
         public Curve3D owner;
@@ -264,7 +263,6 @@ namespace ChaseMacMillan.CurveDesigner
             this.segments = new List<Segment>(curveToClone.segments.Count);
             foreach (var i in curveToClone.segments)
                 segments.Add(new Segment(i));
-            this.isCurveOutOfDate = curveToClone.isCurveOutOfDate;
             this.dimensionLockMode = curveToClone.dimensionLockMode;
             this.owner = curveToClone.owner;
             this.RegenSegmentIndicies();

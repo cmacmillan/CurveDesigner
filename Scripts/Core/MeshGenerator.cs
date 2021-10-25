@@ -684,7 +684,7 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         List<Vector3> backSideBuffer = new List<Vector3>();
                         extrudeSampler.RecalculateOpenCurveOnlyPoints(curve);
-                        int pointCount = FlatPointCount;
+                        int pointCount = RingPointCount;
                         int numMainLayerVerts = 2 * pointCount * sampled.Count;
                         output.InitSubmeshes(!IsClosedLoop ? 4 : 3,out submeshes);
                         CreatePointsAlongCurve(ExtrudePointCreator, sampled, .5f, pointCount, mainTextureLayer);

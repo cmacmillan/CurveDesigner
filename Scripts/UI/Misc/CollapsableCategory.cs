@@ -222,11 +222,11 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 Field("vertexDensity");
             }
-            if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.HollowTube)
+            if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.HollowTube || curve.type == MeshGenerationMode.Extrude)
             {
                 Field("ringPointCount");
             }
-            if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.Flat || curve.type == MeshGenerationMode.Extrude)
+            if (curve.type == MeshGenerationMode.Cylinder || curve.type == MeshGenerationMode.Flat)
             {
                 Field("flatPointCount");
             }

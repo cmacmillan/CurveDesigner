@@ -9,7 +9,10 @@ namespace ChaseMacMillan.CurveDesigner
     [System.Serializable]
     public class ExtrudeSampler : Sampler<BezierCurve>
     {
-        public ExtrudeSampler(string label, Curve3DEditMode editMode) : base(label,editMode) { }
+        public ExtrudeSampler(string label, Curve3DEditMode editMode,BezierCurve positionCurve) : base(label,editMode) 
+        {
+            InsertPointAtDistance(0,positionCurve);
+        }
 
         public ExtrudeSampler(ExtrudeSampler objToClone, bool createNewGuids,Curve3D curve) : base(objToClone,createNewGuids,curve) { }
         public override BezierCurve CloneValue(BezierCurve val, bool shouldCreateGuids)
@@ -75,6 +78,9 @@ namespace ChaseMacMillan.CurveDesigner
                 newPoint = new BezierCurve();
                 newPoint.owner = curve.owner;
                 newPoint.Initialize();
+                newPoint.PointGroups[0].SetPositionLocal(PointGroupIndex.RightTangent, new Vector3(.3f, 0, 0));
+                newPoint.PointGroups[1].SetPositionLocal(PointGroupIndex.Position, new Vector3(.3f, .3f, 0));
+                newPoint.PointGroups[1].SetPositionLocal(PointGroupIndex.LeftTangent, new Vector3(0, .3f, 0));
             }
             newPoint.dimensionLockMode = DimensionLockMode.z;
             newPoint.Recalculate();
