@@ -33,7 +33,15 @@ namespace ChaseMacMillan.CurveDesigner
             curve3d.TryInitialize();
             EnsureValidEditMode();
             curve3d.BindDataToPositionCurve();
-
+            if (curve3d.UICurve == null)
+            {
+                curve3d.UICurve = new UICurve(null, curve3d);
+                curve3d.UICurve.Initialize();
+            }
+            else if (curve3d.UICurve._curve == null)
+            {
+                curve3d.UICurve._curve = curve3d;
+            }
             GUI.enabled = false;
             script = EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false) as MonoScript;
             GUI.enabled = true;

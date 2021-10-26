@@ -21,7 +21,7 @@ namespace ChaseMacMillan.CurveDesigner
         public const float tangentSmoothingMin = .001f;
         [Range(tangentSmoothingMin,1)]
         public float automaticTangentSmoothing = .35f;
-        [System.NonSerialized]
+        [System.NonSerialized]//serializing the segments is slow
         [HideInInspector]
         public List<Segment> segments = null;
         private Vector3 GetTangent(int index)

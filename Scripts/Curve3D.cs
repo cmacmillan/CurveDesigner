@@ -67,9 +67,9 @@ namespace ChaseMacMillan.CurveDesigner
             return colorSampler.GetValueAtDistance(distance, positionCurve);
         }
 
-        public void Start()
+        public void Awake()
         {
-            positionCurve.Recalculate();
+            Recalculate();
         }
         public void Update()
         {

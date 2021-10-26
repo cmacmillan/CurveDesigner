@@ -44,7 +44,10 @@ namespace ChaseMacMillan.CurveDesigner
             data.sizeSampler = new FloatSampler(curve.sizeSampler, false, null);
             data.rotationSampler = new FloatSampler(curve.rotationSampler, false, null);
             data.colorSampler = new ColorSampler(curve.colorSampler, false, null);
-            data.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler, false, null);
+            if (curve.type == MeshGenerationMode.Extrude)
+                data.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler, false, null);
+            else
+                data.extrudeSampler = null;
             data.thicknessSampler = new FloatSampler(curve.thicknessSampler, false, null);
             data.clampAndStretchMeshToCurve = curve.clampAndStretchMeshToCurve;
             data.mainTextureLayer = curve.mainTextureLayer.settings;
