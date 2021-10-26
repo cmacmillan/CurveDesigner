@@ -568,6 +568,10 @@ namespace ChaseMacMillan.CurveDesigner
                 edgeTextureLayer.material = mats[index++];
             if (ShouldUseEndTextureLayer() && index<mats.Length)
                 endTextureLayer.material = mats[index++];
+            if (mats.Length < NumSubmeshesByCurveType(type))
+            {
+                WriteMaterialsToRenderer();
+            }
         }
         public void RequestMeshUpdate()
         {
@@ -627,6 +631,16 @@ namespace ChaseMacMillan.CurveDesigner
                     if (collider != null)
                         collider.sharedMesh = displayMesh;
                 }
+            }
+        }
+        private int NumSubmeshesByCurveType(MeshGenerationMode type)
+        {
+            switch (type)
+            {
+                case MeshGenerationMode.Cylinder:
+                    return 3;
+                default:
+                    return 4;
             }
         }
         public void WriteMaterialsToRenderer()
