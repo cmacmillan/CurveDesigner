@@ -79,11 +79,6 @@ namespace ChaseMacMillan.CurveDesigner
                 this.guid = SelectableGUID.Null;
         }
 
-        public bool DoesEditAffectBothSegments(PointGroupIndex index)
-        {
-            return true;
-        }
-
         #region Get/Set methods
         public bool GetIsPointLocked()
         {

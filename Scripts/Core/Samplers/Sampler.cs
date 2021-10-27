@@ -16,6 +16,8 @@ namespace ChaseMacMillan.CurveDesigner
         public List<SamplerPoint<T>> points = new List<SamplerPoint<T>>();
 
         [NonSerialized]
+        //this value is essentially just a cache of the points excluding all points that are within the final segment of the curve when it is a closed loop
+        //this is because those values essentially need to temporarily disappear when IsClosedLoop gets disabled
         private List<SamplerPoint<T>> points_openCurveOnly = null;
 
         public string fieldDisplayName="";
