@@ -1,9 +1,9 @@
 # Curve Designer
 An open source (MIT) tool for designing tubes, ramps, curves, and half-pipes in Unity. 
 
-![PreviewUI](Art/PreviewUI.png)
-![EditModes](Art/EditModes.png)
-![CurveTypes](Art/CurveTypes.png)
+![PreviewUI](Art/Screenshots/PreviewUI.png)
+![EditModes](Art/Screenshots/EditModes.png)
+![CurveTypes](Art/Screenshots/CurveTypes.png)
 
 # Usage
 See UserManual.pdf for a full user guide. 
