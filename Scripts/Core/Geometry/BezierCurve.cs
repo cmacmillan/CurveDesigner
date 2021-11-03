@@ -403,7 +403,11 @@ namespace ChaseMacMillan.CurveDesigner
 
         public PointOnCurve GetPointAtDistance(float distance, bool needsTangent = true)
         {
-            distance = Mathf.Clamp(distance, 0, GetLength());
+            float length = GetLength();
+            if (isClosedLoop && (distance<0 || distance>length))
+                distance = Utils.ModFloat(distance, length);
+            else
+                distance = Mathf.Clamp(distance, 0, length);
             float remainingDistance = distance;
             for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex++)
             {

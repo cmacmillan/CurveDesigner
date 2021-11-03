@@ -39,6 +39,7 @@ namespace ChaseMacMillan.CurveDesigner
             var camPoint = GetCameraPoint();
             transform.position = camPoint.position;
             transform.rotation = Quaternion.LookRotation(target.transform.position - transform.position, Vector3.up);
+            Debug.DrawRay(camPoint.position, Vector3.up * 3);
             //transform.position = Vector3.Lerp(transform.position,camPoint.position,Time.deltaTime*positionTrackSpeed);
             //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(target.transform.position - transform.position, Vector3.up),Time.deltaTime*rotationTrackSpeed);
         }

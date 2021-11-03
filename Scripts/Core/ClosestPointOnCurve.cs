@@ -14,41 +14,42 @@ namespace ChaseMacMillan.CurveDesigner
     //The equations in GetSqrDistCoefs to produce the coefficients are just the result of combining the above equations together, which I did via mathematica
     public static class ClosestPointOnCurve
     {
-        public static void GetClosestPoint(BezierCurve curve, Vector3 point, out int bestSegmentIndex, out float bestTime)
+        public static void GetClosestPoint(BezierCurve curve, Vector3 point, out int resultSegmentIndex, out float resultTime)
         {
-            bestSegmentIndex = -1;
-            bestTime = 0;
+            int bestSegmentIndex = -1;
+            float bestTime = 0;
             float minSqrDist = float.MaxValue;
+            void TryTime(int segmentIndex, float time)
+            {
+                Vector3 pos = curve.GetSegmentPositionAtTime(segmentIndex, time);
+                float dist = (pos - point).sqrMagnitude;
+                if (dist < minSqrDist)
+                {
+                    minSqrDist = dist;
+                    bestSegmentIndex = segmentIndex;
+                    bestTime = time;
+                }
+            }
             for (int segmentIndex = 0; segmentIndex < curve.NumSegments; segmentIndex++)
             {
                 Vector3 p0 = curve.PointGroups[segmentIndex].GetPositionLocal(PointGroupIndex.Position);
                 Vector3 p1 = curve.PointGroups[segmentIndex].GetPositionLocal(PointGroupIndex.RightTangent);
-                Vector3 p2 = curve.PointGroups[segmentIndex+1].GetPositionLocal(PointGroupIndex.LeftTangent);
-                Vector3 p3 = curve.PointGroups[segmentIndex+1].GetPositionLocal(PointGroupIndex.Position);
+                Vector3 p2 = curve.PointGroups[Utils.ModInt(segmentIndex+1,curve.PointGroups.Count)].GetPositionLocal(PointGroupIndex.LeftTangent);
+                Vector3 p3 = curve.PointGroups[Utils.ModInt(segmentIndex+1,curve.PointGroups.Count)].GetPositionLocal(PointGroupIndex.Position);
                 var coefs = GetSqrDistCoefs(p0,p1,p2,p3,point);
                 for (int i = 0; i <= pointCount; i++)
                 {
                     double t = i / (float)pointCount;
-                    float result;
-                    if (t==0 || t == 1)
-                    {
-                        result = (float)t;
-                    }else
-                    {
-                        result = (float)NewtonsMethod(t, coefs);
-                        result = Mathf.Clamp01(result);
-                    }
-                    Vector3 pos = curve.GetSegmentPositionAtTime(segmentIndex,result);
-                    float dist = (pos - point).sqrMagnitude;
-                    if (dist < minSqrDist)
-                    {
-                        minSqrDist = dist;
-                        bestSegmentIndex = segmentIndex;
-                        bestTime = result;
-                    }
+                    float result = (float)NewtonsMethod(t, coefs);
+                    result = Mathf.Clamp01(result);
+                    TryTime(segmentIndex, result);
                 }
+                TryTime(segmentIndex, 0);
+                TryTime(segmentIndex, 1);
             }
-        } 
+            resultSegmentIndex = bestSegmentIndex;
+            resultTime = bestTime;
+        }
         private const int pointCount = 6;
         private const int newtonsMethodIterations = 15;
         private static double NewtonsMethod(double initial, SqrDistCoefs coefs)
