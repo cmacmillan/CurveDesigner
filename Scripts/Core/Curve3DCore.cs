@@ -549,6 +549,15 @@ namespace ChaseMacMillan.CurveDesigner
                     referenceHint = secondaryCurves[i].value.Recalculate(referenceHint);
             }
         }
+
+        public PointOnCurve GetClosestPointOnCurve(Vector3 worldPosition)
+        { 
+            Vector3 localPos = transform.InverseTransformPoint(worldPosition);
+            ClosestPointOnCurve.GetClosestPoint(positionCurve, localPos, out int segmentIndex, out float time);
+            float dist = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex, time);
+            return GetPointAtDistanceAlongCurve(dist);
+        }
+
         public void CopyRotations()
         {
             previousRotations.Clear();

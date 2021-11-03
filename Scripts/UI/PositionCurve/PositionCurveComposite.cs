@@ -42,7 +42,7 @@ namespace ChaseMacMillan.CurveDesigner
             int segmentIndex;
             float time;
             Profiler.BeginSample("ClosestPointToPolyLine");
-            UnitySourceScripts.ClosestPointToPolyLine(out segmentIndex, out time, samples);
+            UnitySourceScripts.ClosestCursorPointToPolyLine(out segmentIndex, out time, samples);
             Profiler.EndSample();
             foreach (var i in samples)
                 i.position = transformBlob.InverseTransformPoint(i.position);

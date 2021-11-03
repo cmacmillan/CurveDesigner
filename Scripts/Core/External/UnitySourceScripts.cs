@@ -7,7 +7,7 @@ namespace ChaseMacMillan.CurveDesigner
     public static class UnitySourceScripts
     {
         // Get the nearest 3D point.
-        public static Vector3 ClosestPointToPolyLine(out int segmentIndex, out float time, List<PointOnCurve> vertices)
+        public static Vector3 ClosestCursorPointToPolyLine(out int segmentIndex, out float time, List<PointOnCurve> vertices)
         {
             float dist = HandleUtility.DistanceToLine(vertices[0].position, vertices[1].position);
             int nearest = 0;// Which segment we're closest to

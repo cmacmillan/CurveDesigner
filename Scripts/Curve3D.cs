@@ -67,6 +67,11 @@ namespace ChaseMacMillan.CurveDesigner
             return colorSampler.GetValueAtDistance(distance, positionCurve);
         }
 
+        public Vector3 GetClosestPositionOnCurve(Vector3 worldPosition)
+        {
+            return GetClosestPointOnCurve(worldPosition).position;
+        }
+
         public void Awake()
         {
             Recalculate();
