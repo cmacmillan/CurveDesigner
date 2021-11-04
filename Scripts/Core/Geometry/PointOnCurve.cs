@@ -51,7 +51,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             if (previousPoint.position == this.position)
             {
-                reference = previousReference;
+                reference = previousReference.normalized;
                 return;
             }
             Vector3 DoubleReflectionRMF(Vector3 x0, Vector3 x1, Vector3 t0, Vector3 t1, Vector3 r0)
@@ -81,7 +81,7 @@ namespace ChaseMacMillan.CurveDesigner
                         up = Vector3.up;
                         break;
                 }
-                reference = Vector3.ProjectOnPlane(up, this.tangent.normalized);
+                reference = Vector3.ProjectOnPlane(up, tangent).normalized;
                 return;
             }
             Vector3 dir;
@@ -89,7 +89,7 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 case CurveNormalGenerationMode.MinimumDistance:
                     reference = DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, previousReference);
-                    reference = Vector3.ProjectOnPlane(reference, this.tangent.normalized);
+                    reference = Vector3.ProjectOnPlane(reference, tangent).normalized;
                     return;
                 case CurveNormalGenerationMode.BiasTowardsForward:
                     dir = Vector3.forward;
@@ -102,7 +102,7 @@ namespace ChaseMacMillan.CurveDesigner
                     dir = Vector3.up;
                     break;
             }
-            reference = Vector3.ProjectOnPlane(dir, this.tangent.normalized);
+            reference = Vector3.ProjectOnPlane(dir, tangent).normalized;
         }
 
         public int SegmentIndex { get { return segmentIndex; } }
