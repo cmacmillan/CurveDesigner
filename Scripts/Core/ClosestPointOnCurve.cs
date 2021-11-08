@@ -52,7 +52,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
         private const int pointCount = 6;
         private const int newtonsMethodIterations = 15;
-        private static double NewtonsMethod(double initial, SqrDistCoefs coefs)
+        private static double NewtonsMethod(double initial, Coefs coefs)
         {
             double t = initial;
             for (int i = 0; i < newtonsMethodIterations; i++)
@@ -61,7 +61,6 @@ namespace ChaseMacMillan.CurveDesigner
                 double t3 = t2 * t;
                 double t4 = t3 * t;
                 double t5 = t4 * t;
-                double t6 = t5 * t;
                 double firstDer = coefs.aDer*t5+coefs.bDer*t4+coefs.cDer*t3+coefs.dDer*t2+coefs.eDer*t+coefs.fDer;
                 double secondDer = coefs.aDer2*t4+coefs.bDer2*t3+coefs.cDer2*t2+coefs.dDer2*t+coefs.eDer2;
                 t = t - (firstDer / secondDer);
@@ -69,16 +68,32 @@ namespace ChaseMacMillan.CurveDesigner
             return t;
         }
 
-        private static SqrDistCoefs GetSqrDistCoefs(Vector3 p0,Vector3 p1,Vector3 p2,Vector3 p3,Vector3 o)
+        private static Coefs GetSqrDistCoefs(Vector3 p0,Vector3 p1,Vector3 p2,Vector3 p3,Vector3 o)
         {
-            SqrDistCoefs coefs=new SqrDistCoefs();
-            coefs.g = o.x * o.x + o.y * o.y + o.z * o.z - 2 * o.x * p0.x + p0.x * p0.x - 2 * o.y * p0.y + p0.y * p0.y - 2 * o.z * p0.z + p0.z * p0.z;
-            coefs.f = 6 * o.x * p0.x - 6 * p0.x * p0.x + 6 * o.y * p0.y - 6 * p0.y * p0.y + 6 * o.z * p0.z - 6 * p0.z * p0.z - 6 * o.x * p1.x + 6 * p0.x * p1.x - 6 * o.y * p1.y + 6 * p0.y * p1.y - 6 * o.z * p1.z + 6 * p0.z * p1.z;
-            coefs.e = -6 * o.x * p0.x + 15 * p0.x * p0.x - 6 * o.y * p0.y + 15 * p0.y * p0.y - 6 * o.z * p0.z + 15 * p0.z * p0.z + 12 * o.x * p1.x - 30 * p0.x * p1.x + 9 * p1.x * p1.x + 12 * o.y * p1.y - 30 * p0.y * p1.y + 9 * p1.y * p1.y + 12 * o.z * p1.z - 30 * p0.z * p1.z + 9 * p1.z * p1.z - 6 * o.x * p2.x + 6 * p0.x * p2.x - 6 * o.y * p2.y + 6 * p0.y * p2.y - 6 * o.z * p2.z + 6 * p0.z * p2.z;
-            coefs.d = 2 * o.x * p0.x - 20 * p0.x * p0.x + 2 * o.y * p0.y - 20 * p0.y * p0.y + 2 * o.z * p0.z - 20 * p0.z * p0.z - 6 * o.x * p1.x + 60 * p0.x * p1.x - 36 * p1.x * p1.x - 6 * o.y * p1.y + 60 * p0.y * p1.y - 36 * p1.y * p1.y - 6 * o.z * p1.z + 60 * p0.z * p1.z - 36 * p1.z * p1.z + 6 * o.x * p2.x - 24 * p0.x * p2.x + 18 * p1.x * p2.x + 6 * o.y * p2.y - 24 * p0.y * p2.y + 18 * p1.y * p2.y + 6 * o.z * p2.z - 24 * p0.z * p2.z + 18 * p1.z * p2.z - 2 * o.x * p3.x + 2 * p0.x * p3.x - 2 * o.y * p3.y + 2 * p0.y * p3.y - 2 * o.z * p3.z + 2 * p0.z * p3.z;
-            coefs.c = 15 * p0.x * p0.x + 15 * p0.y * p0.y + 15 * p0.z * p0.z - 60 * p0.x * p1.x + 54 * p1.x * p1.x - 60 * p0.y * p1.y + 54 * p1.y * p1.y - 60 * p0.z * p1.z + 54 * p1.z * p1.z + 36 * p0.x * p2.x - 54 * p1.x * p2.x + 9 * p2.x * p2.x + 36 * p0.y * p2.y - 54 * p1.y * p2.y + 9 * p2.y * p2.y + 36 * p0.z * p2.z - 54 * p1.z * p2.z + 9 * p2.z * p2.z - 6 * p0.x * p3.x + 6 * p1.x * p3.x - 6 * p0.y * p3.y + 6 * p1.y * p3.y - 6 * p0.z * p3.z + 6 * p1.z * p3.z;
-            coefs.b = -6 * p0.x * p0.x - 6 * p0.y * p0.y - 6 * p0.z * p0.z + 30 * p0.x * p1.x - 36 * p1.x * p1.x + 30 * p0.y * p1.y - 36 * p1.y * p1.y + 30 * p0.z * p1.z - 36 * p1.z * p1.z - 24 * p0.x * p2.x + 54 * p1.x * p2.x - 18 * p2.x * p2.x - 24 * p0.y * p2.y + 54 * p1.y * p2.y - 18 * p2.y * p2.y - 24 * p0.z * p2.z + 54 * p1.z * p2.z - 18 * p2.z * p2.z + 6 * p0.x * p3.x - 12 * p1.x * p3.x + 6 * p2.x * p3.x + 6 * p0.y * p3.y - 12 * p1.y * p3.y + 6 * p2.y * p3.y + 6 * p0.z * p3.z - 12 * p1.z * p3.z + 6 * p2.z * p3.z;
-            coefs.a = p0.x * p0.x + p0.y * p0.y + p0.z * p0.z - 6 * p0.x * p1.x + 9 * p1.x * p1.x - 6 * p0.y * p1.y + 9 * p1.y * p1.y - 6 * p0.z * p1.z + 9 * p1.z * p1.z + 6 * p0.x * p2.x - 18 * p1.x * p2.x + 9 * p2.x * p2.x + 6 * p0.y * p2.y - 18 * p1.y * p2.y + 9 * p2.y * p2.y + 6 * p0.z * p2.z - 18 * p1.z * p2.z + 9 * p2.z * p2.z - 2 * p0.x * p3.x + 6 * p1.x * p3.x - 6 * p2.x * p3.x + p3.x * p3.x - 2 * p0.y * p3.y + 6 * p1.y * p3.y - 6 * p2.y * p3.y + p3.y * p3.y - 2 * p0.z * p3.z + 6 * p1.z * p3.z - 6 * p2.z * p3.z + p3.z * p3.z;
+            Coefs coefs=new Coefs();
+            double p0x = p0.x;
+            double p0y = p0.y;
+            double p0z = p0.z;
+            double p1x = p1.x;
+            double p1y = p1.y;
+            double p1z = p1.z;
+            double p2x = p2.x;
+            double p2y = p2.y;
+            double p2z = p2.z;
+            double p3x = p3.x;
+            double p3y = p3.y;
+            double p3z = p3.z;
+            double ox = o.x;
+            double oy = o.y;
+            double oz = o.z;
+
+            coefs.g = ox * ox + oy * oy + oz * oz - 2 * ox * p0x + p0x * p0x - 2 * oy * p0y + p0y * p0y - 2 * oz * p0z + p0z * p0z;
+            coefs.f = 6 * ox * p0x - 6 * p0x * p0x + 6 * oy * p0y - 6 * p0y * p0y + 6 * oz * p0z - 6 * p0z * p0z - 6 * ox * p1x + 6 * p0x * p1x - 6 * oy * p1y + 6 * p0y * p1y - 6 * oz * p1z + 6 * p0z * p1z;
+            coefs.e = -6 * ox * p0x + 15 * p0x * p0x - 6 * oy * p0y + 15 * p0y * p0y - 6 * oz * p0z + 15 * p0z * p0z + 12 * ox * p1x - 30 * p0x * p1x + 9 * p1x * p1x + 12 * oy * p1y - 30 * p0y * p1y + 9 * p1y * p1y + 12 * oz * p1z - 30 * p0z * p1z + 9 * p1z * p1z - 6 * ox * p2x + 6 * p0x * p2x - 6 * oy * p2y + 6 * p0y * p2y - 6 * oz * p2z + 6 * p0z * p2z;
+            coefs.d = 2 * ox * p0x - 20 * p0x * p0x + 2 * oy * p0y - 20 * p0y * p0y + 2 * oz * p0z - 20 * p0z * p0z - 6 * ox * p1x + 60 * p0x * p1x - 36 * p1x * p1x - 6 * oy * p1y + 60 * p0y * p1y - 36 * p1y * p1y - 6 * oz * p1z + 60 * p0z * p1z - 36 * p1z * p1z + 6 * ox * p2x - 24 * p0x * p2x + 18 * p1x * p2x + 6 * oy * p2y - 24 * p0y * p2y + 18 * p1y * p2y + 6 * oz * p2z - 24 * p0z * p2z + 18 * p1z * p2z - 2 * ox * p3x + 2 * p0x * p3x - 2 * oy * p3y + 2 * p0y * p3y - 2 * oz * p3z + 2 * p0z * p3z;
+            coefs.c = 15 * p0x * p0x + 15 * p0y * p0y + 15 * p0z * p0z - 60 * p0x * p1x + 54 * p1x * p1x - 60 * p0y * p1y + 54 * p1y * p1y - 60 * p0z * p1z + 54 * p1z * p1z + 36 * p0x * p2x - 54 * p1x * p2x + 9 * p2x * p2x + 36 * p0y * p2y - 54 * p1y * p2y + 9 * p2y * p2y + 36 * p0z * p2z - 54 * p1z * p2z + 9 * p2z * p2z - 6 * p0x * p3x + 6 * p1x * p3x - 6 * p0y * p3y + 6 * p1y * p3y - 6 * p0z * p3z + 6 * p1z * p3z;
+            coefs.b = -6 * p0x * p0x - 6 * p0y * p0y - 6 * p0z * p0z + 30 * p0x * p1x - 36 * p1x * p1x + 30 * p0y * p1y - 36 * p1y * p1y + 30 * p0z * p1z - 36 * p1z * p1z - 24 * p0x * p2x + 54 * p1x * p2x - 18 * p2x * p2x - 24 * p0y * p2y + 54 * p1y * p2y - 18 * p2y * p2y - 24 * p0z * p2z + 54 * p1z * p2z - 18 * p2z * p2z + 6 * p0x * p3x - 12 * p1x * p3x + 6 * p2x * p3x + 6 * p0y * p3y - 12 * p1y * p3y + 6 * p2y * p3y + 6 * p0z * p3z - 12 * p1z * p3z + 6 * p2z * p3z;
+            coefs.a = p0x * p0x + p0y * p0y + p0z * p0z - 6 * p0x * p1x + 9 * p1x * p1x - 6 * p0y * p1y + 9 * p1y * p1y - 6 * p0z * p1z + 9 * p1z * p1z + 6 * p0x * p2x - 18 * p1x * p2x + 9 * p2x * p2x + 6 * p0y * p2y - 18 * p1y * p2y + 9 * p2y * p2y + 6 * p0z * p2z - 18 * p1z * p2z + 9 * p2z * p2z - 2 * p0x * p3x + 6 * p1x * p3x - 6 * p2x * p3x + p3x * p3x - 2 * p0y * p3y + 6 * p1y * p3y - 6 * p2y * p3y + p3y * p3y - 2 * p0z * p3z + 6 * p1z * p3z - 6 * p2z * p3z + p3z * p3z;
 
             coefs.aDer = 6 * coefs.a;
             coefs.bDer = 5 * coefs.b;
@@ -94,7 +109,7 @@ namespace ChaseMacMillan.CurveDesigner
             coefs.eDer2 = coefs.eDer;
             return coefs;
         }
-        private struct SqrDistCoefs
+        private struct Coefs
         {
             //The coefs for the distance function
             public double a;
