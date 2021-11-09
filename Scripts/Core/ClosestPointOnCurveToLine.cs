@@ -9,7 +9,7 @@ namespace ChaseMacMillan.CurveDesigner
     //You can read more about this procedure here https://en.wikipedia.org/wiki/Newton%27s_method_in_optimization#Higher_dimensions
     public static class ClosestPointOnCurveToLine
     {
-        public static void GetClosestPointToLine(BezierCurve curve, Vector3 lineStart, Vector3 lineEnd, out int resultSegmentIndex, out float resultTime)
+        public static void GetClosestPointToLine(BezierCurve curve, Vector3 lineStart, Vector3 lineEnd, out int resultSegmentIndex, out float resultTime,TransformBlob blob=null)
         {
             resultSegmentIndex = -1;
             resultTime = 0;
@@ -20,6 +20,13 @@ namespace ChaseMacMillan.CurveDesigner
                 Vector3 p1 = curve.PointGroups[segmentIndex].GetPositionLocal(PointGroupIndex.RightTangent);
                 Vector3 p2 = curve.PointGroups[Utils.ModInt(segmentIndex + 1, curve.PointGroups.Count)].GetPositionLocal(PointGroupIndex.LeftTangent);
                 Vector3 p3 = curve.PointGroups[Utils.ModInt(segmentIndex + 1, curve.PointGroups.Count)].GetPositionLocal(PointGroupIndex.Position);
+                if (blob != null)
+                {
+                    p0 = blob.TransformPoint(p0);
+                    p1 = blob.TransformPoint(p1);
+                    p2 = blob.TransformPoint(p2);
+                    p3 = blob.TransformPoint(p3);
+                }
                 var coefs = GetCoefs(p0, p1, p2, p3, lineStart, lineEnd);
                 for (int linePoint = 0; linePoint <= linePoints; linePoint++)
                 {
@@ -31,6 +38,8 @@ namespace ChaseMacMillan.CurveDesigner
                         float curveValue = Mathf.Clamp01((float)value.y);
                         Vector3 linePos = lineStart + (lineEnd - lineStart) * lineValue;
                         Vector3 curvePos = curve.GetSegmentPositionAtTime(segmentIndex, curveValue);
+                        if (blob != null)
+                            curvePos = blob.TransformPoint(curvePos);
                         float dist = (linePos - curvePos).sqrMagnitude;
                         if (dist < minSqrDist)
                         {

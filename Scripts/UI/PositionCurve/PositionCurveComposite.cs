@@ -31,8 +31,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             var lineStart = GUITools.GUIToWorldSpace(Event.current.mousePosition,0);
             var lineEnd= GUITools.GUIToWorldSpace(Event.current.mousePosition,1);
-            ClosestPointOnCurveToLine.GetClosestPointToLine(positionCurve,lineStart,lineEnd, out int segmentIndex, out float time);
-
+            ClosestPointOnCurveToLine.GetClosestPointToLine(positionCurve,lineStart,lineEnd, out int segmentIndex, out float time,transformBlob);
             float distance = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);
             PointClosestToCursor = positionCurve.GetPointAtDistance(distance);
         }
