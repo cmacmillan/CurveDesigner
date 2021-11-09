@@ -42,16 +42,11 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public static Vector2 ScreenSpaceToGuiSpace(Vector2 screenPos)
         {
-            return new Vector2(screenPos.x, UnityEditor.SceneView.currentDrawingSceneView.camera.pixelHeight - screenPos.y);//Consider replacing with UnityEditor.SceneView.lastActiveSceneView.camera
-            //return new Vector2(screenPos.x, Camera.current.pixelHeight - screenPos.y);//Consider replacing with UnityEditor.SceneView.lastActiveSceneView.camera
-            //return new Vector2(screenPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - screenPos.y);//Consider replacing with UnityEditor.SceneView.lastActiveSceneView.camera
+            return new Vector2(screenPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - screenPos.y);
         }
         public static Vector2 GuiSpaceToScreenSpace(Vector2 guiPos)
         {
-            //return new Vector2(guiPos.x, UnityEditor.SceneView.currentDrawingSceneView.camera.pixelHeight - guiPos.y);
-            return new Vector2(guiPos.x, UnityEditor.SceneView.currentDrawingSceneView.camera.pixelHeight - guiPos.y);
-            //return new Vector2(guiPos.x, Camera.current.pixelHeight - guiPos.y);
-            //return new Vector2(guiPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - guiPos.y);
+            return new Vector2(guiPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - guiPos.y);
         }
 
         private class Matrix3x4
