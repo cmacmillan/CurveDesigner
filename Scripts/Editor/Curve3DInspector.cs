@@ -205,7 +205,6 @@ namespace ChaseMacMillan.CurveDesigner
             EnsureValidEditMode();
             curve3d.BindDataToPositionCurve();
             curve3d.samplesPerSegment = Mathf.Max(1, curve3d.samplesPerSegment);
-            curve3d.samplesForCursorCollisionCheck = Mathf.Max(1, curve3d.samplesForCursorCollisionCheck);
             var windowRect = new Rect(20, 40, 400, 0);
             bool didWindowEatMouse = false;
             if (curve3d.showPointSelectionWindow)

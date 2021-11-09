@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
 using UnityEngine.Profiling;
 
 namespace ChaseMacMillan.CurveDesigner
@@ -27,28 +29,11 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public void FindPointClosestToCursor()
         {
-            Profiler.BeginSample("FindPointClosestToCursor");
-            List<PointOnCurve> samples = new List<PointOnCurve>();
-            int numSamples = curve3d.samplesForCursorCollisionCheck*positionCurve.NumSegments;
-            var length = positionCurve.GetLength();
-            Profiler.BeginSample("GetPointAtDistance");
-            for (int i = 0; i < numSamples; i++)
-                samples.Add(positionCurve.GetPointAtDistance(length * i / (numSamples - 1),false));
-            Profiler.EndSample();
-            Profiler.BeginSample("TransformPoint");
-            foreach (var i in samples)
-                i.position = transformBlob.TransformPoint(i.position);
-            Profiler.EndSample();
-            int segmentIndex;
-            float time;
-            Profiler.BeginSample("ClosestPointToPolyLine");
-            UnitySourceScripts.ClosestCursorPointToPolyLine(out segmentIndex, out time, samples);
-            Profiler.EndSample();
-            foreach (var i in samples)
-                i.position = transformBlob.InverseTransformPoint(i.position);
+            var ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
+            ClosestPointOnCurveToLine.GetClosestPointToLine(positionCurve, ray.GetPoint(0), ray.GetPoint(1), out int segmentIndex, out float time);
+
             float distance = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);
             PointClosestToCursor = positionCurve.GetPointAtDistance(distance);
-            Profiler.EndSample();
         }
         public override IEnumerable<Composite> GetChildren()
         {

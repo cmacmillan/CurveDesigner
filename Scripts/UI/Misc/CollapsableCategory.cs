@@ -301,9 +301,8 @@ namespace ChaseMacMillan.CurveDesigner
         public override string GetName(Curve3D curve) { return "Advanced"; }
         public override void Draw(Curve3D curve)
         {
-            EditorGUILayout.HelpBox("Modifying these settings may negatively affect your performance", MessageType.Info);
+            EditorGUILayout.HelpBox("SamplesPerSegment increases the accuracy with which the curve is approximated. Increasing this may improve curve quality by reducing vertex and texture distortion, but will reduce performance.", MessageType.Info);
             serializedObj = new SerializedObject(curve);
-            Field("samplesForCursorCollisionCheck");
             bool needsReinitCurve=false;
             EditorGUI.BeginChangeCheck();
             Field("samplesPerSegment");

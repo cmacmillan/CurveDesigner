@@ -9,13 +9,44 @@ namespace ChaseMacMillan.CurveDesigner
     //You can read more about this procedure here https://en.wikipedia.org/wiki/Newton%27s_method_in_optimization#Higher_dimensions
     public static class ClosestPointOnCurveToLine
     {
-        public static void GetClosestPointToLine(BezierCurve curve, Vector3 point, Vector3 lineStart, Vector3 lineEnd, out int resultSegmentIndex, out float resultTime)
+        public static void GetClosestPointToLine(BezierCurve curve, Vector3 lineStart, Vector3 lineEnd, out int resultSegmentIndex, out float resultTime)
         {
-            throw new NotImplementedException();
+            resultSegmentIndex = -1;
+            resultTime = 0;
+            float minSqrDist = float.MaxValue;
+            for (int segmentIndex = 0; segmentIndex < curve.NumSegments; segmentIndex++)
+            {
+                Vector3 p0 = curve.PointGroups[segmentIndex].GetPositionLocal(PointGroupIndex.Position);
+                Vector3 p1 = curve.PointGroups[segmentIndex].GetPositionLocal(PointGroupIndex.RightTangent);
+                Vector3 p2 = curve.PointGroups[Utils.ModInt(segmentIndex + 1, curve.PointGroups.Count)].GetPositionLocal(PointGroupIndex.LeftTangent);
+                Vector3 p3 = curve.PointGroups[Utils.ModInt(segmentIndex + 1, curve.PointGroups.Count)].GetPositionLocal(PointGroupIndex.Position);
+                var coefs = GetCoefs(p0, p1, p2, p3, lineStart, lineEnd);
+                for (int linePoint = 0; linePoint <= linePoints; linePoint++)
+                {
+                    for (int curvePoint = 0; curvePoint <= curvePoints; curvePoint++)
+                    {
+                        Vec2 value = new Vec2() { x = linePoint/(double)linePoints, y = curvePoint/(double)curvePoints };
+                        value = NewtonsMethod(value, coefs);
+                        float lineValue = (float)value.x;
+                        float curveValue = Mathf.Clamp01((float)value.y);
+                        Vector3 linePos = lineStart + (lineEnd - lineStart) * lineValue;
+                        Vector3 curvePos = curve.GetSegmentPositionAtTime(segmentIndex, curveValue);
+                        float dist = (linePos - curvePos).sqrMagnitude;
+                        if (dist < minSqrDist)
+                        {
+                            minSqrDist = dist;
+                            resultTime = curveValue;
+                            resultSegmentIndex = segmentIndex;
+                        }
+                    }
+                }
+            }
         }
 
+        private const int linePoints = 1;
+        private const int curvePoints = 5;
         private const int newtonsMethodIterations = 15;
-        private const double dampingAmount = 1;
+        //private const double dampingAmount = 1;//might be needed to prevent divergence
         private static Vec2 NewtonsMethod(Vec2 initial, Coefs coefs)
         {
             Vec2 current = initial;
@@ -29,10 +60,23 @@ namespace ChaseMacMillan.CurveDesigner
                 double t5 = t4 * t;
                 double st = s * t;
                 double stt = s * t2;
+
+                Matrix2x2 hessian = new Matrix2x2();
+                double diagonal=coefs.hessianDiagonal_t2*t2+coefs.hessianDiagonal_t*t+coefs.hessianDiagonal_constant;
+                hessian.m00 = coefs.hessianUpperLeft_constant;
+                hessian.m01 = diagonal;
+                hessian.m10 = diagonal;
+                hessian.m11 = coefs.hessianLowerRight_t4*t4+coefs.hessianLowerRight_t3*t3+coefs.hessianLowerRight_t2*t2+coefs.hessianLowerRight_t*t+coefs.hessianLowerRight_st*st+coefs.hessianLowerRight_s*s+coefs.hessianLowerRight_constant;
+                hessian.Inverse();
+
+                Vec2 gradient = new Vec2();
+                gradient.x = coefs.sDiff_t3*t3+coefs.sDiff_t2*t2+coefs.sDiff_t*t+coefs.sDiff_s*s+coefs.sDiff_constant;
+                gradient.y = coefs.tDiff_t5*t5+coefs.tDiff_t4*t4+coefs.tDiff_t3*t3+coefs.tDiff_t2*t2+coefs.tDiff_t*t+coefs.tDiff_stt*stt+coefs.tDiff_st*st+coefs.tDiff_s*s+coefs.tDiff_constant;
+                current = current - (hessian*gradient);
             }
             return current;
         }
-        private static Coefs GetHessianCoefs(Vector3 p0,Vector3 p1,Vector3 p2, Vector3 p3, Vector3 l0, Vector3 l1)
+        private static Coefs GetCoefs(Vector3 p0,Vector3 p1,Vector3 p2, Vector3 p3, Vector3 l0, Vector3 l1)
         {
             Coefs coefs = new Coefs();
             double p0x = p0.x;
@@ -102,18 +146,37 @@ namespace ChaseMacMillan.CurveDesigner
                 m10 = new_m10;
                 m11 = new_m11;
             }
+            //[m00 m01][x] = [x*m00+y*m01]
+            //[m10 m11][y]   [x*m10+y*m11]
+            public static Vec2 operator *(Matrix2x2 mat, Vec2 vec)
+            {
+                Vec2 retr = new Vec2();
+                retr.x = vec.x * mat.m00 + vec.y * mat.m01;
+                retr.y = vec.x * mat.m10 + vec.y * mat.m11;
+                return retr;
+            }
         }
         private struct Vec2
         {
             public double x;
             public double y;
+
+            public static Vec2 operator -(Vec2 a, Vec2 b)
+            {
+                Vec2 retr = new Vec2();
+                retr.x = a.x - b.x;
+                retr.y = a.y - b.y;
+                return retr;
+            }
         }
         private struct Coefs 
         {
             public double hessianUpperLeft_constant;
+
             public double hessianDiagonal_constant;
             public double hessianDiagonal_t;
             public double hessianDiagonal_t2;
+
             public double hessianLowerRight_constant;
             public double hessianLowerRight_t;
             public double hessianLowerRight_t2;

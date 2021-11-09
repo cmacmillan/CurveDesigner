@@ -121,15 +121,15 @@ namespace ChaseMacMillan.CurveDesigner
                     leftTangent = LockAxis(value, dimensionLockMode) - GetPositionLocal(PointGroupIndex.Position);
                     if (isPointLocked)
                         rightTangent = reflectAcrossPosition(leftTangent);
-                    return;
+                    break;
                 case PointGroupIndex.Position:
                     position = LockAxis(value, dimensionLockMode);
-                    return;
+                    break;
                 case PointGroupIndex.RightTangent:
                     rightTangent = LockAxis(value, dimensionLockMode) - GetPositionLocal(PointGroupIndex.Position);
                     if (isPointLocked)
                         leftTangent = reflectAcrossPosition(rightTangent);
-                    return;
+                    break;
                 default:
                     throw new System.ArgumentException();
             }

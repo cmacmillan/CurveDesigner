@@ -338,12 +338,6 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private float old_samplesPerSegment = -1;
 
-        [Min(1)]
-        public int samplesForCursorCollisionCheck = 12;
-        [SerializeField]
-        [HideInInspector]
-        private int old_samplesForCursorCollisionCheck;
-
         [Min(3)]
         public int flatPointCount = 3;
         [SerializeField]
@@ -457,7 +451,6 @@ namespace ChaseMacMillan.CurveDesigner
             retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
             retr |= CheckFieldChanged(normalGenerationMode, ref old_normalGenerationMode);
             retr |= CheckFieldChanged(samplesPerSegment, ref old_samplesPerSegment);
-            retr |= CheckFieldChanged(samplesForCursorCollisionCheck, ref old_samplesForCursorCollisionCheck);
 
             retr |= CheckTextureLayerChanged(mainTextureLayer, ref old_mainTextureLayer);
             retr |= CheckTextureLayerChanged(backTextureLayer, ref old_backTextureLayer);

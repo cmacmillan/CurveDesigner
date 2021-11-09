@@ -19,7 +19,7 @@ namespace ChaseMacMillan.CurveDesigner
             int bestSegmentIndex = -1;
             float bestTime = 0;
             float minSqrDist = float.MaxValue;
-            void TryTime(int segmentIndex, float time)
+            void CheckIfIsNewBest(int segmentIndex, float time)
             {
                 Vector3 pos = curve.GetSegmentPositionAtTime(segmentIndex, time);
                 float dist = (pos - point).sqrMagnitude;
@@ -42,10 +42,10 @@ namespace ChaseMacMillan.CurveDesigner
                     double t = i / (float)pointCount;
                     float result = (float)NewtonsMethod(t, coefs);
                     result = Mathf.Clamp01(result);
-                    TryTime(segmentIndex, result);
+                    CheckIfIsNewBest(segmentIndex, result);
                 }
-                TryTime(segmentIndex, 0);
-                TryTime(segmentIndex, 1);
+                CheckIfIsNewBest(segmentIndex, 0);
+                CheckIfIsNewBest(segmentIndex, 1);
             }
             resultSegmentIndex = bestSegmentIndex;
             resultTime = bestTime;
