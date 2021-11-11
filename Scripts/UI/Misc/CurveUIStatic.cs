@@ -10,5 +10,6 @@ namespace ChaseMacMillan.CurveDesigner
         public static Texture2D diamondTexture;
         public static Texture2D defaultLineTexture;
         public static Color Green = new Color(.08f,.83f,.07f);
+        public static float buttonSizeScalar;
     }
 }

@@ -6,7 +6,7 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public static class GUITools
     {
-        public static Rect GetRectCenteredAtPosition(Vector2 position, int halfWidth, int halfHeight)
+        public static Rect GetRectCenteredAtPosition(Vector2 position, float halfWidth, float halfHeight)
         {
             return new Rect(position.x - halfWidth, position.y - halfHeight, 2 * halfWidth, 2 * halfHeight);
         }

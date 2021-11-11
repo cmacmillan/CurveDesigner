@@ -32,7 +32,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             if (mode == DrawMode.hovered || !hideIfNotHovered)
             {
-                var rect = GUITools.GetRectCenteredAtPosition(_guiPos, _size, _size);
+                var rect = GUITools.GetRectCenteredAtPosition(_guiPos, _size*CurveUIStatic.buttonSizeScalar, _size*CurveUIStatic.buttonSizeScalar);
                 DrawPoint(rect, mode.Tint(selectionState, _color), GetPointTexture(type));
             }
         }

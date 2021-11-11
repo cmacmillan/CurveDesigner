@@ -76,6 +76,7 @@ namespace ChaseMacMillan.CurveDesigner
         private FloatSampler _sampler;
         private Curve3D _curve;
         private bool _isLeft;
+        private float initialSign;
         public ArcPointClickCommand(ArcPointComposite owner, SamplerPoint<float> point, FloatSampler sampler, Curve3D curve,bool isLeft)
         {
             this._owner = owner;
@@ -85,7 +86,7 @@ namespace ChaseMacMillan.CurveDesigner
             this._isLeft = isLeft;
         }
 
-        private void Set(List<SelectableGUID> selected,Curve3D curve)
+        private void Set(List<SelectableGUID> selected,Curve3D curve, bool initial)
         {
             if (CirclePlaneTools.GetCursorPointOnPlane(_owner.centerPoint, out Vector3 cursorHitPosition, out Vector3 centerPoint, out Vector3 centerForward,out Vector3 centerReference,_curve))
             {
@@ -94,7 +95,24 @@ namespace ChaseMacMillan.CurveDesigner
                 var rotation = Quaternion.AngleAxis(angle,centerForward);
                 //var reference = _curve.transform.TransformDirection(Quaternion.AngleAxis(-rotation, centerForward) * centerReference);
                 float amountToRotate = Vector3.SignedAngle(rotation*centerReference,cursorHitPosition-centerPoint,centerForward);
-                _point.value = 2 * (180 - Mathf.Abs(amountToRotate));
+                float sign = Mathf.Sign(amountToRotate);
+                if (initial)
+                    initialSign = sign;
+                if (initialSign == sign)
+                {
+                    _point.value = 2 * (180 - Mathf.Abs(amountToRotate));
+                }
+                else
+                {
+                    if (Mathf.Abs(amountToRotate) < 90)
+                    {
+                        _point.value = 360;
+                    }
+                    else
+                    {
+                        _point.value = 0;
+                    }
+                }
                 /*
                 var selectedEditRotations = selected.GetSelected(_sampler.GetPoints(curve.positionCurve));
                 foreach (var i in selectedEditRotations)
@@ -104,17 +122,17 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public void ClickDown(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
         {
-            Set(selected,curve);
+            Set(selected,curve,true);
         }
 
         public void ClickDrag(Vector2 mousePos, Curve3D curve, ClickHitData clicked, List<SelectableGUID> selected)
         {
-            Set(selected,curve);
+            Set(selected,curve,false);
         }
 
         public void ClickUp(Vector2 mousePos, Curve3D curve, List<SelectableGUID> selected)
         {
-            Set(selected,curve);
+            Set(selected,curve,false);
         }
     }
 }

@@ -14,5 +14,7 @@ namespace ChaseMacMillan.CurveDesigner
         public GUIStyle modeSelectorStyle;
         public GUIStyle selectorWindowStyle;
         public GUIStyle colorPickerBoxStyle;
+        [Range(.1f,3f)]
+        public float buttonSizeScalar = 1;
     }
 }

@@ -224,6 +224,7 @@ namespace ChaseMacMillan.CurveDesigner
             CurveUIStatic.squareTexture = curve3d.settings.squareIcon;
             CurveUIStatic.diamondTexture = curve3d.settings.diamondIcon;
             CurveUIStatic.defaultLineTexture = curve3d.settings.lineTex;
+            CurveUIStatic.buttonSizeScalar = curve3d.settings.buttonSizeScalar;
             if (curve3d.UICurve == null)
             {
                 curve3d.UICurve = new UICurve(null, curve3d);
