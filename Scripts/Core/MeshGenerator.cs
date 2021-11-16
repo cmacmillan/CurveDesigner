@@ -647,48 +647,29 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                 case MeshGenerationMode.HollowTube:
                     {
-                        System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
                         int numMainLayerVerts = RingPointCount * sampled.Count * 2;
                         output.InitSubmeshes(!IsClosedLoop ? 4 : 3,out submeshes);
 
-                        s.Start();
                         CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer);
-                        s.Stop();
-                        Debug.LogError($"create points 1 {s.ElapsedMilliseconds}ms");
-                        s.Restart();
                         CreatePointsAlongCurve(TubePointCreator, sampled, -1, RingPointCount, backTextureLayer);
-                        s.Stop();
-                        Debug.LogError($"create points 2 {s.ElapsedMilliseconds}ms");
 
                         if (!shouldTubeGenerateEdges)
                             for (int i = 0; i < vertices.Count/RingPointCount; i++)
                                 smoothNormals.Add((i*RingPointCount,(i+1)*RingPointCount-1));
 
-                        s.Restart();
                         TrianglifyLayer(true, RingPointCount, 0, 0);
                         TrianglifyLayer(false, RingPointCount, numMainLayerVerts / 2, 1);
-                        s.Stop();
-                        Debug.LogError($"trianglify {s.ElapsedMilliseconds}ms");
 
-                        s.Restart();
                         if (shouldTubeGenerateEdges)
                             CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount), 2, edgeTextureLayer, false);
-                        s.Stop();
-                        Debug.LogError($"edge verts {s.ElapsedMilliseconds}ms");
                         if (!IsClosedLoop)
                         {
-                        s.Restart();
                             int submeshIndex = 3;
                             CreateEndPlate(true, 0, TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, 0, -1);
                             CreateEndPlate(false, curve.GetLength(), TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, 0, -1);
-                            s.Stop();
-                            Debug.LogError($"end plates {s.ElapsedMilliseconds}ms");
                         }
 
-                        s.Restart();
                         CreateNormals();
-                        s.Stop();
-                        Debug.LogError($"normals {s.ElapsedMilliseconds}ms");
 
                         return output;
                     }
