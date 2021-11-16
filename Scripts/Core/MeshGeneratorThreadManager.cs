@@ -93,7 +93,7 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(e);
+                        UnityEngine.Debug.LogException(e);
                         resultDict.TryAdd(nextData.currentlyGeneratingForCurveId, null);//a null in the dictionary means something went wrong
                     }
                 }

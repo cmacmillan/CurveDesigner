@@ -575,17 +575,23 @@ namespace ChaseMacMillan.CurveDesigner
                 WriteMaterialsToRenderer();
             }
         }
+        private bool wantsUpdate = false;
         public void RequestMeshUpdate()
         {
             if (!isWaitingForMeshResults)
             {
+                wantsUpdate = false;
                 MeshGeneratorThreadManager.AddMeshGenerationRequest(this);
                 isWaitingForMeshResults = true;
+            }
+            else
+            {
+                wantsUpdate = true;
             }
         }
         public void UpdateMesh(bool checkIfSettingsChanged=true)
         {
-            if (checkIfSettingsChanged && HaveCurveSettingsChanged())
+            if ((checkIfSettingsChanged && HaveCurveSettingsChanged()) || wantsUpdate)
             {
                 RequestMeshUpdate();
             }
