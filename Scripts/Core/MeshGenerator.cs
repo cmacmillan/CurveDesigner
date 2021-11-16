@@ -23,7 +23,7 @@ namespace ChaseMacMillan.CurveDesigner
             return Vector3.ProjectOnPlane(previous, forwardVector).normalized;
         }
 
-        private delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset);
+        private delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset, float arc);
         public static MeshGeneratorOutput GenerateMesh(MeshGeneratorData data)
         {
             ExtrudeSampler extrudeSampler = data.extrudeSampler;
@@ -49,7 +49,15 @@ namespace ChaseMacMillan.CurveDesigner
             MeshPrimaryAxis meshPrimaryAxis = data.meshPrimaryAxis;
             //public int currentlyGeneratingForCurveId;
 
-            MeshGeneratorOutput output = new MeshGeneratorOutput(data.meshDispatchID);
+            extrudeSampler?.CacheDistances(curve);
+            sizeSampler.CacheDistances(curve);
+            colorSampler.CacheDistances(curve);
+            tubeArcSampler.CacheDistances(curve);
+            thicknessSampler.CacheDistances(curve);
+            rotationSampler.CacheDistances(curve);
+
+
+            MeshGeneratorOutput output = new MeshGeneratorOutput();
             List<List<int>> submeshes = null;
             List<Vector3> vertices = output.vertices;
             List<Vector2> uvs = output.uvs;
@@ -80,7 +88,7 @@ namespace ChaseMacMillan.CurveDesigner
                 }
             }
             var sampled = curve.GetPointsWithSpacing(VertexSampleDistance);
-            sizeSampler.RecalculateOpenCurveOnlyPoints(curve);
+
             if (IsClosedLoop)
             {
                 var lastPoint = new PointOnCurve(sampled[0]);
@@ -116,19 +124,23 @@ namespace ChaseMacMillan.CurveDesigner
             }
             float GetSizeAtDistance(float distance)
             {
-                return sizeSampler.GetValueAtDistance(distance, curve);
+                return sizeSampler.GetValueAtDistance(distance, curve, true);
             }
             float GetTubeArcAtDistance(float distance)
             {
-                return tubeArcSampler.GetValueAtDistance(distance, curve);
+                return tubeArcSampler.GetValueAtDistance(distance, curve, true);
             }
             float GetThicknessAtDistance(float distance)
             {
-                return thicknessSampler.GetValueAtDistance(distance, curve);
+                return thicknessSampler.GetValueAtDistance(distance, curve, true);
             }
             Color32 GetColorAtDistance(float distance)
             {
-                return colorSampler.GetValueAtDistance(distance, curve);
+                return colorSampler.GetValueAtDistance(distance, curve, true);
+            }
+            float GetRotationAtDistance(float distance)
+            {
+                return rotationSampler.GetValueAtDistance(distance, curve, true);
             }
             void CreateNormals()
             {
@@ -455,9 +467,10 @@ namespace ChaseMacMillan.CurveDesigner
                 GetColorSizeRotationThickness(currentPoint.distanceFromStartOfCurve, offset, out float outOffset, out size, out float rotation, out Color color);
                 float currentLength = 0;
                 Vector3 previousPoint = Vector3.zero;
+                float arc = GetTubeArcAtDistance(currentPoint.distanceFromStartOfCurve);
                 for (int j = 0; j < pointsPerRing; j++)
                 {
-                    var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation, outOffset);
+                    var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation, outOffset,arc);
                     vertices.Add(position);
                     if (j > 0)
                         currentLength += Vector3.Distance(previousPoint, position);
@@ -470,7 +483,7 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 outOffset = offset * GetThicknessAtDistance(distance);
                 outSize = Mathf.Max(0, GetSizeAtDistance(distance));
-                outRotation = rotationSampler.GetValueAtDistance(distance, curve);
+                outRotation = GetRotationAtDistance(distance);
                 outColor = GetColorAtDistance(distance);
             }
             void CreatePointsAlongCurve(PointCreator pointCreator, List<PointOnCurve> points, float offset, int pointsPerRing, TextureLayerSettings textureLayer)
@@ -488,11 +501,11 @@ namespace ChaseMacMillan.CurveDesigner
                 }
                 CreateUVS(textureLayer, distsFromStart, thickness, pointsPerRing);
             }
-            Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+            Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float arc)
             {
                 totalPointCount -= 1;
                 float progress = currentIndex / (float)totalPointCount;
-                var relativePos = extrudeSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference, out Vector3 tangent);//*size;
+                var relativePos = extrudeSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference, out Vector3 tangent,true);//*size;
                 var rotationMat = Quaternion.AngleAxis(rotation, point.tangent);
                 //Lets say z is forward
                 var cross = Vector3.Cross(point.tangent, point.reference).normalized;
@@ -506,7 +519,7 @@ namespace ChaseMacMillan.CurveDesigner
                     thicknessDirection *= -1;
                 return absolutePos + (rotationMat * TransformVector3(thicknessDirection)).normalized * offset;
             }
-            Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+            Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float arc)
             {
                 var center = point.position;
                 var up = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
@@ -517,18 +530,17 @@ namespace ChaseMacMillan.CurveDesigner
                 Vector3 lineEnd = center + scaledUp - scaledRight;
                 return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
             }
-            Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+            Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float arc)
             {
-                float arc = GetTubeArcAtDistance(point.distanceFromStartOfCurve);
                 float theta = (arc * currentIndex / (totalPointCount - 1)) + (360.0f - arc) / 2 + rotation;
                 Vector3 rotatedVect = Quaternion.AngleAxis(theta, point.tangent) * point.reference;
                 var pos = point.GetRingPoint(theta, (size + offset));
                 return pos;
             }
-            Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset)
+            Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset,float arc)
             {
-                Vector3 lineStart = TubePointCreator(point, 0, totalPointCount, size, rotation, offset);
-                Vector3 lineEnd = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset);
+                Vector3 lineStart = TubePointCreator(point, 0, totalPointCount, size, rotation, offset,arc);
+                Vector3 lineEnd = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset,arc);
                 float lerp = currentIndex / (float)(totalPointCount - 1);
                 return Vector3.Lerp(lineStart, lineEnd, lerp);
             }
@@ -635,29 +647,48 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                 case MeshGenerationMode.HollowTube:
                     {
+                        System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
                         int numMainLayerVerts = RingPointCount * sampled.Count * 2;
                         output.InitSubmeshes(!IsClosedLoop ? 4 : 3,out submeshes);
 
+                        s.Start();
                         CreatePointsAlongCurve(TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer);
+                        s.Stop();
+                        Debug.LogError($"create points 1 {s.ElapsedMilliseconds}ms");
+                        s.Restart();
                         CreatePointsAlongCurve(TubePointCreator, sampled, -1, RingPointCount, backTextureLayer);
+                        s.Stop();
+                        Debug.LogError($"create points 2 {s.ElapsedMilliseconds}ms");
 
                         if (!shouldTubeGenerateEdges)
                             for (int i = 0; i < vertices.Count/RingPointCount; i++)
                                 smoothNormals.Add((i*RingPointCount,(i+1)*RingPointCount-1));
 
+                        s.Restart();
                         TrianglifyLayer(true, RingPointCount, 0, 0);
                         TrianglifyLayer(false, RingPointCount, numMainLayerVerts / 2, 1);
+                        s.Stop();
+                        Debug.LogError($"trianglify {s.ElapsedMilliseconds}ms");
 
+                        s.Restart();
                         if (shouldTubeGenerateEdges)
                             CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount), 2, edgeTextureLayer, false);
+                        s.Stop();
+                        Debug.LogError($"edge verts {s.ElapsedMilliseconds}ms");
                         if (!IsClosedLoop)
                         {
+                        s.Restart();
                             int submeshIndex = 3;
                             CreateEndPlate(true, 0, TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, 0, -1);
                             CreateEndPlate(false, curve.GetLength(), TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, 0, -1);
+                            s.Stop();
+                            Debug.LogError($"end plates {s.ElapsedMilliseconds}ms");
                         }
 
+                        s.Restart();
                         CreateNormals();
+                        s.Stop();
+                        Debug.LogError($"normals {s.ElapsedMilliseconds}ms");
 
                         return output;
                     }
@@ -765,10 +796,6 @@ namespace ChaseMacMillan.CurveDesigner
                         }
                         int vertCount = meshToTile.verts.Length;
                         bool useUvs = meshToTile.uv.Length == meshToTile.verts.Length;
-                        float GetSize(float dist)
-                        {
-                            return sizeSampler.GetValueAtDistance(dist, curve);
-                        }
                         int c = 0;
                         int vertexBaseOffset = 0;
                         List<int> remappedVerts = new List<int>();
@@ -797,8 +824,8 @@ namespace ChaseMacMillan.CurveDesigner
                                     remappedVerts.Add(i - skippedVerts);
                                 }
                                 var point = curve.GetPointAtDistance(distance);
-                                var rotation = rotationSampler.GetValueAtDistance(distance, curve);
-                                var size = GetSize(distance);
+                                var rotation = GetRotationAtDistance(distance);
+                                var size = GetSizeAtDistance(distance);
                                 var sizeScale = size / secondaryDimensionLength;
                                 var reference = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
                                 var cross = Vector3.Cross(reference, point.tangent);

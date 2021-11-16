@@ -48,6 +48,13 @@ namespace ChaseMacMillan.CurveDesigner
         {
             return val;
         }
+        public void CacheDistances(BezierCurve curve)
+        {
+            foreach (var i in GetPoints(curve))
+            {
+                i.cachedDistance = i.GetDistance(curve);
+            }
+        }
         public virtual void SelectEdit(Curve3D curve, List<SamplerPoint<T>> selectedPoints,SamplerPoint<T> mainPoint)
         {
             float originalDistance = mainPoint.GetDistance(curve.positionCurve);

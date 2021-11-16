@@ -187,8 +187,6 @@ namespace ChaseMacMillan.CurveDesigner
         public ExtrudeSampler extrudeSampler;
 
         [NonSerialized]
-        public int meshDispatchID=0;//incremented when requesting a mesh update
-        [NonSerialized]
         private bool isWaitingForMeshResults = false;
 
         [HideInInspector]
@@ -600,8 +598,6 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 isWaitingForMeshResults = false;
                 if (output == null)//an error happened, but we are still done
-                    return;
-                if (output.meshDispatchId < meshDispatchID)
                     return;
                 if (type == MeshGenerationMode.NoMesh)
                 {

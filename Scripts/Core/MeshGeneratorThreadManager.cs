@@ -33,7 +33,6 @@ namespace ChaseMacMillan.CurveDesigner
                 meshGenerationThread = new Thread(ThreadLoop);
             }
 
-            curve.meshDispatchID++;
             MeshGeneratorData data = new MeshGeneratorData();
             data.curve = new BezierCurve(curve.positionCurve, false);
             data.currentlyGeneratingForCurveId = curve.GetInstanceID();
@@ -60,7 +59,6 @@ namespace ChaseMacMillan.CurveDesigner
             data.meshToTile = curve.meshToTile == null ? null : new ThreadMesh(curve.meshToTile);
             data.closeTilableMeshGap = curve.closeTilableMeshGap;
             data.meshPrimaryAxis = curve.meshPrimaryAxis;
-            data.meshDispatchID = curve.meshDispatchID;
 
             generationQueue.Enqueue(data);
             if (isFirstRun)
@@ -102,11 +100,9 @@ namespace ChaseMacMillan.CurveDesigner
     }
     public class MeshGeneratorOutput
     {
-        public MeshGeneratorOutput(int meshDispatchId)
+        public MeshGeneratorOutput()
         {
-            this.meshDispatchId = meshDispatchId;
         }
-        public int meshDispatchId;
         public List<Vector3> vertices = new List<Vector3>();
         public List<Vector2> uvs = new List<Vector2>();
         public List<Color32> colors = new List<Color32>();
@@ -151,7 +147,6 @@ namespace ChaseMacMillan.CurveDesigner
         public float closeTilableMeshGap;
         public MeshPrimaryAxis meshPrimaryAxis;
 
-        public int meshDispatchID;//essentially just to prevent re-copying over the data over and over again
         public int currentlyGeneratingForCurveId;
     }
     public class ThreadMesh

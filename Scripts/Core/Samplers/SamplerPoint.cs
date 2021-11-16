@@ -9,6 +9,8 @@ namespace ChaseMacMillan.CurveDesigner
     {
         public T value;
         public int segmentIndex;
+        [NonSerialized]
+        public float cachedDistance;
         public float time;
         public KeyframeInterpolationMode interpolationMode = KeyframeInterpolationMode.Linear;
         public SelectableGUID guid;
@@ -44,9 +46,12 @@ namespace ChaseMacMillan.CurveDesigner
                 owner.Sort(curve);
         }
 
-        public float GetDistance(BezierCurve positionCurve)
+        public float GetDistance(BezierCurve positionCurve, bool useCachedDistance=false)
         {
-            return positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);
+            if (useCachedDistance)
+                return cachedDistance;
+            else
+                return positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex, time);
         }
 
         public bool IsInsideVisibleCurve(BezierCurve curve)
@@ -57,6 +62,11 @@ namespace ChaseMacMillan.CurveDesigner
         public void SelectEdit(Curve3D curve, List<SamplerPoint<T>> selectedPoints)
         {
             owner.SelectEdit(curve, selectedPoints,selectedPoints[0]);
+        }
+
+        public float GetDistance(BezierCurve positionCurve)
+        {
+            return GetDistance(positionCurve, false);
         }
     }
 }
