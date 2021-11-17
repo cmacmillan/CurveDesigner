@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
@@ -71,3 +72,4 @@ namespace ChaseMacMillan.CurveDesigner
         }
     }
 }
+#endif

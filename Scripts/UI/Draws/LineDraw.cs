@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+using UnityEditor;
 using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
@@ -42,3 +43,4 @@ namespace ChaseMacMillan.CurveDesigner
         }
     }
 }
+#endif

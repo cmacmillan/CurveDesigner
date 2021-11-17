@@ -10,6 +10,8 @@ namespace ChaseMacMillan.CurveDesigner
     }
     public interface ISelectEditable<T> : ISelectable
     {
+#if UNITY_EDITOR
         void SelectEdit(Curve3D curve, List<T> selectedPoints);
+#endif
     }
 }

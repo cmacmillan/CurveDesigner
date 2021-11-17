@@ -55,6 +55,7 @@ namespace ChaseMacMillan.CurveDesigner
                 i.cachedDistance = i.GetDistance(curve);
             }
         }
+#if UNITY_EDITOR
         public virtual void SelectEdit(Curve3D curve, List<SamplerPoint<T>> selectedPoints,SamplerPoint<T> mainPoint)
         {
             float originalDistance = mainPoint.GetDistance(curve.positionCurve);
@@ -68,6 +69,7 @@ namespace ChaseMacMillan.CurveDesigner
             EditorGUIUtility.SetWantsMouseJumping(1);
             PointOnCurveClickCommand.ClampOffset(distanceOffset, curve, selectedPoints);
         }
+#endif
         public string GetLabel()
         {
             return label;

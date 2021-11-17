@@ -155,6 +155,7 @@ namespace ChaseMacMillan.CurveDesigner
             return positionCurve.GetDistanceAtSegmentIndexAndTime(positionCurve.PointGroups.IndexOf(this), 0);
         }
 
+#if UNITY_EDITOR
         public void SelectEdit(Curve3D curve, List<PointGroup> selectedPoints)
         {
             var initialLocked = isPointLocked;
@@ -188,6 +189,7 @@ namespace ChaseMacMillan.CurveDesigner
                 target.SetPositionLocal(PointGroupIndex.RightTangent, target.GetPositionLocal(PointGroupIndex.RightTangent) + rightTangentOffset);
             }
         }
+#endif
 
         //point groups are always inside the visible curve
         public bool IsInsideVisibleCurve(BezierCurve curve)

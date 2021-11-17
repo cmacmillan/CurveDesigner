@@ -12,6 +12,7 @@ namespace ChaseMacMillan.CurveDesigner
             constValue = Color.white;
         }
         public ColorSampler(ColorSampler objToClone,bool createNewGuids,Curve3D curve) : base(objToClone,createNewGuids,curve) { }
+#if UNITY_EDITOR
         public override void ConstantField(Rect rect)
         {
             constValue = EditorGUI.ColorField(rect, GetLabel(), constValue);
@@ -28,6 +29,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
             base.SelectEdit(curve, selectedPoints, mainPoint);
         }
+#endif
 
         public override Color Lerp(Color val1, Color val2, float lerp)
         {

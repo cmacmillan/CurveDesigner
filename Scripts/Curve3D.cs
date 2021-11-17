@@ -81,10 +81,12 @@ namespace ChaseMacMillan.CurveDesigner
             UpdateMesh(false);
         }
 
+#if UNITY_EDITOR
         [ContextMenu("ExportToObj")]
         public void ExportToObj()
         {
             ObjMeshExporter.DoExport(gameObject, false);
         }
+#endif
     }
 }

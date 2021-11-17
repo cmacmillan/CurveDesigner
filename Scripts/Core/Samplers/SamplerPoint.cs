@@ -59,10 +59,12 @@ namespace ChaseMacMillan.CurveDesigner
             return SegmentIndex < curve.NumSegments;
         }
 
+#if UNITY_EDITOR
         public void SelectEdit(Curve3D curve, List<SamplerPoint<T>> selectedPoints)
         {
             owner.SelectEdit(curve, selectedPoints,selectedPoints[0]);
         }
+#endif
 
         public float GetDistance(BezierCurve positionCurve)
         {

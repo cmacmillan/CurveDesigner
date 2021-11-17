@@ -8,6 +8,45 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public class UICurve : Composite
     {
+        public Curve3D _curve;
+        public UICurve(Composite parent,Curve3D curve) : base(parent)
+        {
+#if UNITY_EDITOR
+            Undo.undoRedoPerformed -= Initialize;
+            Undo.undoRedoPerformed += Initialize;
+#endif
+            _curve = curve;
+        }
+        public void Initialize()
+        {
+#if UNITY_EDITOR
+            if (_curve == null)
+            {
+                Undo.undoRedoPerformed -= Initialize;
+                return;
+            }
+
+            _curve.BindDataToPositionCurve();
+            _curve.Recalculate();
+            var mainPositionCurve = new List<BezierCurve>();
+            mainPositionCurve.Add(_curve.positionCurve);
+            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null,null),mainPositionCurve,-1);
+            sizeCurve = new SizeCurveComposite(this,_curve.sizeSampler,_curve,positionCurve);
+            rotationCurve = new RotationCurveComposite(this,_curve.rotationSampler,_curve,positionCurve);
+            colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);
+            thicknessCurve = new ThicknessCurveComposite(this, _curve.thicknessSampler, _curve, positionCurve);
+            arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
+            extrudeCurve = new ExtrudeCurveComposite(this, _curve.extrudeSampler, _curve,positionCurve);
+            BakeBlobs();
+            _curve.RequestMeshUpdate();
+            if (Event.current != null)
+            {
+                positionCurve.FindPointClosestToCursor();
+                extrudeCurve.FindClosestPointsToCursor();
+            }
+#endif
+        }
+#if UNITY_EDITOR
         public PositionCurveComposite positionCurve;
         public SizeCurveComposite sizeCurve;
         public RotationCurveComposite rotationCurve;
@@ -39,49 +78,14 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 
-        public Curve3D _curve;
 
         public override SelectableGUID GUID => SelectableGUID.Null;
-
-        public UICurve(Composite parent,Curve3D curve) : base(parent)
-        {
-            Undo.undoRedoPerformed -= Initialize;
-            Undo.undoRedoPerformed += Initialize;
-            _curve = curve;
-        }
 
         public void BakeBlobs()
         {
             positionCurve.transformBlob.Bake();
             foreach (var i in extrudeCurve._secondaryCurves)
                 i.transformBlob.Bake();
-        }
-        public void Initialize()
-        {
-            if (_curve == null)
-            {
-                Undo.undoRedoPerformed -= Initialize;
-                return;
-            }
-
-            _curve.BindDataToPositionCurve();
-            _curve.Recalculate();
-            var mainPositionCurve = new List<BezierCurve>();
-            mainPositionCurve.Add(_curve.positionCurve);
-            positionCurve = new PositionCurveComposite(this,_curve,_curve.positionCurve,new MainPositionCurveSplitCommand(_curve),new TransformBlob(_curve.transform,null,null),mainPositionCurve,-1);
-            sizeCurve = new SizeCurveComposite(this,_curve.sizeSampler,_curve,positionCurve);
-            rotationCurve = new RotationCurveComposite(this,_curve.rotationSampler,_curve,positionCurve);
-            colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);
-            thicknessCurve = new ThicknessCurveComposite(this, _curve.thicknessSampler, _curve, positionCurve);
-            arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
-            extrudeCurve = new ExtrudeCurveComposite(this, _curve.extrudeSampler, _curve,positionCurve);
-            BakeBlobs();
-            _curve.RequestMeshUpdate();
-            if (Event.current != null)
-            {
-                positionCurve.FindPointClosestToCursor();
-                extrudeCurve.FindClosestPointsToCursor();
-            }
         }
 
         public override void Click(Vector2 mousePosition, List<ClickHitData> clickHits)
@@ -169,5 +173,6 @@ namespace ChaseMacMillan.CurveDesigner
                     throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");
             }
         }
+#endif
     }
 }

@@ -19,6 +19,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             return new BezierCurve(val, shouldCreateGuids);
         }
+#if UNITY_EDITOR
         public override void SelectEdit(Curve3D curve, List<SamplerPoint<BezierCurve>> selectedPoints, SamplerPoint<BezierCurve> mainPoint)
         {
             base.SelectEdit(curve, selectedPoints, mainPoint);
@@ -39,6 +40,7 @@ namespace ChaseMacMillan.CurveDesigner
             if (newClosedLoop != oldClosedLoop || newAutomaticTangents != oldAutomaticTangents || didSmoothingChange)
                 curve.UICurve.Initialize();
         }
+#endif
         public override bool Delete(List<SelectableGUID> guids, Curve3D curve)
         {
             //first we try to delete the curve points

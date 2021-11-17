@@ -49,6 +49,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 
+#if UNITY_EDITOR
         public CollapsableCategory[] collapsableCategories =
         {
         new MainCollapsableCategory(),
@@ -57,6 +58,7 @@ namespace ChaseMacMillan.CurveDesigner
         new PreferencesCollapsableCategory(),
         new AdvancedCollapsableCategory(),
     };
+#endif
 
         [NonSerialized]
         public Matrix4x4 clipSpaceToWorldSpace;
@@ -96,6 +98,7 @@ namespace ChaseMacMillan.CurveDesigner
         public EditModeCategories editModeCategories = new EditModeCategories();
 
         #region guistyles
+#if UNITY_EDITOR
         private bool stylesInitialized = false;
         public void TryInitStyles()
         {
@@ -132,6 +135,7 @@ namespace ChaseMacMillan.CurveDesigner
         public GUIStyle nonInitialHeaderStyle;
         public GUIStyle shurikenCustomDataWindow;
         public GUIStyle dropdownStyle;
+#endif
         #endregion
 
         public bool placeLockedPoints = true;
@@ -513,6 +517,7 @@ namespace ChaseMacMillan.CurveDesigner
             UICurve = new UICurve(null, this);
             UICurve.Initialize();
         }
+#if UNITY_EDITOR
         public void TryInitialize()
         {
             if (!isInitialized)
@@ -527,6 +532,7 @@ namespace ChaseMacMillan.CurveDesigner
                 Clear();
             }
         }
+#endif
         public void Recalculate()
         {
             positionCurve.Recalculate();

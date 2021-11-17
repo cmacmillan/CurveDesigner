@@ -24,6 +24,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             return Mathf.Clamp(f,minValue,maxValue);
         }
+#if UNITY_EDITOR
         public override void ConstantField(Rect rect)
         {
             constValue = Constrain(EditorGUI.FloatField(rect, GetLabel(), constValue));
@@ -48,6 +49,7 @@ namespace ChaseMacMillan.CurveDesigner
             foreach (var target in selectedPoints)
                 target.value = target.value + minChange;
         }
+#endif
 
         public override float Lerp(float val1, float val2, float lerp)
         {

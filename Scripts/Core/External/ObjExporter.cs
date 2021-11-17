@@ -5,6 +5,7 @@ using System.Text;
 
 namespace ChaseMacMillan.CurveDesigner
 {
+#if UNITY_EDITOR
     ///This is from https://wiki.unity3d.com/index.php/ExportOBJ
     public static class ObjMeshExporter
     {
@@ -149,4 +150,5 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
     }
+#endif
 }

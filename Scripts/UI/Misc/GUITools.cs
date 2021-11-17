@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using UnityEngine;
 using UnityEngine.Profiling;
 
@@ -248,3 +249,4 @@ namespace ChaseMacMillan.CurveDesigner
         }
     }
 }
+#endif
