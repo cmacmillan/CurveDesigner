@@ -35,13 +35,15 @@ namespace ChaseMacMillan.CurveDesigner
             this.label = objToClone.label;
             this.editMode = objToClone.editMode;
 
-            foreach (var i in objToClone.points)
-                points.Add(new SamplerPoint<T>(i,this,createNewGuids,curve));
-
             points_openCurveOnly = new List<SamplerPoint<T>>();
 
-            foreach (var i in objToClone.points_openCurveOnly)
-                points_openCurveOnly.Add(new SamplerPoint<T>(i,this,createNewGuids,curve));
+            foreach (var i in objToClone.points)
+            {
+                var newPoint = new SamplerPoint<T>(i, this, createNewGuids, curve);
+                points.Add(newPoint);
+                if (objToClone.points_openCurveOnly.Contains(i))
+                    points_openCurveOnly.Add(newPoint);
+            }
         }
         protected abstract T GetInterpolatedValueAtDistance(float distance, BezierCurve curve);
         public virtual T CloneValue(T val, bool shouldCreateGuids)
