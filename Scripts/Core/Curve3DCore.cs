@@ -469,6 +469,8 @@ namespace ChaseMacMillan.CurveDesigner
                     i.SetPositionLocal(PointGroupIndex.Position, i.GetPositionLocal(PointGroupIndex.Position));
                     i.SetPositionLocal(PointGroupIndex.RightTangent, i.GetPositionLocal(PointGroupIndex.RightTangent));
                 }
+                positionCurve.Recalculate();
+                UICurve.Initialize();
             }
 
             CheckSamplerChanged(colorSampler, ref old_constColor, ref old_colorUseKeyframes);
