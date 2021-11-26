@@ -2,7 +2,7 @@
 //Make sure you've assigned materials in the texture category that read from vertex color
 //such as CurveDesigner/Art/Materials/DrawColorSurface
 using UnityEngine;
-namespace ChaseMacMillan.CurveDesigner
+namespace ChaseMacMillan.CurveDesigner.Examples
 {
     public class AnimatedRainbow : MonoBehaviour
     {

@@ -1,7 +1,7 @@
 ﻿//here is an example of how you could make an object follow along a curve
 //and point in the direction tangent to the curve
 using UnityEngine;
-namespace ChaseMacMillan.CurveDesigner
+namespace ChaseMacMillan.CurveDesigner.Examples
 {
     public class CurveFollower : MonoBehaviour
     {
