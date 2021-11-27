@@ -85,7 +85,11 @@ namespace ChaseMacMillan.CurveDesigner
             }
             return curve.transform.TransformPoint(GetPositionOnSurface_List[GetPositionOnSurface_List.Count - 1].Item2);//last point
         }
-        public static void GetPointCreatorOffsetAndPointCountByType(MeshGenerationMode curveType,int ringPointCount, int flatPointCount,bool front,out PointCreator pointCreator, out float offset, out int pointCount)
+        public static void GetPointOnSurface(Curve3D curve, float distance, float crossAxisDistance, bool front,out Vector3 position, out Vector3 normal, out Vector3 reference,out float crossAxisWidth)
+        {
+            
+        }
+        private static void GetPointCreatorOffsetAndPointCountByType(MeshGenerationMode curveType,int ringPointCount, int flatPointCount,bool front,out PointCreator pointCreator, out float offset, out int pointCount)
         {
             //This function is hardcoded to match the code in meshgenerator because everything is cleaner this way
             switch (curveType)
@@ -132,11 +136,5 @@ namespace ChaseMacMillan.CurveDesigner
                     throw new System.ArgumentException("Not valid for this curve type");
             }
         }
-        /*
-        public static void GetPointOnSurface(,out Vector3 position, out Vector3 normal, out Vector3 reference)
-        {
-            
-        }
-        */
     }
 }
