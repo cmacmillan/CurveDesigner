@@ -4,10 +4,9 @@ using UnityEditor;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    [System.Serializable]//Despite this class being generic, it can still serialize when inside a list
-    public sealed class SamplerPoint<T> : ISelectEditable<SamplerPoint<T>>, ISamplerPoint
+    public class SamplerPoint<DataType> : ISelectEditable<SamplerPoint<DataType>>, ISamplerPoint
     {
-        public T value;
+        public DataType value;
         public int segmentIndex;
         [NonSerialized]
         public float cachedDistance;
@@ -15,17 +14,17 @@ namespace ChaseMacMillan.CurveDesigner
         public KeyframeInterpolationMode interpolationMode = KeyframeInterpolationMode.Linear;
         public SelectableGUID guid;
         [NonSerialized]
-        public Sampler<T> owner;
+        public Sampler<DataType,SamplerPoint<DataType>> owner;
         public KeyframeInterpolationMode InterpolationMode { get => interpolationMode; set => interpolationMode = value; }
         public SelectableGUID GUID { get { return guid; } set { guid = value; } }
         public float Time { get => time; set => time = value; }
         public int SegmentIndex { get => segmentIndex; set => segmentIndex = value; }
 
-        public SamplerPoint(Sampler<T> owner,Curve3D curve) {
+        public SamplerPoint(Sampler<DataType,SamplerPoint<DataType>> owner,Curve3D curve) {
             this.owner = owner;
             GUID = curve.guidFactory.GetGUID(this);
         }
-        public SamplerPoint(SamplerPoint<T> other, ISampler<T> owner, bool createNewGuids,Curve3D curve)
+        public SamplerPoint(ISamplerPoint<DataType> other, ISampler<DataType> owner, bool createNewGuids,Curve3D curve)
         {
             value = owner.CloneValue(other.value,createNewGuids);
             segmentIndex = other.segmentIndex;
@@ -60,7 +59,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
 
 #if UNITY_EDITOR
-        public void SelectEdit(Curve3D curve, List<SamplerPoint<T>> selectedPoints)
+        public void SelectEdit(Curve3D curve, List<SamplerPoint<DataType>> selectedPoints)
         {
             owner.SelectEdit(curve, selectedPoints,selectedPoints[0]);
         }

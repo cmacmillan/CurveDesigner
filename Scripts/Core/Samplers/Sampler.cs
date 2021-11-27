@@ -11,14 +11,14 @@ namespace ChaseMacMillan.CurveDesigner
     /// <para>You can sample at any distance along the curve and will recieve a value calculated by interpolating between the two adjacent points</para>
     /// </summary>
     /// <typeparam name="T">The type of points in the Sampler</typeparam>
-    public abstract class Sampler<T> : ISampler<T>,ISerializationCallbackReceiver
+    public abstract class Sampler<DataType,SamplerPoint> : ISampler<DataType>, ISerializationCallbackReceiver where SamplerPoint : ISamplerPoint<DataType>, new()
     {
-        public List<SamplerPoint<T>> points = new List<SamplerPoint<T>>();
+        public List<SamplerPoint> points = new List<SamplerPoint>();
 
         [NonSerialized]
         //this value is essentially just a cache of the points excluding all points that are within the final segment of the curve when it is a closed loop
         //this is because those values essentially need to temporarily disappear when IsClosedLoop gets disabled
-        private List<SamplerPoint<T>> points_openCurveOnly = null;
+        private List<SamplerPoint> points_openCurveOnly = null;
 
         public string fieldDisplayName="";
 
@@ -30,23 +30,24 @@ namespace ChaseMacMillan.CurveDesigner
             this.label = label;
             this.editMode = editMode;
         }
-        public Sampler(Sampler<T> objToClone,bool createNewGuids,Curve3D curve)
+        public Sampler(Sampler<DataType,SamplerPoint> objToClone, bool createNewGuids,Curve3D curve)
         {
             this.label = objToClone.label;
             this.editMode = objToClone.editMode;
 
-            points_openCurveOnly = new List<SamplerPoint<T>>();
+            points_openCurveOnly = new List<SamplerPoint>();
 
             foreach (var i in objToClone.points)
             {
-                var newPoint = new SamplerPoint<T>(i, this, createNewGuids, curve);
+                var newPoint = new SamplerPoint();
+                    (i, this, createNewGuids, curve);
                 points.Add(newPoint);
                 if (objToClone.points_openCurveOnly.Contains(i))
                     points_openCurveOnly.Add(newPoint);
             }
         }
         protected abstract T GetInterpolatedValueAtDistance(float distance, BezierCurve curve);
-        public virtual T CloneValue(T val, bool shouldCreateGuids)
+        public virtual DataType CloneValue(DataType val, bool shouldCreateGuids)
         {
             return val;
         }
@@ -58,7 +59,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 #if UNITY_EDITOR
-        public virtual void SelectEdit(Curve3D curve, List<SamplerPoint<T>> selectedPoints,SamplerPoint<T> mainPoint)
+        public virtual void SelectEdit(Curve3D curve, List<SamplerPoint> selectedPoints,SamplerPoint mainPoint)
         {
             float originalDistance = mainPoint.GetDistance(curve.positionCurve);
             float distanceOffset = EditorGUILayout.FloatField("Distance", originalDistance) - originalDistance;
@@ -93,7 +94,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
 
         public int InsertPointAtDistance(float distance, BezierCurve curve) {
-            T interpolatedValue = GetInterpolatedValueAtDistance(distance, curve);
+            DataType interpolatedValue = GetInterpolatedValueAtDistance(distance, curve);
             var newPoint = new SamplerPoint<T>(this,curve.owner);
             newPoint.value = interpolatedValue;
             var valuePoint = newPoint as ISamplerPoint;
