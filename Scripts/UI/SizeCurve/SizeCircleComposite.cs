@@ -11,7 +11,7 @@ namespace ChaseMacMillan.CurveDesigner
         private List<PointComposite> ringPoints = new List<PointComposite>();
         private Curve3D _curve;
         public PointAlongCurveComposite linePoint;
-        public SamplerPoint<float> value;
+        public FloatSamplerPoint value;
         public FloatSampler _sampler;
         private IOffsetProvider offset;
 
@@ -19,7 +19,7 @@ namespace ChaseMacMillan.CurveDesigner
 
         public override SelectableGUID GUID => value.GUID;
 
-        public SizeCircleComposite(Composite parent,SamplerPoint<float> value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatSampler _sampler,IOffsetProvider offset = null) : base(parent)
+        public SizeCircleComposite(Composite parent,FloatSamplerPoint value,BezierCurve positionCurve,Curve3D curve,PositionCurveComposite positionCurveComposite,FloatSampler _sampler,IOffsetProvider offset = null) : base(parent)
         {
             this._sampler = _sampler;
             this.value = value;
@@ -88,13 +88,13 @@ namespace ChaseMacMillan.CurveDesigner
     }
     public class SizeCurveEdgeClickCommand : IClickCommand
     {
-        private SamplerPoint<float> _ring;
+        private FloatSamplerPoint _ring;
         private SizeCircleEdgePointPositionProvider _point;
         private SizeCircleComposite _owner;
         private Curve3D curve;
         private IOffsetProvider offset;
 
-        public SizeCurveEdgeClickCommand(SamplerPoint<float> ring, SizeCircleEdgePointPositionProvider point,SizeCircleComposite owner,Curve3D curve,IOffsetProvider offset =null)
+        public SizeCurveEdgeClickCommand(FloatSamplerPoint ring, SizeCircleEdgePointPositionProvider point,SizeCircleComposite owner,Curve3D curve,IOffsetProvider offset =null)
         {
             this._owner = owner;
             this._ring = ring;
@@ -144,10 +144,10 @@ namespace ChaseMacMillan.CurveDesigner
     public class SizeCircleEdgePointPositionProvider : IPositionProvider
     {
         private int _ringPointIndex;
-        private SamplerPoint<float> _ring;
+        private FloatSamplerPoint _ring;
         private Curve3D curve;
         private IOffsetProvider offset;
-        public SizeCircleEdgePointPositionProvider(SamplerPoint<float> ring, int ringPointIndex,Curve3D curve,IOffsetProvider offset = null)
+        public SizeCircleEdgePointPositionProvider(FloatSamplerPoint ring, int ringPointIndex,Curve3D curve,IOffsetProvider offset = null)
         {
             this._ringPointIndex = ringPointIndex;
             this._ring = ring;

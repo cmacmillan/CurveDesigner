@@ -6,7 +6,9 @@ using UnityEngine;
 namespace ChaseMacMillan.CurveDesigner
 {
     [System.Serializable]
-    public class FloatSampler : ValueSampler<float>
+    public class FloatSamplerPoint : SamplerPoint<float,FloatSamplerPoint> { }
+    [System.Serializable]
+    public class FloatSampler : ValueSampler<float,FloatSamplerPoint>
     {
         public float minValue;
         public float maxValue;
@@ -29,7 +31,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             constValue = Constrain(EditorGUI.FloatField(rect, GetLabel(), constValue));
         }
-        public override void SelectEdit(Curve3D curve, List<SamplerPoint<float>> selectedPoints,SamplerPoint<float> mainPoint)
+        public override void SelectEdit(Curve3D curve, List<FloatSamplerPoint> selectedPoints,FloatSamplerPoint mainPoint)
         {
             float originalValue = mainPoint.value;
             EditorGUIUtility.SetWantsMouseJumping(1);
@@ -84,7 +86,7 @@ namespace ChaseMacMillan.CurveDesigner
                     return FindDistanceOfArea(targetAreaUnderCurve, -1, startingHeight, -1, startingHeight);
             }
             areaUnderCurve += firstSegmentArea;
-            float GetVal(SamplerPoint<float> val)
+            float GetVal(FloatSamplerPoint val)
             {
                 return 1.0f / (val.value);
             }

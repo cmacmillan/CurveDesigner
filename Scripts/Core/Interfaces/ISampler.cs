@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public interface ISampler<T> : ISampler
+    public interface ISampler<T,SamplerPointType> : ISampler
     {
         T CloneValue(T val,bool shouldCreateGuids);
     }

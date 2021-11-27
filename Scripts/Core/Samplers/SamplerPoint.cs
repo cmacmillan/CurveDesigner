@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public class SamplerPoint<DataType> : ISelectEditable<SamplerPoint<DataType>>, ISamplerPoint
+    public class SamplerPoint<DataType,SamplerPointType> : ISelectEditable<SamplerPointType>, ISamplerPoint<DataType,SamplerPointType> where SamplerPointType : class, ISamplerPoint<DataType,SamplerPointType>, new()
     {
         public DataType value;
         public int segmentIndex;
@@ -14,22 +14,27 @@ namespace ChaseMacMillan.CurveDesigner
         public KeyframeInterpolationMode interpolationMode = KeyframeInterpolationMode.Linear;
         public SelectableGUID guid;
         [NonSerialized]
-        public Sampler<DataType,SamplerPoint<DataType>> owner;
+        public Sampler<DataType,SamplerPointType> owner;
         public KeyframeInterpolationMode InterpolationMode { get => interpolationMode; set => interpolationMode = value; }
         public SelectableGUID GUID { get { return guid; } set { guid = value; } }
         public float Time { get => time; set => time = value; }
         public int SegmentIndex { get => segmentIndex; set => segmentIndex = value; }
+        public DataType Value { get => value; set => this.value = value; }
+        public ISampler<DataType,SamplerPointType> Owner { get => owner; set => owner=(Sampler<DataType,SamplerPointType>)value; }
+        public float CachedDistance { get => cachedDistance; set => cachedDistance = value; }
 
-        public SamplerPoint(Sampler<DataType,SamplerPoint<DataType>> owner,Curve3D curve) {
-            this.owner = owner;
+        public SamplerPoint() { }
+
+        public void Construct(ISampler<DataType,SamplerPointType> owner,Curve3D curve) {
+            this.owner = (Sampler<DataType,SamplerPointType>)owner;
             GUID = curve.guidFactory.GetGUID(this);
         }
-        public SamplerPoint(ISamplerPoint<DataType> other, ISampler<DataType> owner, bool createNewGuids,Curve3D curve)
+        public void Construct(ISamplerPoint<DataType,SamplerPointType> other, ISampler<DataType,SamplerPointType> owner, bool createNewGuids,Curve3D curve)
         {
-            value = owner.CloneValue(other.value,createNewGuids);
-            segmentIndex = other.segmentIndex;
-            time = other.time;
-            interpolationMode = other.interpolationMode;
+            value = owner.CloneValue(other.Value,createNewGuids);
+            segmentIndex = other.SegmentIndex;
+            time = other.Time;
+            interpolationMode = other.InterpolationMode;
             if (createNewGuids)
                 guid = curve.guidFactory.GetGUID(this);
             else
@@ -59,7 +64,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
 
 #if UNITY_EDITOR
-        public void SelectEdit(Curve3D curve, List<SamplerPoint<DataType>> selectedPoints)
+        public void SelectEdit(Curve3D curve, List<SamplerPointType> selectedPoints)
         {
             owner.SelectEdit(curve, selectedPoints,selectedPoints[0]);
         }

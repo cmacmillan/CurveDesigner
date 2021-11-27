@@ -1,0 +1,5 @@
+﻿So you might be wondering why the SamplerPoint/Sampler code is so horrible, with massive quantities of confusing nested generics.
+This is because prior to Unity version 2020 it could not serialize any generic objects unless they had a concrete implementation.
+This has massive ripple effects which forces you to pass this concrete type all the way down the class hierarchy and generally turns every class into a mess.
+I didn't really realize that my code wouldn't work with <2020 versions until it was a bit too late and this was all written, so I had to resort to this generic scheme. 
+My sincerest apologies. 

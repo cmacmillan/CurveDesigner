@@ -6,7 +6,10 @@ using UnityEngine;
 namespace ChaseMacMillan.CurveDesigner
 {
     [System.Serializable]
-    public class ColorSampler : ValueSampler<Color>
+    public class ColorSamplerPoint : SamplerPoint<Color,ColorSamplerPoint> { }
+
+    [System.Serializable]
+    public class ColorSampler : ValueSampler<Color,ColorSamplerPoint>
     {
         public ColorSampler(string label, Curve3DEditMode editMode) : base(label, editMode) {
             constValue = Color.white;
@@ -17,7 +20,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             constValue = EditorGUI.ColorField(rect, GetLabel(), constValue);
         }
-        public override void SelectEdit(Curve3D curve, List<SamplerPoint<Color>> selectedPoints, SamplerPoint<Color> mainPoint)
+        public override void SelectEdit(Curve3D curve, List<ColorSamplerPoint> selectedPoints, ColorSamplerPoint mainPoint)
         {
             if (selectedPoints.Count==1)
             {

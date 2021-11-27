@@ -11,14 +11,14 @@ namespace ChaseMacMillan.CurveDesigner
     /// <para>You can sample at any distance along the curve and will recieve a value calculated by interpolating between the two adjacent points</para>
     /// </summary>
     /// <typeparam name="T">The type of points in the Sampler</typeparam>
-    public abstract class Sampler<DataType,SamplerPoint> : ISampler<DataType>, ISerializationCallbackReceiver where SamplerPoint : ISamplerPoint<DataType>, new()
+    public abstract class Sampler<DataType,SamplerPointType> : ISampler<DataType,SamplerPointType>, ISerializationCallbackReceiver where SamplerPointType : class, ISamplerPoint<DataType,SamplerPointType>, new()
     {
-        public List<SamplerPoint> points = new List<SamplerPoint>();
+        public List<SamplerPointType> points = new List<SamplerPointType>();
 
         [NonSerialized]
         //this value is essentially just a cache of the points excluding all points that are within the final segment of the curve when it is a closed loop
         //this is because those values essentially need to temporarily disappear when IsClosedLoop gets disabled
-        private List<SamplerPoint> points_openCurveOnly = null;
+        private List<SamplerPointType> points_openCurveOnly = null;
 
         public string fieldDisplayName="";
 
@@ -30,23 +30,23 @@ namespace ChaseMacMillan.CurveDesigner
             this.label = label;
             this.editMode = editMode;
         }
-        public Sampler(Sampler<DataType,SamplerPoint> objToClone, bool createNewGuids,Curve3D curve)
+        public Sampler(Sampler<DataType,SamplerPointType> objToClone, bool createNewGuids,Curve3D curve)
         {
             this.label = objToClone.label;
             this.editMode = objToClone.editMode;
 
-            points_openCurveOnly = new List<SamplerPoint>();
+            points_openCurveOnly = new List<SamplerPointType>();
 
             foreach (var i in objToClone.points)
             {
-                var newPoint = new SamplerPoint();
-                    (i, this, createNewGuids, curve);
+                var newPoint = new SamplerPointType();
+                newPoint.Construct(i, this, createNewGuids, curve);
                 points.Add(newPoint);
                 if (objToClone.points_openCurveOnly.Contains(i))
                     points_openCurveOnly.Add(newPoint);
             }
         }
-        protected abstract T GetInterpolatedValueAtDistance(float distance, BezierCurve curve);
+        protected abstract DataType GetInterpolatedValueAtDistance(float distance, BezierCurve curve);
         public virtual DataType CloneValue(DataType val, bool shouldCreateGuids)
         {
             return val;
@@ -55,11 +55,11 @@ namespace ChaseMacMillan.CurveDesigner
         {
             foreach (var i in GetPoints(curve))
             {
-                i.cachedDistance = i.GetDistance(curve);
+                i.CachedDistance = i.GetDistance(curve);
             }
         }
 #if UNITY_EDITOR
-        public virtual void SelectEdit(Curve3D curve, List<SamplerPoint> selectedPoints,SamplerPoint mainPoint)
+        public virtual void SelectEdit(Curve3D curve, List<SamplerPointType> selectedPoints,SamplerPointType mainPoint)
         {
             float originalDistance = mainPoint.GetDistance(curve.positionCurve);
             float distanceOffset = EditorGUILayout.FloatField("Distance", originalDistance) - originalDistance;
@@ -95,17 +95,18 @@ namespace ChaseMacMillan.CurveDesigner
 
         public int InsertPointAtDistance(float distance, BezierCurve curve) {
             DataType interpolatedValue = GetInterpolatedValueAtDistance(distance, curve);
-            var newPoint = new SamplerPoint<T>(this,curve.owner);
-            newPoint.value = interpolatedValue;
+            var newPoint = new SamplerPointType();
+            newPoint.Construct(this,curve.owner);
+            newPoint.Value = interpolatedValue;
             var valuePoint = newPoint as ISamplerPoint;
-            if (valuePoint != null && TryGetPointBelowDistance(distance, curve, out SamplerPoint<T> point))
+            if (valuePoint != null && TryGetPointBelowDistance(distance, curve, out SamplerPointType point))
                 valuePoint.InterpolationMode = point.InterpolationMode;
             points.Add(newPoint);
             newPoint.SetDistance(distance,curve);
             return points.IndexOf(newPoint);
         }
 
-        private bool TryGetPointBelowDistance(float distance, BezierCurve curve,out SamplerPoint<T> point)
+        private bool TryGetPointBelowDistance(float distance, BezierCurve curve,out SamplerPointType point)
         {
             point = null;
             var points = GetPoints(curve);
@@ -130,7 +131,7 @@ namespace ChaseMacMillan.CurveDesigner
             point = points.Last();
             return true;
         }
-        public List<SamplerPoint<T>> GetPoints(BezierCurve curve)
+        public List<SamplerPointType> GetPoints(BezierCurve curve)
         {
             if (curve.isClosedLoop)
                 return points;
@@ -144,15 +145,15 @@ namespace ChaseMacMillan.CurveDesigner
         /// </summary>
         public void RecalculateOpenCurveOnlyPoints(BezierCurve curve)
         {
-            points_openCurveOnly = new List<SamplerPoint<T>>();
+            points_openCurveOnly = new List<SamplerPointType>();
             foreach (var i in points)
-                if (i.segmentIndex < curve.PointGroups.Count-1)
+                if (i.SegmentIndex < curve.PointGroups.Count-1)
                     points_openCurveOnly.Add(i);
         }
 
         public void Sort(BezierCurve curve)
         {
-            points = points.OrderBy((a) => a.time).OrderBy(a=>a.segmentIndex).ToList();
+            points = points.OrderBy((a) => a.Time).OrderBy(a=>a.SegmentIndex).ToList();
             RecalculateOpenCurveOnlyPoints(curve);
         }
 
@@ -161,7 +162,7 @@ namespace ChaseMacMillan.CurveDesigner
         public void OnAfterDeserialize()
         {
             foreach (var i in points)
-                i.owner = this;
+                i.Owner = this;
         }
 
         public virtual ISelectable GetSelectable(int index, Curve3D curve)

@@ -7,7 +7,9 @@ using System.Linq;
 namespace ChaseMacMillan.CurveDesigner
 {
     [System.Serializable]
-    public class ExtrudeSampler : Sampler<BezierCurve>
+    public class ExtrudeSamplerPoint : SamplerPoint<BezierCurve,ExtrudeSamplerPoint> { }
+    [System.Serializable]
+    public class ExtrudeSampler : Sampler<BezierCurve,ExtrudeSamplerPoint>
     {
         public ExtrudeSampler(string label, Curve3DEditMode editMode,BezierCurve positionCurve) : base(label,editMode) 
         {
@@ -20,7 +22,7 @@ namespace ChaseMacMillan.CurveDesigner
             return new BezierCurve(val, shouldCreateGuids);
         }
 #if UNITY_EDITOR
-        public override void SelectEdit(Curve3D curve, List<SamplerPoint<BezierCurve>> selectedPoints, SamplerPoint<BezierCurve> mainPoint)
+        public override void SelectEdit(Curve3D curve, List<ExtrudeSamplerPoint> selectedPoints, ExtrudeSamplerPoint mainPoint)
         {
             base.SelectEdit(curve, selectedPoints, mainPoint);
             bool oldClosedLoop = mainPoint.value.isClosedLoop;
@@ -92,14 +94,14 @@ namespace ChaseMacMillan.CurveDesigner
         public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference,out Vector3 tangent,bool useCachedDistance=false)
         {
             //This needs to interpolate references smoothly
-            Vector3 SamplePosition(SamplerPoint<BezierCurve> point, out Vector3 myRef,out Vector3 myTan)
+            Vector3 SamplePosition(ExtrudeSamplerPoint point, out Vector3 myRef,out Vector3 myTan)
             {
                 var samp = point.value.GetPointAtDistance(secondaryCurveDistance * point.value.GetLength());
                 myRef = samp.reference;
                 myTan = samp.tangent;
                 return samp.position;
             }
-            Vector3 InterpolateSamples(SamplerPoint<BezierCurve> lowerCurve,SamplerPoint<BezierCurve> upperCurve,float lowerDistance,float upperDistance,out Vector3 interpolatedReference,out Vector3 interpolatedTangent)
+            Vector3 InterpolateSamples(ExtrudeSamplerPoint lowerCurve, ExtrudeSamplerPoint upperCurve,float lowerDistance,float upperDistance,out Vector3 interpolatedReference,out Vector3 interpolatedTangent)
             {
                 float distanceBetweenSegments = upperDistance- lowerDistance;
                 Vector3 lowerPosition = SamplePosition(lowerCurve, out Vector3 lowerRef,out Vector3 lowerTangent);
@@ -135,7 +137,7 @@ namespace ChaseMacMillan.CurveDesigner
                 var upperDistance = upper.GetDistance(primaryCurve,useCachedDistance);
                 return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference,out tangent);
             }
-            SamplerPoint<BezierCurve> previousCurve = availableCurves[0];
+            ExtrudeSamplerPoint previousCurve = availableCurves[0];
             for (int i = 1; i < availableCurves.Count; i++)
             {
                 var currCurve = availableCurves[i];

@@ -7,14 +7,14 @@ namespace ChaseMacMillan.CurveDesigner
     public class ArcPointComposite : Composite
     {
         private Curve3D _curve;
-        private SamplerPoint<float> _point;
+        private FloatSamplerPoint _point;
         public PointAlongCurveComposite centerPoint;
         private PointComposite _leftHandlePoint;
         private PointComposite _rightHandlePoint;
         private ArcPointPositionProvider _leftPosition;
         private ArcPointPositionProvider _rightPosition;
         public override SelectableGUID GUID => _point.GUID;
-        public ArcPointComposite(Composite parent,SamplerPoint<float> point,Curve3D curve,FloatSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
+        public ArcPointComposite(Composite parent,FloatSamplerPoint point,Curve3D curve,FloatSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
             _curve = curve;
             _point = point;
@@ -49,8 +49,8 @@ namespace ChaseMacMillan.CurveDesigner
     {
         private Curve3D _curve;
         private bool _isLeft;
-        private SamplerPoint<float> _point;
-        public ArcPointPositionProvider(Curve3D curve,SamplerPoint<float> point, bool isLeft)
+        private FloatSamplerPoint _point;
+        public ArcPointPositionProvider(Curve3D curve,FloatSamplerPoint point, bool isLeft)
         {
             this._curve = curve;
             this._isLeft = isLeft;
@@ -73,12 +73,12 @@ namespace ChaseMacMillan.CurveDesigner
     public class ArcPointClickCommand : IClickCommand
     {
         private ArcPointComposite _owner;
-        private SamplerPoint<float> _point;
+        private FloatSamplerPoint _point;
         private FloatSampler _sampler;
         private Curve3D _curve;
         private bool _isLeft;
         private float initialSign;
-        public ArcPointClickCommand(ArcPointComposite owner, SamplerPoint<float> point, FloatSampler sampler, Curve3D curve,bool isLeft)
+        public ArcPointClickCommand(ArcPointComposite owner, FloatSamplerPoint point, FloatSampler sampler, Curve3D curve,bool isLeft)
         {
             this._owner = owner;
             this._point = point;

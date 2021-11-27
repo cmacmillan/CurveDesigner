@@ -6,13 +6,13 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public class RotationPointComposite : Composite, IPositionProvider
     {
-        public SamplerPoint<float> _point;
+        public FloatSamplerPoint _point;
         public PointAlongCurveComposite centerPoint;
         private PointComposite _rotationHandlePoint;
         public Curve3D _curve;
         public override SelectableGUID GUID => _point.GUID;
 
-        public RotationPointComposite(Composite parent,SamplerPoint<float> value,Curve3D curve,FloatSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
+        public RotationPointComposite(Composite parent,FloatSamplerPoint value,Curve3D curve,FloatSampler sampler,Color color, PositionCurveComposite positionCurveComposite): base(parent)
         {
             _point = value;
             _curve = curve;
@@ -51,7 +51,7 @@ namespace ChaseMacMillan.CurveDesigner
     public class EditRotationClickCommand : IClickCommand
     {
         private RotationPointComposite _owner;
-        private SamplerPoint<float> _value;
+        private FloatSamplerPoint _value;
         private FloatSampler _sampler;
         private Curve3D _curve;
         private int Index {
@@ -65,7 +65,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 
-        public EditRotationClickCommand(RotationPointComposite owner,SamplerPoint<float> value,FloatSampler sampler,Curve3D curve)
+        public EditRotationClickCommand(RotationPointComposite owner,FloatSamplerPoint value,FloatSampler sampler,Curve3D curve)
         {
             _owner = owner;
             _value = value;
