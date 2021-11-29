@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
 
@@ -43,10 +44,11 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public static Vector2 ScreenSpaceToGuiSpace(Vector2 screenPos)
         {
-            return new Vector2(screenPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - screenPos.y);
+            return new Vector2(screenPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - screenPos.y)/EditorGUIUtility.pixelsPerPoint;
         }
         public static Vector2 GuiSpaceToScreenSpace(Vector2 guiPos)
         {
+            guiPos *= EditorGUIUtility.pixelsPerPoint;
             return new Vector2(guiPos.x, UnityEditor.SceneView.lastActiveSceneView.camera.pixelHeight - guiPos.y);
         }
 
