@@ -6,7 +6,7 @@ An open source (MIT) tool for designing tubes, ramps, curves, and half-pipes in 
 ![CurveTypes](Art/Screenshots/CurveTypes.png)
 
 # Usage
-See UserManual.pdf for a full user guide. Only unity versions 2020.1+ are supported currently
+See UserManual.pdf for a full user guide.
 
 # Downloads
 You can download the most up-to-date version from https://github.com/cmacmillan/CurveDesigner
