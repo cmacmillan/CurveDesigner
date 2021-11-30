@@ -45,6 +45,16 @@ namespace ChaseMacMillan.CurveDesigner
             return point;
         }
 
+        public Vector3 GetPointOnSurface(float distance, float crossAxis, bool front = true)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float GetCrossAxisWidthAtDistance(float distance, bool front = true)
+        {
+            throw new System.NotImplementedException();
+        }
+
         //The functions below simply return the values of different samples at a distance
         public float GetRotationAtDistanceAlongCurve(float distance)
         {

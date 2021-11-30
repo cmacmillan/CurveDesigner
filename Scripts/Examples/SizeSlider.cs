@@ -1,6 +1,6 @@
 ﻿//This script slides a size point back and forth along a curve. The curve must have at least 2 points and sizeSampler must have useKeyframes=true
 using UnityEngine;
-namespace ChaseMacMillan.CurveDesigner
+namespace ChaseMacMillan.CurveDesigner.Examples
 {
     public class SizeSlider : MonoBehaviour
     {

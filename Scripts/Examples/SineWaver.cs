@@ -2,7 +2,7 @@
 //to make the curve move in a sine wave-ish pattern
 //if you add more points to the curve the sine wave will get longer
 using UnityEngine;
-namespace ChaseMacMillan.CurveDesigner
+namespace ChaseMacMillan.CurveDesigner.Examples
 {
     public class SineWaver : MonoBehaviour
     {

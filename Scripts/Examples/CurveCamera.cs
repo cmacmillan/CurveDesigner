@@ -1,7 +1,7 @@
 ﻿//This script allows a camera to follow behind an object that is near a curve
 //Perfect for following behind a ball rolling down a tube
 using UnityEngine;
-namespace ChaseMacMillan.CurveDesigner
+namespace ChaseMacMillan.CurveDesigner.Examples
 {
     public class CurveCamera : MonoBehaviour
     {
