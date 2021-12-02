@@ -3,15 +3,16 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance);
+    public delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal);
     public static class MeshGeneratorPointCreators
     {
-        public static Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance)
+        public static Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
         {
             totalPointCount -= 1;
             float progress = currentIndex / (float)totalPointCount;
             var relativePos = extrudeSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference, out Vector3 tangent, useCachedDistance);//*size;
             var rotationMat = Quaternion.AngleAxis(rotation, point.tangent);
+            normal = reference;
             //Lets say z is forward
             var cross = Vector3.Cross(point.tangent, point.reference).normalized;
             Vector3 TransformVector3(Vector3 vect)
@@ -24,7 +25,7 @@ namespace ChaseMacMillan.CurveDesigner
                 thicknessDirection *= -1;
             return absolutePos + (rotationMat * TransformVector3(thicknessDirection)).normalized * offset;
         }
-        public static Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance)
+        public static Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
         {
             var center = point.position;
             var up = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
@@ -33,23 +34,26 @@ namespace ChaseMacMillan.CurveDesigner
             var scaledRight = right * size;
             Vector3 lineStart = center + scaledUp + scaledRight;
             Vector3 lineEnd = center + scaledUp - scaledRight;
+            normal = up;
             return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
         }
-        public static Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance)
+        public static Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
         {
             float theta = (arc * currentIndex / (totalPointCount - 1)) + (360.0f - arc) / 2 + rotation;
-            var pos = point.GetRingPoint(theta, (size + offset));
+            var pos = point.GetRingPoint(theta, (size + offset), out normal);
+            normal *= Mathf.Sign(offset);
             return pos;
         }
-        public static Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance)
+        public static Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
         {
-            Vector3 lineStart = TubePointCreator(point, 0, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance);
-            Vector3 lineEnd = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance);
+            Vector3 lineStart = TubePointCreator(point, 0, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _);
+            Vector3 lineEnd = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _);
             float lerp = currentIndex / (float)(totalPointCount - 1);
+            normal = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
             return Vector3.Lerp(lineStart, lineEnd, lerp);
         }
         private static List<(float, Vector3)> GetPositionOnSurface_List = new List<(float, Vector3)>();//to avoid reallocation
-        public static Vector3 GetPositionOnSurface(Curve3D curve, float distance, float crossAxisDistance, bool front, out float crossAxisWidth)
+        public static Vector3 GetPointOnSurface(Curve3D curve, float distance, float crossAxisDistance, bool front, out float crossAxisWidth)
         {
             var pointOnCurve = curve.positionCurve.GetPointAtDistance(distance);
             GetPointCreatorOffsetAndPointCountByType(curve.type, curve.ringPointCount, curve.flatPointCount, front, out PointCreator pointCreator, out float offset, out int pointCount);
@@ -61,7 +65,7 @@ namespace ChaseMacMillan.CurveDesigner
             GetPositionOnSurface_List.Clear();
             for (int i = 0; i < pointCount; i++)
             {
-                Vector3 point = pointCreator(pointOnCurve, i, pointCount,size,rotation,offset,arc,curve.extrudeSampler,curve.positionCurve,false);
+                Vector3 point = pointCreator(pointOnCurve, i, pointCount,size,rotation,offset,arc,curve.extrudeSampler,curve.positionCurve,false,out _);//normal
                 if (i > 0)
                 {
                     totalDistance += Vector3.Distance(previousPoint,point);
@@ -84,10 +88,6 @@ namespace ChaseMacMillan.CurveDesigner
                 }
             }
             return curve.transform.TransformPoint(GetPositionOnSurface_List[GetPositionOnSurface_List.Count - 1].Item2);//last point
-        }
-        public static void GetPointOnSurface(Curve3D curve, float distance, float crossAxisDistance, bool front,out Vector3 position, out Vector3 normal, out Vector3 reference,out float crossAxisWidth)
-        {
-            
         }
         private static void GetPointCreatorOffsetAndPointCountByType(MeshGenerationMode curveType,int ringPointCount, int flatPointCount,bool front,out PointCreator pointCreator, out float offset, out int pointCount)
         {

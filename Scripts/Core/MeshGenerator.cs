@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
@@ -17,6 +16,8 @@ namespace ChaseMacMillan.CurveDesigner
 
             public Vector3 side2Point1;
             public Vector3 side2Point2;
+
+            public Vector3 tangentDirection;
         }
         private static Vector3 NormalTangent(Vector3 forwardVector, Vector3 previous)
         {
@@ -47,6 +48,8 @@ namespace ChaseMacMillan.CurveDesigner
             float closeTilableMeshGap = data.closeTilableMeshGap;
             MeshPrimaryAxis meshPrimaryAxis = data.meshPrimaryAxis;
             //public int currentlyGeneratingForCurveId;
+            System.Diagnostics.Stopwatch overallstop = new System.Diagnostics.Stopwatch();
+            overallstop.Start();
 
             extrudeSampler?.CacheDistances(curve);
             sizeSampler.CacheDistances(curve);
@@ -143,6 +146,8 @@ namespace ChaseMacMillan.CurveDesigner
             }
             void CreateNormals()
             {
+                System.Diagnostics.Stopwatch normalwatch = new System.Diagnostics.Stopwatch();
+                normalwatch.Start();
                 for (int i = 0; i < vertices.Count; i++)
                     normals.Add(Vector3.zero);
                 for (int submeshIndex = 0; submeshIndex < submeshes.Count; submeshIndex++)
@@ -174,6 +179,8 @@ namespace ChaseMacMillan.CurveDesigner
                 {
                     normals[i] = normals[i].normalized;
                 }
+                normalwatch.Stop();
+                Debug.Log($"normals {normalwatch.ElapsedMilliseconds}ms");
             }
             void TrianglifyLayer(bool isExterior, int numPointsPerRing, int startIndex, int submeshIndex)
             {//generate tris
@@ -221,6 +228,9 @@ namespace ChaseMacMillan.CurveDesigner
 
                         vertices.Add(curr.side1Point1);
                         vertices.Add(curr.side1Point2);
+                        var normal = -Vector3.Cross(curr.side1Point2-curr.side1Point1,curr.tangentDirection).normalized;
+                        normals.Add(normal);
+                        normals.Add(normal);
 
                         var color = GetColorAtDistance(curr.distanceAlongCurve);
                         var thickness = GetThicknessAtDistance(curr.distanceAlongCurve);
@@ -264,6 +274,9 @@ namespace ChaseMacMillan.CurveDesigner
 
                         vertices.Add(curr.side2Point1);
                         vertices.Add(curr.side2Point2);
+                        var normal = Vector3.Cross(curr.side2Point2-curr.side2Point1,curr.tangentDirection).normalized;
+                        normals.Add(normal);
+                        normals.Add(normal);
 
                         var color = GetColorAtDistance(curr.distanceAlongCurve);
                         var thickness = GetThicknessAtDistance(curr.distanceAlongCurve);
@@ -314,6 +327,7 @@ namespace ChaseMacMillan.CurveDesigner
                         side1Point2 = vertices[s1p2],
                         side2Point1 = vertices[s2p1],
                         side2Point2 = vertices[s2p2],
+                        tangentDirection = point.tangent,
                     });
                 }
                 return retr;
@@ -396,16 +410,23 @@ namespace ChaseMacMillan.CurveDesigner
             void CreateEndPlate(bool isStartPlate, float distanceFromStart, PointCreator pointCreator, int pointsPerRing, int submeshIndex, TextureLayerSettings settings, float offset1, float offset2, bool flip = false)
             {
                 PointOnCurve point;
+                Vector3 normal;
                 if (isStartPlate)
+                {
                     point = sampled[0];
+                    normal = -point.tangent;
+                }
                 else
+                {
                     point = sampled.Last();
+                    normal = point.tangent;
+                }
 
                 int ring1Base = vertices.Count;
-                CreateRing(pointCreator, pointsPerRing, offset1, point, out _);
+                CreateRing(pointCreator, pointsPerRing, offset1, point, out _,false);
 
                 int ring2Base = vertices.Count;
-                CreateRing(pointCreator, pointsPerRing, offset2, point, out _);
+                CreateRing(pointCreator, pointsPerRing, offset2, point, out _,false);
 
                 bool side = isStartPlate;
                 if (flip)
@@ -420,6 +441,8 @@ namespace ChaseMacMillan.CurveDesigner
                     pos.Add(vertices[ring2Base + i]);
                     color.Add(colors[ring1Base + i]);
                     color.Add(colors[ring2Base + i]);
+                    normals.Add(normal);
+                    normals.Add(normal);
                 }
                 for (int i = 0; i < pointsPerRing * 2; i++)
                 {
@@ -461,7 +484,7 @@ namespace ChaseMacMillan.CurveDesigner
                         DrawQuad(i + 2, i + 3, i, i + 1, submeshIndex);
                 }
             }
-            float CreateRing(PointCreator pointCreator, int pointsPerRing, float offset, PointOnCurve currentPoint, out float size)
+            float CreateRing(PointCreator pointCreator, int pointsPerRing, float offset, PointOnCurve currentPoint, out float size,bool addNormals)
             {
                 GetColorSizeRotationThickness(currentPoint.distanceFromStartOfCurve, offset, out float outOffset, out size, out float rotation, out Color color);
                 float currentLength = 0;
@@ -469,8 +492,10 @@ namespace ChaseMacMillan.CurveDesigner
                 float arc = GetTubeArcAtDistance(currentPoint.distanceFromStartOfCurve);
                 for (int j = 0; j < pointsPerRing; j++)
                 {
-                    var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation, outOffset,arc,extrudeSampler,curve,true);
+                    var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation, outOffset,arc,extrudeSampler,curve,true,out Vector3 normal);
                     vertices.Add(position);
+                    if (addNormals)
+                        normals.Add(normal);
                     if (j > 0)
                         currentLength += Vector3.Distance(previousPoint, position);
                     previousPoint = position;
@@ -494,7 +519,7 @@ namespace ChaseMacMillan.CurveDesigner
                 for (int i = 0; i < points.Count; i++)
                 {
                     PointOnCurve currentPoint = points[i];
-                    float currentLength = CreateRing(pointCreator, pointsPerRing, offset, currentPoint, out float size);
+                    float currentLength = CreateRing(pointCreator, pointsPerRing, offset, currentPoint, out float size,true);
                     distsFromStart.Add(currentPoint.distanceFromStartOfCurve);
                     thickness.Add(currentLength);
                 }
@@ -602,12 +627,12 @@ namespace ChaseMacMillan.CurveDesigner
                         return output;
                     }
                 case MeshGenerationMode.HollowTube:
-                    {
+                    { 
                         int numMainLayerVerts = RingPointCount * sampled.Count * 2;
                         output.InitSubmeshes(!IsClosedLoop ? 4 : 3,out submeshes);
 
-                        CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer);
-                        CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, -1, RingPointCount, backTextureLayer);
+                        CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, .5f, RingPointCount, mainTextureLayer);
+                        CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, -.5f, RingPointCount, backTextureLayer);
 
                         if (!shouldTubeGenerateEdges)
                             for (int i = 0; i < vertices.Count/RingPointCount; i++)
@@ -621,12 +646,13 @@ namespace ChaseMacMillan.CurveDesigner
                         if (!IsClosedLoop)
                         {
                             int submeshIndex = 3;
-                            CreateEndPlate(true, 0, MeshGeneratorPointCreators.TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, 0, -1);
-                            CreateEndPlate(false, curve.GetLength(), MeshGeneratorPointCreators.TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, 0, -1);
+                            CreateEndPlate(true, 0, MeshGeneratorPointCreators.TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, .5f, -.5f);
+                            CreateEndPlate(false, curve.GetLength(), MeshGeneratorPointCreators.TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, .5f, -.5f);
                         }
 
-                        CreateNormals();
-
+                        //CreateNormals();
+                        overallstop.Stop();
+                        Debug.Log($"overall {overallstop.ElapsedMilliseconds}ms");
                         return output;
                     }
                 case MeshGenerationMode.Flat:
