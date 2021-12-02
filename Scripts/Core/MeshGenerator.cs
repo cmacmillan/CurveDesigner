@@ -48,8 +48,6 @@ namespace ChaseMacMillan.CurveDesigner
             float closeTilableMeshGap = data.closeTilableMeshGap;
             MeshPrimaryAxis meshPrimaryAxis = data.meshPrimaryAxis;
             //public int currentlyGeneratingForCurveId;
-            System.Diagnostics.Stopwatch overallstop = new System.Diagnostics.Stopwatch();
-            overallstop.Start();
 
             extrudeSampler?.CacheDistances(curve);
             sizeSampler.CacheDistances(curve);
@@ -65,8 +63,6 @@ namespace ChaseMacMillan.CurveDesigner
             List<Vector2> uvs = output.uvs;
             List<Color32> colors = output.colors;
             List<Vector3> normals = output.normals;
-
-            List<(int, int)> smoothNormals = new List<(int, int)>();
 
             float curveLength = curve.GetLength();
             bool shouldTubeGenerateEdges = false;
@@ -144,44 +140,6 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 return rotationSampler.GetValueAtDistance(distance, curve, true);
             }
-            void CreateNormals()
-            {
-                System.Diagnostics.Stopwatch normalwatch = new System.Diagnostics.Stopwatch();
-                normalwatch.Start();
-                for (int i = 0; i < vertices.Count; i++)
-                    normals.Add(Vector3.zero);
-                for (int submeshIndex = 0; submeshIndex < submeshes.Count; submeshIndex++)
-                {
-                    int end = submeshes[submeshIndex].Count;
-                    for (int i = 0; i < end; i += 3)
-                    {
-                        int v1 = submeshes[submeshIndex][i];
-                        int v2 = submeshes[submeshIndex][i + 1];
-                        int v3 = submeshes[submeshIndex][i + 2];
-                        Vector3 p1 = vertices[v1];
-                        Vector3 p2 = vertices[v2];
-                        Vector3 p3 = vertices[v3];
-                        Vector3 normal = Vector3.Cross(p2 - p1, p3 - p1).normalized;
-                        normals[v1]+= normal;
-                        normals[v2]+= normal;
-                        normals[v3]+= normal;
-                    }
-                }
-                foreach (var i in smoothNormals)
-                {
-                    Vector3 normal1 = normals[i.Item1];
-                    Vector3 normal2 = normals[i.Item2];
-                    Vector3 sum = normal1 + normal2;
-                    normals[i.Item1] = sum;
-                    normals[i.Item2] = sum;
-                }
-                for (int i=0;i<normals.Count;i++)
-                {
-                    normals[i] = normals[i].normalized;
-                }
-                normalwatch.Stop();
-                Debug.Log($"normals {normalwatch.ElapsedMilliseconds}ms");
-            }
             void TrianglifyLayer(bool isExterior, int numPointsPerRing, int startIndex, int submeshIndex)
             {//generate tris
                 int numVertsInALayer = (numRings + 1) * numPointsPerRing;
@@ -228,7 +186,7 @@ namespace ChaseMacMillan.CurveDesigner
 
                         vertices.Add(curr.side1Point1);
                         vertices.Add(curr.side1Point2);
-                        var normal = -Vector3.Cross(curr.side1Point2-curr.side1Point1,curr.tangentDirection).normalized;
+                        var normal = (flip?1:-1)*Vector3.Cross(curr.side1Point2-curr.side1Point1,curr.tangentDirection).normalized;
                         normals.Add(normal);
                         normals.Add(normal);
 
@@ -274,7 +232,7 @@ namespace ChaseMacMillan.CurveDesigner
 
                         vertices.Add(curr.side2Point1);
                         vertices.Add(curr.side2Point2);
-                        var normal = Vector3.Cross(curr.side2Point2-curr.side2Point1,curr.tangentDirection).normalized;
+                        var normal = (flip?-1:1)*Vector3.Cross(curr.side2Point2-curr.side2Point1,curr.tangentDirection).normalized;
                         normals.Add(normal);
                         normals.Add(normal);
 
@@ -567,11 +525,13 @@ namespace ChaseMacMillan.CurveDesigner
                         var vert = vertices[i];
                         average += vert;
                         vertices.Add(vert);
+                        normals.Add(normal);
                         colors.Add(color);
                         uvs.Add(GetFlatUV(vert - point.position, endTextureLayer, right, up));
                     }
                     average = average / ActualRingPointCount;
                     vertices.Add(average);
+                    normals.Add(normal);
                     colors.Add(color);
                     uvs.Add(GetFlatUV(average - point.position, endTextureLayer, right, up));
                 }
@@ -610,9 +570,6 @@ namespace ChaseMacMillan.CurveDesigner
                         int numMainLayerVerts = RingPointCount * sampled.Count;
                         output.InitSubmeshes(!IsClosedLoop ? 3 : 2,out submeshes);
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer);
-                        if (!shouldTubeGenerateEdges)
-                            for (int i = 0; i < vertices.Count/RingPointCount; i++)
-                                smoothNormals.Add((i*RingPointCount,(i+1)*RingPointCount-1));
                         if (shouldTubeGenerateEdges)
                             CreatePointsAlongCurve(MeshGeneratorPointCreators.TubeFlatPlateCreator, sampled, 0, FlatPointCount, backTextureLayer);
                         TrianglifyLayer(true, RingPointCount, 0, 0);
@@ -623,7 +580,6 @@ namespace ChaseMacMillan.CurveDesigner
                             int submeshIndex = 2;
                             CreateTubeEndPlates(submeshIndex);
                         }
-                        CreateNormals();
                         return output;
                     }
                 case MeshGenerationMode.HollowTube:
@@ -633,10 +589,6 @@ namespace ChaseMacMillan.CurveDesigner
 
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, .5f, RingPointCount, mainTextureLayer);
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, -.5f, RingPointCount, backTextureLayer);
-
-                        if (!shouldTubeGenerateEdges)
-                            for (int i = 0; i < vertices.Count/RingPointCount; i++)
-                                smoothNormals.Add((i*RingPointCount,(i+1)*RingPointCount-1));
 
                         TrianglifyLayer(true, RingPointCount, 0, 0);
                         TrianglifyLayer(false, RingPointCount, numMainLayerVerts / 2, 1);
@@ -650,9 +602,6 @@ namespace ChaseMacMillan.CurveDesigner
                             CreateEndPlate(false, curve.GetLength(), MeshGeneratorPointCreators.TubePointCreator, RingPointCount, submeshIndex, endTextureLayer, .5f, -.5f);
                         }
 
-                        //CreateNormals();
-                        overallstop.Stop();
-                        Debug.Log($"overall {overallstop.ElapsedMilliseconds}ms");
                         return output;
                     }
                 case MeshGenerationMode.Flat:
@@ -671,7 +620,6 @@ namespace ChaseMacMillan.CurveDesigner
                             CreateEndPlate(true, 0, MeshGeneratorPointCreators.RectanglePointCreator, RingPointCount, submeshIndex, endTextureLayer, .5f, -.5f);
                             CreateEndPlate(false, curve.GetLength(), MeshGeneratorPointCreators.RectanglePointCreator, RingPointCount, submeshIndex, endTextureLayer, .5f, -.5f);
                         }
-                        CreateNormals();
                         return output;
                     }
                 case MeshGenerationMode.Extrude:
@@ -692,7 +640,6 @@ namespace ChaseMacMillan.CurveDesigner
                             CreateEndPlate(true, 0, MeshGeneratorPointCreators.ExtrudePointCreator, pointCount, submeshIndex, endTextureLayer, .5f, -.5f, true);
                             CreateEndPlate(false, curve.GetLength(), MeshGeneratorPointCreators.ExtrudePointCreator, pointCount, submeshIndex, endTextureLayer, .5f, -.5f, true);
                         }
-                        CreateNormals();
                         return output;
                     }
                 case MeshGenerationMode.Mesh:

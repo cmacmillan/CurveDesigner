@@ -12,7 +12,6 @@ namespace ChaseMacMillan.CurveDesigner
             float progress = currentIndex / (float)totalPointCount;
             var relativePos = extrudeSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference, out Vector3 tangent, useCachedDistance);//*size;
             var rotationMat = Quaternion.AngleAxis(rotation, point.tangent);
-            normal = reference;
             //Lets say z is forward
             var cross = Vector3.Cross(point.tangent, point.reference).normalized;
             Vector3 TransformVector3(Vector3 vect)
@@ -21,9 +20,9 @@ namespace ChaseMacMillan.CurveDesigner
             }
             var absolutePos = point.position + rotationMat * TransformVector3(relativePos);
             Vector3 thicknessDirection = Vector3.Cross(reference, tangent);
-            if (Vector3.Dot(TransformVector3(reference), point.tangent) < 0)
-                thicknessDirection *= -1;
-            return absolutePos + (rotationMat * TransformVector3(thicknessDirection)).normalized * offset;
+            thicknessDirection = TransformVector3(thicknessDirection).normalized;
+            normal = Mathf.Sign(offset)*thicknessDirection;
+            return absolutePos + (rotationMat * thicknessDirection) * offset;
         }
         public static Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
         {
@@ -35,6 +34,7 @@ namespace ChaseMacMillan.CurveDesigner
             Vector3 lineStart = center + scaledUp + scaledRight;
             Vector3 lineEnd = center + scaledUp - scaledRight;
             normal = up;
+            normal *= Mathf.Sign(offset);
             return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
         }
         public static Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
