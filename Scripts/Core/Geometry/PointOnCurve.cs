@@ -41,10 +41,12 @@ namespace ChaseMacMillan.CurveDesigner
             this.tangent = tangent;
         }
 
-        public Vector3 GetRingPoint(float angle, float length,out Vector3 rotatedReference)
+        public Vector3 GetRingPoint(float lerp, float size, float offset,float arc,float rotation,out Vector3 normal)
         {
-            rotatedReference = Quaternion.AngleAxis(angle, tangent) * reference;
-            return position + rotatedReference * length;
+            float angle = arc * lerp + ((360.0f - arc) / 2)+rotation;
+            var rotatedReference = Quaternion.AngleAxis(angle, tangent) * reference;
+            normal = rotatedReference * Mathf.Sign(offset);
+            return position + rotatedReference * (size+offset);
         }
 
         public void CalculateReference(PointOnCurve previousPoint, Vector3 previousReference, BezierCurve curve)

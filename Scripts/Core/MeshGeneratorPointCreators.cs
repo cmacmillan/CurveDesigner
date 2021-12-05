@@ -6,11 +6,9 @@ namespace ChaseMacMillan.CurveDesigner
     public delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal);
     public static class MeshGeneratorPointCreators
     {
-        public static Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
+        public static Vector3 ExtrudePointCreator_Core(PointOnCurve point, float lerp, float size, float rotation, float offset, float arc, ExtrudeSampler extrudeSampler, BezierCurve curve, bool useCachedDistance, out Vector3 normal)
         {
-            totalPointCount -= 1;
-            float progress = currentIndex / (float)totalPointCount;
-            var relativePos = extrudeSampler.SampleAt(point.distanceFromStartOfCurve, progress, curve, out Vector3 reference, out Vector3 tangent, useCachedDistance);//*size;
+            var relativePos = extrudeSampler.SampleAt(point.distanceFromStartOfCurve, lerp, curve, out Vector3 reference, out Vector3 tangent, useCachedDistance);//*size;
             var rotationMat = Quaternion.AngleAxis(rotation, point.tangent);
             //Lets say z is forward
             var cross = Vector3.Cross(point.tangent, point.reference).normalized;
@@ -24,70 +22,123 @@ namespace ChaseMacMillan.CurveDesigner
             normal = Mathf.Sign(offset)*thicknessDirection;
             return absolutePos + (rotationMat * thicknessDirection) * offset;
         }
-        public static Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
+        public static Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
+        {
+            totalPointCount -= 1;
+            float lerp = currentIndex / (float)totalPointCount;
+            return ExtrudePointCreator_Core(point, lerp, size, rotation, offset, arc, extrudeSampler, curve, useCachedDistance, out normal);
+        }
+        public static void RectanglePointCreator_Core(PointOnCurve point, float size, float rotation, float offset, BezierCurve curve,out Vector3 normal,out Vector3 lineStart, out Vector3 lineEnd)
         {
             var center = point.position;
             var up = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
             var right = Vector3.Cross(up, point.tangent).normalized;
             var scaledUp = up * offset;
             var scaledRight = right * size;
-            Vector3 lineStart = center + scaledUp + scaledRight;
-            Vector3 lineEnd = center + scaledUp - scaledRight;
+            lineStart = center + scaledUp + scaledRight;
+            lineEnd = center + scaledUp - scaledRight;
             normal = up;
             normal *= Mathf.Sign(offset);
+        }
+        public static Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc, ExtrudeSampler extrudeSampler, BezierCurve curve, bool useCachedDistance, out Vector3 normal)
+        {
+            RectanglePointCreator_Core(point, size, rotation, offset, curve, out normal, out Vector3 lineStart, out Vector3 lineEnd);
             return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
+        }
+        public static float GetTubeWidth(float size, float offset,float arc)
+        {
+            float radius = offset + size;
+            return 2 * Mathf.PI * radius * arc / 360.0f;
         }
         public static Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
         {
-            float theta = (arc * currentIndex / (totalPointCount - 1)) + (360.0f - arc) / 2 + rotation;
-            var pos = point.GetRingPoint(theta, (size + offset), out normal);
-            normal *= Mathf.Sign(offset);
-            return pos;
+            return point.GetRingPoint(currentIndex / (float)(totalPointCount - 1), size, offset, arc, rotation, out normal);
+        }
+        public static void TubeFlatPlateCreator_Core(PointOnCurve point, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal, out Vector3 start, out Vector3 end)
+        {
+            start = TubePointCreator(point, 0, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _);
+            end = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _);
+            normal = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
         }
         public static Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
         {
-            Vector3 lineStart = TubePointCreator(point, 0, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _);
-            Vector3 lineEnd = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _);
+            TubeFlatPlateCreator_Core(point, totalPointCount, size, rotation, offset, arc, extrudeSampler, curve, useCachedDistance, out normal, out Vector3 lineStart, out Vector3 lineEnd);
             float lerp = currentIndex / (float)(totalPointCount - 1);
-            normal = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
             return Vector3.Lerp(lineStart, lineEnd, lerp);
         }
-        private static List<(float, Vector3)> GetPositionOnSurface_List = new List<(float, Vector3)>();//to avoid reallocation
-        public static Vector3 GetPointOnSurface(Curve3D curve, float distance, float crossAxisDistance, bool front, out float crossAxisWidth)
+        //crosswiseDistance is between 0-1, unless crosswiseDistanceIsNormalized is set to false
+        public static Vector3 GetPointOnSurface(Curve3D curve, float lengthwiseDistance, float crosswiseDistance, bool front, out float crossAxisWidth,out Vector3 normal,bool crosswiseDistanceIsNormalized=true)
         {
-            var pointOnCurve = curve.positionCurve.GetPointAtDistance(distance);
+            var pointOnCurve = curve.positionCurve.GetPointAtDistance(lengthwiseDistance);
             GetPointCreatorOffsetAndPointCountByType(curve.type, curve.ringPointCount, curve.flatPointCount, front, out PointCreator pointCreator, out float offset, out int pointCount);
-            float size = curve.GetSizeAtDistanceAlongCurve(distance);
-            float rotation = curve.GetRotationAtDistanceAlongCurve(distance);
-            float arc = curve.GetArcAtDistanceAlongCurve(distance);
-            Vector3 previousPoint = Vector3.zero;
-            float totalDistance = 0;//distance in local space
-            GetPositionOnSurface_List.Clear();
-            for (int i = 0; i < pointCount; i++)
+            float size = curve.GetSizeAtDistanceAlongCurve(lengthwiseDistance);
+            float rotation = curve.GetRotationAtDistanceAlongCurve(lengthwiseDistance);
+            float arc = curve.GetArcAtDistanceAlongCurve(lengthwiseDistance);
+            Vector3 localPosition;
+            Vector3 localNormal;
+            switch (curve.type)
             {
-                Vector3 point = pointCreator(pointOnCurve, i, pointCount,size,rotation,offset,arc,curve.extrudeSampler,curve.positionCurve,false,out _);//normal
-                if (i > 0)
-                {
-                    totalDistance += Vector3.Distance(previousPoint,point);
-                }
-                GetPositionOnSurface_List.Add((totalDistance,point));
-                previousPoint = point;
+                case MeshGenerationMode.Flat:
+                    {
+                        RectanglePointCreator_Core(pointOnCurve,size,rotation,offset,curve.positionCurve,out localNormal, out Vector3 start, out Vector3 end);
+                        crossAxisWidth = Vector3.Distance(start, end);
+                        float lerp;
+                        if (crosswiseDistanceIsNormalized)
+                            lerp = crosswiseDistance;
+                        else
+                            lerp = crossAxisWidth * crosswiseDistance;
+                        localPosition = Vector3.Lerp(start,end,lerp);
+                        break;
+                    }
+                case MeshGenerationMode.HollowTube:
+                    {
+                        crossAxisWidth = GetTubeWidth(size, offset, arc);
+                        float lerp;
+                        if (crosswiseDistanceIsNormalized)
+                            lerp = crosswiseDistance;
+                        else
+                            lerp = crossAxisWidth * crosswiseDistance;
+                        localPosition = pointOnCurve.GetRingPoint(lerp, size, offset, arc, rotation, out localNormal);
+                        break;
+                    }
+                case MeshGenerationMode.Cylinder:
+                    {
+                        if (front)
+                        {
+                            crossAxisWidth = GetTubeWidth(size, offset, arc);
+                            float lerp;
+                            if (crosswiseDistanceIsNormalized)
+                                lerp = crosswiseDistance;
+                            else
+                                lerp = crossAxisWidth * crosswiseDistance;
+                            localPosition = pointOnCurve.GetRingPoint(lerp, size, offset, arc, rotation, out localNormal);
+                        }
+                        else
+                        {
+                            TubeFlatPlateCreator_Core(pointOnCurve, pointCount, size, rotation, offset, arc, curve.extrudeSampler, curve.positionCurve, false, out localNormal, out Vector3 start, out Vector3 end);
+                            crossAxisWidth = Vector3.Distance(start, end);
+                            float lerp;
+                            if (crosswiseDistanceIsNormalized)
+                                lerp = crosswiseDistance;
+                            else
+                                lerp = crossAxisWidth * crosswiseDistance;
+                            localPosition = Vector3.Lerp(start, end, lerp);
+                        }
+                        break;
+                    }
+                case MeshGenerationMode.Extrude:
+                    {
+                        if (!crosswiseDistanceIsNormalized)
+                            throw new System.NotSupportedException($"crosswiseDistanceIsNormalized must be true for extrude curves");
+                        crossAxisWidth = -1;//this value is not calculated for extrude curves
+                        localPosition = ExtrudePointCreator_Core(pointOnCurve, crosswiseDistance, size, rotation, offset, arc, curve.extrudeSampler, curve.positionCurve, false, out localNormal);
+                        break;
+                    }
+                default:
+                    throw new System.NotSupportedException($"GetPointOnSurface is not valid for curve type '{curve.type}'");
             }
-            crossAxisWidth = totalDistance;
-            if (crossAxisDistance <= 0.0f)
-                return curve.transform.TransformPoint(GetPositionOnSurface_List[0].Item2);
-            float crossAxis = totalDistance * crossAxisDistance;
-            for (int i = 0; i < pointCount - 1; i++)
-            {
-                if (GetPositionOnSurface_List[i+1].Item1 > crossAxis)
-                {
-                    float next = GetPositionOnSurface_List[i + 1].Item1;
-                    float curr = GetPositionOnSurface_List[i].Item1;
-                    float lerp = (crossAxis-curr)/(next-curr);
-                    return curve.transform.TransformPoint(Vector3.Lerp(GetPositionOnSurface_List[i].Item2,GetPositionOnSurface_List[i+1].Item2,lerp));
-                }
-            }
-            return curve.transform.TransformPoint(GetPositionOnSurface_List[GetPositionOnSurface_List.Count - 1].Item2);//last point
+            normal = curve.transform.TransformDirection(localNormal);
+            return curve.transform.TransformPoint(localPosition);
         }
         private static void GetPointCreatorOffsetAndPointCountByType(MeshGenerationMode curveType,int ringPointCount, int flatPointCount,bool front,out PointCreator pointCreator, out float offset, out int pointCount)
         {

@@ -157,7 +157,9 @@ namespace ChaseMacMillan.CurveDesigner
 
         public Vector3 Position {
             get {
-                return curve.transform.TransformPoint(curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve)).GetRingPoint(360.0f * _ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value+(offset==null?0:offset.Offset),out _));
+                var point = curve.positionCurve.GetPointAtDistance(_ring.GetDistance(curve.positionCurve));
+                var ringPoint = point.GetRingPoint(_ringPointIndex / (float)SizeCircleComposite.ringPointCount, _ring.value, (offset == null ? 0 : offset.Offset), 360.0f, 0.0f, out _);
+                return curve.transform.TransformPoint(ringPoint);
             }
         }
     }
