@@ -69,9 +69,10 @@ namespace ChaseMacMillan.CurveDesigner
         public const float frontOffset = .5f;
         public const float backOffset = -.5f;
         //crosswiseDistance is between 0-1, unless crosswiseDistanceIsNormalized is set to false
-        public static Vector3 GetPointOnSurface(Curve3D curve, float lengthwiseDistance, float crosswiseDistance, bool front, out Vector3 normal, out float crossAxisWidth,bool crosswiseDistanceIsNormalized=true)
+        public static Vector3 GetPointOnSurface(Curve3D curve, float lengthwiseDistance, float crosswiseDistance, bool front, out Vector3 normal, out Vector3 tangent,out float crossAxisWidth,bool crosswiseDistanceIsNormalized=true)
         {
             var pointOnCurve = curve.positionCurve.GetPointAtDistance(lengthwiseDistance);
+            var localTangent = pointOnCurve.tangent;
             float size = curve.GetSizeAtDistanceAlongCurve(lengthwiseDistance);
             float rotation = curve.GetRotationAtDistanceAlongCurve(lengthwiseDistance);
             float arc = curve.GetArcAtDistanceAlongCurve(lengthwiseDistance);
@@ -145,6 +146,7 @@ namespace ChaseMacMillan.CurveDesigner
                 default:
                     throw new System.NotSupportedException($"GetPointOnSurface is not valid for curve type '{curve.type}'");
             }
+            tangent = curve.transform.TransformDirection(localTangent);
             normal = curve.transform.TransformDirection(localNormal);
             return curve.transform.TransformPoint(localPosition);
         }

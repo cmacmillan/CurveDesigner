@@ -45,9 +45,9 @@ namespace ChaseMacMillan.CurveDesigner
             return point;
         }
 
-        public Vector3 GetPointOnSurface(float lengthwise, float crosswise, out Vector3 normal, bool front = true)
+        public Vector3 GetPointOnSurface(float lengthwise, float crosswise, out Vector3 normal, out Vector3 tangent, bool front = true)
         {
-            return MeshGeneratorPointCreators.GetPointOnSurface(this, lengthwise, crosswise, front, out normal, out _);
+            return MeshGeneratorPointCreators.GetPointOnSurface(this, lengthwise, crosswise, front, out normal, out tangent, out _);
         }
 
         //The functions below simply return the values of different samples at a distance
