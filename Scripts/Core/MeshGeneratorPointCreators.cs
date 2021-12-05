@@ -66,16 +66,24 @@ namespace ChaseMacMillan.CurveDesigner
             float lerp = currentIndex / (float)(totalPointCount - 1);
             return Vector3.Lerp(lineStart, lineEnd, lerp);
         }
+        public const float frontOffset = .5f;
+        public const float backOffset = -.5f;
         //crosswiseDistance is between 0-1, unless crosswiseDistanceIsNormalized is set to false
-        public static Vector3 GetPointOnSurface(Curve3D curve, float lengthwiseDistance, float crosswiseDistance, bool front, out float crossAxisWidth,out Vector3 normal,bool crosswiseDistanceIsNormalized=true)
+        public static Vector3 GetPointOnSurface(Curve3D curve, float lengthwiseDistance, float crosswiseDistance, bool front, out Vector3 normal, out float crossAxisWidth,bool crosswiseDistanceIsNormalized=true)
         {
             var pointOnCurve = curve.positionCurve.GetPointAtDistance(lengthwiseDistance);
-            GetPointCreatorOffsetAndPointCountByType(curve.type, curve.ringPointCount, curve.flatPointCount, front, out PointCreator pointCreator, out float offset, out int pointCount);
             float size = curve.GetSizeAtDistanceAlongCurve(lengthwiseDistance);
             float rotation = curve.GetRotationAtDistanceAlongCurve(lengthwiseDistance);
             float arc = curve.GetArcAtDistanceAlongCurve(lengthwiseDistance);
+            float thickness = curve.GetThicknessAtDistanceAlongCurve(lengthwiseDistance);
             Vector3 localPosition;
             Vector3 localNormal;
+            float offset;
+            if (front)
+                offset = frontOffset;
+            else
+                offset = backOffset;
+            offset *= thickness;
             switch (curve.type)
             {
                 case MeshGenerationMode.Flat:
@@ -105,17 +113,17 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         if (front)
                         {
-                            crossAxisWidth = GetTubeWidth(size, offset, arc);
+                            crossAxisWidth = GetTubeWidth(size, 0, arc);
                             float lerp;
                             if (crosswiseDistanceIsNormalized)
                                 lerp = crosswiseDistance;
                             else
                                 lerp = crossAxisWidth * crosswiseDistance;
-                            localPosition = pointOnCurve.GetRingPoint(lerp, size, offset, arc, rotation, out localNormal);
+                            localPosition = pointOnCurve.GetRingPoint(lerp, size, 0, arc, rotation, out localNormal);
                         }
                         else
                         {
-                            TubeFlatPlateCreator_Core(pointOnCurve, pointCount, size, rotation, offset, arc, curve.extrudeSampler, curve.positionCurve, false, out localNormal, out Vector3 start, out Vector3 end);
+                            TubeFlatPlateCreator_Core(pointOnCurve, 2, size, rotation, 0, arc, curve.extrudeSampler, curve.positionCurve, false, out localNormal, out Vector3 start, out Vector3 end);
                             crossAxisWidth = Vector3.Distance(start, end);
                             float lerp;
                             if (crosswiseDistanceIsNormalized)
@@ -139,53 +147,6 @@ namespace ChaseMacMillan.CurveDesigner
             }
             normal = curve.transform.TransformDirection(localNormal);
             return curve.transform.TransformPoint(localPosition);
-        }
-        private static void GetPointCreatorOffsetAndPointCountByType(MeshGenerationMode curveType,int ringPointCount, int flatPointCount,bool front,out PointCreator pointCreator, out float offset, out int pointCount)
-        {
-            //This function is hardcoded to match the code in meshgenerator because everything is cleaner this way
-            switch (curveType)
-            {
-                case MeshGenerationMode.Cylinder:
-                    if (front)
-                    {
-                        pointCreator = TubePointCreator;
-                        pointCount = ringPointCount;
-                        offset = 0;
-                    }
-                    else
-                    {
-                        pointCreator = TubeFlatPlateCreator;
-                        pointCount = flatPointCount;
-                        offset = 0;
-                    }
-                    break;
-                case MeshGenerationMode.HollowTube:
-                    pointCreator = TubePointCreator;
-                    pointCount = ringPointCount;
-                    if (front)
-                        offset = 0;
-                    else
-                        offset = -1;
-                    break;
-                case MeshGenerationMode.Flat:
-                    pointCreator = RectanglePointCreator;
-                    pointCount = flatPointCount;
-                    if (front)
-                        offset = .5f;
-                    else
-                        offset = -.5f;
-                    break;
-                case MeshGenerationMode.Extrude:
-                    pointCreator = ExtrudePointCreator;
-                    pointCount = ringPointCount;
-                    if (front)
-                        offset = .5f;
-                    else
-                        offset = -.5f;
-                    break;
-                default:
-                    throw new System.ArgumentException("Not valid for this curve type");
-            }
         }
     }
 }

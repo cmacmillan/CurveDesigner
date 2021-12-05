@@ -45,14 +45,9 @@ namespace ChaseMacMillan.CurveDesigner
             return point;
         }
 
-        public Vector3 GetPointOnSurface(float distance, float crossAxis, bool front = true)
+        public Vector3 GetPointOnSurface(float lengthwise, float crosswise, out Vector3 normal, bool front = true)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public float GetCrossAxisWidthAtDistance(float distance, bool front = true)
-        {
-            throw new System.NotImplementedException();
+            return MeshGeneratorPointCreators.GetPointOnSurface(this, lengthwise, crosswise, front, out normal, out _);
         }
 
         //The functions below simply return the values of different samples at a distance
