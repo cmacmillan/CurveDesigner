@@ -149,6 +149,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             try
             {
+                Recalculate();
                 foreach (var i in DistanceSamplers)
                     i.RecalculateOpenCurveOnlyPoints(positionCurve);
                 //We need to rebuild the guid map
