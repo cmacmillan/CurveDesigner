@@ -64,6 +64,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bloodParticlesPrefab: {fileID: 7745498511991347329, guid: 6784ecabcaf8c734a810b825c6ad6bdd,
     type: 3}
+  dealDamageSFX: {fileID: 8300000, guid: 21258089e276a3a448ccee2927e53e53, type: 3}
 --- !u!65 &3526882826470451211
 BoxCollider:
   m_ObjectHideFlags: 0

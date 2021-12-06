@@ -66,6 +66,7 @@ MonoBehaviour:
   rotationSpeed: 100
   getCoinParticlePrefab: {fileID: 3568060410955240705, guid: 6a97cc15acbfcc9438a3c3b94d961e76,
     type: 3}
+  collectionSound: {fileID: 8300000, guid: 70694e548337487489e583545f78cffd, type: 3}
 --- !u!65 &6398635550718744073
 BoxCollider:
   m_ObjectHideFlags: 0

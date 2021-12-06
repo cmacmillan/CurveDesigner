@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 namespace ChaseMacMillan.CurveDesigner.Examples
 {
     public class EndlessRunnerCharacter : MonoBehaviour
@@ -13,6 +14,7 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         public float crosswiseMaxSpeed = 1;
         public float crosswiseAcceleration = 1;
         public float maxTurnLean = 5;
+        public List<AudioClip> footstepClips;
         [System.NonSerialized]
         public int coinCount=0;
         [System.NonSerialized]
@@ -28,37 +30,36 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         }
         void Update()
         {
+            if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+            {
+                crosswiseVelocity -= crosswiseAcceleration * Time.deltaTime;
+            }
+            else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+            {
+                crosswiseVelocity += crosswiseAcceleration * Time.deltaTime;
+            }
+            else
+            {
+                crosswiseVelocity = Mathf.MoveTowards(crosswiseVelocity, 0, crosswiseAcceleration * Time.deltaTime);
+            }
+            crosswiseVelocity = Mathf.Clamp(crosswiseVelocity, -crosswiseMaxSpeed, crosswiseMaxSpeed);
+            if (objectOnCurve.crosswisePosition < crosswiseBounds.x)
+            {
+                objectOnCurve.crosswisePosition = crosswiseBounds.x;
+                crosswiseVelocity = 0;
+            }
+            else if (objectOnCurve.crosswisePosition > crosswiseBounds.y)
+            {
+                objectOnCurve.crosswisePosition = crosswiseBounds.y;
+                crosswiseVelocity = 0;
+            }
+            objectOnCurve.crosswisePosition += crosswiseVelocity * Time.deltaTime;
             if (isGrounded)
             {
                 if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
                 {
                     verticalVelocity = jumpSpeed;
-                    crosswiseVelocity = 0;
                     isGrounded = false;
-                }
-                if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
-                {
-                    crosswiseVelocity -= crosswiseAcceleration * Time.deltaTime;
-                }
-                else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
-                {
-                    crosswiseVelocity += crosswiseAcceleration * Time.deltaTime;
-                }
-                else
-                {
-                    crosswiseVelocity = Mathf.MoveTowards(crosswiseVelocity, 0, crosswiseAcceleration * Time.deltaTime);
-                }
-                crosswiseVelocity = Mathf.Clamp(crosswiseVelocity, -crosswiseMaxSpeed, crosswiseMaxSpeed);
-                objectOnCurve.crosswisePosition += crosswiseVelocity * Time.deltaTime;
-                if (objectOnCurve.crosswisePosition <= crosswiseBounds.x)
-                {
-                    objectOnCurve.crosswisePosition = crosswiseBounds.x;
-                    crosswiseVelocity = 0;
-                }
-                else if (objectOnCurve.crosswisePosition >= crosswiseBounds.y)
-                {
-                    objectOnCurve.crosswisePosition = crosswiseBounds.y;
-                    crosswiseVelocity = 0;
                 }
                 var point = objectOnCurve.curve.GetPointAtDistanceAlongCurve(objectOnCurve.lengthwisePosition);
                 transform.rotation = Quaternion.AngleAxis(maxTurnLean * (crosswiseVelocity / crosswiseMaxSpeed), point.tangent)*transform.rotation;
@@ -76,6 +77,10 @@ namespace ChaseMacMillan.CurveDesigner.Examples
             objectOnCurve.lengthwisePosition += runSpeed;
             localRoot.localPosition = initialLocalPosition + new Vector3(0, height, 0);
             animator.SetBool("InAir", !isGrounded);
+        }
+        public void PlayFootstep()
+        {
+            PlaySound.Play(footstepClips[Random.Range(0, footstepClips.Count)], .8f, transform.position);
         }
     }
 }
