@@ -38,7 +38,7 @@ namespace ChaseMacMillan.CurveDesigner
             arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
             extrudeCurve = new ExtrudeCurveComposite(this, _curve.extrudeSampler, _curve,positionCurve);
             BakeBlobs();
-            _curve.RequestMeshUpdate();
+            _curve.RequestMeshUpdate();//called because during undo you wanna update the mesh
             if (Event.current != null)
             {
                 positionCurve.FindPointClosestToCursor();
