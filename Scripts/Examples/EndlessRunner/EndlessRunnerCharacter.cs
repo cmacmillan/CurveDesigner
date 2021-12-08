@@ -62,7 +62,7 @@ namespace ChaseMacMillan.CurveDesigner.Examples
                     isGrounded = false;
                 }
                 var point = objectOnCurve.curve.GetPointAtDistanceAlongCurve(objectOnCurve.lengthwisePosition);
-                transform.rotation = Quaternion.AngleAxis(maxTurnLean * (crosswiseVelocity / crosswiseMaxSpeed), point.tangent)*transform.rotation;
+                transform.rotation = Quaternion.AngleAxis(maxTurnLean * (crosswiseVelocity / crosswiseMaxSpeed), transform.up)*transform.rotation;
             }
             else
             {
