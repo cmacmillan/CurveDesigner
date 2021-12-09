@@ -520,22 +520,21 @@ namespace ChaseMacMillan.CurveDesigner
             UICurve = new UICurve(null, this);
             UICurve.Initialize();
         }
-#if UNITY_EDITOR
         public void TryInitialize()
         {
             if (!isInitialized)
             {
-                var mat = AssetDatabase.GetBuiltinExtraResource<Material>("Default-Diffuse.mat");
+                Clear();
+                var mat = settings.defaultMaterial;
                 mainTextureLayer.material = mat;
                 backTextureLayer.material = mat;
                 edgeTextureLayer.material = mat;
                 endTextureLayer.material = mat;
                 WriteMaterialsToRenderer();
                 isInitialized = true;
-                Clear();
+                RequestMeshUpdate();
             }
         }
-#endif
         public void Recalculate()
         {
             positionCurve.Recalculate();
@@ -587,6 +586,16 @@ namespace ChaseMacMillan.CurveDesigner
         {
             if (!isWaitingForMeshResults)
             {
+                if (type == MeshGenerationMode.Mesh)
+                {
+                    if (meshToTile == null)
+                        return;
+                    if (!meshToTile.isReadable)
+                    {
+                        Debug.LogError($"MeshToTile '{meshToTile.name}' must be marked readable! Enable read/write in the import settings!");
+                        return;
+                    }
+                }
                 wantsUpdate = false;
                 MeshGeneratorThreadManager.AddMeshGenerationRequest(this);
                 isWaitingForMeshResults = true;

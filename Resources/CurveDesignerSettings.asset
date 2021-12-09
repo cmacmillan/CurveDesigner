@@ -220,3 +220,5 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 1
+  defaultMaterial: {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
+  buttonSizeScalar: 1

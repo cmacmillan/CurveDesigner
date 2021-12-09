@@ -79,7 +79,16 @@ namespace ChaseMacMillan.CurveDesigner
 
         public void Awake()
         {
-            Recalculate();
+            if (isInitialized)
+            {
+                Recalculate();
+                wantsUpdate = true;
+            }
+        }
+        public void Start()
+        {
+            TryInitialize();
+            UpdateMesh(false);
         }
         public void Update()
         {
