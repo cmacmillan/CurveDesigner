@@ -5,11 +5,12 @@ namespace ChaseMacMillan.CurveDesigner
     [ExecuteAlways]
     public class ObjectOnCurve : MonoBehaviour
     {
-        public Curve3D curve;
         [Range(0, 1)]
         public float crosswisePosition;
         public float lengthwisePosition;
         public bool attachedToFront = true;
+        [HideInInspector]
+        public Curve3D curve;
         void Update()
         {
             if (curve != null && curve.type != MeshGenerationMode.Mesh && curve.type != MeshGenerationMode.NoMesh)

@@ -19,7 +19,6 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public static bool WorldToGUISpace(Vector3 worldPos, out Vector2 guiPosition, out float screenDepth)
         {
-            Profiler.BeginSample("WorldToGUISpace");
             var sceneCam = UnityEditor.SceneView.currentDrawingSceneView.camera;
             //var sceneCam = Camera.current;//UnityEditor.SceneView.lastActiveSceneView.camera;//Consider replacing with Camera.current?
             Vector3 screen_pos = sceneCam.WorldToScreenPoint(worldPos);
@@ -28,11 +27,9 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 //guiPosition = Vector2.zero;
                 guiPosition = ScreenSpaceToGuiSpace(screen_pos);
-                Profiler.EndSample();
                 return false;
             }
             guiPosition = ScreenSpaceToGuiSpace(screen_pos);
-            Profiler.EndSample();
             return true;
         }
         public static Vector3 GUIToWorldSpace(Vector2 guiPos, float screenDepth)
