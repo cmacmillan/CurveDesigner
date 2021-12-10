@@ -77,6 +77,17 @@ namespace ChaseMacMillan.CurveDesigner
             return GetClosestPointOnCurve(worldPosition).position;
         }
 
+        //Appends a copy of another curve3d to this curve3d. Position/rotation data of otherCurve is discarded
+        public void AppendCurve(Curve3D otherCurve)
+        {
+            AppendCurve_Internal(otherCurve);
+        }
+
+        public void DeletePointsBefore(int index)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Awake()
         {
             if (isInitialized)

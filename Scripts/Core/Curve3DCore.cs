@@ -564,6 +564,29 @@ namespace ChaseMacMillan.CurveDesigner
                 previousRotations.Add(i.value);
         }
 
+        private void AppendCurve_Internal(Curve3D otherCurve, bool relativeRotation=true, bool lockedJoiningPoint = true)
+        {
+            if (otherCurve.type != type)
+            {
+                Debug.LogError("Curve types must match in order to append!");
+                return;
+            }
+            if (IsClosedLoop || otherCurve.IsClosedLoop)
+            {
+                Debug.LogError("You cannot append closed loop curves!");
+                return;
+            }
+            float thisCurveLength = positionCurve.GetLength();
+            var lastPoint = positionCurve.PointGroups[positionCurve.PointGroups.Count-1];
+            //lastPoint
+
+            //positionCurve.AppendPoint(false, lockedJoiningPoint,);
+
+
+            Recalculate();
+            RequestMeshUpdate();
+        }
+
         public void ReadMaterialsFromRenderer()
         {
             int index = 0;

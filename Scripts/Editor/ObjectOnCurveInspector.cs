@@ -48,7 +48,7 @@ namespace ChaseMacMillan.CurveDesigner
                         Handles.BeginGUI();
                         Color oldColor = GUI.color;
                         var color = Color.green;
-                        if (buttonOverlapped)
+                        if (buttonOverlapped || GUIUtility.hotControl == controlID)
                         {
                             color = DrawMode.hovered.Tint(SelectionState.unselected, Color.green);
                         }
@@ -56,6 +56,23 @@ namespace ChaseMacMillan.CurveDesigner
                         GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(guiPos, buttonSize, buttonSize), curve.settings.circleIcon);
                         GUI.color = oldColor;
                         Handles.EndGUI();
+                    }
+                    break;
+                case EventType.MouseDown:
+                    if (buttonOverlapped && Event.current.button == 0)
+                    {
+                        GUIUtility.hotControl = controlID;
+                        Event.current.Use();
+                    }
+                    break;
+                case EventType.MouseDrag:
+                    Event.current.Use();
+                    break;
+                case EventType.MouseUp:
+                    if (Event.current.button == 0)
+                    {
+                        GUIUtility.hotControl = 0;
+                        Event.current.Use();
                     }
                     break;
                 case EventType.MouseMove:
