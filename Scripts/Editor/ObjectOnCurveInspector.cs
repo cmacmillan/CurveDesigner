@@ -52,6 +52,8 @@ namespace ChaseMacMillan.CurveDesigner
                         {
                             color = DrawMode.hovered.Tint(SelectionState.unselected, Color.green);
                         }
+                        Ray ray = SceneView.lastActiveSceneView.camera.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
+                        curve.RaycastAgainstCurve(ray, out float lengthwise, out float crosswise, objectOnCurve.attachedToFront);
                         GUI.color = color;
                         GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(guiPos, buttonSize, buttonSize), curve.settings.circleIcon);
                         GUI.color = oldColor;
@@ -66,7 +68,17 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                     break;
                 case EventType.MouseDrag:
-                    Event.current.Use();
+                    if (Event.current.button == 0 && GUIUtility.hotControl == controlID)
+                    {
+                        Ray ray = SceneView.lastActiveSceneView.camera.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
+                        Handles.BeginGUI();
+                        curve.RaycastAgainstCurve(ray, out float lengthwise, out float crosswise, objectOnCurve.attachedToFront);
+                        Handles.EndGUI();
+                        objectOnCurve.lengthwisePosition = lengthwise;
+                        objectOnCurve.crosswisePosition = crosswise;
+                        objectOnCurve.Update();
+                        Event.current.Use();
+                    }
                     break;
                 case EventType.MouseUp:
                     if (Event.current.button == 0)

@@ -11,7 +11,7 @@ namespace ChaseMacMillan.CurveDesigner
         public bool attachedToFront = true;
         [HideInInspector]
         public Curve3D curve;
-        void Update()
+        public void Update()
         {
             if (curve != null && curve.type != MeshGenerationMode.Mesh && curve.type != MeshGenerationMode.NoMesh)
             {

@@ -564,7 +564,7 @@ namespace ChaseMacMillan.CurveDesigner
                 previousRotations.Add(i.value);
         }
 
-        private void AppendCurve_Internal(Curve3D otherCurve, bool relativeRotation=true, bool lockedJoiningPoint = true)
+        public void AppendCurve_Internal(Curve3D otherCurve)
         {
             if (otherCurve.type != type)
             {
@@ -577,14 +577,95 @@ namespace ChaseMacMillan.CurveDesigner
                 return;
             }
             float thisCurveLength = positionCurve.GetLength();
-            var lastPoint = positionCurve.PointGroups[positionCurve.PointGroups.Count-1];
-            //lastPoint
+            var thisEnd = GetPointAtDistanceAlongCurve(thisCurveLength,false);
+            var otherStart = otherCurve.GetPointAtDistanceAlongCurve(0,false);
+            var rotateTangent = Quaternion.FromToRotation(otherStart.tangent, thisEnd.tangent);
+            var rotateReference = Quaternion.FromToRotation(rotateTangent*otherStart.reference, thisEnd.reference);
+            var rotation = rotateReference * rotateTangent;
+            var otherBasePosition = otherStart.position;
+            var otherPointGroups = otherCurve.positionCurve.PointGroups;
+            var thisLastPoint = positionCurve.PointGroups[positionCurve.PointGroups.Count-1];
+            for (int i = 1; i < otherPointGroups.Count; i++)
+            {
+                /*
+                var curr = otherPointGroups[i];
+                bool lockedPoint;
+                if (i == 0)
+                    lockedPoint = lockedJoiningPoint;
+                else
+                    lockedPoint = curr.GetIsPointLocked();
+                positionCurve.AppendPoint(false,)
+                */
+            }
 
             //positionCurve.AppendPoint(false, lockedJoiningPoint,);
 
 
             Recalculate();
             RequestMeshUpdate();
+        }
+
+        //performs a raycast against the curve without requiring a collider on the curve
+        private const int raycastIterations = 1000;
+        private const float raycastLearningRate=1f;
+        private const float raycastEpsilon = .0001f;
+        private float PointDistanceToRay(Ray ray, Vector3 point)
+        {
+            return Vector3.Distance(point,ray.origin+Vector3.Project(point - ray.origin, ray.direction));
+        }
+        public Vector3 RaycastAgainstCurve(Ray ray, out float lengthwiseDistance, out float crosswiseDistance, bool front)
+        {
+            ClosestPointOnCurveToLine.GetClosestPointToLine(positionCurve,ray.origin,ray.origin+ray.direction, out int segmentIndex, out float time,new TransformBlob(transform));
+            crosswiseDistance = .5f;
+            lengthwiseDistance = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex, time);
+            float curveLength = CurveLength;
+            lengthwiseDistance /= curveLength;
+            Vector3 currentPoint = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance, out _, out _, front);
+            float currentDist = PointDistanceToRay(ray, currentPoint);
+            Color ogColor = GUI.color;
+            for (int i = 0; i < raycastIterations; i++)
+            {
+                GUITools.WorldToGUISpace(currentPoint, out Vector2 guipos, out _);
+                GUI.color = Color.HSVToRGB(.7f*i/(float)raycastIterations,1,1);
+                GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(guipos, 5, 5), settings.circleIcon);
+                float lengthwiseDelta;
+                if (lengthwiseDistance+raycastEpsilon >= 1 )
+                {
+                    Vector3 lengthwiseBump = GetPointOnSurface((lengthwiseDistance-raycastEpsilon)*curveLength, crosswiseDistance, out _, out _, front);
+                    float dist = PointDistanceToRay(ray, lengthwiseBump);
+                    lengthwiseDelta = currentDist - dist;
+                }
+                else
+                {
+                    Vector3 lengthwiseBump = GetPointOnSurface((lengthwiseDistance+raycastEpsilon)*curveLength, crosswiseDistance, out _, out _, front);
+                    float dist = PointDistanceToRay(ray, lengthwiseBump);
+                    lengthwiseDelta = dist-currentDist;
+                }
+                float crosswiseDelta;
+                if (crosswiseDistance+raycastEpsilon >= 1)
+                {
+                    Vector3 crosswiseBump = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance-raycastEpsilon, out _, out _, front);
+                    float dist = PointDistanceToRay(ray, crosswiseBump);
+                    crosswiseDelta= currentDist-dist;
+                }
+                else
+                {
+                    Vector3 crosswiseBump = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance+raycastEpsilon, out _, out _, front);
+                    float dist = PointDistanceToRay(ray, crosswiseBump);
+                    crosswiseDelta= dist-currentDist;
+                }
+                Vector2 gradient = new Vector2(crosswiseDelta, lengthwiseDelta);
+                gradient *= raycastLearningRate;
+                crosswiseDistance -= gradient.x;
+                lengthwiseDistance -= gradient.y;
+                crosswiseDistance = Mathf.Clamp01(crosswiseDistance);
+                lengthwiseDistance = Mathf.Clamp01(lengthwiseDistance);
+                currentPoint = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance, out _, out _, front);
+                currentDist = PointDistanceToRay(ray, currentPoint);
+            }
+            GUI.color = ogColor;
+            lengthwiseDistance *= curveLength;
+            return currentPoint;
         }
 
         public void ReadMaterialsFromRenderer()

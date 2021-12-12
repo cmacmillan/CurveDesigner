@@ -38,10 +38,11 @@ namespace ChaseMacMillan.CurveDesigner
         }
 
         //This returns a PointOnCurve from a particular distance along the curve. This contains the position, tangent and reference at a point along the curve
-        public PointOnCurve GetPointAtDistanceAlongCurve(float distance)
+        public PointOnCurve GetPointAtDistanceAlongCurve(float distance,bool worldSpace=true)
         {
             var point = positionCurve.GetPointAtDistance(distance);
-            point.FromLocalToWorld(transform);
+            if (worldSpace)
+                point.FromLocalToWorld(transform);
             return point;
         }
 

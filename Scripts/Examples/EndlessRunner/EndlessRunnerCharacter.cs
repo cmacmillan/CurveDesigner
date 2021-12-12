@@ -19,6 +19,7 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         public int coinCount=0;
         [System.NonSerialized]
         public int health=4;
+        public float landHeight = 0;
         private float crosswiseVelocity=0;
         private float verticalVelocity=0;
         private float height=0;
@@ -76,7 +77,7 @@ namespace ChaseMacMillan.CurveDesigner.Examples
             }
             objectOnCurve.lengthwisePosition += runSpeed;
             localRoot.localPosition = initialLocalPosition + new Vector3(0, height, 0);
-            animator.SetBool("InAir", !isGrounded);
+            animator.SetBool("Airborne", height>landHeight || verticalVelocity>0);
         }
         public void PlayFootstep()
         {
