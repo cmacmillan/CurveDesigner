@@ -17,7 +17,7 @@ namespace ChaseMacMillan.CurveDesigner.Examples
             var character = other.transform.parent.GetComponent<EndlessRunnerCharacter>();//collider is a child of the character script
             if (character != null)
             {
-                PlaySound.Play(collectionSound, 0.3f, transform.position);
+                PlaySound.Play(collectionSound, transform.position,0.3f);
                 var particles = Instantiate(getCoinParticlePrefab);
                 particles.transform.position = child.transform.position;
                 particles.transform.rotation = child.transform.rotation;

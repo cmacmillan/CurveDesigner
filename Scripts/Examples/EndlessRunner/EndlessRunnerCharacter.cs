@@ -23,8 +23,11 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         private float crosswiseVelocity=0;
         private float verticalVelocity=0;
         private float height=0;
+        private bool wantsJump = false;
         private bool isGrounded = true;
         private Vector3 initialLocalPosition;
+        private float jumpApex;
+        private bool hasJumpApex = false;
         private void Start()
         {
             initialLocalPosition = localRoot.localPosition;
@@ -59,14 +62,28 @@ namespace ChaseMacMillan.CurveDesigner.Examples
             {
                 if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
                 {
-                    verticalVelocity = jumpSpeed;
-                    isGrounded = false;
+                    wantsJump=true;
                 }
                 var point = objectOnCurve.curve.GetPointAtDistanceAlongCurve(objectOnCurve.lengthwisePosition);
                 transform.rotation = Quaternion.AngleAxis(maxTurnLean * (crosswiseVelocity / crosswiseMaxSpeed), transform.up)*transform.rotation;
             }
             else
             {
+                float blend;
+                if (verticalVelocity < 0)
+                {
+                    if (!hasJumpApex)
+                    {
+                        hasJumpApex = true;
+                        jumpApex = height;
+                    }
+                    blend = Mathf.Clamp01(1 - ((height - landHeight) / (jumpApex - landHeight)));
+                }
+                else
+                {
+                    blend = 0;
+                }
+                animator.SetFloat("Blend", blend);
                 verticalVelocity += gravity * Time.deltaTime;
                 height += verticalVelocity * Time.deltaTime;
                 if (height <= 0)
@@ -77,11 +94,22 @@ namespace ChaseMacMillan.CurveDesigner.Examples
             }
             objectOnCurve.lengthwisePosition += runSpeed;
             localRoot.localPosition = initialLocalPosition + new Vector3(0, height, 0);
-            animator.SetBool("Airborne", height>landHeight || verticalVelocity>0);
+            animator.SetBool("wantsJump", wantsJump);
+            animator.SetBool("wantsLand", height<landHeight && verticalVelocity<0);
+        }
+        public void OnLeaveGround()
+        {
+            verticalVelocity = jumpSpeed;
+            hasJumpApex = false;
+            isGrounded = false;
+            wantsJump = false;
         }
         public void PlayFootstep()
         {
-            PlaySound.Play(footstepClips[Random.Range(0, footstepClips.Count)], .8f, transform.position);
+            if (isGrounded)
+            {
+                PlaySound.Play(footstepClips[Random.Range(0, footstepClips.Count)], transform.position,Random.Range(.2f,.5f),Random.Range(.85f,1.1f));
+            }
         }
     }
 }
