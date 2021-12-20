@@ -607,14 +607,18 @@ namespace ChaseMacMillan.CurveDesigner
 
         //performs a raycast against the curve without requiring a collider on the curve
         private const int raycastIterations = 1000;
-        private const float raycastLearningRate=1f;
-        private const float raycastEpsilon = .0001f;
+        private const float raycastLearningRate=10f;
+        private const float lengthwiseEpsilon=.0000001f;
+        private const float crosswiseEpsilon=.0001f;
         private float PointDistanceToRay(Ray ray, Vector3 point)
         {
-            return Vector3.Distance(point,ray.origin+Vector3.Project(point - ray.origin, ray.direction));
+            float dot = Vector3.Dot(point - ray.origin, ray.direction);
+            dot = Mathf.Max(0, dot);
+            return Vector3.Distance(point,ray.origin+dot*ray.direction);
         }
         public Vector3 RaycastAgainstCurve(Ray ray, out float lengthwiseDistance, out float crosswiseDistance, bool front)
         {
+            ray.direction = ray.direction.normalized;
             ClosestPointOnCurveToLine.GetClosestPointToLine(positionCurve,ray.origin,ray.origin+ray.direction, out int segmentIndex, out float time,new TransformBlob(transform));
             crosswiseDistance = .5f;
             lengthwiseDistance = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex, time);
@@ -629,28 +633,28 @@ namespace ChaseMacMillan.CurveDesigner
                 GUI.color = Color.HSVToRGB(.7f*i/(float)raycastIterations,1,1);
                 GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(guipos, 5, 5), settings.circleIcon);
                 float lengthwiseDelta;
-                if (lengthwiseDistance+raycastEpsilon >= 1 )
+                if (lengthwiseDistance+lengthwiseEpsilon>= 1 )
                 {
-                    Vector3 lengthwiseBump = GetPointOnSurface((lengthwiseDistance-raycastEpsilon)*curveLength, crosswiseDistance, out _, out _, front);
+                    Vector3 lengthwiseBump = GetPointOnSurface((lengthwiseDistance-lengthwiseEpsilon)*curveLength, crosswiseDistance, out _, out _, front);
                     float dist = PointDistanceToRay(ray, lengthwiseBump);
                     lengthwiseDelta = currentDist - dist;
                 }
                 else
                 {
-                    Vector3 lengthwiseBump = GetPointOnSurface((lengthwiseDistance+raycastEpsilon)*curveLength, crosswiseDistance, out _, out _, front);
+                    Vector3 lengthwiseBump = GetPointOnSurface((lengthwiseDistance+lengthwiseEpsilon)*curveLength, crosswiseDistance, out _, out _, front);
                     float dist = PointDistanceToRay(ray, lengthwiseBump);
                     lengthwiseDelta = dist-currentDist;
                 }
                 float crosswiseDelta;
-                if (crosswiseDistance+raycastEpsilon >= 1)
+                if (crosswiseDistance+crosswiseEpsilon>= 1)
                 {
-                    Vector3 crosswiseBump = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance-raycastEpsilon, out _, out _, front);
+                    Vector3 crosswiseBump = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance-crosswiseEpsilon, out _, out _, front);
                     float dist = PointDistanceToRay(ray, crosswiseBump);
                     crosswiseDelta= currentDist-dist;
                 }
                 else
                 {
-                    Vector3 crosswiseBump = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance+raycastEpsilon, out _, out _, front);
+                    Vector3 crosswiseBump = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance+crosswiseEpsilon, out _, out _, front);
                     float dist = PointDistanceToRay(ray, crosswiseBump);
                     crosswiseDelta= dist-currentDist;
                 }
