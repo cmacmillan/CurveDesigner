@@ -619,7 +619,7 @@ namespace ChaseMacMillan.CurveDesigner
         public Vector3 RaycastAgainstCurve(Ray ray, out float lengthwiseDistance, out float crosswiseDistance, bool front)
         {
             ray.direction = ray.direction.normalized;
-            ClosestPointOnCurveToLine.GetClosestPointToLine(positionCurve,ray.origin,ray.origin+ray.direction, out int segmentIndex, out float time,new TransformBlob(transform));
+            ClosestPointOnCurveToRayDotProduct.GetClosestPoint(positionCurve,ray,out int segmentIndex, out float time,new TransformBlob(transform));
             crosswiseDistance = .5f;
             lengthwiseDistance = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex, time);
             float curveLength = CurveLength;
