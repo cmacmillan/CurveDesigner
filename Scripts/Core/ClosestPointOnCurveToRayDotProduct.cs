@@ -17,7 +17,7 @@ namespace ChaseMacMillan.CurveDesigner
             int bestSegmentIndex = -1;
             float bestTime = 0;
             ray.direction = ray.direction.normalized;
-            float bestFitness = float.MaxValue;
+            float bestFitness = float.MinValue;
             for (int segmentIndex = 0; segmentIndex < curve.NumSegments; segmentIndex++)
             {
                 Vector3 p0 = curve.PointGroups[segmentIndex].GetPositionLocal(PointGroupIndex.Position);
@@ -40,7 +40,6 @@ namespace ChaseMacMillan.CurveDesigner
                 {
                     float t =(i+1)/(float)(initialPointCount+1);
                     float t2;
-                    float t3;
                     Vector3 pos;
                     float k;
                     for (int j = 0; j < newtonsIterations; j++)
@@ -48,7 +47,7 @@ namespace ChaseMacMillan.CurveDesigner
                         pos = GetPos(p0,p1,p2,p3,t);
                         k = pos.magnitude;
                         t2 = t * t;
-                        float num = (3 * coefs.t3 * t2 + 2 * coefs.t2 * t + coefs.t1)/k;
+                        float num = (3 * coefs.t3 * t2 + 2 * coefs.t2 * t + coefs.t1)/k;//k can cancel, so remove
                         float denom = (6 * coefs.t3 * t + 2 * coefs.t2)/k;
                         t = t - (num / denom);
                     }
@@ -56,9 +55,9 @@ namespace ChaseMacMillan.CurveDesigner
                     pos = GetPos(p0, p1, p2, p3, t);
                     k = pos.magnitude;
                     t2 = t * t;
-                    t3 = t * t * t;
+                    float t3 = t * t * t;
                     float fitness = (coefs.t3 * t3 + coefs.t2 * t2 + coefs.t1 * t + coefs.c) / k;
-                    if (fitness < bestFitness)
+                    if (fitness > bestFitness)
                     {
                         bestFitness = fitness;
                         bestSegmentIndex = segmentIndex;
