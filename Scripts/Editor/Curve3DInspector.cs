@@ -27,7 +27,6 @@ namespace ChaseMacMillan.CurveDesigner
 
         public override void OnInspectorGUI()
         {
-            EnsureValidEditMode();
             var curve3d = (target as Curve3D);
             curve3d.TryInitStyles();
             curve3d.TryInitialize();
@@ -46,11 +45,18 @@ namespace ChaseMacMillan.CurveDesigner
             script = EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false) as MonoScript;
             GUI.enabled = true;
 
+
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             EditorGUIUtility.labelWidth = 0;
             EditorGUIUtility.labelWidth = EditorGUIUtility.labelWidth - 4;
 
-            EditorGUILayout.BeginVertical();
+            EditorGUILayout.BeginVertical(
+#if UNITY_2019_1_OR_NEWER
+#else
+                GUILayout.MaxHeight(200)//hack to prevent inspector over-expansion on unity versions <2018
+#endif
+                );
+
             bool isDisabled = false;
 
             GUILayout.BeginVertical(curve3d.effectBgStyle);
