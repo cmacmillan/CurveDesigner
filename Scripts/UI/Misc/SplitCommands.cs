@@ -146,6 +146,8 @@ namespace ChaseMacMillan.CurveDesigner
             /////////////////
             foreach (var i in modificationTrackers)
                 i.FinishInsertToBackingCurve();
+            foreach (var i in _curve.DistanceSamplers)
+                i.Sort(_curve.positionCurve);
             ////////////////
 
             var selected = _curve.UICurve.positionCurve.pointGroups[closestPoint.segmentIndex+1].centerPoint;
