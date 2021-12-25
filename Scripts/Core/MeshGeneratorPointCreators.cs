@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    public delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal);
+    public delegate Vector3 PointCreator(PointOnCurve point, int pointNum, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal,out float crosswise);
     public static class MeshGeneratorPointCreators
     {
         public static Vector3 ExtrudePointCreator_Core(PointOnCurve point, float lerp, float size, float rotation, float offset, float arc, ExtrudeSampler extrudeSampler, BezierCurve curve, bool useCachedDistance, out Vector3 normal)
@@ -22,11 +22,11 @@ namespace ChaseMacMillan.CurveDesigner
             normal = Mathf.Sign(offset)*thicknessDirection;
             return absolutePos + (rotationMat * thicknessDirection) * offset;
         }
-        public static Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
+        public static Vector3 ExtrudePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal, out float crosswise)
         {
             totalPointCount -= 1;
-            float lerp = currentIndex / (float)totalPointCount;
-            return ExtrudePointCreator_Core(point, lerp, size, rotation, offset, arc, extrudeSampler, curve, useCachedDistance, out normal);
+            crosswise = currentIndex / (float)totalPointCount;
+            return ExtrudePointCreator_Core(point, crosswise, size, rotation, offset, arc, extrudeSampler, curve, useCachedDistance, out normal);
         }
         public static void RectanglePointCreator_Core(PointOnCurve point, float size, float rotation, float offset, BezierCurve curve,out Vector3 normal,out Vector3 lineStart, out Vector3 lineEnd)
         {
@@ -40,31 +40,33 @@ namespace ChaseMacMillan.CurveDesigner
             normal = up;
             normal *= Mathf.Sign(offset);
         }
-        public static Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc, ExtrudeSampler extrudeSampler, BezierCurve curve, bool useCachedDistance, out Vector3 normal)
+        public static Vector3 RectanglePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc, ExtrudeSampler extrudeSampler, BezierCurve curve, bool useCachedDistance, out Vector3 normal, out float crosswise)
         {
             RectanglePointCreator_Core(point, size, rotation, offset, curve, out normal, out Vector3 lineStart, out Vector3 lineEnd);
-            return Vector3.Lerp(lineStart, lineEnd, currentIndex / (float)(totalPointCount - 1));
+            crosswise = currentIndex / (float)(totalPointCount - 1);
+            return Vector3.Lerp(lineStart, lineEnd, crosswise);
         }
         public static float GetTubeWidth(float size, float offset,float arc)
         {
             float radius = offset + size;
             return 2 * Mathf.PI * radius * arc / 360.0f;
         }
-        public static Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
+        public static Vector3 TubePointCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal,out float crosswise)
         {
-            return point.GetRingPoint(currentIndex / (float)(totalPointCount - 1), size, offset, arc, rotation, out normal);
+            crosswise = currentIndex / (float)(totalPointCount - 1);
+            return point.GetRingPoint(crosswise, size, offset, arc, rotation, out normal);
         }
         public static void TubeFlatPlateCreator_Core(PointOnCurve point, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal, out Vector3 start, out Vector3 end)
         {
-            start = TubePointCreator(point, 0, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _);
-            end = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _);
+            start = TubePointCreator(point, 0, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _,out _);
+            end = TubePointCreator(point, totalPointCount - 1, totalPointCount, size, rotation, offset, arc,extrudeSampler,curve,useCachedDistance,out _,out _);
             normal = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
         }
-        public static Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal)
+        public static Vector3 TubeFlatPlateCreator(PointOnCurve point, int currentIndex, int totalPointCount, float size, float rotation, float offset, float arc,ExtrudeSampler extrudeSampler, BezierCurve curve,bool useCachedDistance,out Vector3 normal, out float crosswise)
         {
             TubeFlatPlateCreator_Core(point, totalPointCount, size, rotation, offset, arc, extrudeSampler, curve, useCachedDistance, out normal, out Vector3 lineStart, out Vector3 lineEnd);
-            float lerp = currentIndex / (float)(totalPointCount - 1);
-            return Vector3.Lerp(lineStart, lineEnd, lerp);
+            crosswise = currentIndex / (float)(totalPointCount - 1);
+            return Vector3.Lerp(lineStart, lineEnd, crosswise);
         }
         public const float frontOffset = .5f;
         public const float backOffset = -.5f;

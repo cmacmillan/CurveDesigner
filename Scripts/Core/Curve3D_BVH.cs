@@ -9,6 +9,11 @@ namespace ChaseMacMillan.CurveDesigner
 {
     public class Curve3D_BVH
     {
+        private MeshGeneratorOutput meshGenOutput;
+        public Curve3D_BVH(MeshGeneratorOutput meshGenOutput)
+        {
+
+        }
         public static bool TestHitTriangle(Ray ray, Vector3 p0,Vector3 p2,Vector3 p3)
         {
             return true;

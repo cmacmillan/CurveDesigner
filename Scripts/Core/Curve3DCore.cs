@@ -737,30 +737,26 @@ namespace ChaseMacMillan.CurveDesigner
                         displayMesh.indexFormat = IndexFormat.UInt32;
                         Filter.mesh = displayMesh;
                         displayMeshCreatorId = GetInstanceID();
+                        displayMesh.MarkDynamic();
                     }
                     else
                     {
                         displayMesh.Clear();
                     }
-                    displayMesh.SetVertices(output.vertices);
-                    displayMesh.subMeshCount = output.submeshCount;
-                    for (int i = 0; i < output.submeshCount; i++)
-                        displayMesh.SetTriangles(output.submeshes[i], i);
-                    if (output.uvs.Count != output.vertices.Count)
-                        Debug.LogError($"Expected {output.vertices.Count} uvs, but got {output.uvs.Count}");
-                    displayMesh.SetUVs(0, output.uvs);
-                    if (output.colors.Count != output.vertices.Count)
-                        Debug.LogError($"Expected {output.vertices.Count} colors, but got {output.colors.Count}");
-                    displayMesh.SetColors(output.colors);
-                    if (output.autoRecalculateNormals)
-                        displayMesh.RecalculateNormals();
-                    else
-                        displayMesh.SetNormals(output.normals);
+                    displayMesh.SetVertexBufferParams(output.data.Count,MeshGeneratorThreadManager.GetVertexBufferParams());
+                    displayMesh.SetVertexBufferData(output.data, 0, 0, output.data.Count);
+                    displayMesh.SetIndexBufferParams(output.triangles.Count, IndexFormat.UInt32);
+                    displayMesh.SetIndexBufferData(output.triangles, 0, 0, output.triangles.Count);
+                    displayMesh.subMeshCount = output.submeshInfo.Count;
+                    for (int i = 0; i < output.submeshInfo.Count; i++)
+                        displayMesh.SetSubMesh(i,output.submeshInfo[i]);
+                    displayMesh.RecalculateTangents();
                     if (collider == null)
                         collider = GetComponent<MeshCollider>();
                     if (collider != null)
                         collider.sharedMesh = displayMesh;
                 }
+                MeshGeneratorThreadManager.ReturnToOutputPool(output);
             }
         }
         private int NumSubmeshesByCurveType(MeshGenerationMode type)

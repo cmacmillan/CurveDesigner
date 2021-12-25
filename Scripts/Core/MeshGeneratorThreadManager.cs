@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ChaseMacMillan.CurveDesigner
 {
@@ -10,8 +11,18 @@ namespace ChaseMacMillan.CurveDesigner
     {
         private static Thread meshGenerationThread;
         private static readonly object locker = new object();
+        private static readonly List<MeshGeneratorOutput> outputPool = new List<MeshGeneratorOutput>();//only access on main thread
         private static readonly ConcurrentQueue<MeshGeneratorData> generationQueue = new ConcurrentQueue<MeshGeneratorData>();
         private static readonly ConcurrentDictionary<int, MeshGeneratorOutput> resultDict = new ConcurrentDictionary<int, MeshGeneratorOutput>();
+        private static VertexAttributeDescriptor[] vertexBufferParams;
+        public static void ReturnToOutputPool(MeshGeneratorOutput output)
+        {
+            output.data.Clear();
+            output.distances.Clear();
+            output.triangles.Clear();
+            output.submeshInfo.Clear();
+            outputPool.Add(output);
+        }
 
         public static bool GetMeshResults(Curve3D curve,out MeshGeneratorOutput output)
         {
@@ -34,6 +45,13 @@ namespace ChaseMacMillan.CurveDesigner
             }
 
             MeshGeneratorData data = new MeshGeneratorData();
+            if (outputPool.Count == 0)
+                data.output = new MeshGeneratorOutput();
+            else
+            {
+                data.output = outputPool[outputPool.Count - 1];
+                outputPool.RemoveAt(outputPool.Count - 1);
+            }
             data.curve = new BezierCurve(curve.positionCurve, false);
             data.currentlyGeneratingForCurveId = curve.GetInstanceID();
             data.RingPointCount = curve.ringPointCount;
@@ -97,28 +115,49 @@ namespace ChaseMacMillan.CurveDesigner
                 }
             }
         }
+        public static VertexAttributeDescriptor[] GetVertexBufferParams()
+        {
+            if (vertexBufferParams == null)
+            {
+                //must match data layout of MeshGeneratorVertexItem
+                vertexBufferParams = new VertexAttributeDescriptor[] 
+                { 
+                    new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32,3),
+                    new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3),
+                    new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.UNorm8,4),
+                    new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2),
+                };
+            }
+            return vertexBufferParams;
+        }
+    }
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public struct MeshGeneratorVertexItem
+    {
+        public Vector3 position;//12 bytes
+        public Vector3 normal;//12 bytes
+        public Color32 color;//4 bytes 
+        public Vector2 uv;//8 bytes
     }
     public class MeshGeneratorOutput
     {
         public MeshGeneratorOutput()
         {
         }
-        public List<Vector3> vertices = new List<Vector3>();
-        public List<Vector2> uvs = new List<Vector2>();
-        public List<Color32> colors = new List<Color32>();
-        public List<Vector3> normals = new List<Vector3>();
-        public bool autoRecalculateNormals = false;
-        public List<List<int>> submeshes;
-        public int submeshCount = 0;
-        public void InitSubmeshes(int numSubmeshes, out List<List<int>> localSubmeshRef)
+        public List<MeshGeneratorVertexItem> data = new List<MeshGeneratorVertexItem>();
+        public List<SurfaceInfo> distances = new List<SurfaceInfo>();//stores the distance from the start of the curve for each vertex
+        public List<int> triangles = new List<int>();
+        public List<UnityEngine.Rendering.SubMeshDescriptor> submeshInfo = new List<SubMeshDescriptor>();
+    }
+    public struct SurfaceInfo
+    {
+        public SurfaceInfo(float lengthwise, float crosswise)
         {
-            submeshCount = numSubmeshes;
-            if (submeshes == null)
-                submeshes = new List<List<int>>();
-            for (int i = submeshes.Count; i < numSubmeshes; i++)
-                submeshes.Add(new List<int>());
-            localSubmeshRef = submeshes;
+            this.lengthwise = lengthwise;
+            this.crosswise = crosswise;
         }
+        public float lengthwise;
+        public float crosswise;
     }
     public class MeshGeneratorData
     {
@@ -128,6 +167,8 @@ namespace ChaseMacMillan.CurveDesigner
         public ColorSampler colorSampler;
         public FloatSampler tubeArcSampler;
         public FloatSampler thicknessSampler;
+
+        public MeshGeneratorOutput output;
 
         public BezierCurve curve;
 
