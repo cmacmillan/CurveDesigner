@@ -171,7 +171,7 @@ namespace ChaseMacMillan.CurveDesigner
             this.indexCount = indexCount;
         }
 #if UNITY_2019_3_OR_NEWER
-     SubMeshDescriptor GetDescriptor()
+     public SubMeshDescriptor GetDescriptor()
      {
         return new SubMeshDescriptor(indexStart,indexCount);
      }

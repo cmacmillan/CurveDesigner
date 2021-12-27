@@ -751,7 +751,7 @@ namespace ChaseMacMillan.CurveDesigner
                     displayMesh.SetIndexBufferData(output.triangles, 0, 0, output.triangles.Count);
                     displayMesh.subMeshCount = output.submeshInfo.Count;
                     for (int i = 0; i < output.submeshInfo.Count; i++)
-                        displayMesh.SetSubMesh(i,output.submeshInfo[i]);
+                        displayMesh.SetSubMesh(i,output.submeshInfo[i].GetDescriptor());
 #else
                     //fallback to old api
                     var positions = MeshGeneratorThreadManager.positionCopyList;
