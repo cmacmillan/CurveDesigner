@@ -748,7 +748,7 @@ namespace ChaseMacMillan.CurveDesigner
                     displayMesh.SetVertexBufferParams(output.data.Count,MeshGeneratorThreadManager.GetVertexBufferParams());
                     displayMesh.SetVertexBufferData(output.data, 0, 0, output.data.Count);
                     displayMesh.SetIndexBufferParams(output.triangles.Count, IndexFormat.UInt32);
-                    displayMesh.SetIndexBufferData(output.triangles, 0, 0, output.triangles.Count);
+                    displayMesh.SetIndexBufferData(output.triangles, 0, 0, output.triangles.Count, MeshUpdateFlags.DontValidateIndices);
                     displayMesh.subMeshCount = output.submeshInfo.Count;
                     for (int i = 0; i < output.submeshInfo.Count; i++)
                         displayMesh.SetSubMesh(i,output.submeshInfo[i].GetDescriptor());
