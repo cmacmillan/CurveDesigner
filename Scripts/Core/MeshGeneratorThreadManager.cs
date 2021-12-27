@@ -124,6 +124,7 @@ namespace ChaseMacMillan.CurveDesigner
                 { 
                     new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32,3),
                     new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3),
+                    new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4),
                     new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.UNorm8,4),
                     new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2),
                 };
@@ -136,6 +137,7 @@ namespace ChaseMacMillan.CurveDesigner
     {
         public Vector3 position;//12 bytes
         public Vector3 normal;//12 bytes
+        public Vector4 tangent;//16 bytes
         public Color32 color;//4 bytes 
         public Vector2 uv;//8 bytes
     }
@@ -198,6 +200,7 @@ namespace ChaseMacMillan.CurveDesigner
             verts = meshToCopy.vertices;
             uv = meshToCopy.uv;
             normals = meshToCopy.normals;
+            tangents = meshToCopy.tangents;
             bounds = meshToCopy.bounds;
         }
         public void WriteToMesh(Mesh meshToWriteTo)
@@ -205,11 +208,13 @@ namespace ChaseMacMillan.CurveDesigner
             meshToWriteTo.vertices = verts;
             meshToWriteTo.triangles = tris;
             meshToWriteTo.normals = normals;
+            meshToWriteTo.tangents = tangents;
             meshToWriteTo.uv = uv;
         }
         public int[] tris;
         public Vector3[] verts;
         public Vector3[] normals;
+        public Vector4[] tangents;
         public Vector2[] uv;
         public Bounds bounds;
         //currently only supports uv0

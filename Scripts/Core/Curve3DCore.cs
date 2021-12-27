@@ -750,7 +750,6 @@ namespace ChaseMacMillan.CurveDesigner
                     displayMesh.subMeshCount = output.submeshInfo.Count;
                     for (int i = 0; i < output.submeshInfo.Count; i++)
                         displayMesh.SetSubMesh(i,output.submeshInfo[i]);
-                    displayMesh.RecalculateTangents();
                     if (collider == null)
                         collider = GetComponent<MeshCollider>();
                     if (collider != null)

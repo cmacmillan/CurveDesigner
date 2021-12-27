@@ -62,13 +62,6 @@ namespace ChaseMacMillan.CurveDesigner
             List<SurfaceInfo> distances = output.distances;
             List<UnityEngine.Rendering.SubMeshDescriptor> submeshInfo = output.submeshInfo;
 
-            void SetUV(int index, Vector2 uv)
-            {
-                var data = vertexItems[index];
-                data.uv = uv;
-                vertexItems[index]=data;
-            }
-
             int currentSubmeshBase = 0;
             void EndSubmesh()
             {
@@ -319,18 +312,68 @@ namespace ChaseMacMillan.CurveDesigner
                 {
                     var thickness = thicknesses[bandIndex];
                     var distFromStart = distsFromStart[bandIndex];
+                    int bandOffset = startIndex + bandIndex * pointsPerBand;
+                    void SetUV(int index, Vector2 uv)
+                    {
+                        var curr = vertexItems[bandOffset + index];
+                        Vector3 avgX = Vector3.zero;
+                        if (bandIndex > 0)
+                        {
+                            var prev = vertexItems[startIndex + (bandIndex - 1) * pointsPerBand+index];
+                            Vector3 offset = curr.position - prev.position;
+                            avgX += offset;
+                        }
+                        if (bandIndex < numBands-1)
+                        {
+                            var next = vertexItems[startIndex + (bandIndex + 1) * pointsPerBand+index];
+                            Vector3 offset = next.position - curr.position;
+                            avgX += offset;
+                        }
+                        Vector3 avgY = Vector3.zero;
+                        if (index > 0)
+                        {
+                            var prev = vertexItems[bandOffset + index - 1];
+                            Vector3 offset = curr.position - prev.position;
+                            avgY += offset;
+                        }
+                        if (index < pointsPerBand - 1)
+                        {
+                            var next = vertexItems[bandOffset + index + 1];
+                            Vector3 offset = next.position - curr.position;
+                            avgY += offset;
+                        }
+                        Vector3 tangent;
+                        float w;
+                        if (settings.textureDirection == TextureDirection.x)
+                        {
+                            tangent = avgX.normalized;
+                            w = Vector3.Dot(Vector3.Cross(curr.normal, tangent), avgY) >= 0 ? 1 : -1;
+                        }
+                        else
+                        {
+                            tangent = avgY.normalized;
+                            w = Vector3.Dot(Vector3.Cross(curr.normal, tangent), avgX) >= 0 ? 1 : -1;
+                        }
+                        curr.uv = uv;
+                        curr.tangent = new Vector4(tangent.x, tangent.y, tangent.z, w);
+                        vertexItems[bandOffset+index] = curr;
+                    }
                     switch (settings.textureGenMode)
                     {
-                        case TextureGenerationMode.Stretch://doesn't yet support stretch direction, but should
+                        case TextureGenerationMode.Stretch:
                             if (settings.textureDirection == TextureDirection.x)
                             {
                                 for (int i = 0; i < pointsPerBand; i++)
-                                    SetUV(startIndex++,new Vector2(distFromStart / surfaceLength, i / (float)(pointsPerBand - 1)));
+                                {
+                                    SetUV(i, new Vector2(distFromStart / surfaceLength, i / (float)(pointsPerBand - 1)));
+                                }
                             }
                             else
                             {
                                 for (int i = 0; i < pointsPerBand; i++)
-                                    SetUV(startIndex++,new Vector2(i / (float)(pointsPerBand - 1), distFromStart / surfaceLength));
+                                {
+                                    SetUV(i,new Vector2(i / (float)(pointsPerBand - 1), distFromStart / surfaceLength));
+                                }
                             }
                             break;
                         case TextureGenerationMode.Tile:
@@ -349,17 +392,22 @@ namespace ChaseMacMillan.CurveDesigner
                             {
                                 float uvy = settings.scale * i / (float)(pointsPerBand - 1);
                                 if (settings.textureDirection == TextureDirection.x)
-                                    SetUV(startIndex++,new Vector2(scaledUvx, uvy));
+                                    SetUV(i,new Vector2(scaledUvx, uvy));
                                 else if (settings.textureDirection == TextureDirection.y)
-                                    SetUV(startIndex++,new Vector2(uvy, scaledUvx));
+                                    SetUV(i,new Vector2(uvy, scaledUvx));
                             }
                             break;
                         case TextureGenerationMode.Flat:
-                            if (right.HasValue && center.HasValue && up.HasValue)
+                            if (right.HasValue && center.HasValue && up.HasValue)//special case for end plates
                             {
+                                Vector3 rightNormalized = right.Value.normalized;
+                                Vector3 upNormalized = up.Value.normalized;
                                 for (int i = 0; i < pointsPerBand; i++)
                                 {
-                                    SetUV(startIndex++,GetFlatUV(vertexItems[startIndex].position - center.Value, settings, right.Value, up.Value));
+                                    var curr = vertexItems[bandOffset + i];
+                                    curr.uv = GetFlatUV(curr.position - center.Value, settings, right.Value, up.Value,curr.normal,rightNormalized,upNormalized,out Vector4 tangent);
+                                    curr.tangent = tangent;
+                                    vertexItems[bandOffset + i] = curr;
                                 }
                             }
                             else
@@ -368,14 +416,14 @@ namespace ChaseMacMillan.CurveDesigner
                                 {
                                     for (int i = 0; i < pointsPerBand; i++)
                                     {
-                                        SetUV(startIndex++,new Vector2(settings.scale * distFromStart, settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / (float)pointsPerBand)));
+                                        SetUV(i,new Vector2(settings.scale * distFromStart, settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / (float)pointsPerBand)));
                                     }
                                 }
                                 else
                                 {
                                     for (int i = 0; i < pointsPerBand; i++)
                                     {
-                                        SetUV(startIndex++,new Vector2(settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / (float)pointsPerBand), settings.scale * distFromStart));
+                                        SetUV(i,new Vector2(settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / (float)pointsPerBand), settings.scale * distFromStart));
                                     }
                                 }
                             }
@@ -512,14 +560,22 @@ namespace ChaseMacMillan.CurveDesigner
                 var up = point.reference;
                 var right = Vector3.Cross(up, point.tangent);
             */
-            Vector2 GetFlatUV(Vector3 relative, TextureLayerSettings settings, Vector3 right, Vector3 up)
+            Vector2 GetFlatUV(Vector3 relative, TextureLayerSettings settings, Vector3 right, Vector3 up, Vector3 normal,Vector3 rightNormalized, Vector3 upNormalized,out Vector4 tangent)
             {
                 var x = Vector3.Dot(relative, right) * settings.scale;
                 var y = Vector3.Dot(relative, up) * settings.scale;
                 if (settings.textureDirection == TextureDirection.x)
+                {
+                    float w = Vector3.Dot(Vector3.Cross(right, normal), up) >= 0 ? -1 : 1;
+                    tangent = new Vector4(rightNormalized.x,rightNormalized.y,rightNormalized.z,w);
                     return new Vector2(x + .5f, y + .5f);
+                }
                 else
+                {
+                    float w = Vector3.Dot(Vector3.Cross(up, normal), right) >= 0 ? -1 : 1;
+                    tangent = new Vector4(upNormalized.x,upNormalized.y,upNormalized.z,w);
                     return new Vector2(y + .5f, x + .5f);
+                }
             }
             void CreateTubeEndPlates()
             {
@@ -553,7 +609,8 @@ namespace ChaseMacMillan.CurveDesigner
                         item.position = vert;
                         item.normal = normal;
                         item.color = color;
-                        item.uv = GetFlatUV(vert - point.position, endTextureLayer, right, up);
+                        item.uv = GetFlatUV(vert - point.position, endTextureLayer, right, up,normal,right.normalized,up.normalized,out Vector4 tangent);
+                        item.tangent = tangent;
                         vertexItems.Add(item);
                         distances.Add(new SurfaceInfo(distance,-1));
                     }
@@ -563,7 +620,8 @@ namespace ChaseMacMillan.CurveDesigner
                         item.position = average;
                         item.normal = normal;
                         item.color = color;
-                        item.uv = GetFlatUV(average - point.position, endTextureLayer, right, up);
+                        item.uv = GetFlatUV(average - point.position, endTextureLayer, right, up,normal,right.normalized,up.normalized,out Vector4 tangent);
+                        item.tangent = tangent;
                         vertexItems.Add(item);
                         distances.Add(new SurfaceInfo(distance, -1));
                     }
@@ -690,26 +748,28 @@ namespace ChaseMacMillan.CurveDesigner
                         var bounds = meshToTile.bounds;
                         //watch out for square meshes
                         float meshLength = -1;
+                        bool useUvs = meshToTile.uv!=null && meshToTile.uv.Length == meshToTile.verts.Length;
+                        bool useTangents = meshToTile.tangents!=null && meshToTile.tangents.Length == meshToTile.verts.Length;
+                        Quaternion initialRotation = Quaternion.identity;
                         float secondaryDimensionLength = -1;
                         {
-                            Quaternion rotation = Quaternion.identity;
                             void UseXAsMainAxis()
                             {
                                 meshLength = bounds.extents.x * 2;
                                 secondaryDimensionLength = Mathf.Max(bounds.extents.y, bounds.extents.z);
-                                rotation = Quaternion.FromToRotation(Vector3.right, Vector3.right);//does nothing
+                                initialRotation = Quaternion.FromToRotation(Vector3.right, Vector3.right);//does nothing
                             }
                             void UseYAsMainAxis()
                             {
                                 meshLength = bounds.extents.y * 2;
                                 secondaryDimensionLength = Mathf.Max(bounds.extents.x, bounds.extents.z);
-                                rotation = Quaternion.FromToRotation(Vector3.up, Vector3.right);
+                                initialRotation = Quaternion.FromToRotation(Vector3.up, Vector3.right);
                             }
                             void UseZAsMainAxis()
                             {
                                 meshLength = bounds.extents.z * 2;
                                 secondaryDimensionLength = Mathf.Max(bounds.extents.x, bounds.extents.y);
-                                rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.right);
+                                initialRotation = Quaternion.FromToRotation(Vector3.forward, Vector3.right);
                             }
                             switch (meshPrimaryAxis)
                             {
@@ -733,19 +793,22 @@ namespace ChaseMacMillan.CurveDesigner
                             }
                             Vector3 TransformPoint(Vector3 point)
                             {
-                                return (rotation * (point - bounds.center)) + new Vector3(meshLength / 2, 0, 0);
+                                return (initialRotation * (point - bounds.center)) + new Vector3(meshLength / 2, 0, 0);
                             }
                             for (int i = 0; i < meshToTile.verts.Length; i++)
                             {
                                 meshToTile.verts[i] = TransformPoint(meshToTile.verts[i]);
                                 meshToTile.verts[i].x = Mathf.Max(0, meshToTile.verts[i].x);//clamp above zero, sometimes floats mess with this
-                                throw new NotImplementedException("implement normal transformation!");
-                                //meshToTile.normals[i] = ;
+                                if (useTangents)
+                                {
+                                    var transformedTangent = initialRotation*meshToTile.tangents[i];
+                                    meshToTile.tangents[i] = new Vector4(transformedTangent.x,transformedTangent.y,transformedTangent.z,meshToTile.tangents[i].w);
+                                }
+                                meshToTile.normals[i] = initialRotation*meshToTile.normals[i];
                             }
                             //now x is always along the mesh and normalized around the center
                         }
                         int vertCount = meshToTile.verts.Length;
-                        bool useUvs = meshToTile.uv.Length == meshToTile.verts.Length;
                         int c = 0;
                         int vertexBaseOffset = 0;
                         List<int> remappedVerts = new List<int>();
@@ -777,7 +840,8 @@ namespace ChaseMacMillan.CurveDesigner
                                 var rotation = GetRotationAtDistance(distance);
                                 var size = GetSizeAtDistance(distance);
                                 var sizeScale = size / secondaryDimensionLength;
-                                var reference = Quaternion.AngleAxis(rotation, point.tangent) * point.reference;
+                                var localRotation = Quaternion.AngleAxis(rotation, point.tangent);
+                                var reference = localRotation * point.reference;
                                 var cross = Vector3.Cross(reference, point.tangent);
                                 MeshGeneratorVertexItem item = new MeshGeneratorVertexItem();
                                 item.position = point.position + reference * vert.y * sizeScale + cross * vert.z * sizeScale;
@@ -786,7 +850,23 @@ namespace ChaseMacMillan.CurveDesigner
                                     item.uv = meshToTile.uv[i];
                                 else
                                     item.uv = new Vector2();
-                                item.normal = meshToTile.normals[i];
+                                var normal = meshToTile.normals[i];
+                                var transformedNormal = (normal.x * point.tangent + reference * normal.y + cross * normal.z).normalized;
+                                item.normal = transformedNormal;
+                                if (useTangents)
+                                {
+                                    var tangent = meshToTile.tangents[i];
+                                    var transformedTangent = (tangent.x*point.tangent+reference * tangent.y + cross * tangent.z).normalized;
+                                    var ogBitangent = Vector3.Cross(tangent, normal);
+                                    var transformedOGBitangent = (ogBitangent.x*point.tangent+reference * ogBitangent.y + cross * ogBitangent.z);
+                                    var newBitangent = Vector3.Cross(transformedTangent,transformedNormal);
+                                    item.tangent = new Vector4(transformedTangent.x, transformedTangent.y, transformedTangent.z, tangent.w*(Vector3.Dot(transformedOGBitangent, newBitangent) > 0 ? 1:-1));
+                                }
+                                else
+                                {
+                                    item.tangent = new Vector4(1, 0, 0, 1);
+                                }
+                                vertexItems.Add(item);
                                 distances.Add(new SurfaceInfo(point.distanceFromStartOfCurve,-1));
                             }
                             for (int i = 0; i < meshToTile.tris.Length; i += 3)
