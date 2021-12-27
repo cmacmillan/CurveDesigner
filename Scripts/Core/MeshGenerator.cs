@@ -60,12 +60,12 @@ namespace ChaseMacMillan.CurveDesigner
             List<int> triangles = output.triangles;
             List<MeshGeneratorVertexItem> vertexItems = output.data;
             List<SurfaceInfo> distances = output.distances;
-            List<UnityEngine.Rendering.SubMeshDescriptor> submeshInfo = output.submeshInfo;
+            List<MySubMeshDescriptor> submeshInfo = output.submeshInfo;
 
             int currentSubmeshBase = 0;
             void EndSubmesh()
             {
-                submeshInfo.Add(new UnityEngine.Rendering.SubMeshDescriptor(currentSubmeshBase, triangles.Count-currentSubmeshBase));
+                submeshInfo.Add(new MySubMeshDescriptor(currentSubmeshBase, triangles.Count-currentSubmeshBase));
                 currentSubmeshBase = triangles.Count;
             }
 

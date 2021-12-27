@@ -743,6 +743,8 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         displayMesh.Clear();
                     }
+#if UNITY_2019_3_OR_NEWER
+                    //use fast api if possible
                     displayMesh.SetVertexBufferParams(output.data.Count,MeshGeneratorThreadManager.GetVertexBufferParams());
                     displayMesh.SetVertexBufferData(output.data, 0, 0, output.data.Count);
                     displayMesh.SetIndexBufferParams(output.triangles.Count, IndexFormat.UInt32);
@@ -750,6 +752,47 @@ namespace ChaseMacMillan.CurveDesigner
                     displayMesh.subMeshCount = output.submeshInfo.Count;
                     for (int i = 0; i < output.submeshInfo.Count; i++)
                         displayMesh.SetSubMesh(i,output.submeshInfo[i]);
+#else
+                    //fallback to old api
+                    var positions = MeshGeneratorThreadManager.positionCopyList;
+                    var normals = MeshGeneratorThreadManager.normalCopyList;
+                    var tangents = MeshGeneratorThreadManager.tangentCopyList;
+                    var uv = MeshGeneratorThreadManager.uvCopyList;
+                    var colors = MeshGeneratorThreadManager.colorCopyList;
+                    var triangles = MeshGeneratorThreadManager.triangleCopyList;
+                    positions.Clear();
+                    normals.Clear();
+                    tangents.Clear();
+                    uv.Clear();
+                    colors.Clear();
+                    foreach (var i in output.data)
+                    {
+                        positions.Add(i.position);
+                        normals.Add(i.normal);
+                        tangents.Add(i.tangent);
+                        uv.Add(i.uv);
+                        colors.Add(i.color);
+                    }
+                    displayMesh.SetVertices(positions);
+                    displayMesh.SetNormals(normals);
+                    displayMesh.SetTangents(tangents);
+                    displayMesh.SetColors(colors);
+                    displayMesh.SetUVs(0, uv);
+                    int subMeshCount = output.submeshInfo.Count;
+                    displayMesh.subMeshCount = subMeshCount;
+                    int submeshIndex = 0;
+                    foreach (var i in output.submeshInfo)
+                    {
+                        int end = i.indexStart + i.indexCount;
+                        triangles.Clear();
+                        for (int c=i.indexStart;c<end;c++)
+                        {
+                            triangles.Add(output.triangles[c]);
+                        }
+                        displayMesh.SetTriangles(triangles,submeshIndex);
+                        submeshIndex++;
+                    }
+#endif
                     if (collider == null)
                         collider = GetComponent<MeshCollider>();
                     if (collider != null)

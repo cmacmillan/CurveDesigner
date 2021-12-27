@@ -14,7 +14,6 @@ namespace ChaseMacMillan.CurveDesigner
         private static readonly List<MeshGeneratorOutput> outputPool = new List<MeshGeneratorOutput>();//only access on main thread
         private static readonly ConcurrentQueue<MeshGeneratorData> generationQueue = new ConcurrentQueue<MeshGeneratorData>();
         private static readonly ConcurrentDictionary<int, MeshGeneratorOutput> resultDict = new ConcurrentDictionary<int, MeshGeneratorOutput>();
-        private static VertexAttributeDescriptor[] vertexBufferParams;
         public static void ReturnToOutputPool(MeshGeneratorOutput output)
         {
             output.data.Clear();
@@ -115,6 +114,9 @@ namespace ChaseMacMillan.CurveDesigner
                 }
             }
         }
+
+#if UNITY_2019_3_OR_NEWER
+        private static VertexAttributeDescriptor[] vertexBufferParams;
         public static VertexAttributeDescriptor[] GetVertexBufferParams()
         {
             if (vertexBufferParams == null)
@@ -131,6 +133,14 @@ namespace ChaseMacMillan.CurveDesigner
             }
             return vertexBufferParams;
         }
+#else
+        public static List<Vector3> positionCopyList = new List<Vector3>();
+        public static List<Vector3> normalCopyList = new List<Vector3>();
+        public static List<Vector2> uvCopyList = new List<Vector2>();
+        public static List<Vector4> tangentCopyList = new List<Vector4>();
+        public static List<Color32> colorCopyList = new List<Color32>();
+        public static List<int> triangleCopyList = new List<int>();
+#endif
     }
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public struct MeshGeneratorVertexItem
@@ -149,7 +159,23 @@ namespace ChaseMacMillan.CurveDesigner
         public List<MeshGeneratorVertexItem> data = new List<MeshGeneratorVertexItem>();
         public List<SurfaceInfo> distances = new List<SurfaceInfo>();//stores the distance from the start of the curve for each vertex
         public List<int> triangles = new List<int>();
-        public List<UnityEngine.Rendering.SubMeshDescriptor> submeshInfo = new List<SubMeshDescriptor>();
+        public List<MySubMeshDescriptor> submeshInfo = new List<MySubMeshDescriptor>();
+    }
+    public struct MySubMeshDescriptor
+    {
+        public int indexStart;
+        public int indexCount;
+        public MySubMeshDescriptor(int indexStart, int indexCount)
+        {
+            this.indexStart = indexStart;
+            this.indexCount = indexCount;
+        }
+#if UNITY_2019_3_OR_NEWER
+     SubMeshDescriptor GetDescriptor()
+     {
+        return new SubMeshDescriptor(indexStart,indexCount);
+     }
+#endif
     }
     public struct SurfaceInfo
     {
