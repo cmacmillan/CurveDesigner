@@ -60,13 +60,20 @@ namespace ChaseMacMillan.CurveDesigner
             List<int> triangles = output.triangles;
             List<MeshGeneratorVertexItem> vertexItems = output.data;
             List<SurfaceInfo> distances = output.distances;
-            List<MySubMeshDescriptor> submeshInfo = output.submeshInfo;
+            List<MySubMeshDescriptor_Tris> submeshInfo_tris = output.submeshInfo_Tris;
+            List<MySubMeshDescriptor_Verts> submeshInfo_verts = output.submeshInfo_Verts;
 
-            int currentSubmeshBase = 0;
-            void EndSubmesh()
+            int currentSubmeshBase_tris = 0;
+            void EndSubmesh_Tris()
             {
-                submeshInfo.Add(new MySubMeshDescriptor(currentSubmeshBase, triangles.Count-currentSubmeshBase));
-                currentSubmeshBase = triangles.Count;
+                submeshInfo_tris.Add(new MySubMeshDescriptor_Tris(currentSubmeshBase_tris , triangles.Count-currentSubmeshBase_tris ));
+                currentSubmeshBase_tris = triangles.Count;
+            }
+            int currentSubmeshBase_verts = 0;
+            void EndSubmesh_Verts()//this only works properly if all the submeshes fall one after another with no overlap, e.g. the vertices in submesh 0 must start at index 0 and submesh 1 cannot start until submesh 0 has ended
+            {
+                submeshInfo_verts.Add(new MySubMeshDescriptor_Verts(currentSubmeshBase_verts, vertexItems.Count-currentSubmeshBase_verts));
+                currentSubmeshBase_verts = vertexItems.Count;
             }
 
             float curveLength = curve.GetLength();
@@ -651,72 +658,85 @@ namespace ChaseMacMillan.CurveDesigner
             switch (CurveType)
             {
                 case MeshGenerationMode.NoMesh:
-                    return output;
+                    break;
                 case MeshGenerationMode.Cylinder:
                     {
                         int numMainLayerVerts = RingPointCount * sampled.Count;
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, 0, RingPointCount, mainTextureLayer);
+                        EndSubmesh_Verts();
                         if (shouldTubeGenerateEdges)
+                        {
                             CreatePointsAlongCurve(MeshGeneratorPointCreators.TubeFlatPlateCreator, sampled, 0, FlatPointCount, backTextureLayer);
+                            EndSubmesh_Verts();
+                        }
                         TrianglifyLayer(true, RingPointCount, 0);
-                        EndSubmesh();
+                        EndSubmesh_Tris();
                         if (shouldTubeGenerateEdges)
                         {
                             TrianglifyLayer(false, FlatPointCount, numMainLayerVerts);
-                            EndSubmesh();
+                            EndSubmesh_Tris();
                         }
                         if (!IsClosedLoop)
                         {
                             CreateTubeEndPlates();
-                            EndSubmesh();
+                            EndSubmesh_Verts();
+                            EndSubmesh_Tris();
                         }
-                        return output;
+                        break;
                     }
                 case MeshGenerationMode.HollowTube:
                     { 
                         int numMainLayerVerts = RingPointCount * sampled.Count * 2;
 
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, MeshGeneratorPointCreators.frontOffset, RingPointCount, mainTextureLayer);
+                        EndSubmesh_Verts();
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.TubePointCreator, sampled, MeshGeneratorPointCreators.backOffset, RingPointCount, backTextureLayer);
+                        EndSubmesh_Verts();
 
                         TrianglifyLayer(true, RingPointCount, 0);
-                        EndSubmesh();
+                        EndSubmesh_Tris();
                         TrianglifyLayer(false, RingPointCount, numMainLayerVerts / 2);
-                        EndSubmesh();
+                        EndSubmesh_Tris();
 
                         if (shouldTubeGenerateEdges)
                         {
                             CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(RingPointCount), edgeTextureLayer, false);
-                            EndSubmesh();
+                            EndSubmesh_Verts();
+                            EndSubmesh_Tris();
                         }
                         if (!IsClosedLoop)
                         {
                             CreateEndPlate(true, 0, MeshGeneratorPointCreators.TubePointCreator, RingPointCount, endTextureLayer, MeshGeneratorPointCreators.frontOffset, MeshGeneratorPointCreators.backOffset);
                             CreateEndPlate(false, curve.GetLength(), MeshGeneratorPointCreators.TubePointCreator, RingPointCount, endTextureLayer, MeshGeneratorPointCreators.frontOffset, MeshGeneratorPointCreators.backOffset);
-                            EndSubmesh();
+                            EndSubmesh_Verts();
+                            EndSubmesh_Tris();
                         }
 
-                        return output;
+                        break;
                     }
                 case MeshGenerationMode.Flat:
                     {
                         int pointsPerFace = FlatPointCount;
                         int numMainLayerVerts = 2 * pointsPerFace * sampled.Count;
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.RectanglePointCreator, sampled,MeshGeneratorPointCreators.frontOffset, pointsPerFace, mainTextureLayer);
+                        EndSubmesh_Verts();
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.RectanglePointCreator, sampled, MeshGeneratorPointCreators.backOffset, pointsPerFace, backTextureLayer);
+                        EndSubmesh_Verts();
                         TrianglifyLayer(true, pointsPerFace, 0);
-                        EndSubmesh();
+                        EndSubmesh_Tris();
                         TrianglifyLayer(false, pointsPerFace, numMainLayerVerts / 2);
-                        EndSubmesh();
+                        EndSubmesh_Tris();
                         CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointsPerFace), edgeTextureLayer, false);
-                        EndSubmesh();
+                        EndSubmesh_Verts();
+                        EndSubmesh_Tris();
                         if (!IsClosedLoop)
                         {
                             CreateEndPlate(true, 0, MeshGeneratorPointCreators.RectanglePointCreator, RingPointCount, endTextureLayer, MeshGeneratorPointCreators.frontOffset, MeshGeneratorPointCreators.backOffset);
                             CreateEndPlate(false, curve.GetLength(), MeshGeneratorPointCreators.RectanglePointCreator, RingPointCount, endTextureLayer, MeshGeneratorPointCreators.frontOffset, MeshGeneratorPointCreators.backOffset);
-                            EndSubmesh();
+                            EndSubmesh_Verts();
+                            EndSubmesh_Tris();
                         }
-                        return output;
+                        break;
                     }
                 case MeshGenerationMode.Extrude:
                     {
@@ -725,20 +745,24 @@ namespace ChaseMacMillan.CurveDesigner
                         int pointCount = RingPointCount;
                         int numMainLayerVerts = 2 * pointCount * sampled.Count;
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.ExtrudePointCreator, sampled, MeshGeneratorPointCreators.frontOffset, pointCount, mainTextureLayer);
+                        EndSubmesh_Verts();
                         CreatePointsAlongCurve(MeshGeneratorPointCreators.ExtrudePointCreator, sampled, MeshGeneratorPointCreators.backOffset, pointCount, backTextureLayer);
-                        TrianglifyLayer(true, pointCount, numMainLayerVerts / 2);
-                        EndSubmesh();
+                        EndSubmesh_Verts();
                         TrianglifyLayer(false, pointCount, 0);
-                        EndSubmesh();
+                        EndSubmesh_Tris();
+                        TrianglifyLayer(true, pointCount, numMainLayerVerts / 2);
+                        EndSubmesh_Tris();
                         CreateEdgeVertsTrisAndUvs(GetEdgePointInfo(pointCount), edgeTextureLayer, true);
-                        EndSubmesh();
+                        EndSubmesh_Verts();
+                        EndSubmesh_Tris();
                         if (!IsClosedLoop)
                         {
                             CreateEndPlate(true, 0, MeshGeneratorPointCreators.ExtrudePointCreator, pointCount, endTextureLayer, MeshGeneratorPointCreators.frontOffset, MeshGeneratorPointCreators.backOffset, true);
                             CreateEndPlate(false, curve.GetLength(), MeshGeneratorPointCreators.ExtrudePointCreator, pointCount, endTextureLayer, MeshGeneratorPointCreators.frontOffset, MeshGeneratorPointCreators.backOffset, true);
-                            EndSubmesh();
+                            EndSubmesh_Verts();
+                            EndSubmesh_Tris();
                         }
-                        return output;
+                        break;
                     }
                 case MeshGenerationMode.Mesh:
                     {
@@ -894,12 +918,27 @@ namespace ChaseMacMillan.CurveDesigner
                             triangles[i] = triangles[i + 2];
                             triangles[i + 2] = swap;
                         }
-                        EndSubmesh();
-                        return output;
+                        EndSubmesh_Tris();
+                        EndSubmesh_Verts();
+                        break;
                     }
                 default:
                     throw new NotImplementedException();
             }
+#if UNITY_2019_3_OR_NEWER
+            {
+                Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+                Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+                foreach (var i in vertexItems)
+                {
+                    var pos = i.position;
+                    min = new Vector3(Mathf.Min(min.x, pos.x), Mathf.Min(min.y, pos.y), Mathf.Min(min.z, pos.z));
+                    max = new Vector3(Mathf.Max(max.x, pos.x), Mathf.Max(max.y, pos.y), Mathf.Max(max.z, pos.z));
+                }
+                output.bounds = new Bounds((min + max) * .5f, max - min);
+            }
+#endif
+            return output;
         }
     }
     public static class ListExtensionMethods

@@ -749,9 +749,20 @@ namespace ChaseMacMillan.CurveDesigner
                     displayMesh.SetVertexBufferData(output.data, 0, 0, output.data.Count);
                     displayMesh.SetIndexBufferParams(output.triangles.Count, IndexFormat.UInt32);
                     displayMesh.SetIndexBufferData(output.triangles, 0, 0, output.triangles.Count, MeshUpdateFlags.DontValidateIndices);
-                    displayMesh.subMeshCount = output.submeshInfo.Count;
-                    for (int i = 0; i < output.submeshInfo.Count; i++)
-                        displayMesh.SetSubMesh(i,output.submeshInfo[i].GetDescriptor());
+                    displayMesh.subMeshCount = output.submeshInfo_Tris.Count;
+                    for (int i = 0; i < output.submeshInfo_Tris.Count; i++)
+                    {
+                        var tris = output.submeshInfo_Tris[i];
+                        var verts = output.submeshInfo_Verts[i];
+                        //verts.Debug_Validate(tris, output.triangles);
+                        var descriptor = new SubMeshDescriptor(tris.indexStart, tris.indexCount);
+                        descriptor.firstVertex = verts.firstVertex;
+                        descriptor.vertexCount = verts.vertexCount;
+                        descriptor.bounds = output.bounds;
+                        descriptor.baseVertex = 0;
+                        displayMesh.SetSubMesh(i, descriptor, MeshUpdateFlags.DontRecalculateBounds);
+                    }
+                    displayMesh.bounds = output.bounds;
 #else
                     //fallback to old api
                     var positions = MeshGeneratorThreadManager.positionCopyList;
