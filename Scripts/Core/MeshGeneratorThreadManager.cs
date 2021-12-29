@@ -19,8 +19,7 @@ namespace ChaseMacMillan.CurveDesigner
             output.data.Clear();
             output.distances.Clear();
             output.triangles.Clear();
-            output.submeshInfo_Tris.Clear();
-            output.submeshInfo_Verts.Clear();
+            output.submeshInfo.Clear();
             outputPool.Add(output);
         }
 
@@ -160,48 +159,23 @@ namespace ChaseMacMillan.CurveDesigner
         public List<MeshGeneratorVertexItem> data = new List<MeshGeneratorVertexItem>();
         public List<SurfaceInfo> distances = new List<SurfaceInfo>();//stores the distance from the start of the curve for each vertex
         public List<int> triangles = new List<int>();
-        public List<MySubMeshDescriptor_Tris> submeshInfo_Tris = new List<MySubMeshDescriptor_Tris>();
-        public List<MySubMeshDescriptor_Verts> submeshInfo_Verts = new List<MySubMeshDescriptor_Verts>();
+        public List<MySubMeshDescriptor> submeshInfo = new List<MySubMeshDescriptor>();
 #if UNITY_2019_3_OR_NEWER
         public Bounds bounds;
 #endif
     }
-    public struct MySubMeshDescriptor_Verts
-    {
-        public void Debug_Validate(MySubMeshDescriptor_Tris tris, List<int> triangles)
-        {
-            int minIndex = int.MaxValue;
-            int maxIndex = int.MinValue;
-            for (int c = tris.indexStart; c < tris.indexStart + tris.indexCount; c++)
-            {
-                minIndex = Mathf.Min(triangles[c], minIndex);
-                maxIndex = Mathf.Max(triangles[c], maxIndex);
-            }
-            if (minIndex != firstVertex || maxIndex - minIndex + 1 != vertexCount)
-            {
-                Debug.LogError("Error");
-            }
-            else
-            {
-                Debug.Log("good");
-            }
-        }
-        public int firstVertex;
-        public int vertexCount;
-        public MySubMeshDescriptor_Verts(int firstVertex, int vertexCount)
-        {
-            this.firstVertex = firstVertex;
-            this.vertexCount = vertexCount;
-        }
-    }
-    public struct MySubMeshDescriptor_Tris
+    public struct MySubMeshDescriptor
     {
         public int indexStart;
         public int indexCount;
-        public MySubMeshDescriptor_Tris(int indexStart, int indexCount)
+        public int firstVertex;
+        public int vertexCount;
+        public MySubMeshDescriptor(int indexStart, int indexCount)
         {
             this.indexStart = indexStart;
             this.indexCount = indexCount;
+            firstVertex = -1;
+            vertexCount = -1;
         }
     }
     public struct SurfaceInfo
