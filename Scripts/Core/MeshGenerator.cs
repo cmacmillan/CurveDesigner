@@ -416,14 +416,14 @@ namespace ChaseMacMillan.CurveDesigner
                                 {
                                     for (int i = 0; i < pointsPerBand; i++)
                                     {
-                                        SetUV(i,new Vector2(settings.scale * distFromStart, settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / (float)pointsPerBand)));
+                                        SetUV(i,new Vector2(settings.scale * distFromStart, settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / ((float)pointsPerBand-1))));
                                     }
                                 }
                                 else
                                 {
                                     for (int i = 0; i < pointsPerBand; i++)
                                     {
-                                        SetUV(i,new Vector2(settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / (float)pointsPerBand), settings.scale * distFromStart));
+                                        SetUV(i,new Vector2(settings.scale * thickness * Mathf.Lerp(-.5f, .5f, i / ((float)pointsPerBand-1)), settings.scale * distFromStart));
                                     }
                                 }
                             }

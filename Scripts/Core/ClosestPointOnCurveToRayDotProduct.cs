@@ -11,7 +11,7 @@ namespace ChaseMacMillan.CurveDesigner
     public static class ClosestPointOnCurveToRayDotProduct
     {
         private const int newtonsIterations = 10;
-        private const int initialPointCount = 5;
+        private const int initialPointCount = 20;
         public static void GetClosestPoint(BezierCurve curve, Ray ray, out int resultSegmentIndex, out float resultTime,TransformBlob blob=null)
         {
             int bestSegmentIndex = -1;
