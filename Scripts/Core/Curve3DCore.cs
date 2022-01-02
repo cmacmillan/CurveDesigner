@@ -616,8 +616,16 @@ namespace ChaseMacMillan.CurveDesigner
             dot = Mathf.Max(0, dot);
             return Vector3.Distance(point,ray.origin+dot*ray.direction);
         }
-        public Vector3 RaycastAgainstCurve(Ray ray, out float lengthwiseDistance, out float crosswiseDistance, bool front)
+        private Curve3D_BVH bvh;
+        public bool RaycastAgainstCurve(Ray ray, out float lengthwiseDistance, out float crosswiseDistance, bool front, out Vector3 hitPoint)
         {
+            lengthwiseDistance = -1;
+            crosswiseDistance = -1;
+            hitPoint = Vector3.zero;
+            if (bvh == null)
+                return false;
+            return bvh.RaycastSurface(ray, out lengthwiseDistance, out crosswiseDistance,out hitPoint);
+            /*
             ray.direction = ray.direction.normalized;
             ClosestPointOnCurveToRayDotProduct.GetClosestPoint(positionCurve,ray,out int segmentIndex, out float time,new TransformBlob(transform));
             crosswiseDistance = .5f;
@@ -670,6 +678,7 @@ namespace ChaseMacMillan.CurveDesigner
             GUI.color = ogColor;
             lengthwiseDistance *= curveLength;
             return currentPoint;
+            */
         }
 
         public void ReadMaterialsFromRenderer()
@@ -807,7 +816,8 @@ namespace ChaseMacMillan.CurveDesigner
                     if (collider != null)
                         collider.sharedMesh = displayMesh;
                 }
-                MeshGeneratorThreadManager.ReturnToOutputPool(output);
+                bvh = new Curve3D_BVH(output);//should return the previous one to the pool rather than just overwriting and just generally think this through more
+                //MeshGeneratorThreadManager.ReturnToOutputPool(output);
             }
         }
         private int NumSubmeshesByCurveType(MeshGenerationMode type)

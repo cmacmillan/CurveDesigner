@@ -53,8 +53,10 @@ namespace ChaseMacMillan.CurveDesigner
                             color = DrawMode.hovered.Tint(SelectionState.unselected, Color.green);
                         }
                         Ray ray = SceneView.lastActiveSceneView.camera.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
-                        curve.RaycastAgainstCurve(ray, out float lengthwise, out float crosswise, objectOnCurve.attachedToFront);
+                        curve.RaycastAgainstCurve(ray, out _, out _, objectOnCurve.attachedToFront, out Vector3 hitPoint);
                         GUI.color = color;
+                        GUITools.WorldToGUISpace(hitPoint, out Vector2 hitGuiPos, out _);
+                        GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(hitGuiPos, buttonSize*2, buttonSize*2), curve.settings.circleIcon);
                         GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(guiPos, buttonSize, buttonSize), curve.settings.circleIcon);
                         GUI.color = oldColor;
                         Handles.EndGUI();
@@ -72,11 +74,13 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         Ray ray = SceneView.lastActiveSceneView.camera.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
                         Handles.BeginGUI();
-                        curve.RaycastAgainstCurve(ray, out float lengthwise, out float crosswise, objectOnCurve.attachedToFront);
+                        if (curve.RaycastAgainstCurve(ray, out float lengthwise, out float crosswise, objectOnCurve.attachedToFront,out Vector3 hitPoint))
+                        {
+                            objectOnCurve.lengthwisePosition = lengthwise;
+                            objectOnCurve.crosswisePosition = crosswise;
+                            objectOnCurve.Update();
+                        }
                         Handles.EndGUI();
-                        objectOnCurve.lengthwisePosition = lengthwise;
-                        objectOnCurve.crosswisePosition = crosswise;
-                        objectOnCurve.Update();
                         Event.current.Use();
                     }
                     break;

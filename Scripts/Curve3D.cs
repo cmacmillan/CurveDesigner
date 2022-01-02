@@ -45,11 +45,6 @@ namespace ChaseMacMillan.CurveDesigner
                 point.FromLocalToWorld(transform);
             return point;
         }
-        [ContextMenu("RunTest")]
-        public void RunTest()
-        {
-            Curve3D_BVH.Test();
-        }
 
         public Vector3 GetPointOnSurface(float lengthwise, float crosswise, out Vector3 normal, out Vector3 tangent, bool front = true)
         {
