@@ -582,26 +582,27 @@ namespace ChaseMacMillan.CurveDesigner
             var rotateTangent = Quaternion.FromToRotation(otherStart.tangent, thisEnd.tangent);
             var rotateReference = Quaternion.FromToRotation(rotateTangent*otherStart.reference, thisEnd.reference);
             var rotation = rotateReference * rotateTangent;
-            var otherBasePosition = otherStart.position;
             var otherPointGroups = otherCurve.positionCurve.PointGroups;
             var thisLastPoint = positionCurve.PointGroups[positionCurve.PointGroups.Count-1];
             for (int i = 1; i < otherPointGroups.Count; i++)
             {
-                /*
                 var curr = otherPointGroups[i];
-                bool lockedPoint;
-                if (i == 0)
-                    lockedPoint = lockedJoiningPoint;
-                else
-                    lockedPoint = curr.GetIsPointLocked();
-                positionCurve.AppendPoint(false,)
-                */
+                Vector3 position = curr.GetPositionLocal(PointGroupIndex.Position)-otherStart.position;
+                position = rotation * position;
+                position += thisEnd.position;
+                positionCurve.AppendPoint(false, curr.GetIsPointLocked(), position);
             }
-
-            //positionCurve.AppendPoint(false, lockedJoiningPoint,);
-
-
             Recalculate();
+
+            sizeSampler.CopyFrom(otherCurve.sizeSampler,thisCurveLength,this,otherCurve);
+            arcOfTubeSampler.CopyFrom(otherCurve.arcOfTubeSampler,thisCurveLength,this,otherCurve);
+            thicknessSampler.CopyFrom(otherCurve.thicknessSampler,thisCurveLength,this,otherCurve);
+            rotationSampler.CopyFrom(otherCurve.rotationSampler,thisCurveLength,this,otherCurve);
+            colorSampler.CopyFrom(otherCurve.colorSampler,thisCurveLength,this,otherCurve);
+            if (extrudeSampler!=null && otherCurve.extrudeSampler!=null)
+                extrudeSampler.CopyFrom(otherCurve.extrudeSampler,thisCurveLength,this,otherCurve);
+
+            UICurve.Initialize();
             RequestMeshUpdate();
         }
 

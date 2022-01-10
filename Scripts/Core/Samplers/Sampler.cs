@@ -51,6 +51,17 @@ namespace ChaseMacMillan.CurveDesigner
         {
             return val;
         }
+        public void CopyFrom(Sampler<DataType,SamplerPointType> from, float baseDistance,Curve3D curve,Curve3D otherCurve)
+        {
+            foreach (var i in from.points)
+            {
+                SamplerPointType newPoint = new SamplerPointType();
+                newPoint.Construct(i, this, true, curve);
+                points.Add(newPoint);
+                newPoint.SetDistance(baseDistance+i.GetDistance(otherCurve.positionCurve), curve.positionCurve,false);
+            }
+            Sort(curve.positionCurve);
+        }
         public void CacheDistances(BezierCurve curve)
         {
             foreach (var i in GetPoints(curve))

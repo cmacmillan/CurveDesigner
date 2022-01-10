@@ -31,6 +31,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public void Construct(ISamplerPoint<DataType,SamplerPointType> other, ISampler<DataType,SamplerPointType> owner, bool createNewGuids,Curve3D curve)
         {
+            this.owner = (Sampler<DataType,SamplerPointType>)owner;
             value = owner.CloneValue(other.Value,createNewGuids);
             segmentIndex = other.SegmentIndex;
             time = other.Time;
