@@ -47,16 +47,7 @@ namespace ChaseMacMillan.CurveDesigner
                     {
                         Handles.BeginGUI();
                         Color oldColor = GUI.color;
-                        var color = Color.green;
-                        if (buttonOverlapped || GUIUtility.hotControl == controlID)
-                        {
-                            color = DrawMode.hovered.Tint(SelectionState.unselected, Color.green);
-                        }
-                        Ray ray = SceneView.lastActiveSceneView.camera.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
-                        curve.RaycastAgainstCurve(ray, out _, out _, objectOnCurve.attachedToFront, out Vector3 hitPoint);
-                        GUI.color = color;
-                        GUITools.WorldToGUISpace(hitPoint, out Vector2 hitGuiPos, out _);
-                        GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(hitGuiPos, buttonSize*2, buttonSize*2), curve.settings.circleIcon);
+                        GUI.color = Color.green;
                         GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(guiPos, buttonSize, buttonSize), curve.settings.circleIcon);
                         GUI.color = oldColor;
                         Handles.EndGUI();
@@ -70,29 +61,8 @@ namespace ChaseMacMillan.CurveDesigner
                     }
                     break;
                 case EventType.MouseDrag:
-                    if (Event.current.button == 0 && GUIUtility.hotControl == controlID)
-                    {
-                        Ray ray = SceneView.lastActiveSceneView.camera.ScreenPointToRay(GUITools.GuiSpaceToScreenSpace(mousePos));
-                        Handles.BeginGUI();
-                        if (curve.RaycastAgainstCurve(ray, out float lengthwise, out float crosswise, objectOnCurve.attachedToFront,out Vector3 hitPoint))
-                        {
-                            objectOnCurve.lengthwisePosition = lengthwise;
-                            objectOnCurve.crosswisePosition = crosswise;
-                            objectOnCurve.Update();
-                        }
-                        Handles.EndGUI();
-                        Event.current.Use();
-                    }
                     break;
                 case EventType.MouseUp:
-                    if (Event.current.button == 0)
-                    {
-                        GUIUtility.hotControl = 0;
-                        Event.current.Use();
-                    }
-                    break;
-                case EventType.MouseMove:
-                    SceneView.lastActiveSceneView.Repaint();
                     break;
             }
             Tools.hidden = true;

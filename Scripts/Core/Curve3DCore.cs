@@ -605,82 +605,6 @@ namespace ChaseMacMillan.CurveDesigner
             RequestMeshUpdate();
         }
 
-        //performs a raycast against the curve without requiring a collider on the curve
-        private const int raycastIterations = 1000;
-        private const float raycastLearningRate=10f;
-        private const float lengthwiseEpsilon=.0000001f;
-        private const float crosswiseEpsilon=.0001f;
-        private float PointDistanceToRay(Ray ray, Vector3 point)
-        {
-            float dot = Vector3.Dot(point - ray.origin, ray.direction);
-            dot = Mathf.Max(0, dot);
-            return Vector3.Distance(point,ray.origin+dot*ray.direction);
-        }
-        private Curve3D_BVH bvh;
-        public bool RaycastAgainstCurve(Ray ray, out float lengthwiseDistance, out float crosswiseDistance, bool front, out Vector3 hitPoint)
-        {
-            lengthwiseDistance = -1;
-            crosswiseDistance = -1;
-            hitPoint = Vector3.zero;
-            if (bvh == null)
-                return false;
-            return bvh.RaycastSurface(ray, out lengthwiseDistance, out crosswiseDistance,out hitPoint);
-            /*
-            ray.direction = ray.direction.normalized;
-            ClosestPointOnCurveToRayDotProduct.GetClosestPoint(positionCurve,ray,out int segmentIndex, out float time,new TransformBlob(transform));
-            crosswiseDistance = .5f;
-            lengthwiseDistance = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex, time);
-            float curveLength = CurveLength;
-            lengthwiseDistance /= curveLength;
-            Vector3 currentPoint = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance, out _, out _, front);
-            float currentDist = PointDistanceToRay(ray, currentPoint);
-            Color ogColor = GUI.color;
-            for (int i = 0; i < raycastIterations; i++)
-            {
-                GUITools.WorldToGUISpace(currentPoint, out Vector2 guipos, out _);
-                GUI.color = Color.HSVToRGB(.7f*i/(float)raycastIterations,1,1);
-                GUI.DrawTexture(GUITools.GetRectCenteredAtPosition(guipos, 5, 5), settings.circleIcon);
-                float lengthwiseDelta;
-                if (lengthwiseDistance+lengthwiseEpsilon>= 1 )
-                {
-                    Vector3 lengthwiseBump = GetPointOnSurface((lengthwiseDistance-lengthwiseEpsilon)*curveLength, crosswiseDistance, out _, out _, front);
-                    float dist = PointDistanceToRay(ray, lengthwiseBump);
-                    lengthwiseDelta = currentDist - dist;
-                }
-                else
-                {
-                    Vector3 lengthwiseBump = GetPointOnSurface((lengthwiseDistance+lengthwiseEpsilon)*curveLength, crosswiseDistance, out _, out _, front);
-                    float dist = PointDistanceToRay(ray, lengthwiseBump);
-                    lengthwiseDelta = dist-currentDist;
-                }
-                float crosswiseDelta;
-                if (crosswiseDistance+crosswiseEpsilon>= 1)
-                {
-                    Vector3 crosswiseBump = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance-crosswiseEpsilon, out _, out _, front);
-                    float dist = PointDistanceToRay(ray, crosswiseBump);
-                    crosswiseDelta= currentDist-dist;
-                }
-                else
-                {
-                    Vector3 crosswiseBump = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance+crosswiseEpsilon, out _, out _, front);
-                    float dist = PointDistanceToRay(ray, crosswiseBump);
-                    crosswiseDelta= dist-currentDist;
-                }
-                Vector2 gradient = new Vector2(crosswiseDelta, lengthwiseDelta);
-                gradient *= raycastLearningRate;
-                crosswiseDistance -= gradient.x;
-                lengthwiseDistance -= gradient.y;
-                crosswiseDistance = Mathf.Clamp01(crosswiseDistance);
-                lengthwiseDistance = Mathf.Clamp01(lengthwiseDistance);
-                currentPoint = GetPointOnSurface(lengthwiseDistance*curveLength, crosswiseDistance, out _, out _, front);
-                currentDist = PointDistanceToRay(ray, currentPoint);
-            }
-            GUI.color = ogColor;
-            lengthwiseDistance *= curveLength;
-            return currentPoint;
-            */
-        }
-
         public void ReadMaterialsFromRenderer()
         {
             int index = 0;
@@ -816,8 +740,7 @@ namespace ChaseMacMillan.CurveDesigner
                     if (collider != null)
                         collider.sharedMesh = displayMesh;
                 }
-                bvh = new Curve3D_BVH(output);//should return the previous one to the pool rather than just overwriting and just generally think this through more
-                //MeshGeneratorThreadManager.ReturnToOutputPool(output);
+                MeshGeneratorThreadManager.ReturnToOutputPool(output);
             }
         }
         private int NumSubmeshesByCurveType(MeshGenerationMode type)

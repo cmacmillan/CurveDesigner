@@ -70,6 +70,8 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public const float frontOffset = .5f;
         public const float backOffset = -.5f;
+        //This function gets you a point based on idealized curve with infinite resolution
+        //As a result it will produce inaccurate results if used on a very low-resolution curve
         //crosswiseDistance is between 0-1, unless crosswiseDistanceIsNormalized is set to false
         public static Vector3 GetPointOnSurface(Curve3D curve, float lengthwiseDistance, float crosswiseDistance, bool front, out Vector3 normal, out Vector3 tangent,out float crossAxisWidth,bool crosswiseDistanceIsNormalized=true)
         {
