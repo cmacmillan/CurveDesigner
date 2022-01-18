@@ -154,12 +154,7 @@ namespace ChaseMacMillan.CurveDesigner
                     else
                         GUILayout.Label($"{selectedPointCount} point{(selectedPointCount != 1 ? "s" : "")} selected", curve.centeredStyle);
                     var drawer = curve.UICurve.GetWindowDrawer();
-                    EditorGUI.BeginChangeCheck();
                     drawer.DrawWindow(curve);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        curve.Recalculate();
-                    }
                 }
             }
             else
