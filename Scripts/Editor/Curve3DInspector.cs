@@ -333,25 +333,15 @@ namespace ChaseMacMillan.CurveDesigner
                             curve3d.elementClickedDown = closestElementToCursor;
                             var clickPos = MousePos + curve3d.elementClickedDown.offset;
                             var commandToExecute = curve3d.elementClickedDown.owner.GetClickCommand();
-                            //shift will behave like control if it's a split command, also just fixed a bug when shift-clicking a split point
 
-                            bool isSplitAndShift = Event.current.shift && (commandToExecute is SplitCommand);
-                            if (Event.current.control || isSplitAndShift)  /////CONTROL CLICK
+                            if (Event.current.control || Event.current.shift)
                             {
-                                curve3d.shiftControlState = ClickShiftControlState.control;
+                                curve3d.isMultiselecting = true;
                                 curve3d.ToggleSelectPoint(curve3d.elementClickedDown.owner.GUID);
-                            }
-                            else if (Event.current.shift) /////SHIFT CLICK
-                            {
-                                curve3d.shiftControlState = ClickShiftControlState.shift;
-                                SelectableGUID previous = SelectableGUID.Null;
-                                if (curve3d.selectedPoints.Count > 0)
-                                    previous = curve3d.selectedPoints[0];
-                                curve3d.selectedPoints = SelectableGUID.SelectBetween(curve3d.ActiveElement, previous, curve3d.elementClickedDown.owner.GUID, curve3d, curve3d.positionCurve);//for a extrude selection should use that curve instead of main
                             }
                             else
                             {
-                                curve3d.shiftControlState = ClickShiftControlState.none;
+                                curve3d.isMultiselecting = false;
                                 if (curve3d.selectedPoints.Contains(curve3d.elementClickedDown.owner.GUID))
                                     curve3d.SelectAdditionalPoint(curve3d.elementClickedDown.owner.GUID);
                                 else
@@ -391,7 +381,7 @@ namespace ChaseMacMillan.CurveDesigner
                             if (IsActiveElementSelected())
                                 commandToExecute.ClickUp(MousePos, curve3d, curve3d.selectedPoints);
                             curve3d.RequestMeshUpdate();
-                            if (!curve3d.elementClickedDown.hasBeenDragged && curve3d.shiftControlState == ClickShiftControlState.none)
+                            if (!curve3d.elementClickedDown.hasBeenDragged && !curve3d.isMultiselecting)
                             {
                                 curve3d.SelectOnlyPoint(curve3d.elementClickedDown.owner.GUID);
                             }

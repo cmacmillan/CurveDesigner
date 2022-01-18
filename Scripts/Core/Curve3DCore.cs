@@ -66,7 +66,7 @@ namespace ChaseMacMillan.CurveDesigner
         public Matrix4x4 worldSpaceToClipSpace;
         //sorted from most recent to oldest
         public List<SelectableGUID> selectedPoints = new List<SelectableGUID>();
-        public ClickShiftControlState shiftControlState = ClickShiftControlState.none;
+        public bool isMultiselecting = false;
 
         public void DeselectAllPoints()
         {

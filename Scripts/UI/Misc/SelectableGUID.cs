@@ -81,50 +81,6 @@ namespace ChaseMacMillan.CurveDesigner
             selectables = newPoints;
             return foundAPointToDelete;
         }
-        public static List<SelectableGUID> SelectBetween(IActiveElement activeElement, SelectableGUID start, SelectableGUID end, Curve3D curve, BezierCurve curveConnectingPoints)
-        {
-            List<SelectableGUID> retr = new List<SelectableGUID>();
-            if (start == end)//good ol' deselect
-                return retr;
-            int startIndex = -1;
-            int endIndex = -1;
-            ISelectable startSelectable = null;
-            ISelectable endSelectable = null;
-            ISelectable Get(int index)
-            {
-                return activeElement.GetSelectable(index, curve);
-            }
-            int count = activeElement.NumSelectables(curve);
-            for (int i = 0; i < count; i++)
-            {
-                var curr = Get(i);
-                if (curr.GUID == start)
-                {
-                    startIndex = i;
-                    startSelectable = curr;
-                }
-                else if (curr.GUID == end)
-                {
-                    endIndex = i;
-                    endSelectable = curr;
-                }
-            }
-            float startDistance = startSelectable.GetDistance(curveConnectingPoints);
-            float endDistance = endSelectable.GetDistance(curveConnectingPoints);
-            int sign = startDistance < endDistance ? 1 : -1;
-            float directlyTowardsDistance = (endDistance - startDistance) * sign;
-            float awayFromDistance = 0;
-            if (sign == 1)
-                awayFromDistance = (curveConnectingPoints.GetLength() - endDistance) + startDistance;
-            else
-                awayFromDistance = (curveConnectingPoints.GetLength() - startDistance) + endDistance;
-            if (curveConnectingPoints.isClosedLoop && awayFromDistance < directlyTowardsDistance)
-                sign *= -1;
-            for (int i = startIndex; i != endIndex; i = Utils.ModInt(i + sign, count))
-                retr.Add(Get(i).GUID);
-            retr.Add(Get(endIndex).GUID);
-            return retr;
-        }
     }
     public static class ListSelectableGUIDExtension
     {

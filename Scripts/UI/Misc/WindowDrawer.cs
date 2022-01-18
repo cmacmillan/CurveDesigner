@@ -29,6 +29,7 @@ namespace ChaseMacMillan.CurveDesigner
             primaryPoint.SelectEdit(curve, selected);
             if (EditorGUI.EndChangeCheck())
             {
+                curve.Recalculate();
                 curve.RequestMeshUpdate();
             }
         }
