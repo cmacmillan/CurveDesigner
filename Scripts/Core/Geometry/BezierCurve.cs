@@ -111,7 +111,16 @@ namespace ChaseMacMillan.CurveDesigner
             bool hasLeftRun = IsDeleted(curr);
             PointGroupRun leftRun = null;
             if (hasLeftRun)
+            {
                 leftRun = GetRun();
+                if (!beforeIsClosedLoop) 
+                {
+                    foreach (var i in curve.DistanceSamplers)
+                    {
+                        i.DeleteInDistanceRange(0,leftRun.runLength,curve);
+                    }
+                }
+            }
             List<PointGroupRun> runs = new List<PointGroupRun>();
             while (!isEnd)
                 runs.Add(GetRun());
@@ -119,6 +128,14 @@ namespace ChaseMacMillan.CurveDesigner
             bool hasRightRun = IsDeleted(rightRun.points.Last());
             if (hasRightRun)
             {
+                if (!beforeIsClosedLoop) 
+                {
+                    float curveLength = curve.CurveLength;
+                    foreach (var i in curve.DistanceSamplers)
+                    {
+                        i.DeleteInDistanceRange(curveLength-rightRun.runLength,curveLength,curve);
+                    }
+                }
                 runs.Remove(rightRun);
                 rightRun.runLength -= segments.Last().length;//ending on an open point made the right run include the open curve length
             }

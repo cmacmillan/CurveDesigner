@@ -194,6 +194,19 @@ namespace ChaseMacMillan.CurveDesigner
             return retr;
         }
 
+        public void DeleteInDistanceRange(float start, float end, Curve3D curve)
+        {
+            for (int i = points.Count - 1; i >= 0; i--)
+            {
+                float distance = points[i].GetDistance(curve.positionCurve);
+                if (distance>=start && distance <= end)
+                {
+                    points.RemoveAt(i);
+                }
+            }
+            RecalculateOpenCurveOnlyPoints(curve.positionCurve);
+        }
+
         public virtual List<SelectableGUID> SelectAll(Curve3D curve)
         {
             List<SelectableGUID> retr = new List<SelectableGUID>();
