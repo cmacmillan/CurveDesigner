@@ -45,14 +45,26 @@ namespace ChaseMacMillan.CurveDesigner
             script = EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false) as MonoScript;
             GUI.enabled = true;
 
+#if UNITY_2021_2_OR_NEWER || UNITY_2022_1_OR_NEWER
+            EditorGUILayout.BeginHorizontal(EditorStyles.wordWrappedLabel);
+            GUILayout.Label($"Your Unity version ({Application.unityVersion}) has a known bug which can cause CurveDesigner to crash the editor. You can downgrade to below 2021.2/2022.1 to fix this.",EditorStyles.wordWrappedLabel);
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal(EditorStyles.wordWrappedLabel);
+            GUILayout.Label($"Here's a link to the issue page",EditorStyles.wordWrappedLabel);
+            if (GUILayout.Button("issuetracker.unity3d.com"))
+                Application.OpenURL("https://issuetracker.unity3d.com/issues/crash-on-gc-push-all-when-updating-custom-mesh-generation");
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+#endif
+
+            GUILayout.Space(-1);
 
             float width = Screen.width - 18; // -10 is effect_bg padding, -8 is inspector padding
             EditorGUIUtility.labelWidth = 0;
             EditorGUIUtility.labelWidth = EditorGUIUtility.labelWidth - 4;
 
             EditorGUILayout.BeginVertical(
-#if UNITY_2019_1_OR_NEWER
-#else
+#if !UNITY_2019_1_OR_NEWER
                 GUILayout.MaxHeight(200)//hack to prevent inspector over-expansion on unity versions <2018
 #endif
                 );
@@ -105,7 +117,6 @@ namespace ChaseMacMillan.CurveDesigner
                     curr.SetIsExpanded(curve3d,GUI.Toggle(headerRect, curr.IsExpanded(curve3d), headerLabel, headerStyle));
                     GUILayout.Space(1);
                 }
-                GUILayout.Space(-1);
             }
             EditorGUILayout.EndVertical();
             GUILayout.FlexibleSpace();
