@@ -7,7 +7,8 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         public EndlessRunnerCharacter character;
         public void OnLeaveGround()
         {
-            character.OnLeaveGround();
+            character.animator.SetBool("wantsJumpRight", false);
+            character.animator.SetBool("wantsJumpLeft", false);
         }
         public void PlayFootstep()
         {

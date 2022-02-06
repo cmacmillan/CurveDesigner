@@ -23,7 +23,6 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         private float crosswiseVelocity=0;
         private float verticalVelocity=0;
         private float height=0;
-        private bool wantsJump = false;
         private bool isGrounded = true;
         private Vector3 initialLocalPosition;
         private float jumpApex;
@@ -62,7 +61,29 @@ namespace ChaseMacMillan.CurveDesigner.Examples
             {
                 if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W))
                 {
-                    wantsJump=true;
+                    var currState = animator.GetCurrentAnimatorStateInfo(0);
+                    var name = currState.shortNameHash;
+                    if (name == Animator.StringToHash("Run-right"))
+                    {
+                        if (currState.normalizedTime > .15 && currState.normalizedTime < .65f)
+                            animator.SetBool("wantsJumpLeft", true);
+                        else
+                            animator.SetBool("wantsJumpRight", true);
+                    }
+                    else if (name == Animator.StringToHash("Land-right"))
+                            animator.SetBool("wantsJumpLeft", true);
+                    else if (name == Animator.StringToHash("Land-left"))
+                            animator.SetBool("wantsJumpRight", true);
+                    else if (name == Animator.StringToHash("Run-left"))
+                    {
+                        if (currState.normalizedTime > .15 && currState.normalizedTime < .65f)
+                            animator.SetBool("wantsJumpRight", true);
+                        else
+                            animator.SetBool("wantsJumpLeft", true);
+                    }
+                    verticalVelocity = jumpSpeed;
+                    isGrounded = false;
+                    hasJumpApex = false;
                 }
                 var point = objectOnCurve.curve.GetPointAtDistanceAlongCurve(objectOnCurve.lengthwisePosition);
                 transform.rotation = Quaternion.AngleAxis(maxTurnLean * (crosswiseVelocity / crosswiseMaxSpeed), transform.up)*transform.rotation;
@@ -92,17 +113,9 @@ namespace ChaseMacMillan.CurveDesigner.Examples
                     isGrounded = true;
                 }
             }
-            objectOnCurve.lengthwisePosition += runSpeed;
+            objectOnCurve.lengthwisePosition += runSpeed*Time.deltaTime;
             localRoot.localPosition = initialLocalPosition + new Vector3(0, height, 0);
-            animator.SetBool("wantsJump", wantsJump);
             animator.SetBool("wantsLand", height<landHeight && verticalVelocity<0);
-        }
-        public void OnLeaveGround()
-        {
-            verticalVelocity = jumpSpeed;
-            hasJumpApex = false;
-            isGrounded = false;
-            wantsJump = false;
         }
         public void PlayFootstep()
         {
