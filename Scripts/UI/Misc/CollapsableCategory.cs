@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    //Abstract classes can't be serialized, but we could make this serializable by adding a concrete root class, saving that, and casting back to the abstract class when we wanna serialize it
     public abstract class CollapsableCategory
     {
         public abstract bool IsExpanded(Curve3D curve);
@@ -324,6 +323,61 @@ namespace ChaseMacMillan.CurveDesigner
         public override void SetIsExpanded(Curve3D curve, bool value)
         {
             curve.advancedCategoryExpanded= value;
+        }
+    }
+    public class LinksCollapsableCategory : CollapsableCategory
+    {
+        private double timeOfShowCopiedToClipboard = 0;
+        public override void Draw(Curve3D curve)
+        {
+            /*
+            EditorGUILayout.BeginHorizontal(EditorStyles.wordWrappedLabel);
+            GUILayout.Label($"Your Unity version ({Application.unityVersion}) has a known bug which can cause CurveDesigner to crash the editor. You can downgrade to below 2021.2/2022.1 to fix this.",EditorStyles.wordWrappedLabel);
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal(EditorStyles.wordWrappedLabel);
+            */
+
+            GUILayout.Label($"If you need any help, please feel free to email me or file an issue on the github page. If you're enjoying the asset, please leave a review or star the asset on github. Thanks!",EditorStyles.wordWrappedLabel);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("assetstore.unity.com"))
+                Application.OpenURL("https://assetstore.unity.com/packages/tools/modeling/curve-designer-200130");
+            if (GUILayout.Button("github.com"))
+                Application.OpenURL("https://github.com/cmacmillan/CurveDesigner");
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            string emailText;
+            if (EditorApplication.timeSinceStartup - timeOfShowCopiedToClipboard < 2)
+                emailText = "Copied To clipboard!";
+            else
+                emailText = "support@chasemacmillan.com";
+            if (GUILayout.Button(emailText,GUILayout.MinWidth(190)))
+            {
+                timeOfShowCopiedToClipboard = EditorApplication.timeSinceStartup;
+                GUIUtility.systemCopyBuffer = "support@chasemacmillan.com";
+            }
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+
+            //GUILayout.FlexibleSpace();
+            //EditorGUILayout.EndHorizontal();
+        }
+
+        public override string GetName(Curve3D curve)
+        {
+            return "Links";
+        }
+
+        public override bool IsExpanded(Curve3D curve)
+        {
+            return curve.linksCategoryExpanded;
+        }
+
+        public override void SetIsExpanded(Curve3D curve, bool value)
+        {
+            curve.linksCategoryExpanded = value;
         }
     }
     public class PreferencesCollapsableCategory : CollapsableCategory
