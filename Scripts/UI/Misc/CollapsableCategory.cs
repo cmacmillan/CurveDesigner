@@ -12,6 +12,7 @@ namespace ChaseMacMillan.CurveDesigner
         public abstract string GetName(Curve3D curve);
         public abstract void Draw(Curve3D curve);
 
+        public virtual bool ShouldShow() { return true; }
         protected SerializedObject serializedObj;
         public void Field(string fieldName, bool isRed=false)
         {
@@ -325,19 +326,49 @@ namespace ChaseMacMillan.CurveDesigner
             curve.advancedCategoryExpanded= value;
         }
     }
+    public class WarningCollapsableCategory : CollapsableCategory
+    {
+        public override bool ShouldShow()
+        {
+#if UNITY_2021_2_OR_NEWER || UNITY_2022_1_OR_NEWER
+            return true;
+#endif
+            return false;
+        }
+        public override void Draw(Curve3D curve)
+        {
+#if UNITY_2021_2_OR_NEWER || UNITY_2022_1_OR_NEWER
+            EditorGUILayout.HelpBox($"Your Unity version ({Application.unityVersion}) has a known bug which can cause CurveDesigner to crash the editor. You can downgrade to below 2021.2/2022.1 to fix this.", MessageType.Error);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("issuetracker.unity3d.com"))
+                Application.OpenURL("https://issuetracker.unity3d.com/issues/crash-on-gc-push-all-when-updating-custom-mesh-generation");
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+#endif
+        }
+
+        public override string GetName(Curve3D curve)
+        {
+            return "Warning";
+        }
+
+        public override bool IsExpanded(Curve3D curve)
+        {
+            return curve.warningCategoryExpanded;
+        }
+
+        public override void SetIsExpanded(Curve3D curve, bool value)
+        {
+            curve.warningCategoryExpanded = value;
+        }
+    }
     public class LinksCollapsableCategory : CollapsableCategory
     {
         private double timeOfShowCopiedToClipboard = 0;
         public override void Draw(Curve3D curve)
         {
-            /*
-            EditorGUILayout.BeginHorizontal(EditorStyles.wordWrappedLabel);
-            GUILayout.Label($"Your Unity version ({Application.unityVersion}) has a known bug which can cause CurveDesigner to crash the editor. You can downgrade to below 2021.2/2022.1 to fix this.",EditorStyles.wordWrappedLabel);
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.BeginHorizontal(EditorStyles.wordWrappedLabel);
-            */
-
-            GUILayout.Label($"If you need any help, please feel free to email me or file an issue on the github page. If you're enjoying the asset, please leave a review or star the asset on github. Thanks!",EditorStyles.wordWrappedLabel);
+            EditorGUILayout.HelpBox($"If you need any help, please feel free to email me or file an issue on the github page. There's also some info in the UserManual.pdf file. If you're enjoying the asset, please leave a review or star the asset on github. Thanks!",MessageType.Info);
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("assetstore.unity.com"))
@@ -360,9 +391,6 @@ namespace ChaseMacMillan.CurveDesigner
             }
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
-
-            //GUILayout.FlexibleSpace();
-            //EditorGUILayout.EndHorizontal();
         }
 
         public override string GetName(Curve3D curve)

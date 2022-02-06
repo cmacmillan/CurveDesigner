@@ -58,6 +58,7 @@ namespace ChaseMacMillan.CurveDesigner
         new PreferencesCollapsableCategory(),
         new AdvancedCollapsableCategory(),
         new LinksCollapsableCategory(),
+        new WarningCollapsableCategory()
     };
 #endif
 
@@ -225,6 +226,7 @@ namespace ChaseMacMillan.CurveDesigner
         public bool preferencesCategoryExpanded = false;
         public bool advancedCategoryExpanded = false;
         public bool linksCategoryExpanded = false;
+        public bool warningCategoryExpanded = false;
 
         public Curve3DEditMode editMode = Curve3DEditMode.PositionCurve;
 
