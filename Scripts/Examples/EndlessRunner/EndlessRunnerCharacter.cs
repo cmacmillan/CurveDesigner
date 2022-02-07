@@ -15,6 +15,8 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         public float crosswiseAcceleration = 1;
         public float maxTurnLean = 5;
         public List<AudioClip> footstepClips;
+        public AudioClip JumpStartClip;
+        public AudioClip HitGroundClip;
         [System.NonSerialized]
         public int coinCount=0;
         [System.NonSerialized]
@@ -81,6 +83,7 @@ namespace ChaseMacMillan.CurveDesigner.Examples
                         else
                             animator.SetBool("wantsJumpLeft", true);
                     }
+                    PlaySound.Play(JumpStartClip, transform.position,Random.Range(.4f,.5f),Random.Range(.95f,1f));
                     verticalVelocity = jumpSpeed;
                     isGrounded = false;
                     hasJumpApex = false;
@@ -111,6 +114,7 @@ namespace ChaseMacMillan.CurveDesigner.Examples
                 {
                     height = 0;
                     isGrounded = true;
+                    PlaySound.Play(HitGroundClip, transform.position,Random.Range(.4f,.5f),Random.Range(.9f,1.1f));
                 }
             }
             objectOnCurve.lengthwisePosition += runSpeed*Time.deltaTime;

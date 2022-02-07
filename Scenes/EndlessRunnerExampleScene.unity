@@ -1864,7 +1864,7 @@ MonoBehaviour:
   runSpeed: 15
   crosswiseMaxSpeed: 1
   crosswiseAcceleration: 5
-  maxTurnLean: -10
+  maxTurnLean: 30
   footstepClips:
   - {fileID: 8300000, guid: 95e114ae88af3814da9dec340c87efa1, type: 3}
   - {fileID: 8300000, guid: 291c3ae476c4ee64a8809e7b34efa6c0, type: 3}
@@ -1872,6 +1872,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 82bbd0719581ef44b9fd2573de7c2447, type: 3}
   - {fileID: 8300000, guid: 33487e14cab732b449a7bd02fcc83b14, type: 3}
   - {fileID: 8300000, guid: 02500f9ccced4a04fa0150c1eb35abf0, type: 3}
+  JumpStartClip: {fileID: 8300000, guid: 8749c1897ca3ea4478f083e5183b5a5d, type: 3}
+  HitGroundClip: {fileID: 8300000, guid: fb40d24dc712c9f4a88fa208ca5abea5, type: 3}
   landHeight: 0.2
 --- !u!1 &1456065444
 GameObject:
