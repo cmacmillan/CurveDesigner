@@ -9,7 +9,6 @@ namespace ChaseMacMillan.CurveDesigner
         public float crosswisePosition;
         public float lengthwisePosition;
         public bool attachedToFront = true;
-        [HideInInspector]
         public Curve3D curve;
         public void Update()
         {

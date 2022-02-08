@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace ChaseMacMillan.CurveDesigner
 {
-    [CustomEditor(typeof(ObjectOnCurve))]
+    //[CustomEditor(typeof(ObjectOnCurve))]
+    [CanEditMultipleObjects]
     public class ObjectOnCurveInspector : Editor
     {
         private static readonly int _Hint = "ObjectOnCurve".GetHashCode();

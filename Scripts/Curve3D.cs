@@ -2,6 +2,7 @@
 namespace ChaseMacMillan.CurveDesigner
 {
     //This is just a simple interface for interacting with curves. The meat of Curve3D is in Curve3DCore.cs
+    [ExecuteAlways]
     public partial class Curve3D : MonoBehaviour, ISerializationCallbackReceiver
     {
         public bool IsClosedLoop => positionCurve.isClosedLoop;

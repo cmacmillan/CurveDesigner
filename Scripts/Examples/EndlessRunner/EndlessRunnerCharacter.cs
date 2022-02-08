@@ -17,6 +17,8 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         public List<AudioClip> footstepClips;
         public AudioClip JumpStartClip;
         public AudioClip HitGroundClip;
+        public GameObject dirtPuff;
+        public Transform dirtPuffRoot;
         [System.NonSerialized]
         public int coinCount=0;
         [System.NonSerialized]
@@ -115,6 +117,9 @@ namespace ChaseMacMillan.CurveDesigner.Examples
                     height = 0;
                     isGrounded = true;
                     PlaySound.Play(HitGroundClip, transform.position,Random.Range(.4f,.5f),Random.Range(.9f,1.1f));
+                    var puff = Instantiate(dirtPuff);
+                    puff.transform.position = dirtPuffRoot.transform.position;
+                    puff.transform.rotation = dirtPuffRoot.transform.rotation;
                 }
             }
             objectOnCurve.lengthwisePosition += runSpeed*Time.deltaTime;

@@ -11,9 +11,10 @@ namespace ChaseMacMillan.CurveDesigner.Examples
         void Update()
         {
             var point = curve.GetPointAtDistanceAlongCurve(character.lengthwisePosition - distanceBehindCharacter);
-            transform.position = point.position+point.reference*heightAboveCurve;
+            var reference = (character.attachedToFront?1:-1)*curve.GetReferenceAtDistanceAlongCurve(character.lengthwisePosition);//negation is inconsistent between curve types
+            transform.position = point.position+reference*heightAboveCurve;
             var curveCenterPoint = curve.GetPointOnSurface(character.lengthwisePosition, .5f, out _, out _, character.attachedToFront);
-            transform.LookAt(curveCenterPoint,point.reference);
+            transform.LookAt(curveCenterPoint,reference);
         }
     }
 }
