@@ -509,7 +509,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
 
         [ContextMenu("Clear")]
-        public void Clear()
+        public void Clear(bool updateMesh=true)
         {
             sizeSampler = new FloatSampler("Size", .2f, Curve3DEditMode.Size, 0);
             rotationSampler = new FloatSampler("Rotation", 0, Curve3DEditMode.Rotation);
@@ -524,7 +524,7 @@ namespace ChaseMacMillan.CurveDesigner
             UICurve = new UICurve(null, this);
             UICurve.Initialize();
         }
-        public void TryInitialize()
+        public void Initialize(bool updateMesh = true)
         {
             if (!isInitialized)
             {
@@ -536,7 +536,8 @@ namespace ChaseMacMillan.CurveDesigner
                 endTextureLayer.material = mat;
                 WriteMaterialsToRenderer();
                 isInitialized = true;
-                RequestMeshUpdate();
+                if (updateMesh)
+                    RequestMeshUpdate();
             }
         }
         public void Recalculate()

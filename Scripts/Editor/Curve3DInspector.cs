@@ -29,7 +29,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             var curve3d = (target as Curve3D);
             curve3d.TryInitStyles();
-            curve3d.TryInitialize();
+            curve3d.Initialize();
             EnsureValidEditMode();
             curve3d.BindDataToPositionCurve();
             if (curve3d.UICurve == null)
@@ -201,7 +201,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             var curve3d = (target as Curve3D);
             curve3d.TryInitStyles();
-            curve3d.TryInitialize();
+            curve3d.Initialize();
             curve3d.CacheAverageSize();
             //curve3d.UpdateMaterials();
             EnsureValidEditMode();

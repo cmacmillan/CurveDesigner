@@ -12,17 +12,22 @@ namespace ChaseMacMillan.CurveDesigner
         public UICurve(Composite parent,Curve3D curve) : base(parent)
         {
 #if UNITY_EDITOR
-            Undo.undoRedoPerformed -= Initialize;
-            Undo.undoRedoPerformed += Initialize;
-#endif
+            Undo.undoRedoPerformed -= OnUndo;
+            Undo.undoRedoPerformed += OnUndo;
             _curve = curve;
         }
+        public void OnUndo()
+        {
+            Initialize();
+            _curve.RequestMeshUpdate();
+        }
+#endif
         public void Initialize()
         {
 #if UNITY_EDITOR
             if (_curve == null)
             {
-                Undo.undoRedoPerformed -= Initialize;
+                Undo.undoRedoPerformed -= OnUndo;
                 return;
             }
 
@@ -38,7 +43,6 @@ namespace ChaseMacMillan.CurveDesigner
             arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
             extrudeCurve = new ExtrudeCurveComposite(this, _curve.extrudeSampler, _curve,positionCurve);
             BakeBlobs();
-            _curve.RequestMeshUpdate();//called because during undo you wanna update the mesh
             if (Event.current != null)
             {
                 positionCurve.FindPointClosestToCursor();

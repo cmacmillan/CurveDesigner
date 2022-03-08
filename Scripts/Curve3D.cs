@@ -42,6 +42,7 @@ namespace ChaseMacMillan.CurveDesigner
         public PointOnCurve GetPointAtDistanceAlongCurve(float distance,bool worldSpace=true)
         {
             var point = positionCurve.GetPointAtDistance(distance);
+            //reference not getting rotated here! that's a problem. Gotta make sure changing this won't break internal use-cases tho
             if (worldSpace)
                 point.FromLocalToWorld(transform);
             return point;
@@ -100,10 +101,14 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public void Start()
         {
-            TryInitialize();
+            Initialize();
             UpdateMesh(false);
         }
         public void Update()
+        {
+            UpdateMesh(false);
+        }
+        public void LateUpdate()
         {
             UpdateMesh(false);
         }
