@@ -21,6 +21,7 @@ namespace ChaseMacMillan.CurveDesigner
                 yield return colorSampler;
                 yield return arcOfTubeSampler;
                 yield return thicknessSampler;
+                yield return normalSampler;
             }
         }
         public IActiveElement ActiveElement
@@ -43,6 +44,8 @@ namespace ChaseMacMillan.CurveDesigner
                         return thicknessSampler;
                     case Curve3DEditMode.Arc:
                         return arcOfTubeSampler;
+                    case Curve3DEditMode.Normal:
+                        return normalSampler;
                     default:
                         throw new NotImplementedException();
                 }
@@ -192,6 +195,7 @@ namespace ChaseMacMillan.CurveDesigner
         public FloatSampler rotationSampler;
         public ColorSampler colorSampler;
         public ExtrudeSampler extrudeSampler;
+        public NormalSampler normalSampler;
 
         [NonSerialized]
         private bool isWaitingForMeshResults = false;
@@ -206,7 +210,6 @@ namespace ChaseMacMillan.CurveDesigner
         {
             positionCurve.owner = this;
             positionCurve.dimensionLockMode = lockToPositionZero;
-            positionCurve.normalGenerationMode = normalGenerationMode;
         }
 
 
@@ -317,6 +320,14 @@ namespace ChaseMacMillan.CurveDesigner
         [HideInInspector]
         private bool old_thicknessUseKeyframes;
 
+        [SerializeField]
+        [HideInInspector]
+        private bool old_normalUseKeyframes;
+
+        [SerializeField]
+        [HideInInspector]
+        private Vector3 old_constNormal;
+
         public bool clampAndStretchMeshToCurve = true;
         [SerializeField]
         [HideInInspector]
@@ -326,11 +337,6 @@ namespace ChaseMacMillan.CurveDesigner
         [SerializeField]
         [HideInInspector]
         private DimensionLockMode old_lockToPositionZero;
-
-        public CurveNormalGenerationMode normalGenerationMode;
-        [SerializeField]
-        [HideInInspector]
-        private CurveNormalGenerationMode old_normalGenerationMode;
 
         [Min(0)]
         public float vertexDensity = 40.0f;
@@ -456,7 +462,6 @@ namespace ChaseMacMillan.CurveDesigner
                 retr |= CheckFieldChanged(meshToTile, ref old_meshToTile);
             retr |= CheckFieldChanged(meshPrimaryAxis, ref old_meshPrimaryAxis);
             retr |= CheckFieldChanged(clampAndStretchMeshToCurve, ref old_clampAndStretchMeshToCurve);
-            retr |= CheckFieldChanged(normalGenerationMode, ref old_normalGenerationMode);
             retr |= CheckFieldChanged(samplesPerSegment, ref old_samplesPerSegment);
 
             retr |= CheckTextureLayerChanged(mainTextureLayer, ref old_mainTextureLayer);
@@ -483,6 +488,7 @@ namespace ChaseMacMillan.CurveDesigner
             CheckSamplerChanged(rotationSampler, ref old_constRotation, ref old_rotationUseKeyframes);
             CheckSamplerChanged(arcOfTubeSampler, ref old_constArcOfTube, ref old_arcOfTubeUseKeyframes);
             CheckSamplerChanged(thicknessSampler, ref old_constThickness, ref old_thicknessUseKeyframes);
+            CheckSamplerChanged(normalSampler, ref old_constNormal, ref old_normalUseKeyframes);
 
             if (CheckFieldChanged(positionCurve.automaticTangentSmoothing, ref old_automaticTangentSmoothing))
             {
@@ -508,6 +514,15 @@ namespace ChaseMacMillan.CurveDesigner
             return retr;
         }
 
+        [ContextMenu("UpgradeCurve")]
+        private void UpgradeCurve()//delete me
+        {
+            //if (normalSampler==null)
+            normalSampler = new NormalSampler("Normal Generation", Curve3DEditMode.Normal);
+            UICurve = new UICurve(null, this);
+            UICurve.Initialize();
+        }
+
         [ContextMenu("Clear")]
         public void Clear(bool updateMesh=true)
         {
@@ -516,6 +531,7 @@ namespace ChaseMacMillan.CurveDesigner
             arcOfTubeSampler = new FloatSampler("Arc", 180, Curve3DEditMode.Arc, 0, 360);
             thicknessSampler = new FloatSampler("Thickness", .05f, Curve3DEditMode.Thickness, 0);
             colorSampler = new ColorSampler("Color", Curve3DEditMode.Color);
+            normalSampler = new NormalSampler("Normal Generation", Curve3DEditMode.Normal);
             positionCurve = new BezierCurve();
             positionCurve.owner = this;
             positionCurve.Initialize();
@@ -604,11 +620,14 @@ namespace ChaseMacMillan.CurveDesigner
             thicknessSampler.CopyFrom(otherCurve.thicknessSampler,thisCurveLength,this,otherCurve);
             rotationSampler.CopyFrom(otherCurve.rotationSampler,thisCurveLength,this,otherCurve);
             colorSampler.CopyFrom(otherCurve.colorSampler,thisCurveLength,this,otherCurve);
+            normalSampler.CopyFrom(otherCurve.normalSampler, thisCurveLength, this, otherCurve);
             if (extrudeSampler!=null && otherCurve.extrudeSampler!=null)
                 extrudeSampler.CopyFrom(otherCurve.extrudeSampler,thisCurveLength,this,otherCurve);
 
             UICurve.Initialize();
             RequestMeshUpdate();
+            //the normals should get rotated when you match the end
+            //and we must consider whether or not to use the sampler points, or just insert a new sampler point representing the const value of that sampler at the beginning with no interpolation after
         }
 
         public void ReadMaterialsFromRenderer()
@@ -811,6 +830,7 @@ namespace ChaseMacMillan.CurveDesigner
             {Curve3DEditMode.Color, "Color" },
             {Curve3DEditMode.Arc, "Arc" },
             {Curve3DEditMode.Thickness, "Thickness" },
+            {Curve3DEditMode.Normal, "Normal" }
         };
         public Curve3DEditMode[] editModes;
         public GUIStyle _centeredStyle;

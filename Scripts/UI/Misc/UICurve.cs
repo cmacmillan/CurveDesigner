@@ -41,7 +41,8 @@ namespace ChaseMacMillan.CurveDesigner
             colorCurve = new ColorCurveComposite(this, _curve.colorSampler, _curve, positionCurve);
             thicknessCurve = new ThicknessCurveComposite(this, _curve.thicknessSampler, _curve, positionCurve);
             arcCurve = new ArcCurveComposite(this,_curve.arcOfTubeSampler,_curve,positionCurve);
-            extrudeCurve = new ExtrudeCurveComposite(this, _curve.extrudeSampler, _curve,positionCurve);
+            normalCurve = new NormalCurveComposite(this, _curve.normalSampler, _curve, positionCurve);
+            extrudeCurve = new ExtrudeCurveComposite(this, _curve.extrudeSampler, _curve, positionCurve);
             BakeBlobs();
             if (Event.current != null)
             {
@@ -58,6 +59,7 @@ namespace ChaseMacMillan.CurveDesigner
         public ExtrudeCurveComposite extrudeCurve;
         public ThicknessCurveComposite thicknessCurve;
         public ArcCurveComposite arcCurve;
+        public NormalCurveComposite normalCurve;
 
         public IWindowDrawer GetWindowDrawer()
         {
@@ -77,6 +79,8 @@ namespace ChaseMacMillan.CurveDesigner
                     return thicknessCurve;
                 case Curve3DEditMode.Arc:
                     return arcCurve;
+                case Curve3DEditMode.Normal:
+                    return normalCurve;
                 default:
                     throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");
             }
@@ -172,6 +176,9 @@ namespace ChaseMacMillan.CurveDesigner
                     break;
                 case Curve3DEditMode.Arc:
                     yield return arcCurve;
+                    break;
+                case Curve3DEditMode.Normal:
+                    yield return normalCurve;
                     break;
                 default:
                     throw new NotImplementedException($"Case {_curve.editMode} not defined in switch statement");

@@ -159,6 +159,7 @@ namespace ChaseMacMillan.CurveDesigner
         private ISampler _sampler;
         private Func<Curve3D,IValueAlongCurvePointProvider> _pointsProvider;
 
+        public static IValueAlongCurvePointProvider GetNormalCurve(Curve3D curve) { return curve.UICurve.normalCurve; }
         public static IValueAlongCurvePointProvider GetRotationCurve(Curve3D curve) { return curve.UICurve.rotationCurve; }
         public static IValueAlongCurvePointProvider GetSizeCurve(Curve3D curve) { return curve.UICurve.sizeCurve; }
         public static IValueAlongCurvePointProvider GetThicknessCurve(Curve3D curve) { return curve.UICurve.thicknessCurve; }

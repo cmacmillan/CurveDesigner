@@ -9,5 +9,6 @@
         Color = 4,
         Arc = 5,
         Thickness = 6,
+        Normal = 7,
     }
 }

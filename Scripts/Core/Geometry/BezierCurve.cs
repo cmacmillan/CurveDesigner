@@ -14,7 +14,7 @@ namespace ChaseMacMillan.CurveDesigner
         public int NumSegments { get { return isClosedLoop ? PointGroups.Count : PointGroups.Count - 1; } }
 
         public DimensionLockMode dimensionLockMode = DimensionLockMode.none;
-        public CurveNormalGenerationMode normalGenerationMode = CurveNormalGenerationMode.MinimumDistance;
+        //[System.NonSerialized]//re-examine this. I think on deserialization this leads to 2 objects getting created and we really don't wanna double-serialize this
         public Curve3D owner;
         public bool isClosedLoop=false;
         public bool automaticTangents = false;
@@ -533,20 +533,10 @@ namespace ChaseMacMillan.CurveDesigner
                     reference = Vector3.forward;
                     break;
                 default:
-                    switch (normalGenerationMode)
-                    {
-                        case CurveNormalGenerationMode.BiasTowardsForward:
-                            reference = Vector3.forward;
-                            break;
-                        case CurveNormalGenerationMode.BiasTowardsRight:
-                            reference = Vector3.right;
-                            break;
-                        case CurveNormalGenerationMode.BiasTowardsUp:
-                        case CurveNormalGenerationMode.MinimumDistance:
-                        default:
-                            reference = Vector3.up;
-                            break;
-                    }
+                    if (!owner.normalSampler.UseKeyframes)
+                        reference = Vector3.up;
+                    else
+                        reference = owner.normalSampler.GetValueAtDistance(0, this);
                     break;
             }
             var retr = Vector3.ProjectOnPlane(reference, tangent).normalized;

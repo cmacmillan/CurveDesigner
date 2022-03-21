@@ -86,25 +86,16 @@ namespace ChaseMacMillan.CurveDesigner
                 reference = Vector3.ProjectOnPlane(up, tangent).normalized;
                 return;
             }
-            Vector3 dir;
-            switch (curve.normalGenerationMode)
+            if (!curve.owner.normalSampler.UseKeyframes)
             {
-                case CurveNormalGenerationMode.MinimumDistance:
-                    reference = DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, previousReference);
-                    reference = Vector3.ProjectOnPlane(reference, tangent).normalized;
-                    return;
-                case CurveNormalGenerationMode.BiasTowardsForward:
-                    dir = Vector3.forward;
-                    break;
-                case CurveNormalGenerationMode.BiasTowardsRight:
-                    dir = Vector3.right;
-                    break;
-                default:
-                case CurveNormalGenerationMode.BiasTowardsUp:
-                    dir = Vector3.up;
-                    break;
+                reference = DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, previousReference);
+                reference = Vector3.ProjectOnPlane(reference, tangent).normalized;
             }
-            reference = Vector3.ProjectOnPlane(dir, tangent).normalized;
+            else
+            {
+                Vector3 dir = curve.owner.normalSampler.GetValueAtDistance(distanceFromStartOfCurve,curve);
+                reference = Vector3.ProjectOnPlane(dir, tangent).normalized;
+            }
         }
 
         public int SegmentIndex { get { return segmentIndex; } }

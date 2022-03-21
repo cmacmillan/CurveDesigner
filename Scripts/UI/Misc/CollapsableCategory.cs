@@ -183,6 +183,7 @@ namespace ChaseMacMillan.CurveDesigner
                     SamplerField("thicknessSampler",curve.thicknessSampler,curve);
                 }
                 SamplerField("colorSampler", curve.colorSampler, curve);
+                SamplerField("normalSampler", curve.normalSampler,curve);
             }
             if (curve.type == MeshGenerationMode.Extrude)
                 EditModeSwitchButton("Extrude", Curve3DEditMode.Extrude, GetFieldRects(out _,curve),curve);
@@ -218,7 +219,6 @@ namespace ChaseMacMillan.CurveDesigner
             if (curve.type == MeshGenerationMode.NoMesh)
                 return;
             serializedObj = new SerializedObject(curve);
-            bool needsReinitCurve = false;
             if (curve.type != MeshGenerationMode.Mesh && curve.type!=MeshGenerationMode.NoMesh)
             {
                 Field("vertexDensity");
@@ -232,13 +232,7 @@ namespace ChaseMacMillan.CurveDesigner
                 Field("flatPointCount");
             }
             Field("lockToPositionZero");
-            EditorGUI.BeginChangeCheck();
-            Field("normalGenerationMode");
-            if (EditorGUI.EndChangeCheck())
-                needsReinitCurve = true;
             serializedObj.ApplyModifiedProperties();
-            if (needsReinitCurve)
-                curve.UICurve.Initialize();
         }
 
         public override bool IsExpanded(Curve3D curve)

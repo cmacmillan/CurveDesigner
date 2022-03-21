@@ -60,6 +60,7 @@ namespace ChaseMacMillan.CurveDesigner
             data.sizeSampler = new FloatSampler(curve.sizeSampler, false, null);
             data.rotationSampler = new FloatSampler(curve.rotationSampler, false, null);
             data.colorSampler = new ColorSampler(curve.colorSampler, false, null);
+            //data.normalSampler = new NormalSampler(curve.normalSampler, false, null);
             if (curve.type == MeshGenerationMode.Extrude)
                 data.extrudeSampler = new ExtrudeSampler(curve.extrudeSampler, false, null);
             else
@@ -196,6 +197,7 @@ namespace ChaseMacMillan.CurveDesigner
         public ColorSampler colorSampler;
         public FloatSampler tubeArcSampler;
         public FloatSampler thicknessSampler;
+        //public NormalSampler normalSampler;//normals should already be generated
 
         public MeshGeneratorOutput output;
 
