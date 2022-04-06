@@ -15,7 +15,7 @@ namespace ChaseMacMillan.CurveDesigner
         public AxisHandleDraw(AxisHandleComposite creator,Curve3D curve,Vector3 axis,Vector3 position,float alpha)
         {
             creator.GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,creator.drawLineStartOffset);
-            GUITools.WorldToGUISpace(creator.HandleToWorldSpace(lineEnd), out Vector2 _guiPos, out _distFromCamera);
+            GUITools.WorldToGUISpace(GUITools.HandleToWorldSpace(lineEnd), out Vector2 _guiPos, out _distFromCamera);
             this.creator = creator;
             this.curve = curve;
             this.axis = axis;

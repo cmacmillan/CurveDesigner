@@ -42,7 +42,7 @@ namespace ChaseMacMillan.CurveDesigner
             if (dot < axisMaxDotProduct)
             {
                 GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize, clickLineStartOffset);
-                GUITools.WorldToGUISpace(HandleToWorldSpace(lineEnd), out Vector2 guiPosition, out float screenDepth);
+                GUITools.WorldToGUISpace(GUITools.HandleToWorldSpace(lineEnd), out Vector2 guiPosition, out float screenDepth);
                 clickHits.Add(new ClickHitData(this, screenDepth, guiPosition - mousePosition));
             }
         }
@@ -51,23 +51,19 @@ namespace ChaseMacMillan.CurveDesigner
 
         public float drawLineStartOffset = .06f;
         public float clickLineStartOffset = .2f;
-
-        private Vector4 ToHomo(Vector3 v) { return new Vector4(v.x, v.y, v.z, 1); }
-        public Vector3 WorldToHandleSpace(Vector3 v) { return Handles.matrix*ToHomo(v); }
-        public Vector3 HandleToWorldSpace(Vector3 v) { return Handles.inverseMatrix*ToHomo(v); }
         public void GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,float lineStartOffset)
         {
             Vector3 position = positionProvider.Position;
-            var basePos = WorldToHandleSpace(position);
+            var basePos = GUITools.WorldToHandleSpace(position);
             handleSize = HandleUtility.GetHandleSize(basePos);
-            lineStart = WorldToHandleSpace(position + lineStartOffset * handleSize*axis);
-            lineEnd = WorldToHandleSpace(position + lineLength * handleSize*axis);
+            lineStart = GUITools.WorldToHandleSpace(position + lineStartOffset * handleSize*axis);
+            lineEnd = GUITools.WorldToHandleSpace(position + lineLength * handleSize*axis);
         }
         public override float DistanceFromMouse(Vector2 mouse)
         {
             GetHandleInfo(out Vector3 lineStart, out Vector3 lineEnd, out float handleSize,clickLineStartOffset);
-            var worldSpaceEnd = HandleToWorldSpace(lineEnd);
-            float lineDist = HandleUtility.DistanceToLine(HandleToWorldSpace(lineStart),worldSpaceEnd);
+            var worldSpaceEnd = GUITools.HandleToWorldSpace(lineEnd);
+            float lineDist = HandleUtility.DistanceToLine(GUITools.HandleToWorldSpace(lineStart),worldSpaceEnd);
             float coneDist = HandleUtility.DistanceToCircle(worldSpaceEnd,handleSize*coneSizeMultiplier);
             return Mathf.Min(lineDist, coneDist);
         }

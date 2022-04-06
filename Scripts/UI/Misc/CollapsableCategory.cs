@@ -194,6 +194,7 @@ namespace ChaseMacMillan.CurveDesigner
                 Field("meshPrimaryAxis");
                 Field("closeTilableMeshGap");
             }
+            Field("lockToPositionZero");
             serializedObj.ApplyModifiedProperties();
             if (changedCurveType)
                 curve.OnCurveTypeChanged();
@@ -211,9 +212,9 @@ namespace ChaseMacMillan.CurveDesigner
             curve.mainCategoryExpanded = value;
         }
     }
-    public class MeshGenerationCollapsableCategory : CollapsableCategory
+    public class QualityCollapsableCategory : CollapsableCategory
     {
-        public override string GetName(Curve3D curve) { return "Mesh Generation"; }
+        public override string GetName(Curve3D curve) { return "Quality"; }
         public override void Draw(Curve3D curve)
         {
             if (curve.type == MeshGenerationMode.NoMesh)
@@ -231,7 +232,17 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 Field("flatPointCount");
             }
-            Field("lockToPositionZero");
+            EditorGUILayout.HelpBox("SamplesPerSegment increases the accuracy with which the curve is approximated. Increasing this may improve curve quality by reducing vertex and texture distortion, but will reduce performance.", MessageType.Info);
+            serializedObj = new SerializedObject(curve);
+            bool needsReinitCurve=false;
+            EditorGUI.BeginChangeCheck();
+            Field("samplesPerSegment");
+            if (EditorGUI.EndChangeCheck())
+            {
+                needsReinitCurve = true;
+            }
+            if (needsReinitCurve)
+                curve.UICurve.Initialize();
             serializedObj.ApplyModifiedProperties();
         }
 
@@ -291,35 +302,6 @@ namespace ChaseMacMillan.CurveDesigner
             curve.textureCategoryExpanded = value;
         }
     }
-    public class AdvancedCollapsableCategory : CollapsableCategory
-    {
-        public override string GetName(Curve3D curve) { return "Advanced"; }
-        public override void Draw(Curve3D curve)
-        {
-            EditorGUILayout.HelpBox("SamplesPerSegment increases the accuracy with which the curve is approximated. Increasing this may improve curve quality by reducing vertex and texture distortion, but will reduce performance.", MessageType.Info);
-            serializedObj = new SerializedObject(curve);
-            bool needsReinitCurve=false;
-            EditorGUI.BeginChangeCheck();
-            Field("samplesPerSegment");
-            if (EditorGUI.EndChangeCheck())
-            {
-                needsReinitCurve = true;
-            }
-            serializedObj.ApplyModifiedProperties();
-            if (needsReinitCurve)
-                curve.UICurve.Initialize();
-        }
-
-        public override bool IsExpanded(Curve3D curve)
-        {
-            return curve.advancedCategoryExpanded;
-        }
-
-        public override void SetIsExpanded(Curve3D curve, bool value)
-        {
-            curve.advancedCategoryExpanded= value;
-        }
-    }
     public class WarningCollapsableCategory : CollapsableCategory
     {
         public override bool ShouldShow()
@@ -357,20 +339,12 @@ namespace ChaseMacMillan.CurveDesigner
             curve.warningCategoryExpanded = value;
         }
     }
-    public class LinksCollapsableCategory : CollapsableCategory
+    public class HelpCollapsableCategory : CollapsableCategory
     {
         private double timeOfShowCopiedToClipboard = 0;
         public override void Draw(Curve3D curve)
         {
-            EditorGUILayout.HelpBox($"If you need any help, please feel free to email me or file an issue on the github page. There's also some info in the UserManual.pdf file. If you're enjoying the asset, please leave a review or star the asset on github. Thanks!",MessageType.Info);
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("assetstore.unity.com"))
-                Application.OpenURL("https://assetstore.unity.com/packages/tools/modeling/curve-designer-200130");
-            if (GUILayout.Button("github.com"))
-                Application.OpenURL("https://github.com/cmacmillan/CurveDesigner");
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.HelpBox($"If you need any help, please feel free to email me or file an issue on the github page. If you're enjoying the asset, please leave a review or star the asset on github. Thanks!",MessageType.Info);
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             string emailText;
@@ -383,23 +357,33 @@ namespace ChaseMacMillan.CurveDesigner
                 timeOfShowCopiedToClipboard = EditorApplication.timeSinceStartup;
                 GUIUtility.systemCopyBuffer = "support@chasemacmillan.com";
             }
+            if (GUILayout.Button("User Manual"))
+                Application.OpenURL("https://github.com/cmacmillan/CurveDesigner/blob/master/UserManual.pdf");
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("assetstore.unity.com"))
+                Application.OpenURL("https://assetstore.unity.com/packages/tools/modeling/curve-designer-200130");
+            if (GUILayout.Button("github.com"))
+                Application.OpenURL("https://github.com/cmacmillan/CurveDesigner");
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
         }
 
         public override string GetName(Curve3D curve)
         {
-            return "Links";
+            return "Help";
         }
 
         public override bool IsExpanded(Curve3D curve)
         {
-            return curve.linksCategoryExpanded;
+            return curve.helpCategoryExpanded;
         }
 
         public override void SetIsExpanded(Curve3D curve, bool value)
         {
-            curve.linksCategoryExpanded = value;
+            curve.helpCategoryExpanded = value;
         }
     }
     public class PreferencesCollapsableCategory : CollapsableCategory

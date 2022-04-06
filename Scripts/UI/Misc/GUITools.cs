@@ -17,6 +17,8 @@ namespace ChaseMacMillan.CurveDesigner
             WorldToGUISpace(worldPos, out Vector2 guiPosition, out float depth);
             return depth;
         }
+        public static Vector3 WorldToHandleSpace(Vector3 v) { return Handles.matrix.MultiplyPoint(v); }
+        public static Vector3 HandleToWorldSpace(Vector3 v) { return Handles.inverseMatrix.MultiplyPoint(v); }
         public static bool WorldToGUISpace(Vector3 worldPos, out Vector2 guiPosition, out float screenDepth)
         {
             var sceneCam = UnityEditor.SceneView.currentDrawingSceneView.camera;

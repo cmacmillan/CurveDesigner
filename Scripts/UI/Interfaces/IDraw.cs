@@ -4,6 +4,7 @@ namespace ChaseMacMillan.CurveDesigner
 { 
     public interface IDraw
     {
+        //IDraw mostly exists to sort drawn elements back to front
         void Draw(DrawMode mode,SelectionState selectionState);
         float DistFromCamera();
         Composite Creator();

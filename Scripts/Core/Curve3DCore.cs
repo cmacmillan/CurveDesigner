@@ -56,11 +56,10 @@ namespace ChaseMacMillan.CurveDesigner
         public CollapsableCategory[] collapsableCategories =
         {
         new MainCollapsableCategory(),
-        new MeshGenerationCollapsableCategory(),
+        new QualityCollapsableCategory(),
         new TexturesCollapsableCategory(),
         new PreferencesCollapsableCategory(),
-        new AdvancedCollapsableCategory(),
-        new LinksCollapsableCategory(),
+        new HelpCollapsableCategory(),
         new WarningCollapsableCategory()
     };
 #endif
@@ -228,7 +227,7 @@ namespace ChaseMacMillan.CurveDesigner
         public bool textureCategoryExpanded = false;
         public bool preferencesCategoryExpanded = false;
         public bool advancedCategoryExpanded = false;
-        public bool linksCategoryExpanded = false;
+        public bool helpCategoryExpanded = false;
         public bool warningCategoryExpanded = false;
 
         public Curve3DEditMode editMode = Curve3DEditMode.PositionCurve;
@@ -488,6 +487,10 @@ namespace ChaseMacMillan.CurveDesigner
             CheckSamplerChanged(rotationSampler, ref old_constRotation, ref old_rotationUseKeyframes);
             CheckSamplerChanged(arcOfTubeSampler, ref old_constArcOfTube, ref old_arcOfTubeUseKeyframes);
             CheckSamplerChanged(thicknessSampler, ref old_constThickness, ref old_thicknessUseKeyframes);
+
+            if (old_normalUseKeyframes != normalSampler.UseKeyframes)
+                positionCurve.Recalculate();
+
             CheckSamplerChanged(normalSampler, ref old_constNormal, ref old_normalUseKeyframes);
 
             if (CheckFieldChanged(positionCurve.automaticTangentSmoothing, ref old_automaticTangentSmoothing))

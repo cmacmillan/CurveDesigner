@@ -103,8 +103,9 @@ namespace ChaseMacMillan.CurveDesigner
             }
             else
             {
-                valueToWrite = fieldVal.normalized;
+                valueToWrite = fieldVal;
             }
+            valueToWrite = valueToWrite.normalized;
             foreach (var target in selectedPoints)
                 target.Value = valueToWrite;
         }

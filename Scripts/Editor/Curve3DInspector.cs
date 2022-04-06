@@ -135,6 +135,7 @@ namespace ChaseMacMillan.CurveDesigner
             EditorGUIUtility.wideMode = true;
             EditorGUIUtility.labelWidth = 90;
             var curve = (target as Curve3D);
+            Undo.RecordObject(curve, "curve");
             var editModes = curve.editModeCategories;
             if (curve.UICurve != null)
             {
