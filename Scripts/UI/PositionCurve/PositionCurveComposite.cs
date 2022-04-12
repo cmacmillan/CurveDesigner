@@ -30,9 +30,7 @@ namespace ChaseMacMillan.CurveDesigner
         }
         public void FindPointClosestToCursor()
         {
-            var lineStart = GUITools.GUIToWorldSpace(Event.current.mousePosition,0);
-            var lineEnd= GUITools.GUIToWorldSpace(Event.current.mousePosition,1);
-            Ray ray = new Ray(lineStart,(lineEnd-lineStart).normalized);
+            var ray = GUITools.GetCursorRay();
             ClosestPointOnCurveToRayDotProduct.GetClosestPoint(positionCurve, ray, out int segmentIndex, out float time, transformBlob);
             //ClosestPointOnCurveToLine.GetClosestPointToLine(positionCurve,lineStart,lineEnd, out int segmentIndex, out float time,transformBlob);
             float distance = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex,time);

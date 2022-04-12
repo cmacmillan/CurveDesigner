@@ -34,6 +34,12 @@ namespace ChaseMacMillan.CurveDesigner
             guiPosition = ScreenSpaceToGuiSpace(screen_pos);
             return true;
         }
+        public static Ray GetCursorRay()
+        {
+            var lineStart = GUIToWorldSpace(Event.current.mousePosition,0);
+            var lineEnd= GUIToWorldSpace(Event.current.mousePosition,1);
+            return new Ray(lineStart,(lineEnd-lineStart).normalized);
+        }
         public static Vector3 GUIToWorldSpace(Vector2 guiPos, float screenDepth)
         {
             var sceneCam = UnityEditor.SceneView.lastActiveSceneView.camera;
