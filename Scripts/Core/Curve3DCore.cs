@@ -603,6 +603,7 @@ namespace ChaseMacMillan.CurveDesigner
             float thisCurveLength = positionCurve.GetLength();
             var thisEnd = GetPointAtDistanceAlongCurve(thisCurveLength,false);
             var otherStart = otherCurve.GetPointAtDistanceAlongCurve(0,false);
+            var otherEnd = otherCurve.GetPointAtDistanceAlongCurve(otherCurve.CurveLength,false);
             var rotateTangent = Quaternion.FromToRotation(otherStart.tangent, thisEnd.tangent);
             var rotateReference = Quaternion.FromToRotation(rotateTangent*otherStart.reference, thisEnd.reference);
             var rotation = rotateReference * rotateTangent;
@@ -611,10 +612,17 @@ namespace ChaseMacMillan.CurveDesigner
             for (int i = 1; i < otherPointGroups.Count; i++)
             {
                 var curr = otherPointGroups[i];
-                Vector3 position = curr.GetPositionLocal(PointGroupIndex.Position)-otherStart.position;
-                position = rotation * position;
+                Vector3 originalPosition = curr.GetPositionLocal(PointGroupIndex.Position)-otherStart.position;
+                Vector3 position = rotation * originalPosition;
                 position += thisEnd.position;
                 positionCurve.AppendPoint(false, curr.GetIsPointLocked(), position);
+                var point = positionCurve.PointGroups[positionCurve.PointGroups.Count-1];
+                Vector3 tangent = curr.GetPositionLocal(PointGroupIndex.LeftTangent)-otherStart.position;
+                point.SetPositionLocal(PointGroupIndex.LeftTangent,thisEnd.position+(rotation*tangent));
+                if (!curr.GetIsPointLocked()) {//test me
+                    Vector3 rightTangent = curr.GetPositionLocal(PointGroupIndex.RightTangent)-otherStart.position;
+                    point.SetPositionLocal(PointGroupIndex.RightTangent,thisEnd.position+(rotation*rightTangent));
+                }
             }
             Recalculate();
 
@@ -623,14 +631,26 @@ namespace ChaseMacMillan.CurveDesigner
             thicknessSampler.CopyFrom(otherCurve.thicknessSampler,thisCurveLength,this,otherCurve);
             rotationSampler.CopyFrom(otherCurve.rotationSampler,thisCurveLength,this,otherCurve);
             colorSampler.CopyFrom(otherCurve.colorSampler,thisCurveLength,this,otherCurve);
-            normalSampler.CopyFrom(otherCurve.normalSampler, thisCurveLength, this, otherCurve);
             if (extrudeSampler!=null && otherCurve.extrudeSampler!=null)
                 extrudeSampler.CopyFrom(otherCurve.extrudeSampler,thisCurveLength,this,otherCurve);
 
-            UICurve.Initialize();
+            //normalSampler.CopyFrom(otherCurve.normalSampler, thisCurveLength, this, otherCurve);
+            foreach (var i in otherCurve.normalSampler.points)
+            {
+                NormalSamplerPoint newPoint = new NormalSamplerPoint();
+                newPoint.Construct(i, normalSampler, true, this);
+                newPoint.value = rotation*newPoint.value;
+                normalSampler.points.Add(newPoint);
+                newPoint.SetDistance(thisCurveLength+i.GetDistance(otherCurve.positionCurve), positionCurve,false);
+            }
+            normalSampler.Sort(positionCurve);
+            Recalculate();
+
+            if (UICurve!=null)
+                UICurve.Initialize();
             RequestMeshUpdate();
-            //the normals should get rotated when you match the end
             //and we must consider whether or not to use the sampler points, or just insert a new sampler point representing the const value of that sampler at the beginning with no interpolation after
+            var finalEnd = GetPointAtDistanceAlongCurve(CurveLength,false);
         }
 
         public void ReadMaterialsFromRenderer()

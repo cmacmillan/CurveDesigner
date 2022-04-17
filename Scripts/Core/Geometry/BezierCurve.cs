@@ -533,7 +533,7 @@ namespace ChaseMacMillan.CurveDesigner
                     reference = Vector3.forward;
                     break;
                 default:
-                    if (!owner.normalSampler.UseKeyframes)
+                    if (owner.normalSampler.ShouldUseAutomaticNormals(owner))
                         reference = Vector3.up;
                     else
                         reference = owner.normalSampler.GetValueAtDistance(0, this);

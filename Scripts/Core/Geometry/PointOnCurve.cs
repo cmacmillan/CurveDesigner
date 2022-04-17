@@ -86,7 +86,7 @@ namespace ChaseMacMillan.CurveDesigner
                 reference = Vector3.ProjectOnPlane(up, tangent).normalized;
                 return;
             }
-            if (!curve.owner.normalSampler.UseKeyframes)
+            if (curve.owner.normalSampler.ShouldUseAutomaticNormals(curve.owner))
             {
                 reference = DoubleReflectionRMF(previousPoint.position, this.position, previousPoint.tangent.normalized, this.tangent.normalized, previousReference);
                 reference = Vector3.ProjectOnPlane(reference, tangent).normalized;

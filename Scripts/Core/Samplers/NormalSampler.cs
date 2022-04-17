@@ -18,6 +18,11 @@ namespace ChaseMacMillan.CurveDesigner
 
         public NormalSampler(NormalSampler objToClone, bool createNewGuids, Curve3D curve) : base(objToClone, createNewGuids, curve) { }
 
+        public bool ShouldUseAutomaticNormals(Curve3D curve)
+        {
+            return !UseKeyframes || GetPoints(curve.positionCurve).Count == 0;
+        }
+
         protected override Vector3 GetInterpolatedValueAtDistance(float distance, BezierCurve curve)
         {
             if (GetPoints(curve).Count == 0)
@@ -108,6 +113,8 @@ namespace ChaseMacMillan.CurveDesigner
             valueToWrite = valueToWrite.normalized;
             foreach (var target in selectedPoints)
                 target.Value = valueToWrite;
+            if (valueToWrite!=originalValue)
+                curve.positionCurve.Recalculate();
         }
 #endif
 
