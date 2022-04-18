@@ -32,7 +32,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             return GetValueAtDistance(distance,curve);
         }
-        public DataType GetValueAtDistance(float distance, BezierCurve curve, bool useCachedDistance=false)
+        public DataType GetValueAtDistance(float distance, BezierCurve curve)
         {
             float curveLength = curve.GetLength();
             bool isClosedLoop = curve.isClosedLoop;
@@ -43,9 +43,9 @@ namespace ChaseMacMillan.CurveDesigner
             }
             var firstPoint = pointsInsideCurve[0];
             var lastPoint = pointsInsideCurve[pointsInsideCurve.Count - 1];
-            var lastDistance = curveLength - lastPoint.GetDistance(curve,useCachedDistance);
-            float endSegmentDistance = firstPoint.GetDistance(curve,useCachedDistance) + lastDistance;
-            if (pointsInsideCurve[0].GetDistance(curve,useCachedDistance) >= distance)
+            var lastDistance = curveLength - lastPoint.GetDistance(curve,true);
+            float endSegmentDistance = firstPoint.GetDistance(curve,true) + lastDistance;
+            if (pointsInsideCurve[0].GetDistance(curve,true) >= distance)
             {
                 if (isClosedLoop && lastPoint.InterpolationMode == KeyframeInterpolationMode.Linear)
                 {
@@ -59,10 +59,10 @@ namespace ChaseMacMillan.CurveDesigner
             for (int i = 1; i < pointsInsideCurve.Count; i++)
             {
                 var current = pointsInsideCurve[i];
-                if (current.GetDistance(curve,useCachedDistance) >= distance)
+                if (current.GetDistance(curve,true) >= distance)
                 {
                     if (previous.InterpolationMode == KeyframeInterpolationMode.Linear)
-                        return Lerp(previous.Value, current.Value, (distance - previous.GetDistance(curve,useCachedDistance)) / (current.GetDistance(curve,useCachedDistance) - previous.GetDistance(curve,useCachedDistance)));
+                        return Lerp(previous.Value, current.Value, (distance - previous.GetDistance(curve,true)) / (current.GetDistance(curve,true) - previous.GetDistance(curve,true)));
                     else
                         return previous.Value;
                 }
@@ -70,7 +70,7 @@ namespace ChaseMacMillan.CurveDesigner
             }
             if (isClosedLoop && lastPoint.InterpolationMode == KeyframeInterpolationMode.Linear)
             {
-                float lerpVal = (distance - lastPoint.GetDistance(curve,useCachedDistance)) / endSegmentDistance;
+                float lerpVal = (distance - lastPoint.GetDistance(curve,true)) / endSegmentDistance;
                 return Lerp(lastPoint.Value, firstPoint.Value, lerpVal);
             }
             else

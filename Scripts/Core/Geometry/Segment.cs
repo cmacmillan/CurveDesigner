@@ -51,45 +51,51 @@ namespace ChaseMacMillan.CurveDesigner
         {
             if (length < 0 || length > this.length)
                 throw new System.ArgumentException("Length out of bounds");
-            PointOnCurve previousPoint = samples[0];
-            if (previousPoint.distanceFromStartOfSegment > length)
+            if (samples[0].distanceFromStartOfSegment > length)
                 throw new System.Exception("Should always have a point at 0.0");
-            for (int i = 1; i < samples.Count; i++)
+            //binary search
+            int bottom = 0;//inclusive
+            int top = samples.Count-1;//inclusive
+            while (top-bottom>1)
             {
-                var currentPoint = samples[i];
-                if (currentPoint.distanceFromStartOfSegment > length)
-                {
-                    float fullPieceLength = currentPoint.distanceFromStartOfSegment - previousPoint.distanceFromStartOfSegment;
-                    float partialPieceLength = length - previousPoint.distanceFromStartOfSegment;
-                    lowerPoint = previousPoint;
-                    lowerReference = lowerPoint.reference;
-                    return Mathf.Lerp(previousPoint.time, currentPoint.time, partialPieceLength / fullPieceLength);
-                }
-                previousPoint = currentPoint;
+                int middle = (bottom + top) / 2;
+                var middlePoint = samples[middle];
+                if (middlePoint.distanceFromStartOfSegment >= length)
+                    top = middle;
+                else
+                    bottom = middle;
             }
-            lowerPoint = samples[samples.Count - 2];
+            var nextPoint = samples[top];
+            var previousPoint = samples[bottom];
+            float fullPieceLength = nextPoint.distanceFromStartOfSegment - previousPoint.distanceFromStartOfSegment;
+            float partialPieceLength = length - previousPoint.distanceFromStartOfSegment;
+            lowerPoint = previousPoint;
             lowerReference = lowerPoint.reference;
-            return samples[samples.Count - 1].time;
+            return Mathf.Lerp(previousPoint.time, nextPoint.time, partialPieceLength / fullPieceLength);
         }
         public float GetDistanceAtTime(float time)
         {
             if (time < 0 || time > 1.0f)
                 throw new System.ArgumentException("Length out of bounds");
-            PointOnCurve previousPoint = samples[0];
-            if (previousPoint.time > time)
+            if (samples[0].time > time)
                 throw new System.Exception("Should always have a point at 0.0");
-            for (int i = 1; i < samples.Count; i++)
+            //binary search
+            int bottom = 0;//inclusive
+            int top = samples.Count-1;//inclusive
+            while (top-bottom>1)
             {
-                var currentPoint = samples[i];
-                if (currentPoint.time > time)
-                {
-                    float fullPieceTime = currentPoint.time - previousPoint.time;
-                    float partialPieceTime = time - previousPoint.time;
-                    return Mathf.Lerp(previousPoint.distanceFromStartOfSegment, currentPoint.distanceFromStartOfSegment, partialPieceTime / fullPieceTime);
-                }
-                previousPoint = currentPoint;
+                int middle = (bottom + top) / 2;
+                var middlePoint = samples[middle];
+                if (middlePoint.time >= time)
+                    top = middle;
+                else
+                    bottom = middle;
             }
-            return samples[samples.Count - 1].distanceFromStartOfSegment;
+            var nextPoint = samples[top];
+            var previousPoint = samples[bottom];
+            float fullPieceTime = nextPoint.time - previousPoint.time;
+            float partialPieceTime = time - previousPoint.time;
+            return Mathf.Lerp(previousPoint.distanceFromStartOfSegment, nextPoint.distanceFromStartOfSegment, partialPieceTime / fullPieceTime); 
         }
 
     }

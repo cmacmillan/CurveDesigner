@@ -125,23 +125,23 @@ namespace ChaseMacMillan.CurveDesigner
             }
             float GetSizeAtDistance(float distance)
             {
-                return sizeSampler.GetValueAtDistance(distance, curve, true);
+                return sizeSampler.GetValueAtDistance(distance, curve);
             }
             float GetTubeArcAtDistance(float distance)
             {
-                return tubeArcSampler.GetValueAtDistance(distance, curve, true);
+                return tubeArcSampler.GetValueAtDistance(distance, curve);
             }
             float GetThicknessAtDistance(float distance)
             {
-                return thicknessSampler.GetValueAtDistance(distance, curve, true);
+                return thicknessSampler.GetValueAtDistance(distance, curve);
             }
             Color32 GetColorAtDistance(float distance)
             {
-                return colorSampler.GetValueAtDistance(distance, curve, true);
+                return colorSampler.GetValueAtDistance(distance, curve);
             }
             float GetRotationAtDistance(float distance)
             {
-                return rotationSampler.GetValueAtDistance(distance, curve, true);
+                return rotationSampler.GetValueAtDistance(distance, curve);
             }
             void TrianglifyLayer(bool isExterior, int numPointsPerRing, int startIndex)
             {//generate tris
@@ -520,7 +520,7 @@ namespace ChaseMacMillan.CurveDesigner
                 float arc = GetTubeArcAtDistance(currentPoint.distanceFromStartOfCurve);
                 for (int j = 0; j < pointsPerRing; j++)
                 {
-                    var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation, outOffset,arc,extrudeSampler,curve,true,out Vector3 normal,out float crosswise);
+                    var position = pointCreator(currentPoint, j, pointsPerRing, size, rotation, outOffset,arc,extrudeSampler,curve,out Vector3 normal,out float crosswise);
                     MeshGeneratorVertexItem item = new MeshGeneratorVertexItem();
                     item.position = position;
                     item.normal = normal;

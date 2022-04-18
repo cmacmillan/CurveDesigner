@@ -51,12 +51,17 @@ namespace ChaseMacMillan.CurveDesigner
                 owner.Sort(curve);
         }
 
-        public float GetDistance(BezierCurve positionCurve, bool useCachedDistance=false)
+        public float GetDistance(BezierCurve positionCurve, bool useCachedDistance=true)
         {
             if (useCachedDistance)
                 return cachedDistance;
             else
-                return positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex, time);
+            {
+                UnityEngine.Profiling.Profiler.BeginSample("GetDistanceAtSegmentIndexAndTime");
+                var retr = positionCurve.GetDistanceAtSegmentIndexAndTime(segmentIndex, time);
+                UnityEngine.Profiling.Profiler.EndSample();
+                return retr;
+            }
         }
 
         public bool IsInsideVisibleCurve(BezierCurve curve)

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 namespace ChaseMacMillan.CurveDesigner
 {
     //This is just a simple interface for interacting with curves. The meat of Curve3D is in Curve3DCore.cs
@@ -84,6 +85,11 @@ namespace ChaseMacMillan.CurveDesigner
         public void AppendCurve(Curve3D otherCurve)
         {
             AppendCurve_Internal(otherCurve);
+        }
+        [ContextMenu("MakeUnique")]
+        public void MakeUnique()
+        {
+            objectsOnThisCurve = objectsOnThisCurve.Distinct().ToList();
         }
 
         public void DeletePointsBefore(int index)

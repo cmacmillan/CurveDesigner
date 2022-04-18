@@ -93,7 +93,9 @@ namespace ChaseMacMillan.CurveDesigner
             }
             else
             {
+                UnityEngine.Profiling.Profiler.BeginSample("getValueAtDistance");
                 Vector3 dir = curve.owner.normalSampler.GetValueAtDistance(distanceFromStartOfCurve,curve);
+                UnityEngine.Profiling.Profiler.EndSample();
                 reference = Vector3.ProjectOnPlane(dir, tangent).normalized;
             }
         }

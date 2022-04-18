@@ -108,7 +108,7 @@ namespace ChaseMacMillan.CurveDesigner
                 Vector3 worldOffset = hit - center;
                 Vector3 local = _curve.transform.InverseTransformDirection(worldOffset);
                 _value.value = local.normalized;//normalization prolly not absolutely necessary here
-                _curve.positionCurve.Recalculate();
+                _curve.Recalculate();
             }
         }
         public void ClickDown(Vector2 mousePos,Curve3D curve, List<SelectableGUID> selectedPoints)

@@ -426,18 +426,25 @@ namespace ChaseMacMillan.CurveDesigner
             else
                 distance = Mathf.Clamp(distance, 0, length);
             float remainingDistance = distance;
-            for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex++)
+            int numSegments = NumSegments;
+            for (int segmentIndex = 0; segmentIndex < numSegments; segmentIndex++)
             {
                 if (remainingDistance < segments[segmentIndex].length)
                 {
+                    UnityEngine.Profiling.Profiler.BeginSample("GET TIME AT LENGTH");
                     float time = segments[segmentIndex].GetTimeAtLength(remainingDistance, out PointOnCurve lowerPoint, out Vector3 lowerReference);
+                    UnityEngine.Profiling.Profiler.EndSample();
+                    UnityEngine.Profiling.Profiler.BeginSample("middlestuff");
                     Vector3 position = GetSegmentPositionAtTime(segmentIndex, time);
                     Vector3 tangent = Vector3.zero;
                     if (needsTangent)
                         tangent = GetSegmentTangentAtTime(segmentIndex, time);
                     var retr = new PointOnCurve(time, remainingDistance, position, segmentIndex, tangent);
                     retr.distanceFromStartOfCurve = retr.distanceFromStartOfSegment + (segmentIndex - 1 >= 0 ? segments[segmentIndex - 1].cummulativeLength : 0);
+                    UnityEngine.Profiling.Profiler.EndSample();
+                    UnityEngine.Profiling.Profiler.BeginSample("Calc ref");
                     retr.CalculateReference(lowerPoint, lowerReference, this);
+                    UnityEngine.Profiling.Profiler.EndSample();
                     return retr;
                 }
                 remainingDistance -= segments[segmentIndex].length;
@@ -635,6 +642,10 @@ namespace ChaseMacMillan.CurveDesigner
                 float angleDifference = Vector3.SignedAngle(finalReferenceVector, firstReferenceVectorProjectedBackwards, points[points.Count - 1].tangent);
                 for (int i = 1; i < points.Count; i++)
                     points[i].reference = Quaternion.AngleAxis((i / (float)(points.Count - 1)) * angleDifference, points[i].tangent) * points[i].reference;
+            }
+            if (this == owner.positionCurve)
+            {
+                owner.CacheSamplerDistances();
             }
             return points[0];
         }

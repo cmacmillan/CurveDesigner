@@ -91,7 +91,7 @@ namespace ChaseMacMillan.CurveDesigner
             return newPoint;
         }
         ///Secondary curve distance is a value between 0 and 1
-        public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference,out Vector3 tangent,bool useCachedDistance=false)
+        public Vector3 SampleAt(float primaryCurveDistance,float secondaryCurveDistance, BezierCurve primaryCurve,out Vector3 reference,out Vector3 tangent)
         {
             //This needs to interpolate references smoothly
             Vector3 SamplePosition(ExtrudeSamplerPoint point, out Vector3 myRef,out Vector3 myTan)
@@ -125,7 +125,7 @@ namespace ChaseMacMillan.CurveDesigner
                 tangent = point.tangent;
                 return point.position;
             }
-            float previousDistance = availableCurves[0].GetDistance(primaryCurve,useCachedDistance);
+            float previousDistance = availableCurves[0].GetDistance(primaryCurve,true);
             if (availableCurves.Count==1 || (previousDistance > primaryCurveDistance && !primaryCurve.isClosedLoop))
                 return SamplePosition(availableCurves[0], out reference,out tangent);
             if (previousDistance > primaryCurveDistance && primaryCurve.isClosedLoop)
@@ -133,15 +133,15 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 var lower = availableCurves[availableCurves.Count - 1];
                 var upper = availableCurves[0];
-                var lowerDistance = lower.GetDistance(primaryCurve,useCachedDistance)-primaryCurve.GetLength();
-                var upperDistance = upper.GetDistance(primaryCurve,useCachedDistance);
+                var lowerDistance = lower.GetDistance(primaryCurve,true)-primaryCurve.GetLength();
+                var upperDistance = upper.GetDistance(primaryCurve,true);
                 return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference,out tangent);
             }
             ExtrudeSamplerPoint previousCurve = availableCurves[0];
             for (int i = 1; i < availableCurves.Count; i++)
             {
                 var currCurve = availableCurves[i];
-                float currentDistance = currCurve.GetDistance(primaryCurve,useCachedDistance);
+                float currentDistance = currCurve.GetDistance(primaryCurve,true);
                 if (currentDistance > primaryCurveDistance)
                     return InterpolateSamples(previousCurve,currCurve,previousDistance,currentDistance,out reference,out tangent);
                 previousDistance = currentDistance;
@@ -153,8 +153,8 @@ namespace ChaseMacMillan.CurveDesigner
             {
                 var lower = availableCurves[availableCurves.Count - 1];
                 var upper = availableCurves[0];
-                var lowerDistance = lower.GetDistance(primaryCurve,useCachedDistance);
-                var upperDistance = upper.GetDistance(primaryCurve,useCachedDistance)+primaryCurve.GetLength();
+                var lowerDistance = lower.GetDistance(primaryCurve,true);
+                var upperDistance = upper.GetDistance(primaryCurve,true)+primaryCurve.GetLength();
                 return InterpolateSamples(lower,upper,lowerDistance,upperDistance,out reference,out tangent);
             }
         }

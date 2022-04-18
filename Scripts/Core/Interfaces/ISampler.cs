@@ -17,5 +17,6 @@ namespace ChaseMacMillan.CurveDesigner
         void RecalculateOpenCurveOnlyPoints(BezierCurve curve);
         void Sort(BezierCurve curve);
         int InsertPointAtDistance(float distance,BezierCurve curve);
+        void CacheDistances(BezierCurve curve);
     }
 }

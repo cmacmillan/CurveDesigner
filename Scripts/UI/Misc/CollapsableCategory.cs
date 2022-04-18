@@ -344,7 +344,7 @@ namespace ChaseMacMillan.CurveDesigner
         private double timeOfShowCopiedToClipboard = 0;
         public override void Draw(Curve3D curve)
         {
-            EditorGUILayout.HelpBox($"If you need any help, please feel free to email me or file an issue on the github page. If you're enjoying the asset, please leave a review or star the asset on github. Thanks!",MessageType.Info);
+            EditorGUILayout.HelpBox($"If you need any help, please feel free to email me or file an issue on the github page. Please feel free to report bugs, performance problems and any other issues you are having. If you're enjoying the asset, please leave a review or star the asset on github. Thanks!",MessageType.Info);
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             string emailText;

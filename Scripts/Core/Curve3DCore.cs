@@ -265,6 +265,9 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 
+        [HideInInspector]
+        public List<ObjectOnCurve> objectsOnThisCurve = new List<ObjectOnCurve>();
+
         [SerializeField]
         private MeshFilter _filter;
         [SerializeField]
@@ -522,6 +525,7 @@ namespace ChaseMacMillan.CurveDesigner
         {
             //if (normalSampler==null)
             normalSampler = new NormalSampler("Normal Generation", Curve3DEditMode.Normal);
+            CacheSamplerDistances();
             UICurve = new UICurve(null, this);
             UICurve.Initialize();
         }
@@ -573,6 +577,14 @@ namespace ChaseMacMillan.CurveDesigner
             }
         }
 
+        public void CacheSamplerDistances()
+        {
+            foreach (var i in DistanceSamplers)
+            {
+                i.CacheDistances(positionCurve);
+            }
+        }
+
         public PointOnCurve GetClosestPointOnCurve(Vector3 worldPosition)
         { 
             Vector3 localPos = transform.InverseTransformPoint(worldPosition);
@@ -603,12 +615,10 @@ namespace ChaseMacMillan.CurveDesigner
             float thisCurveLength = positionCurve.GetLength();
             var thisEnd = GetPointAtDistanceAlongCurve(thisCurveLength,false);
             var otherStart = otherCurve.GetPointAtDistanceAlongCurve(0,false);
-            var otherEnd = otherCurve.GetPointAtDistanceAlongCurve(otherCurve.CurveLength,false);
             var rotateTangent = Quaternion.FromToRotation(otherStart.tangent, thisEnd.tangent);
             var rotateReference = Quaternion.FromToRotation(rotateTangent*otherStart.reference, thisEnd.reference);
             var rotation = rotateReference * rotateTangent;
             var otherPointGroups = otherCurve.positionCurve.PointGroups;
-            var thisLastPoint = positionCurve.PointGroups[positionCurve.PointGroups.Count-1];
             for (int i = 1; i < otherPointGroups.Count; i++)
             {
                 var curr = otherPointGroups[i];
@@ -624,7 +634,7 @@ namespace ChaseMacMillan.CurveDesigner
                     point.SetPositionLocal(PointGroupIndex.RightTangent,thisEnd.position+(rotation*rightTangent));
                 }
             }
-            Recalculate();
+            Recalculate();//we have to recalculate so we can insert by distance
 
             sizeSampler.CopyFrom(otherCurve.sizeSampler,thisCurveLength,this,otherCurve);
             arcOfTubeSampler.CopyFrom(otherCurve.arcOfTubeSampler,thisCurveLength,this,otherCurve);
@@ -644,13 +654,19 @@ namespace ChaseMacMillan.CurveDesigner
                 newPoint.SetDistance(thisCurveLength+i.GetDistance(otherCurve.positionCurve), positionCurve,false);
             }
             normalSampler.Sort(positionCurve);
-            Recalculate();
+            Recalculate();//we have to recalculate again because our normal sampler changed
+
+            foreach (var i in otherCurve.objectsOnThisCurve)
+            {
+                var objectOnCurve = Instantiate(i.gameObject, transform).GetComponent<ObjectOnCurve>();
+                objectOnCurve.curve = this;
+                objectOnCurve.lengthwisePosition += thisCurveLength;
+            }
 
             if (UICurve!=null)
                 UICurve.Initialize();
             RequestMeshUpdate();
             //and we must consider whether or not to use the sampler points, or just insert a new sampler point representing the const value of that sampler at the beginning with no interpolation after
-            var finalEnd = GetPointAtDistanceAlongCurve(CurveLength,false);
         }
 
         public void ReadMaterialsFromRenderer()
