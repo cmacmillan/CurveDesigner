@@ -540,10 +540,11 @@ namespace ChaseMacMillan.CurveDesigner
             colorSampler = new ColorSampler("Color", Curve3DEditMode.Color);
             normalSampler = new NormalSampler("Normal Generation", Curve3DEditMode.Normal);
             positionCurve = new BezierCurve();
+            extrudeSampler = new ExtrudeSampler("Extrude", Curve3DEditMode.Extrude);
             positionCurve.owner = this;
             positionCurve.Initialize();
             positionCurve.Recalculate();
-            extrudeSampler = new ExtrudeSampler("Extrude", Curve3DEditMode.Extrude,positionCurve);
+            extrudeSampler.InsertPointAtDistance(0,positionCurve);//just to add a default point
             UICurve = new UICurve(null, this);
             UICurve.Initialize();
         }

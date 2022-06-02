@@ -11,12 +11,8 @@ namespace ChaseMacMillan.CurveDesigner
     [System.Serializable]
     public class ExtrudeSampler : Sampler<BezierCurve,ExtrudeSamplerPoint>
     {
-        public ExtrudeSampler(string label, Curve3DEditMode editMode,BezierCurve positionCurve) : base(label,editMode) 
-        {
-            InsertPointAtDistance(0,positionCurve);
-        }
-
-        public ExtrudeSampler(ExtrudeSampler objToClone, bool createNewGuids,Curve3D curve) : base(objToClone,createNewGuids,curve) { }
+        public ExtrudeSampler(string label, Curve3DEditMode editMode) : base(label, editMode) { }
+        public ExtrudeSampler(ExtrudeSampler objToClone, bool createNewGuids, Curve3D curve) : base(objToClone, createNewGuids, curve) { }
         public override BezierCurve CloneValue(BezierCurve val, bool shouldCreateGuids)
         {
             return new BezierCurve(val, shouldCreateGuids);
