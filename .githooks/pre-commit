@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -e
+
+#=== from https://stackoverflow.com/questions/3442874/in-git-how-can-i-write-the-current-commit-hash-to-a-file-in-the-same-commit
+#=== 'prev-commit' solution by o_O Tync
+#commit_hash=$(git rev-parse --verify HEAD)
+commit=$(git log -1 --pretty="%H%n%ci") # hash \n date
+commit_hash=$(echo "$commit" | head -1)
+commit_date=$(date) # 2010-12-28 05:16:23 +0300
+
+branch_name=$(git symbolic-ref -q HEAD) # http://stackoverflow.com/questions/1593051/#1593487
+branch_name=${branch_name##refs/heads/}
+branch_name=${branch_name:-HEAD} # 'HEAD' indicates detached HEAD situation
+
+# Write it
+echo -e "prev_commit='$commit_hash'\ndate='$commit_date'\nbranch='$branch_name'\n" > version.txt
+
+git add version.txt
